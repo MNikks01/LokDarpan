@@ -1,0 +1,898 @@
+[
+ {
+  "igod_id": "Rc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of AYUSH",
+  "url": "https://ayush.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Ministry of AYUSH,"
+ },
+ {
+  "igod_id": "FM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Agriculture and Farmers Welfare",
+  "url": null,
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Krishi Bhawan, New Delhi"
+ },
+ {
+  "igod_id": "Fc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Chemicals and Fertilizers",
+  "url": "https://mocf.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Chemicals & Fertilizers, Dept. of Chemicals & Petrochemicals, 22019 (KB-II), Kartavya Bhawan, New Delhi-110001"
+ },
+ {
+  "igod_id": "Fs4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Civil Aviation",
+  "url": "https://www.civilaviation.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Rajiv Gandhi Bhawan, Block B, Safdarjung Airport Area, New Delhi, 110003"
+ },
+ {
+  "igod_id": "F84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Coal",
+  "url": "https://coal.nic.in",
+  "breadcrumb": "Union Government",
+  "sub_orgs": {
+   "Attached / Subordinated Offices": "1",
+   "Statutory Bodies": "1",
+   "PSUs / JVs / Companies / Societies": "12",
+   "Schemes / Programmes / Missions / Applications": "2"
+  },
+  "address": "Ministry of Coal, GPOA-3 Netaji Nagar, New Delhi - 110023"
+ },
+ {
+  "igod_id": "GM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Commerce and Industry",
+  "url": "https://www.moci.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Vanijya Bhawan, New Delhi-110011"
+ },
+ {
+  "igod_id": "Gc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Communications",
+  "url": null,
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Sanchar Bhawan, 20 Ashoka Road, New Delhi- 110001"
+ },
+ {
+  "igod_id": "Gs4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Consumer Affairs, Food and Public Distribution",
+  "url": null,
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Room No. 546 C , Krishi Bhawan, New Delhi-110001"
+ },
+ {
+  "igod_id": "3p8Len0BjXgo0VKujWP3",
+  "name": "Ministry of Cooperation",
+  "url": "https://www.cooperation.gov.in",
+  "breadcrumb": "Union Government",
+  "sub_orgs": {
+   "Attached / Subordinated Offices": "2",
+   "Autonomous Bodies": "2",
+   "PSUs / JVs / Companies / Societies": "1",
+   "Academies / Institutions": "4",
+   "Schemes / Programmes / Missions / Applications": "3"
+  },
+  "address": "Atal Akshay Urja Bhawan, CGO Complex, Lodhi Road, Behind NIA Building, New Delhi"
+ },
+ {
+  "igod_id": "G84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Corporate Affairs",
+  "url": "https://www.mca.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Corporate Affairs, 3rd Floor, Kartavya Bhawan-1, New Delhi-110001"
+ },
+ {
+  "igod_id": "HM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Culture",
+  "url": "https://culture.gov.in",
+  "breadcrumb": "Union Government",
+  "sub_orgs": {
+   "Attached / Subordinated Offices": "6",
+   "Statutory Bodies": "2",
+   "Autonomous Bodies": "25",
+   "Academies / Institutions": "3",
+   "Schemes / Programmes / Missions / Applications": "9",
+   "Divisions / Units / Wings": "3",
+   "Societies": "1",
+   "Others": "5"
+  },
+  "address": "Ministry of Culture, Government of India, Kartavya Bhawan 2, New Delhi - 110001"
+ },
+ {
+  "igod_id": "Hc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Defence",
+  "url": "https://www.mod.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Defence, Room No.305 - 'B' Wing, Sena Bhawan, New Delhi-110011"
+ },
+ {
+  "igod_id": "Q84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Development of North Eastern Region",
+  "url": "https://mdoner.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Development of North Eastern Region, Jodhpur Officers Hostel, Block-12-A, Room No-14, C-Hexagaon, India Gate Circle, Pandara Park, New Delhi-110003"
+ },
+ {
+  "igod_id": "Hs4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Earth Sciences",
+  "url": "https://moes.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Ministry of Earth Sciences,"
+ },
+ {
+  "igod_id": "J84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Education",
+  "url": "https://www.education.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Kartavya Bhawan 2, Central Secretariat, New Delhi-110001"
+ },
+ {
+  "igod_id": "RM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Electronics and Information Technology",
+  "url": "https://meity.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Ministry of Electronics and Information Technology"
+ },
+ {
+  "igod_id": "H84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Environment, Forest and Climate Change",
+  "url": "https://moef.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Indira Paryavaran Bhawan"
+ },
+ {
+  "igod_id": "IM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of External Affairs",
+  "url": "https://www.mea.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "SO (Vigilance Unit), CNV&I Division, Room No. 0168, Jawaharlal Nehru Bhawan, MEA, Janpath, New Delhi-110011"
+ },
+ {
+  "igod_id": "Ic4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Finance",
+  "url": "https://finmin.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Finance, Department of Expenditure, Room No. : 16088, Kartavya Bhawan - I, New Delhi"
+ },
+ {
+  "igod_id": "SM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Fisheries, Animal Husbandry and Dairying",
+  "url": null,
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Department of Animal Husbandry and Dairying,"
+ },
+ {
+  "igod_id": "Is4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Food Processing Industries",
+  "url": "https://mofpi.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Panchsheel Bhawan, August Kranti Marg"
+ },
+ {
+  "igod_id": "I84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Health and Family Welfare",
+  "url": "https://mohfw.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Health & Family Welfare, Room No. 11068, B-Wing, Kartavya Bhawan -1 New Delhi -110001"
+ },
+ {
+  "igod_id": "JM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Heavy Industries",
+  "url": "https://heavyindustries.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Room No. 123-B, Udyog Bhawan, Rafi Marg,New Delhi - 110011"
+ },
+ {
+  "igod_id": "Jc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Home Affairs",
+  "url": "https://mha.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Ministry of Home Affairs"
+ },
+ {
+  "igod_id": "Js4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Housing and Urban Affairs",
+  "url": "https://mohua.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Sankalp Bhawan, GPOA-2, Pt. Ravi Shankar Shukla Lane, New Delhi-110001"
+ },
+ {
+  "igod_id": "KM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Information and Broadcasting",
+  "url": "https://www.mib.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Information and Broadcasting, Government of India, 3rd Floor, Kartavya Bhawan 2, New Delhi-110 001"
+ },
+ {
+  "igod_id": "eqNfInUBxrox_NfiSIBI",
+  "name": "Ministry of Jal Shakti",
+  "url": "https://jalshakti.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "e-Governance Cell, 6th Floor Cabin, Shram Shakti Bhawan, Rafi Marg, New Delhi – 110001"
+ },
+ {
+  "igod_id": "Kc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Labour and Employment",
+  "url": "https://labour.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Labour & Employment"
+ },
+ {
+  "igod_id": "Ks4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Law and Justice",
+  "url": "https://lawmin.gov.in",
+  "breadcrumb": "Minister of State (Independent Charge)",
+  "sub_orgs": {},
+  "address": "Ministry of Law and Justice, 4th Floor, Kartavya Bhawan - 2, New Delhi - 110001"
+ },
+ {
+  "igod_id": "aNJDHHUBGGphvn7wU-S7",
+  "name": "Ministry of Micro, Small & Medium Enterprises",
+  "url": "https://msme.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Micro, Small and Medium Enterprises, Kartavya Bhawan-03, Kartavya Path, New Delhi - 110001"
+ },
+ {
+  "igod_id": "K84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Mines",
+  "url": "https://mines.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Fourth Floor, GPOA-3, Netaji Nagar, Bhikaji Cama Place, New Delhi-110023"
+ },
+ {
+  "igod_id": "LM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Minority Affairs",
+  "url": "https://minorityaffairs.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Ministry of Minority Affairs"
+ },
+ {
+  "igod_id": "Lc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of New and Renewable Energy",
+  "url": "https://mnre.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Atal Akshaya Urja Bhawan, CGO Complex, Lodhi Road, New Delhi – 110003, India"
+ },
+ {
+  "igod_id": "Ls4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Panchayati Raj",
+  "url": "https://panchayat.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "11th Floor, Jeevan Prakash Building, 25 K.G.Marg, New Delhi-110001"
+ },
+ {
+  "igod_id": "L84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Parliamentary Affairs",
+  "url": "https://www.mpa.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Parliamentary Affairs, 94, Samvidhan Sadan, New Delhi-110001"
+ },
+ {
+  "igod_id": "MM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Personnel, Public Grievances and Pensions",
+  "url": "https://persmin.gov.in",
+  "breadcrumb": "Prime Minister",
+  "sub_orgs": {},
+  "address": "Department of Personnel & Training"
+ },
+ {
+  "igod_id": "Mc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Petroleum and Natural Gas",
+  "url": "https://mopng.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Petroleum & Natural Gas, Kartavya Bhawan - 03, Janpath Road, New Delhi - 110001"
+ },
+ {
+  "igod_id": "5wPlNYYB77KrIrzWr9-k",
+  "name": "Ministry of Planning",
+  "url": null,
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "South Block"
+ },
+ {
+  "igod_id": "Rs4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Ports, Shipping and Waterways",
+  "url": "https://shipmin.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Ports, Shipping and Waterways, Transport Bhawan, 1, Parliament Street, New Delhi-110001"
+ },
+ {
+  "igod_id": "Ms4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Power",
+  "url": "https://powermin.gov.in",
+  "breadcrumb": "Union Government",
+  "sub_orgs": {
+   "Commissions/ Committees": "6",
+   "Statutory Bodies": "3",
+   "Autonomous Bodies": "3",
+   "PSUs / JVs / Companies / Societies": "16",
+   "Academies / Institutions": "1",
+   "Schemes / Programmes / Missions / Applications": "7",
+   "Others": "1"
+  },
+  "address": "Ministry of Power Govt. of India, Shram Shakti Bhawan, Rafi Marg, New Delhi-1"
+ },
+ {
+  "igod_id": "M84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Railways",
+  "url": "https://indianrailways.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "256-A, Raisina Road, Rajpath Area, Central Secretariat, New Delhi, 110001"
+ },
+ {
+  "igod_id": "Ns4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Road Transport and Highways",
+  "url": "https://morth.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Road Transport & Highways, Transport Bhawan, 1, Parliament Street, New Delhi-110001"
+ },
+ {
+  "igod_id": "NM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Rural Development",
+  "url": "https://www.rural.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Ministry of Rural Development"
+ },
+ {
+  "igod_id": "Nc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Science and Technology",
+  "url": "https://most.gov.in",
+  "breadcrumb": "Minister of State (Independent Charge)",
+  "sub_orgs": {},
+  "address": "Technology Bhavan, New Mehrauli Road, New Delhi-110016"
+ },
+ {
+  "igod_id": "R84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Skill Development and Entrepreneurship",
+  "url": "https://www.msde.gov.in",
+  "breadcrumb": "Minister of State (Independent Charge)",
+  "sub_orgs": {},
+  "address": "Ministry of Skill Development and Entrepreneurship, Government of India, Kaushal Bhawan, New Moti Bagh, New Delhi - 1100231"
+ },
+ {
+  "igod_id": "nxKd9XkBmn7FjzzhzCSZ",
+  "name": "Ministry of Social Justice and Empowerment",
+  "url": null,
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Room No. 637, A-Wing, Shastri Bhawan, New Delhi - 110001"
+ },
+ {
+  "igod_id": "Oc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Statistics and Programme Implementation",
+  "url": "https://www.mospi.gov.in",
+  "breadcrumb": "Minister of State (Independent Charge)",
+  "sub_orgs": {},
+  "address": "Ministry of Statistics and Programme Implementation Khurshid Lal Bhawan, Janpath, New Delhi,110001"
+ },
+ {
+  "igod_id": "Os4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Steel",
+  "url": "https://steel.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Steel, 3rd Floor, GPOA - 3, Netaji Nagar, New Delhi - 110023"
+ },
+ {
+  "igod_id": "O84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Textiles",
+  "url": "https://texmin.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Textiles, Government of India, GPOA 3,5th Floor, Africa Avenue, Sector 55, Netaji Nagar, New Delhi-110023"
+ },
+ {
+  "igod_id": "PM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Tourism",
+  "url": "https://tourism.gov.in",
+  "breadcrumb": "Union Government",
+  "sub_orgs": {
+   "Autonomous Bodies": "7",
+   "PSUs / JVs / Companies / Societies": "1",
+   "Academies / Institutions": "21",
+   "Schemes / Programmes / Missions / Applications": "7",
+   "Divisions / Units / Wings": "1",
+   "Others": "1"
+  },
+  "address": "Room No.119, Transport Bhawan, 1, Parliament Street,"
+ },
+ {
+  "igod_id": "Pc4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Tribal Affairs",
+  "url": "https://tribal.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Kartavya Path, Rajpath Area, Central Secretariat, Kartavya Bhawan- 01, New Delhi-110001"
+ },
+ {
+  "igod_id": "P84zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Women and Child Development",
+  "url": "https://wcd.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Ministry of Women and Child Development, Government of India, GPOA 3 Netaji Nagar, Bhikaji Cama Place, New Delhi - 110023"
+ },
+ {
+  "igod_id": "QM4zv3QBGZk0jujBKgGW",
+  "name": "Ministry of Youth Affairs and Sports",
+  "url": "https://yas.gov.in",
+  "breadcrumb": "Minister",
+  "sub_orgs": {},
+  "address": "Room No. 7201, 7th Floor, Zone-06, GPOA-3, Netaji Nagar, Africa Avenue, New Delhi - 110023"
+ },
+ {
+  "igod_id": "Qc4zv3QBGZk0jujBKgGW",
+  "name": "Department of Atomic Energy",
+  "url": "https://dae.gov.in",
+  "breadcrumb": "Union Government",
+  "sub_orgs": {
+   "Attached / Subordinated Offices": "4",
+   "Autonomous Bodies": "8",
+   "Boards / Undertakings": "1",
+   "PSUs / JVs / Companies / Societies": "10",
+   "Academies / Institutions": "5",
+   "Regional / Field Offices": "1",
+   "Others": "3"
+  },
+  "address": "102, Anushakti Bhavan, Department of Atomic Energy, CSM Marg, Mumbai-400001"
+ },
+ {
+  "igod_id": "Qs4zv3QBGZk0jujBKgGW",
+  "name": "Department of Space",
+  "url": "https://www.dos.gov.in",
+  "breadcrumb": "Union Government",
+  "sub_orgs": {
+   "Attached / Subordinated Offices": "1",
+   "Autonomous Bodies": "4",
+   "PSUs / JVs / Companies / Societies": "1",
+   "Schemes / Programmes / Missions / Applications": "1"
+  },
+  "address": "ISRO Headquarters Antariksh Bhavan,"
+ },
+ {
+  "igod_id": "ZmQzG3sBNf80hyXhNfrU",
+  "name": "Department for Promotion of Industry and Internal Trade",
+  "url": "https://dpiit.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Udyog / Vanijya Bhawan, New Delhi 110011"
+ },
+ {
+  "igod_id": "ade83XQBYNG-XPnvjOsx",
+  "name": "Department of Administrative Reforms and Public Grievances",
+  "url": "https://darpg.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Administrative Reforms and Public Grievances, 5th Floor, Sardar Patel Bhawan, Sansad Marg, New Delhi-110001"
+ },
+ {
+  "igod_id": "P9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Agricultural Research and Education",
+  "url": "https://dare.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Krishi Anusandhan Bhawan, New Delhi – 110012"
+ },
+ {
+  "igod_id": "QNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Agriculture and Farmers Welfare",
+  "url": "https://agriwelfare.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Agriculture and farmer welfare"
+ },
+ {
+  "igod_id": "SI7dxHQBnHZIjqMuV49J",
+  "name": "Department of Animal Husbandry and Dairying",
+  "url": "https://dahd.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Department of Animal Husbandry and Dairying, Ministry of Fisheries,Animal Husbandry and Dairying Krishi Bhawan, New Delhi - 110001"
+ },
+ {
+  "igod_id": "d9KpHHUBGGphvn7w1-jZ",
+  "name": "Department of Biotechnology",
+  "url": "https://dbt.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "6th-8th Floor, Block 2 and 4th-5th Floor, Block 3 CGO Complex, Lodhi Road New Delhi - 110 003"
+ },
+ {
+  "igod_id": "Xte83XQBYNG-XPnvjOsx",
+  "name": "Department of Border Management",
+  "url": null,
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Phone No:"
+ },
+ {
+  "igod_id": "JEvOxp8BP88gw02oacoa",
+  "name": "Department of Capital Development",
+  "url": null,
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Sankalp Bhawan, GPOA-2, Pt. Ravi Shankar Shukla Lane, New Delhi-110001"
+ },
+ {
+  "igod_id": "Qde83XQBYNG-XPnvjOsx",
+  "name": "Department of Chemicals and Petro-Chemicals",
+  "url": "https://chemicals.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Ministry of Chemicals & Fertilizers, Dept. of Chemicals & Petrochemicals, 22019 (KB-II), Kartavya Bhawan, New Delhi-110001"
+ },
+ {
+  "igod_id": "Rde83XQBYNG-XPnvjOsx",
+  "name": "Department of Commerce",
+  "url": "https://commerce.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Ministry of Commerce and Industry,"
+ },
+ {
+  "igod_id": "SNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Consumer Affairs",
+  "url": "https://doca.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Department of Consumer Affairs"
+ },
+ {
+  "igod_id": "Ste83XQBYNG-XPnvjOsx",
+  "name": "Department of Defence",
+  "url": "https://www.mod.gov.in/dod",
+  "breadcrumb": "Defence Secretary",
+  "sub_orgs": {},
+  "address": "Room No. 6-A, South Block, New Delhi - 110011"
+ },
+ {
+  "igod_id": "S9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Defence Production",
+  "url": "https://ddpmod.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "11-A, South Block, New Delhi-110011"
+ },
+ {
+  "igod_id": "TNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Defence Research and Development",
+  "url": "https://drdo.gov.in/drdo",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "DRDO Bhawan, Rajaji Marg, New Delhi-110011"
+ },
+ {
+  "igod_id": "ZNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Drinking Water and Sanitation",
+  "url": "https://www.jalshakti-ddws.gov.in",
+  "breadcrumb": "Office of Secretary (DWS)",
+  "sub_orgs": {},
+  "address": "Office of Secretary (DWS)"
+ },
+ {
+  "igod_id": "Ude83XQBYNG-XPnvjOsx",
+  "name": "Department of Economic Affairs",
+  "url": "https://dea.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department Of Economic Affairs, Kartavya Bhawan - 1, New Delhi-110001"
+ },
+ {
+  "igod_id": "cde83XQBYNG-XPnvjOsx",
+  "name": "Department of Empowerment of Persons with Disabilities",
+  "url": "https://depwd.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Department of Empowerment of Persons with Disabilities"
+ },
+ {
+  "igod_id": "Tde83XQBYNG-XPnvjOsx",
+  "name": "Department of Ex-Servicemen Welfare",
+  "url": "https://www.desw.gov.in",
+  "breadcrumb": "Secretary (ESW)",
+  "sub_orgs": {},
+  "address": "99-A, South Block New Delhi-110011"
+ },
+ {
+  "igod_id": "Ute83XQBYNG-XPnvjOsx",
+  "name": "Department of Expenditure",
+  "url": "https://doe.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Ministry of Finance, Department of Expenditure, Room No. : 16088, Kartavya Bhawan - I, New Delhi"
+ },
+ {
+  "igod_id": "Qte83XQBYNG-XPnvjOsx",
+  "name": "Department of Fertilizers",
+  "url": "https://fert.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Fertilizers, Government of India, Ministry of Chemicals and Fertilizers, Shastri Bhawan, New Delhi - 110001"
+ },
+ {
+  "igod_id": "U9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Financial Services",
+  "url": "https://financialservices.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Department of Financial Services"
+ },
+ {
+  "igod_id": "LKNfInUBxrox_NfiSIBI",
+  "name": "Department of Fisheries",
+  "url": "https://dof.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Fisheries, Ministry of Fisheries,Animal Husbandry and Dairying Krishi Bhawan, New Delhi - 110001"
+ },
+ {
+  "igod_id": "Sde83XQBYNG-XPnvjOsx",
+  "name": "Department of Food and Public Distribution",
+  "url": "https://dfpd.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Department of Food and Public Distribution"
+ },
+ {
+  "igod_id": "Wde83XQBYNG-XPnvjOsx",
+  "name": "Department of Health Research",
+  "url": "https://dhr.gov.in",
+  "breadcrumb": "Address:",
+  "sub_orgs": {},
+  "address": "Department of Health Research"
+ },
+ {
+  "igod_id": "WNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Health and Family Welfare",
+  "url": "https://www.mohfw-dohfw.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Ministry of Health & Family Welfare,"
+ },
+ {
+  "igod_id": "T9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Higher Education",
+  "url": "https://www.dohe-education.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Higher Education, Kartavya Bhawan 2, Central Secretariat, New Delhi-110001"
+ },
+ {
+  "igod_id": "X9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Home",
+  "url": null,
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Phone No:"
+ },
+ {
+  "igod_id": "VNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Investment and Public Asset Management",
+  "url": "https://dipam.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Room No 408, 4th Floor"
+ },
+ {
+  "igod_id": "Zte83XQBYNG-XPnvjOsx",
+  "name": "Department of Justice",
+  "url": "https://www.doj.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Room No. 12-A, Jaisalmer House, 26, Mansingh Road, New Delhi-110001"
+ },
+ {
+  "igod_id": "bNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Land Resources",
+  "url": "https://dolr.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Kartavya Bhavan-03, Kartavya Path, Rajpath Area, Central Secretariat, New Delhi, -110001"
+ },
+ {
+  "igod_id": "Z9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Legal Affairs",
+  "url": "https://legalaffairs.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Ministry of Law and Justice, Department of Legal Affairs, 4th Floor, Kartavya Bhawan - 2, New Delhi - 110 001"
+ },
+ {
+  "igod_id": "YQUjYIQBF92NGf8XoaQ6",
+  "name": "Department of Military Affairs",
+  "url": "https://dmamod.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Kartavya Bhawan-II, New Delhi - 110011"
+ },
+ {
+  "igod_id": "Yte83XQBYNG-XPnvjOsx",
+  "name": "Department of Official Language",
+  "url": "https://rajbhasha.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "NDCC-II Bhawan, 'B' Wing 4th Floor,"
+ },
+ {
+  "igod_id": "ate83XQBYNG-XPnvjOsx",
+  "name": "Department of Pension & Pensioner's Welfare",
+  "url": "https://www.doppw.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Pension & Pensioners' Welfare,"
+ },
+ {
+  "igod_id": "a9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Personnel and Training",
+  "url": "https://dopt.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Personnel & Training"
+ },
+ {
+  "igod_id": "Q9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Pharmaceuticals",
+  "url": "https://pharma-dept.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Pharmaceuticals, Ministry of Chemicals & Fertilizers, Room No. 340B, A-Wing, 3rd Floor, Shastri Bhawan, New Delhi-110001"
+ },
+ {
+  "igod_id": "Rte83XQBYNG-XPnvjOsx",
+  "name": "Department of Posts",
+  "url": "https://www.indiapost.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Postal Directorate"
+ },
+ {
+  "igod_id": "W9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Public Enterprises",
+  "url": "https://dpe.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department Of Public Enterprises"
+ },
+ {
+  "igod_id": "Vde83XQBYNG-XPnvjOsx",
+  "name": "Department of Revenue",
+  "url": "https://dor.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Ministry of Finance Department of Revenue Room No.Room No. 14081, Kartavya Bhawan - I, New Delhi"
+ },
+ {
+  "igod_id": "f47dxHQBnHZIjqMuV49J",
+  "name": "Department of Rural Development",
+  "url": "https://www.dord.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Department of of Rural Development, Government of India, Kartavya Bhavan 3, Central Secretariat, New Delhi-110001"
+ },
+ {
+  "igod_id": "UNe83XQBYNG-XPnvjOsx",
+  "name": "Department of School Education and Literacy",
+  "url": "https://dsel.education.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of School Education & Literacy, Kartavya Bhawan 2, Central Secretariat, New Delhi-110001"
+ },
+ {
+  "igod_id": "b9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Science and Technology",
+  "url": "https://dst.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Department of Science & Technology,"
+ },
+ {
+  "igod_id": "cNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Scientific and Industrial Research",
+  "url": "https://www.dsir.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Department of Scientific & Industrial Research (DSIR)"
+ },
+ {
+  "igod_id": "cte83XQBYNG-XPnvjOsx",
+  "name": "Department of Social Justice and Empowerment",
+  "url": "https://socialjustice.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Room No. 637, A-Wing, Shastri Bhawan, New Delhi - 110001"
+ },
+ {
+  "igod_id": "c9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Sports",
+  "url": "https://dbtyas-sports.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Room No. 7201, 7th Floor, Zone-06, GPOA-3, Netaji Nagar, Africa Avenue, New Delhi - 110023"
+ },
+ {
+  "igod_id": "R9e83XQBYNG-XPnvjOsx",
+  "name": "Department of Telecommunications",
+  "url": "https://www.dot.gov.in",
+  "breadcrumb": "Ministry of Communications",
+  "sub_orgs": {},
+  "address": "Ministry of Communications"
+ },
+ {
+  "igod_id": "NUvYxp8BP88gw02owNCt",
+  "name": "Department of Urban Development",
+  "url": null,
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "Sankalp Bhawan, GPOA-2, Pt. Ravi Shankar Shukla Lane, New Delhi-110001"
+ },
+ {
+  "igod_id": "Zde83XQBYNG-XPnvjOsx",
+  "name": "Department of Water Resources, River Development and Ganga Rejuvenation",
+  "url": "https://www.jalshakti-dowr.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "e-Gov Cell, 6th Floor Cabin, Shram Shakti Bhawan, Rafi Marg, New Delhi - 110001"
+ },
+ {
+  "igod_id": "dNe83XQBYNG-XPnvjOsx",
+  "name": "Department of Youth Affairs",
+  "url": "https://youth.yas.gov.in",
+  "breadcrumb": "Secretary",
+  "sub_orgs": {},
+  "address": "6th Floor, Zone-02 GPOA-3 Netaji Nagar, Africa Avenue Road New Delhi- 110023"
+ },
+ {
+  "igod_id": "aNe83XQBYNG-XPnvjOsx",
+  "name": "Legislative Department",
+  "url": "https://legislative.gov.in",
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": "Legislative Department, Ministry of Law and Justice, Government of India, Kartavya Bhawan-II, New Delhi"
+ },
+ {
+  "igod_id": "new_additions",
+  "name": "Integrated Government Online Directory : New Additions",
+  "url": null,
+  "breadcrumb": "",
+  "sub_orgs": {},
+  "address": null
+ }
+]

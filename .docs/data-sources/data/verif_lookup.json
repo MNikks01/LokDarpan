@@ -1,0 +1,1346 @@
+{
+ "https://apeprocurement.gov.in": {
+  "url": "https://apeprocurement.gov.in",
+  "http_status": 200,
+  "final_url": "https://apeprocurement.gov.in",
+  "title": "Welcome to AP E-Procurement Portal - Govt of Andhra Pradesh",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://arunachaltenders.gov.in": {
+  "url": "https://arunachaltenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://arunachaltenders.gov.in",
+  "title": "HCI Arunachal- eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://assamtenders.gov.in": {
+  "url": "https://assamtenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://assamtenders.gov.in",
+  "title": "HCI Node-1 assam",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://bidar.nic.in": {
+  "url": "https://bidar.nic.in",
+  "http_status": 200,
+  "final_url": "https://bidar.nic.in",
+  "title": "ಬೀದರ್ ಜಿಲ್ಲೆ, ಕರ್ನಾಟಕ ಸರ್ಕಾರ | India",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://bidhannagarcitypolice.gov.in": {
+  "url": "https://bidhannagarcitypolice.gov.in",
+  "http_status": 200,
+  "final_url": "https://bidhannagarcitypolice.gov.in",
+  "title": "Bidhannagar Police :: Welcome",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://dnhtenders.gov.in": {
+  "url": "https://dnhtenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://dnhtenders.gov.in",
+  "title": "DNH eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://eproc.cgstate.gov.in": {
+  "url": "https://eproc.cgstate.gov.in",
+  "http_status": 200,
+  "final_url": "https://eproc.cgstate.gov.in",
+  "title": "CHIPS - e-Tendering System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://eproc.karnataka.gov.in": {
+  "url": "https://eproc.karnataka.gov.in",
+  "http_status": 200,
+  "final_url": "https://eproc.karnataka.gov.in",
+  "title": null,
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://eproc.punjab.gov.in": {
+  "url": "https://eproc.punjab.gov.in",
+  "http_status": 200,
+  "final_url": "https://eproc.punjab.gov.in",
+  "title": "Punjab Govt. eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://eproc.rajasthan.gov.in": {
+  "url": "https://eproc.rajasthan.gov.in",
+  "http_status": 200,
+  "final_url": "https://eproc.rajasthan.gov.in",
+  "title": "Rajasthan eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://eproc2.bihar.gov.in": {
+  "url": "https://eproc2.bihar.gov.in",
+  "http_status": 200,
+  "final_url": "https://eproc2.bihar.gov.in/EPSV2Web/",
+  "title": "Bihar Govt. eProcurement",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://etender.up.nic.in": {
+  "url": "https://etender.up.nic.in",
+  "http_status": 200,
+  "final_url": "https://etender.up.nic.in",
+  "title": null,
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://etenders.chd.nic.in": {
+  "url": "https://etenders.chd.nic.in",
+  "http_status": 200,
+  "final_url": "https://etenders.chd.nic.in",
+  "title": "Chandigarh - eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://etenders.hry.nic.in": {
+  "url": "https://etenders.hry.nic.in",
+  "http_status": 200,
+  "final_url": "https://etenders.hry.nic.in",
+  "title": "Haryana- eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://etenders.kerala.gov.in": {
+  "url": "https://etenders.kerala.gov.in",
+  "http_status": 200,
+  "final_url": "https://etenders.kerala.gov.in",
+  "title": "Kerala eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://fpp.gujarat.gov.in": {
+  "url": "https://fpp.gujarat.gov.in",
+  "http_status": 200,
+  "final_url": "https://fpp.gujarat.gov.in",
+  "title": "Farmer Procurement Portal - Alpha Server",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://govtprocurement.delhi.gov.in": {
+  "url": "https://govtprocurement.delhi.gov.in",
+  "http_status": 200,
+  "final_url": "https://govtprocurement.delhi.gov.in",
+  "title": "DELHI eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://himachal.nic.in/woolfed": {
+  "url": "https://himachal.nic.in/woolfed",
+  "http_status": 200,
+  "final_url": "https://himachal.nic.in/woolfed",
+  "title": "The HP State Cooperative Wool Procurement and Marketing Federation Ltd. - Home",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://hpappp.hp.gov.in": {
+  "url": "https://hpappp.hp.gov.in",
+  "http_status": 200,
+  "final_url": "https://hpappp.hp.gov.in",
+  "title": "HP AGRICULTURE PRODUCE PROCUREMENT PORTAL | HOME",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://hpappp.nic.in": {
+  "url": "https://hpappp.nic.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://hptenders.gov.in": {
+  "url": "https://hptenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://hptenders.gov.in",
+  "title": "eProcurement System Government of Himachal Pradesh",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://jharkhandtenders.gov.in": {
+  "url": "https://jharkhandtenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://jharkhandtenders.gov.in",
+  "title": "Jharkhand eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://jktenders.gov.in": {
+  "url": "https://jktenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://jktenders.gov.in",
+  "title": "Jammu & Kashmir eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://mahatenders.gov.in": {
+  "url": "https://mahatenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://mahatenders.gov.in",
+  "title": null,
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://manipurtenders.gov.in": {
+  "url": "https://manipurtenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://manipurtenders.gov.in",
+  "title": "Manipur - eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://meghalayatenders.gov.in": {
+  "url": "https://meghalayatenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://meghalayatenders.gov.in",
+  "title": "Meghalaya eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://mizoramtenders.gov.in": {
+  "url": "https://mizoramtenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://mizoramtenders.gov.in",
+  "title": "Mizoram - eProcurement System",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://nagalandtenders.gov.in": {
+  "url": "https://nagalandtenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://nagalandtenders.gov.in",
+  "title": "Nagaland - eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://pps.telangana.gov.in": {
+  "url": "https://pps.telangana.gov.in",
+  "http_status": 200,
+  "final_url": "https://pps.telangana.gov.in",
+  "title": "",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://pudutenders.gov.in": {
+  "url": "https://pudutenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://pudutenders.gov.in",
+  "title": "Puducherry eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://sarthac.gov.in": {
+  "url": "https://sarthac.gov.in",
+  "http_status": 200,
+  "final_url": "https://sarthac.gov.in",
+  "title": "::SARTHAC:: Home",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://sikkimtender.gov.in": {
+  "url": "https://sikkimtender.gov.in",
+  "http_status": 200,
+  "final_url": "https://sikkimtender.gov.in",
+  "title": "Sikkim- eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://sppp.assam.gov.in/#/en": {
+  "url": "https://sppp.assam.gov.in/#/en",
+  "http_status": 200,
+  "final_url": "https://sppp.assam.gov.in/#/en",
+  "title": "sppp",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://sppp.rajasthan.gov.in": {
+  "url": "https://sppp.rajasthan.gov.in",
+  "http_status": 200,
+  "final_url": "https://sppp.rajasthan.gov.in",
+  "title": "Rajasthan State Public Procurement Portal",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://tender.apeprocurement.gov.in": {
+  "url": "https://tender.apeprocurement.gov.in",
+  "http_status": 200,
+  "final_url": "https://tender.apeprocurement.gov.in",
+  "title": null,
+  "error": null,
+  "content_type": "text/html;charset=ISO-8859-1"
+ },
+ "https://tender.lsgkerala.gov.in": {
+  "url": "https://tender.lsgkerala.gov.in",
+  "http_status": 200,
+  "final_url": "https://tender.lsgkerala.gov.in/pages/displayTender.php",
+  "title": "Official website of Local Self Government Department, Kerala",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://tender.mizoram.gov.in": {
+  "url": "https://tender.mizoram.gov.in",
+  "http_status": 200,
+  "final_url": "https://tender.mizoram.gov.in",
+  "title": "e-Tender",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://tendersutl.gov.in": {
+  "url": "https://tendersutl.gov.in",
+  "http_status": 200,
+  "final_url": "https://tendersutl.gov.in",
+  "title": "Lakshadweep- eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://tntenders.gov.in": {
+  "url": "https://tntenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://tntenders.gov.in",
+  "title": "TN e-Procurement",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://tripuratenders.gov.in": {
+  "url": "https://tripuratenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://tripuratenders.gov.in",
+  "title": "HCI Node-2 tripura",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://uktenders.gov.in": {
+  "url": "https://uktenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://uktenders.gov.in",
+  "title": "eProcurement System Govt. of Uttarahand eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://wbtenders.gov.in": {
+  "url": "https://wbtenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://wbtenders.gov.in",
+  "title": "E-Procurement",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://www.bckv.edu.in": {
+  "url": "https://www.bckv.edu.in",
+  "http_status": 200,
+  "final_url": "https://www.bckv.edu.in/index.php/en/",
+  "title": "Home",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://www.kvafsu.edu.in": {
+  "url": "https://www.kvafsu.edu.in",
+  "http_status": 200,
+  "final_url": "https://www.kvafsu.edu.in",
+  "title": "Welcome to Karnataka Veterinary, Animal and Fisheries University",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://www.mpeuparjan.nic.in": {
+  "url": "https://www.mpeuparjan.nic.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "RemoteDisconnected: Remote end closed connection without response",
+  "content_type": null
+ },
+ "https://www.paddyprocurement.ap.gov.in": {
+  "url": "https://www.paddyprocurement.ap.gov.in",
+  "http_status": 200,
+  "final_url": "https://www.paddyprocurement.ap.gov.in",
+  "title": ":: APSCSC :: Paddy Procurement System",
+  "error": null,
+  "content_type": "text/html;charset=ISO-8859-1"
+ },
+ "https://www.tendersodisha.gov.in": {
+  "url": "https://www.tendersodisha.gov.in",
+  "http_status": 200,
+  "final_url": "https://www.tendersodisha.gov.in",
+  "title": "eProcurement System Government of Odisha",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "http://www.eprocurement.gov.in/": {
+  "url": "http://www.eprocurement.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "http://arunachaltenders.gov.in/nicgep/app": {
+  "url": "http://arunachaltenders.gov.in/nicgep/app",
+  "http_status": 200,
+  "final_url": "https://arunachaltenders.gov.in/nicgep/app",
+  "title": "eProcurement System Government of Arunachal Pradesh",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "http://assamtenders.gov.in/nicgep/app": {
+  "url": "http://assamtenders.gov.in/nicgep/app",
+  "http_status": 200,
+  "final_url": "https://assamtenders.gov.in/nicgep/app",
+  "title": "eProcurement System Government of Assam",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "http://eprocure.gov.in/epublish/app": {
+  "url": "http://eprocure.gov.in/epublish/app",
+  "http_status": 200,
+  "final_url": "https://eprocure.gov.in/epublish/app",
+  "title": "ePublishing System, Government of India",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://www.eproc.bihar.gov.in": {
+  "url": "https://www.eproc.bihar.gov.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://cgeprocurement.gov.in": {
+  "url": "https://cgeprocurement.gov.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "http://dnhtenders.gov.in/nicgep/app": {
+  "url": "http://dnhtenders.gov.in/nicgep/app",
+  "http_status": 200,
+  "final_url": "https://dnhtenders.gov.in/nicgep/app",
+  "title": "eProcurement System UT Adminstration of Dadra & Nagar Haveli",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "http://ddtenders.gov.in/nicgep/app": {
+  "url": "http://ddtenders.gov.in/nicgep/app",
+  "http_status": 200,
+  "final_url": "https://ddtenders.gov.in/nicgep/app",
+  "title": "eProcurement System UT Administration of Daman & Diu",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "http://www.etender.goa.gov.in": {
+  "url": "http://www.etender.goa.gov.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://eprocure.goa.gov.in/": {
+  "url": "https://eprocure.goa.gov.in/",
+  "http_status": 200,
+  "final_url": "https://eprocure.goa.gov.in/",
+  "title": "The eProcurement System of Goa",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://www.nprocure.com/asp/home/new_home_tenders.asp": {
+  "url": "https://www.nprocure.com/asp/home/new_home_tenders.asp",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR EOF occurred in violation of protocol (_ssl.c:1129)",
+  "content_type": null
+ },
+ "https://tender.nprocure.com": {
+  "url": "https://tender.nprocure.com",
+  "http_status": 200,
+  "final_url": "https://tender.nprocure.com",
+  "title": "eProc-Suite",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://gil.gujarat.gov.in/eprocurement": {
+  "url": "https://gil.gujarat.gov.in/eprocurement",
+  "http_status": 200,
+  "final_url": "https://gil.gujarat.gov.in/eprocurement",
+  "title": "GIL - enabling e- Governance",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "http://tendersutl.gov.in/nicgep/app": {
+  "url": "http://tendersutl.gov.in/nicgep/app",
+  "http_status": 200,
+  "final_url": "https://tendersutl.gov.in/nicgep/app",
+  "title": "eProcurement System Union Teritory of Lakshadweep",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://mptenders.gov.in/nicgep/app": {
+  "url": "https://mptenders.gov.in/nicgep/app",
+  "http_status": 200,
+  "final_url": "https://mptenders.gov.in/nicgep/app",
+  "title": "eProcurement System Government of Madhya Pradesh",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://tendersodisha.gov.in": {
+  "url": "https://tendersodisha.gov.in",
+  "http_status": 200,
+  "final_url": "https://tendersodisha.gov.in",
+  "title": "eProcurement System Government of Odisha",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "http://eprocpbpwd.gov.in": {
+  "url": "http://eprocpbpwd.gov.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://etender.punjabgovt.gov.in": {
+  "url": "https://etender.punjabgovt.gov.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "http://sikkimtender.gov.in": {
+  "url": "http://sikkimtender.gov.in",
+  "http_status": 200,
+  "final_url": "https://sikkimtender.gov.in/",
+  "title": "Sikkim- eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://eprocurement.telangana.gov.in/": {
+  "url": "https://eprocurement.telangana.gov.in/",
+  "http_status": 200,
+  "final_url": "https://eprocurement.telangana.gov.in/",
+  "title": ":: Telangana eProcurement Portal ::",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "http://tripuratenders.gov.in": {
+  "url": "http://tripuratenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://tripuratenders.gov.in/",
+  "title": "HCI Node-2 tripura",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://sppp.assam.gov.in": {
+  "url": "https://sppp.assam.gov.in",
+  "http_status": 200,
+  "final_url": "https://sppp.assam.gov.in",
+  "title": "sppp",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://pmgsytenders.gov.in": {
+  "url": "https://pmgsytenders.gov.in",
+  "http_status": 200,
+  "final_url": "https://pmgsytenders.gov.in/nicgep/app",
+  "title": "eProcurement System for Pradhan Mantri Gram Sadak Yojana (PMGSY)",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://eprocure.gov.in/epublish/app": {
+  "url": "https://eprocure.gov.in/epublish/app",
+  "http_status": 200,
+  "final_url": "https://eprocure.gov.in/epublish/app",
+  "title": "ePublishing System, Government of India",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://etenders.gov.in/eprocure/app": {
+  "url": "https://etenders.gov.in/eprocure/app",
+  "http_status": 200,
+  "final_url": "https://etenders.gov.in/eprocure/app",
+  "title": "Government eProcurement System",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://gem.gov.in": {
+  "url": "https://gem.gov.in",
+  "http_status": 200,
+  "final_url": "https://gem.gov.in",
+  "title": "Government e Marketplace | National Public Procurement Portal",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://www.india.gov.in/": {
+  "url": "https://www.india.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.india.gov.in/",
+  "title": "Home | National Portal of India",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://igod.gov.in/": {
+  "url": "https://igod.gov.in/",
+  "http_status": 200,
+  "final_url": "https://igod.gov.in/",
+  "title": "Integrated Government Online Directory : Home",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://data.gov.in/": {
+  "url": "https://data.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.data.gov.in/",
+  "title": "Home | Open Government Data (OGD) Platform India",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://ndap.niti.gov.in/": {
+  "url": "https://ndap.niti.gov.in/",
+  "http_status": 200,
+  "final_url": "https://ndap.niti.gov.in/",
+  "title": "National Data and Analytics Platform",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://www.niti.gov.in/": {
+  "url": "https://www.niti.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.niti.gov.in/",
+  "title": "NITI Aayog",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://www.indiabudget.gov.in/": {
+  "url": "https://www.indiabudget.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.indiabudget.gov.in/",
+  "title": "India Budget | Ministry of Finance | Government of India",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://finmin.gov.in/": {
+  "url": "https://finmin.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://doe.gov.in/": {
+  "url": "https://doe.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 54] Connection reset by peer",
+  "content_type": null
+ },
+ "https://cga.nic.in/": {
+  "url": "https://cga.nic.in/",
+  "http_status": 200,
+  "final_url": "https://cga.nic.in/",
+  "title": "Home : CONTROLLER GENERAL OF ACCOUNTS",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://pfms.nic.in/SitePages/index.html": {
+  "url": "https://pfms.nic.in/SitePages/index.html",
+  "http_status": 200,
+  "final_url": "https://pfms.nic.in/SitePages/index.html",
+  "title": "Home",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://cag.gov.in/": {
+  "url": "https://cag.gov.in/",
+  "http_status": 200,
+  "final_url": "https://cag.gov.in/en",
+  "title": "Home | Comptroller and Auditor General of India",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://lgdirectory.gov.in/": {
+  "url": "https://lgdirectory.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1129)",
+  "content_type": null
+ },
+ "https://egramswaraj.gov.in/": {
+  "url": "https://egramswaraj.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 54] Connection reset by peer",
+  "content_type": null
+ },
+ "https://morth.nic.in/": {
+  "url": "https://morth.nic.in/",
+  "http_status": 200,
+  "final_url": "http://morth.gov.in/",
+  "title": "Ministry of Road Transport & Highways, Government Of India",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://nhai.gov.in/": {
+  "url": "https://nhai.gov.in/",
+  "http_status": 200,
+  "final_url": "https://nhai.gov.in/",
+  "title": "National Highways Authority of India, Ministry of Road Transport & Highways, Government of India",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://pmgsy.nic.in/": {
+  "url": "https://pmgsy.nic.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://online.omms.nic.in/": {
+  "url": "https://online.omms.nic.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "http://omms.nic.in/": {
+  "url": "http://omms.nic.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://rural.nic.in/": {
+  "url": "https://rural.nic.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://mohua.gov.in/": {
+  "url": "https://mohua.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.mohua.gov.in/",
+  "title": null,
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://amrut.gov.in/": {
+  "url": "https://amrut.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://smartcities.gov.in/": {
+  "url": "https://smartcities.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://pmayurban.gov.in/": {
+  "url": "https://pmayurban.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://pmayg.nic.in/": {
+  "url": "https://pmayg.nic.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://nrega.nic.in/": {
+  "url": "https://nrega.nic.in/",
+  "http_status": 200,
+  "final_url": "https://nrega.nic.in/",
+  "title": "",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://jaljeevanmission.gov.in/": {
+  "url": "https://jaljeevanmission.gov.in/",
+  "http_status": 200,
+  "final_url": "https://jaljeevanmission.gov.in/",
+  "title": "Home | Jal Jeevan Mission",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://swachhbharatmission.ddws.gov.in/": {
+  "url": "https://swachhbharatmission.ddws.gov.in/",
+  "http_status": 200,
+  "final_url": "https://swachhbharatmission.ddws.gov.in/",
+  "title": "Home | sbm",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://bhuvan.nrsc.gov.in/": {
+  "url": "https://bhuvan.nrsc.gov.in/",
+  "http_status": 200,
+  "final_url": "https://bhuvan.nrsc.gov.in/ngmaps",
+  "title": "Bhuvan-Indian Geoportal of ISRO",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://www.nrsc.gov.in/": {
+  "url": "https://www.nrsc.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.nrsc.gov.in/nrscnew/",
+  "title": "NRSC | NRSC Website",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://onemapgoaindia.gov.in/": {
+  "url": "https://onemapgoaindia.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://gem.gov.in/": {
+  "url": "https://gem.gov.in/",
+  "http_status": 200,
+  "final_url": "https://gem.gov.in/",
+  "title": "Government e Marketplace | National Public Procurement Portal",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://eprocure.gov.in/cppp/": {
+  "url": "https://eprocure.gov.in/cppp/",
+  "http_status": 200,
+  "final_url": "https://eprocure.gov.in/cppp/",
+  "title": "Central Public Procurement Portal | Home en | GeM-CPPP | Tenders Portal of Government of India | Government eTenders",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://cpwd.gov.in/": {
+  "url": "https://cpwd.gov.in/",
+  "http_status": 200,
+  "final_url": "https://cpwd.gov.in/",
+  "title": "Home | Central Public Works Department | Government of India",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://dmeo.gov.in/": {
+  "url": "https://dmeo.gov.in/",
+  "http_status": 200,
+  "final_url": "https://dmeo.gov.in/",
+  "title": "| DMEO | Development Monitoring and Evaluation Office | Attached office under NITI Aayog",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://www.pib.gov.in/": {
+  "url": "https://www.pib.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.pib.gov.in/index.aspx?reg=48&lang=2",
+  "title": "Press Information Bureau",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://mospi.gov.in/": {
+  "url": "https://mospi.gov.in/",
+  "http_status": 200,
+  "final_url": "https://mospi.gov.in/",
+  "title": "Ministry of Statistics and Program Implementation | Government Of India",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://esankhyiki.mospi.gov.in/": {
+  "url": "https://esankhyiki.mospi.gov.in/",
+  "http_status": 200,
+  "final_url": "https://esankhyiki.mospi.gov.in/",
+  "title": "Ministry of Statistics and Program Implementation | Government Of India",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://dashboard.nrida.gov.in/": {
+  "url": "https://dashboard.nrida.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://nrida.nic.in/": {
+  "url": "https://nrida.nic.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [Errno 8] nodename nor servname provided, or not known",
+  "content_type": null
+ },
+ "https://www.nhidcl.com/": {
+  "url": "https://www.nhidcl.com/",
+  "http_status": 200,
+  "final_url": "https://www.nhidcl.com/",
+  "title": "Home Page | National Highways & Infrastructure Development Corporation Ltd.",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://sansad.in/": {
+  "url": "https://sansad.in/",
+  "http_status": 200,
+  "final_url": "https://sansad.in/phistory",
+  "title": "Digital Sansad",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://dea.gov.in/": {
+  "url": "https://dea.gov.in/",
+  "http_status": 200,
+  "final_url": "https://dea.gov.in/",
+  "title": "Department of Economic Affairs",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://tenders.ladakh.gov.in/": {
+  "url": "https://tenders.ladakh.gov.in/",
+  "http_status": 200,
+  "final_url": "https://tenders.ladakh.gov.in/",
+  "title": "Ladakh eProcurement System",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://apeprocurement.gov.in/": {
+  "url": "https://apeprocurement.gov.in/",
+  "http_status": 200,
+  "final_url": "https://apeprocurement.gov.in/",
+  "title": "Welcome to AP E-Procurement Portal - Govt of Andhra Pradesh",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://darpg.gov.in/": {
+  "url": "https://darpg.gov.in/",
+  "http_status": 200,
+  "final_url": "https://www.darpg.gov.in/",
+  "title": null,
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://services.india.gov.in/": {
+  "url": "https://services.india.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1129)",
+  "content_type": null
+ },
+ "https://censusindia.gov.in/": {
+  "url": "https://censusindia.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://bharatmaps.gov.in/": {
+  "url": "https://bharatmaps.gov.in/",
+  "http_status": 200,
+  "final_url": "https://bharatmaps.gov.in/",
+  "title": "Bharat Maps",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://nhp.gov.in/": {
+  "url": "https://nhp.gov.in/",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://finance.maharashtra.gov.in": {
+  "url": "https://finance.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://finance.maharashtra.gov.in",
+  "title": "Homepage | वित्त विभाग | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://housing.maharashtra.gov.in": {
+  "url": "https://housing.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://housing.maharashtra.gov.in",
+  "title": "Homepage | गृहनिर्माण विभाग | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://transport.maharashtra.gov.in": {
+  "url": "https://transport.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://transport.maharashtra.gov.in:443/1035/Home",
+  "title": "मोटार वाहन विभाग, महाराष्ट्र",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://samarth.powermin.gov.in": {
+  "url": "https://samarth.powermin.gov.in",
+  "http_status": 200,
+  "final_url": "https://samarth.powermin.gov.in",
+  "title": "National Biomass Mission - SAMARTH",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://iritmold.indianrailways.gov.in": {
+  "url": "https://iritmold.indianrailways.gov.in",
+  "http_status": 200,
+  "final_url": "https://iritmold.indianrailways.gov.in/?lang=1",
+  "title": "",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://plan.maharashtra.gov.in": {
+  "url": "https://plan.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://plan.maharashtra.gov.in",
+  "title": "मुख्यपृष्ठ | नियोजन विभाग, महाराष्ट्र शासन | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://pwd.maharashtra.gov.in": {
+  "url": "https://pwd.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://pwd.maharashtra.gov.in",
+  "title": "मुख्यपृष्ठ | सार्वजनिक बांधकाम विभाग | महाराष्ट्र शासन | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://igrmaharashtra.gov.in": {
+  "url": "https://igrmaharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://igrmaharashtra.gov.in",
+  "title": "नोंदणी व मुद्रांक विभाग - महाराष्ट्र शासन",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://rfd.maharashtra.gov.in": {
+  "url": "https://rfd.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://rfd.maharashtra.gov.in",
+  "title": "Revenue Department Government Of Maharashtra",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://rdd.maharashtra.gov.in": {
+  "url": "https://rdd.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://rdd.maharashtra.gov.in",
+  "title": "Homepage | ग्रामविकास आणि पंचायत राज विभाग | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://waterconserve.maharashtra.gov.in": {
+  "url": "https://waterconserve.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://waterconserve.maharashtra.gov.in",
+  "title": "Homepage | जलसंधारण विभाग | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://wrd.maharashtra.gov.in": {
+  "url": "https://wrd.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://wrd.maharashtra.gov.in",
+  "title": "मुख्य पृष्ठ - जलसंपदा विभाग, महाराष्ट्र शासन, भारत",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://water.maharashtra.gov.in": {
+  "url": "https://water.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://water.maharashtra.gov.in",
+  "title": "मुख्यपृष्ठ | पाणी पुरवठा व स्वच्छता विभाग | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://sahakarayukta.maharashtra.gov.in": {
+  "url": "https://sahakarayukta.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://sahakarayukta.maharashtra.gov.in/Site/Home/Index.aspx",
+  "title": "मुख्य पृष्ठ-सहकार आयुक्त आणि निबंधक-सहकारी संस्था, महाराष्ट्र राज्य, पुणे, भारत.",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://mahakosh.maharashtra.gov.in": {
+  "url": "https://mahakosh.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://mahakosh.maharashtra.gov.in",
+  "title": "Mahakosh : The Official Website",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://www.mhada.gov.in": {
+  "url": "https://www.mhada.gov.in",
+  "http_status": 200,
+  "final_url": "https://www.mhada.gov.in/mr",
+  "title": "MHADA | Maharashtra Housing and Area Development Authority",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://msrtc.maharashtra.gov.in": {
+  "url": "https://msrtc.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://msrtc.maharashtra.gov.in/GeneralPages/Home.aspx",
+  "title": "Welcome to MSRTC :: Maharashtra State Road Transport Corporation",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://aurangabadcitypolice.gov.in": {
+  "url": "https://aurangabadcitypolice.gov.in",
+  "http_status": 404,
+  "final_url": "https://aurangabadcitypolice.gov.in/admin/dashboard",
+  "title": null,
+  "error": "HTTP 404",
+  "content_type": null
+ },
+ "https://aecsmum1.ac.in": {
+  "url": "https://aecsmum1.ac.in",
+  "http_status": 200,
+  "final_url": "https://aecsmum1.ac.in",
+  "title": "AECS1 MUMBAI",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://geca.ac.in": {
+  "url": "https://geca.ac.in",
+  "http_status": 200,
+  "final_url": "https://geca.ac.in",
+  "title": "Government College of Engineering, Chhatrapati Sambhajinagar",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://gpnagar.ac.in": {
+  "url": "https://gpnagar.ac.in",
+  "http_status": 200,
+  "final_url": "https://gpnagar.ac.in",
+  "title": "Government Polytechnic Ahmednagar",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://gras.mahakosh.gov.in": {
+  "url": "https://gras.mahakosh.gov.in",
+  "http_status": 200,
+  "final_url": "https://gras.mahakosh.gov.in/echallan/",
+  "title": "GRAS-Government Receipt Accounting System",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://msrdc.in": {
+  "url": "https://msrdc.in",
+  "http_status": 200,
+  "final_url": "https://msrdc.in:443/1307/Home",
+  "title": null,
+  "error": "TIMEOUT",
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://mswarehousing.com": {
+  "url": "https://mswarehousing.com",
+  "http_status": 200,
+  "final_url": "https://mswarehousing.com/Mar-mswc/",
+  "title": "Maharashtra warehousing corporation |",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://ahmednagar.nic.in": {
+  "url": "https://ahmednagar.nic.in",
+  "http_status": 200,
+  "final_url": "https://ahilyanagar.maharashtra.gov.in/",
+  "title": "अहिल्यानगर | Official website of Ahilyanagar District Administration | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://aurangabad.gov.in": {
+  "url": "https://aurangabad.gov.in",
+  "http_status": 200,
+  "final_url": "https://chhatrapatisambhajinagar.maharashtra.gov.in/",
+  "title": "जिल्हा छत्रपती संभाजीनगर | महाराष्ट्र शासन | India",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://mumbaisuburban.gov.in": {
+  "url": "https://mumbaisuburban.gov.in",
+  "http_status": 200,
+  "final_url": "https://mumbaisuburban.gov.in",
+  "title": "मुंबई उपनगर जिल्हा, महाराष्ट्र शासन | भारताची स्वप्ननगरी | India",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://mrsac.gov.in": {
+  "url": "https://mrsac.gov.in",
+  "http_status": 200,
+  "final_url": "https://mrsac.gov.in/MRSAC/",
+  "title": "Home Maharashtra Remote Sensing Application Centre",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://www.mahaurja.maharashtra.gov.in": {
+  "url": "https://www.mahaurja.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://www.mahaurja.maharashtra.gov.in",
+  "title": "मुख्य पृष्ठ - महाराष्ट्र ऊर्जा विकास एजन्सी",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://mwrra.maharashtra.gov.in": {
+  "url": "https://mwrra.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://mwrra.maharashtra.gov.in",
+  "title": "Maharashtra Water Resources Regulatory Authority",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://amravatiruralpolice.gov.in": {
+  "url": "https://amravatiruralpolice.gov.in",
+  "http_status": 200,
+  "final_url": "https://amravatiruralpolice.gov.in",
+  "title": "Home | Amravati Rural Police",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://beams.mahakosh.gov.in": {
+  "url": "https://beams.mahakosh.gov.in",
+  "http_status": 200,
+  "final_url": "https://beams.mahakosh.gov.in/Beams5/BudgetMVC/index.jsp",
+  "title": "BEAMS :: Budget Estimation, Allocation & Monitoring System",
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://mahaegs.maharashtra.gov.in/en": {
+  "url": "https://mahaegs.maharashtra.gov.in/en",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://www.mahakosh.gov.in": {
+  "url": "https://www.mahakosh.gov.in",
+  "http_status": 200,
+  "final_url": "https://www.mahakosh.gov.in",
+  "title": "Government of Maharashtra - Finance Department",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://www.filmcitymumbai.org": {
+  "url": "https://www.filmcitymumbai.org",
+  "http_status": 200,
+  "final_url": "https://www.filmcitymumbai.org",
+  "title": "Film City Mumbai | Premier Shooting Locations & Studios",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://urban.maharashtra.gov.in": {
+  "url": "https://urban.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://urban.maharashtra.gov.in",
+  "title": "Homepage | नगरविकास विभाग | भारत",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://puneruralpolice.gov.in": {
+  "url": "https://puneruralpolice.gov.in",
+  "http_status": 200,
+  "final_url": "https://puneruralpolice.gov.in",
+  "title": "Home | Pune Rural Police",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://healthnriregistration.maharashtra.gov.in": {
+  "url": "https://healthnriregistration.maharashtra.gov.in",
+  "http_status": 302,
+  "final_url": "https://healthnriregistration.maharashtra.gov.in/Error.aspx?ErrorCode=400",
+  "title": null,
+  "error": "HTTP 302",
+  "content_type": null
+ },
+ "https://sevaarth.mahakosh.gov.in": {
+  "url": "https://sevaarth.mahakosh.gov.in",
+  "http_status": 200,
+  "final_url": "https://sevaarth.mahakosh.gov.in",
+  "title": null,
+  "error": null,
+  "content_type": "text/html;charset=UTF-8"
+ },
+ "https://thaneruralpolice.gov.in": {
+  "url": "https://thaneruralpolice.gov.in",
+  "http_status": 200,
+  "final_url": "https://thaneruralpolice.gov.in",
+  "title": "Home | Thane Rural Police",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://www.bestundertaking.com": {
+  "url": "https://www.bestundertaking.com",
+  "http_status": 200,
+  "final_url": "https://www.bestundertaking.com",
+  "title": "The Brihanmumbai Electric Supply & Transport Undertaking (BEST) | of the Brihanmumbai Mahanagarpalika",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://freesearchigrservice.maharashtra.gov.in": {
+  "url": "https://freesearchigrservice.maharashtra.gov.in",
+  "http_status": 200,
+  "final_url": "https://freesearchigrservice.maharashtra.gov.in",
+  "title": "Online Document Search.......Department of Registration and Stamps",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ },
+ "https://arthwahini.mahakosh.gov.in": {
+  "url": "https://arthwahini.mahakosh.gov.in",
+  "http_status": 200,
+  "final_url": "https://arthwahini.mahakosh.gov.in/arth/frmlogin.php",
+  "title": "Dashboard : Finance Department, Government of Maharashtra",
+  "error": null,
+  "content_type": "text/html; charset=UTF-8"
+ },
+ "https://koshwahini.mahakosh.gov.in": {
+  "url": "https://koshwahini.mahakosh.gov.in",
+  "http_status": null,
+  "final_url": null,
+  "title": null,
+  "error": "URLERR timed out",
+  "content_type": null
+ },
+ "https://mhfr.agristack.gov.in": {
+  "url": "https://mhfr.agristack.gov.in",
+  "http_status": 200,
+  "final_url": "https://mhfr.agristack.gov.in",
+  "title": "Farmer Registry",
+  "error": null,
+  "content_type": "text/html"
+ },
+ "https://www.umed.in": {
+  "url": "https://www.umed.in",
+  "http_status": 200,
+  "final_url": "https://www.umed.in",
+  "title": "महाराष्ट्र राज्य ग्रामीण जीवनोन्नती अभियान | ग्रामविकास व पंचायतराज |",
+  "error": null,
+  "content_type": "text/html; charset=utf-8"
+ }
+}
