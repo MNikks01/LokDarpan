@@ -27,6 +27,12 @@ A six-month plan to a Phase-1 production launch (Maharashtra roads). Each month 
 
 ## Month 3 — Dashboard
 
+> **Superseded.** The product is now **mobile-only** (no website, no responsive web app, no desktop
+> dashboard). This month is replaced by the 12-phase mobile plan in
+> [`.docs/25-implementation-roadmap.md`](../.docs/25-implementation-roadmap.md). The UI contracts below
+> (`FigureWithSource`, `MissingDataWarning`, provenance on every figure, WCAG, English/Marathi) carry over
+> unchanged to the mobile client. See [`.docs/00-document-audit.md`](../.docs/00-document-audit.md) §3.
+
 **Goals:** the public surface.
 
 - Next.js app: Overview, Map (Mapbox + PostGIS), Project Detail with the follow-the-money chain.
