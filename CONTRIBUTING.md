@@ -33,6 +33,16 @@ git push -u origin feature/short-description
 gh pr create --base development
 ```
 
+### Releasing
+
+Promotion from `development` to `main` is a deliberate human step, not automation:
+
+```bash
+gh pr create --base main --head development --title "release: <what is in it>"
+```
+
+This is intentionally _not_ a workflow. GitHub gates "Actions may create pull requests" behind the same setting as "Actions may approve pull requests" — enabling it to save this one command would let a workflow approve its own PR and bypass the review requirement. Least privilege wins over the convenience.
+
 **Hotfixes branch from `main`**, and the fix **must be merged back into `development`** afterwards — forgetting silently reintroduces the bug in the next release.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/); `commitlint` enforces this on `commit-msg`. Scopes: `web`, `api`, `money`, `neutrality`, `contracts`, `ingestion`, `docs`, `ci`, `deps`, `repo`.
