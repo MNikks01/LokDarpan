@@ -57,6 +57,14 @@ Requires Node ≥20 and pnpm 9.
 
 More in [`CLAUDE.md`](./CLAUDE.md).
 
+## Contributing
+
+The platform grows by **source coverage**, not feature count — the highest-value contribution is a connector for a government source not yet ingested. See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
+If you speak Marathi or Hindi, the forbidden-language vocabulary in `packages/neutrality` needs native-speaker review. A word we failed to list is a word that ships.
+
+Security issues: [`SECURITY.md`](./SECURITY.md) — and note that **security testing must never be directed at government portals.**
+
 ## Licence
 
 **Not yet decided** — see [`LICENSE`](./LICENSE). Recommendation on file: Apache-2.0 or MPL-2.0.
