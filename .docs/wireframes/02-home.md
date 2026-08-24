@@ -82,9 +82,10 @@ Deliberately **not** a KPI dashboard. An intent launcher: where am I, what's nea
 │ ⚡ Offline — showing data from 14 Aug 2026   │
 ├──────────────────────────────────────────────┤
 ```
+
 Content renders fully underneath; "Near you" falls back to the last known scope unit.
 
-## S-08 · Fiscal year   ·   S-09 · Scope switcher
+## S-08 · Fiscal year · S-09 · Scope switcher
 
 ```text
 S-08                                S-09
@@ -129,6 +130,7 @@ S-08                                S-09
 │  Manage what you follow ▸                    │
 └──────────────────────────────────────────────┘
 ```
+
 Every row states **what changed, by how much, and from which record** — never "this was updated". Tapping opens the entity anchored to the changed section with the previous value alongside.
 
-**Empty:** *"You'll see updates here when a saved project's figures change."* → ▸ Saved.
+**Empty:** _"You'll see updates here when a saved project's figures change."_ → ▸ Saved.

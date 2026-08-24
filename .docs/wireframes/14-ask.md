@@ -118,9 +118,9 @@ Every number in the prose is a `<Figure>` — **tappable to its source**, not pl
 └──────────────────────────────────────────────┘
 ```
 
-No apology, no "I can't help with that", no retry-the-same-question button. It states the boundary and offers what *is* available.
+No apology, no "I can't help with that", no retry-the-same-question button. It states the boundary and offers what _is_ available.
 
-## S-59 · Citations   ·   S-60 · History   ·   Offline
+## S-59 · Citations · S-60 · History · Offline
 
 ```text
 S-59                             S-60                          OFFLINE

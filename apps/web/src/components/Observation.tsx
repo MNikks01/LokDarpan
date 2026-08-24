@@ -1,3 +1,4 @@
+import type React from "react";
 import type { ServerText } from "@lokdarpan/neutrality";
 import { color } from "@/ui/tokens";
 
@@ -21,11 +22,21 @@ const BAND = {
   high: color.band.high,
 } as const;
 
-export function Observation({ text, severity, confidence }: ObservationProps) {
+export function Observation({ text, severity, confidence }: ObservationProps): React.JSX.Element {
   const band = BAND[severity];
   return (
-    <li style={{ listStyle: "none", padding: 12, background: band.bg, borderRadius: 10, marginBottom: 8 }}>
-      <span aria-hidden="true" style={{ color: band.fg }}>{band.glyph} </span>
+    <li
+      style={{
+        listStyle: "none",
+        padding: 12,
+        background: band.bg,
+        borderRadius: 10,
+        marginBottom: 8,
+      }}
+    >
+      <span aria-hidden="true" style={{ color: band.fg }}>
+        {band.glyph}{" "}
+      </span>
       <span style={{ color: color.text.primary }}>{text}</span>
       <div style={{ fontSize: 12, color: color.text.secondary, marginTop: 4 }}>
         {severity} · {Math.round(confidence * 100)}% confidence
@@ -35,11 +46,10 @@ export function Observation({ text, severity, confidence }: ObservationProps) {
 }
 
 /** The disclaimer docs/15 requires on every observation surface. Not collapsible. */
-export function ObservationDisclaimer() {
+export function ObservationDisclaimer(): React.JSX.Element {
   return (
     <p style={{ fontSize: 13, color: color.text.secondary, maxWidth: "60ch" }}>
-      ⓘ These are data-consistency observations from official records, not
-      findings of wrongdoing.
+      ⓘ These are data-consistency observations from official records, not findings of wrongdoing.
     </p>
   );
 }

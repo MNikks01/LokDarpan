@@ -10,7 +10,7 @@ In most products, states are polish. Here, three of them are **data-honesty cont
 
 > **R1 — Missing is never zero.** A null financial value renders `MissingData` with a reason. It never renders `₹0`, never a blank, never a dash.
 > **R2 — "Offline" and "not published" are different states**, with different copy, different icons, and different actions.
-> **R3 — Every state names the responsible source.** "We expected this from *MH PWD — Works*, last checked 18 Aug 2026."
+> **R3 — Every state names the responsible source.** "We expected this from _MH PWD — Works_, last checked 18 Aug 2026."
 
 ---
 
@@ -35,7 +35,7 @@ stateDiagram-v2
   Stale --> Ready: refreshed
 ```
 
-`Ready` is not the only success state. `Partial` and `Stale` are successes that must be *labelled* successes.
+`Ready` is not the only success state. `Partial` and `Stale` are successes that must be _labelled_ successes.
 
 ---
 
@@ -43,16 +43,16 @@ stateDiagram-v2
 
 **Skeleton-first, spinner almost never.** Skeletons are shape-matched to the real content — a Money Trail skeleton has three stages and two variance rows, not three grey bars.
 
-| Situation | Treatment |
-|---|---|
-| Screen push | Header renders from route params in frame 1; body skeletons |
-| Section | Section-level skeleton; other sections continue independently |
-| List page 2+ | Inline footer skeleton; existing rows never blocked |
-| Refresh (data present) | Subtle top progress line; **content stays visible and interactive** |
-| Sheet | Content is already in memory — no loading state at all for S-52 |
-| >2 s | Skeleton gains a text line: "Still loading…" |
-| >8 s | Becomes `Error` with retry |
-| Long operation (pack download) | Determinate progress + byte counts + cancel |
+| Situation                      | Treatment                                                           |
+| ------------------------------ | ------------------------------------------------------------------- |
+| Screen push                    | Header renders from route params in frame 1; body skeletons         |
+| Section                        | Section-level skeleton; other sections continue independently       |
+| List page 2+                   | Inline footer skeleton; existing rows never blocked                 |
+| Refresh (data present)         | Subtle top progress line; **content stays visible and interactive** |
+| Sheet                          | Content is already in memory — no loading state at all for S-52     |
+| >2 s                           | Skeleton gains a text line: "Still loading…"                        |
+| >8 s                           | Becomes `Error` with retry                                          |
+| Long operation (pack download) | Determinate progress + byte counts + cancel                         |
 
 Never: a full-screen spinner over existing content · a blocking modal · a layout that shifts when data lands (skeletons reserve real dimensions) · shimmer when `reduceMotion` is on.
 
@@ -63,6 +63,7 @@ Never: a full-screen spinner over existing content · a blocking modal · a layo
 This is where most products collapse five meanings into one message. Each of these tells the user something different and needs a different action.
 
 ### E1 · No records published (the most common, and the most sensitive)
+
 ```text
    ▤   No expenditure records published
 
@@ -77,9 +78,11 @@ This is where most products collapse five meanings into one message. Each of the
 
        [ Try another year ]  [ Report a data issue ]  [ What we cover ]
 ```
-The third paragraph is mandatory and is a direct implementation of `.docs/17-legal/legal-ethical-rules.md` rule 8 (*absence of data ≠ absence of activity*). It is stated in words on the screen, not left to inference.
+
+The third paragraph is mandatory and is a direct implementation of `.docs/17-legal/legal-ethical-rules.md` rule 8 (_absence of data ≠ absence of activity_). It is stated in words on the screen, not left to inference.
 
 ### E2 · Outside coverage
+
 ```text
    ◷   Not yet covered
        LokDarpan currently covers Maharashtra roads (Phase 1).
@@ -88,15 +91,18 @@ The third paragraph is mandatory and is a direct implementation of `.docs/17-leg
 ```
 
 ### E3 · Filtered to nothing
+
 ```text
    ⌕   No results with these filters
        142 projects in Pune district; none match
        "completed" + "cost/km above median".
        [ Clear filters ]  [ Remove 'completed' ]
 ```
-Always states what *would* be there without the filters — otherwise a user reads a filter artefact as a coverage gap.
+
+Always states what _would_ be there without the filters — otherwise a user reads a filter artefact as a coverage gap.
 
 ### E4 · Nothing saved yet (the only "teaching" empty state)
+
 ```text
    ☆   Nothing saved yet
        Save a project to keep its figures, sources and updates —
@@ -105,7 +111,8 @@ Always states what *would* be there without the filters — otherwise a user rea
 ```
 
 ### E5 · Genuinely zero
-A count that is legitimately zero (e.g. "0 bridges in this project") renders inline as `0`, not as an empty state — a true zero is a fact, and dressing it up as an absence would be its own kind of dishonesty. R1 governs *missing*, not *zero*.
+
+A count that is legitimately zero (e.g. "0 bridges in this project") renders inline as `0`, not as an empty state — a true zero is a fact, and dressing it up as an absence would be its own kind of dishonesty. R1 governs _missing_, not _zero_.
 
 ---
 
@@ -113,16 +120,16 @@ A count that is legitimately zero (e.g. "0 bridges in this project") renders inl
 
 Every error states what happened, what it means, and what to do — and preserves whatever data is already on screen.
 
-| State | Copy | Actions |
-|---|---|---|
-| **Network** | "Couldn't reach LokDarpan. Check your connection." | Retry · (cached content stays visible) |
-| **Server (5xx)** | "LokDarpan is having trouble loading this. It's not your connection." | Retry · Copy diagnostics (`requestId`) |
-| **Rate limited (429)** | "Too many requests just now. Retrying in 14s…" — auto-retry, countdown, never alarming | (automatic) |
-| **Not found (404)** | "This record is no longer in the published dataset. It may have been superseded or removed by the source." | Search · Report a data issue |
-| **Contract mismatch** | Silent to the user where cached data exists; otherwise "Some details are unavailable right now." **Never crashes, never partially renders a financial figure** | Retry · logged with `requestId` |
-| **Upgrade required (426)** | "This version of LokDarpan is too old to read the current data." | Update · **dismissible when offline** |
-| **Location denied** | Not an error — S-05 "Choose your area" is offered as an equal path | Choose area · Open settings |
-| **Document unavailable** | "The publisher's copy is no longer reachable. This is our archived copy from 30 Jul 2026." | View archived · Open original |
+| State                      | Copy                                                                                                                                                           | Actions                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **Network**                | "Couldn't reach LokDarpan. Check your connection."                                                                                                             | Retry · (cached content stays visible) |
+| **Server (5xx)**           | "LokDarpan is having trouble loading this. It's not your connection."                                                                                          | Retry · Copy diagnostics (`requestId`) |
+| **Rate limited (429)**     | "Too many requests just now. Retrying in 14s…" — auto-retry, countdown, never alarming                                                                         | (automatic)                            |
+| **Not found (404)**        | "This record is no longer in the published dataset. It may have been superseded or removed by the source."                                                     | Search · Report a data issue           |
+| **Contract mismatch**      | Silent to the user where cached data exists; otherwise "Some details are unavailable right now." **Never crashes, never partially renders a financial figure** | Retry · logged with `requestId`        |
+| **Upgrade required (426)** | "This version of LokDarpan is too old to read the current data."                                                                                               | Update · **dismissible when offline**  |
+| **Location denied**        | Not an error — S-05 "Choose your area" is offered as an equal path                                                                                             | Choose area · Open settings            |
+| **Document unavailable**   | "The publisher's copy is no longer reachable. This is our archived copy from 30 Jul 2026."                                                                     | View archived · Open original          |
 
 **Section-level, not screen-level.** A failed road-intelligence section shows an inline retry while the Money Trail beside it keeps working (`.docs/02-architecture/mobile-architecture.md` §Error boundaries). A whole-screen error for a partial failure discards data the user could have used.
 
@@ -133,14 +140,17 @@ Every error states what happened, what it means, and what to do — and preserve
 ## Offline — two states, deliberately distinct from Empty
 
 ### O1 · Offline with cache
+
 ```text
 ┌─────────────────────────────────────────────┐
 │ ⚡ Offline — showing data from 14 Aug 2026  │   persistent, non-blocking
 └─────────────────────────────────────────────┘
 ```
+
 Content renders fully. Every figure keeps its own `asOf`. Actions requiring the network (Ask, document download, remote search) are visibly disabled with a reason, not silently inert.
 
 ### O2 · Offline without cache
+
 ```text
    ⚡   You're offline
         This project hasn't been downloaded to your device.
@@ -227,11 +237,11 @@ Low **linkage** confidence is the more serious of the two — a correctly-read n
 
 ## Permission states
 
-| Permission | Denied behaviour |
-|---|---|
-| Location | Never a blocker. S-05 remains a permanent equal path. The "locate me" button is disabled with "Location access is off — choose your area instead" |
-| Notifications | Watchlist still works; updates appear in S-11. Copy: "You'll see updates in the app; enable notifications to be told sooner" |
-| Microphone | Voice search hidden; typing unaffected |
+| Permission    | Denied behaviour                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Location      | Never a blocker. S-05 remains a permanent equal path. The "locate me" button is disabled with "Location access is off — choose your area instead" |
+| Notifications | Watchlist still works; updates appear in S-11. Copy: "You'll see updates in the app; enable notifications to be told sooner"                      |
+| Microphone    | Voice search hidden; typing unaffected                                                                                                            |
 
 No permission is ever re-requested after a denial except from an explicit user action, and the app never nags.
 
@@ -241,12 +251,17 @@ No permission is ever re-requested after a denial except from an explicit user a
 
 ```ts
 type DataState<T> =
-  | { kind: 'loading'; skeleton: SkeletonShape }
-  | { kind: 'ready'; data: T; asOf: IsoDate; datasetVersion: number; isStale: boolean }
-  | { kind: 'partial'; data: Partial<T>; missing: SectionId[]; reason: PartialReason }
-  | { kind: 'empty'; variant: 'unpublished'|'uncovered'|'filtered'|'none-saved'; expectedSource?: SourceRef; lastChecked?: IsoDate }
-  | { kind: 'error'; error: AppError; cached?: T }
-  | { kind: 'offline'; cached?: T; asOf?: IsoDate };
+  | { kind: "loading"; skeleton: SkeletonShape }
+  | { kind: "ready"; data: T; asOf: IsoDate; datasetVersion: number; isStale: boolean }
+  | { kind: "partial"; data: Partial<T>; missing: SectionId[]; reason: PartialReason }
+  | {
+      kind: "empty";
+      variant: "unpublished" | "uncovered" | "filtered" | "none-saved";
+      expectedSource?: SourceRef;
+      lastChecked?: IsoDate;
+    }
+  | { kind: "error"; error: AppError; cached?: T }
+  | { kind: "offline"; cached?: T; asOf?: IsoDate };
 ```
 
 A closed discriminated union means a screen **cannot** forget a state — an unhandled variant is a TypeScript error. `empty` carries `expectedSource` and `lastChecked` in its type, so **R3 is enforced by the compiler**, not by review.

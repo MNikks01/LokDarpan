@@ -8,15 +8,15 @@
  * A CI test asserts this (tokens.test.ts).
  */
 export const color = {
-  bg:     { canvas: "#FBFBFA", surface: "#FFFFFF", raised: "#F4F5F4", sunken: "#F0F1F0" },
+  bg: { canvas: "#FBFBFA", surface: "#FFFFFF", raised: "#F4F5F4", sunken: "#F0F1F0" },
   border: { hair: "#E3E5E3", strong: "#C9CDC9" },
-  text:   { primary: "#14181A", secondary: "#55605F", tertiary: "#7A8483" },
+  text: { primary: "#14181A", secondary: "#55605F", tertiary: "#7A8483" },
   accent: { base: "#0F766E", soft: "#E6F2F0" },
   /** Verification-priority bands — an amber ramp, deliberately quiet. No red. */
   band: {
-    low:       { bg: "#E8EDEC", fg: "#2F4F4C", glyph: "○" },
-    medium:    { bg: "#DCE6E4", fg: "#1F3E3B", glyph: "◔" },
-    high:      { bg: "#EFE3CB", fg: "#6B4E14", glyph: "◑" },
+    low: { bg: "#E8EDEC", fg: "#2F4F4C", glyph: "○" },
+    medium: { bg: "#DCE6E4", fg: "#1F3E3B", glyph: "◔" },
+    high: { bg: "#EFE3CB", fg: "#6B4E14", glyph: "◑" },
     very_high: { bg: "#E5D2AE", fg: "#4A360C", glyph: "◕" },
   },
   /** Coverage gaps: neutral slate. A publication gap is not a finding. */

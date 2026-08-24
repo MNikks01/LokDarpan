@@ -90,7 +90,7 @@ export class Money {
     const abs = negative ? -this.paise : this.paise;
     const rupees = abs / PAISE_PER_RUPEE;
     const paise = abs % PAISE_PER_RUPEE;
-    return `${negative ? "-" : ""}${rupees}.${paise.toString().padStart(2, "0")}`;
+    return `${negative ? "-" : ""}${rupees.toString()}.${paise.toString().padStart(2, "0")}`;
   }
 
   /**
@@ -104,6 +104,9 @@ export class Money {
     return `${head.replace(/\B(?=(\d{2})+(?!\d))/g, ",")},${tail}`;
   }
 
+  // `_locale` is part of the public signature and intentionally does NOT change
+  // numerals: source documents use Latin digits, so a reader cross-checking a
+  // figure against a PDF must see the same glyphs.
   format(_locale: Locale = "en", style: MoneyStyle = "crore-lakh"): string {
     // Numerals stay Latin in every locale: source documents use Latin digits,
     // and a reader cross-checking against a PDF must see the same glyphs.
@@ -117,7 +120,7 @@ export class Money {
       return `${sign}₹${Money.groupIndian(rupees.toString())}`;
     }
 
-    if (style === "crore-lakh" || style === "compact") {
+    {
       if (rupees >= RUPEES_PER_CRORE) {
         return `${sign}₹${Money.scaled(rupees, RUPEES_PER_CRORE)} crore`;
       }

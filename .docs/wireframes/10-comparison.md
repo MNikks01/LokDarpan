@@ -29,6 +29,7 @@
 │  [ Compare 3 projects ]                      │
 └──────────────────────────────────────────────┘
 ```
+
 Peer suggestions come from the same peer-set logic the analytics engine uses (`.docs/07-analytics/analytics-engine.md` §4) — so what a user compares by hand matches what the engine compares automatically.
 
 ## S-38 · Result — cards, never a table

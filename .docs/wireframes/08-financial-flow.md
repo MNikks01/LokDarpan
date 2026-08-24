@@ -71,7 +71,7 @@
 
 - **Both variances**, each showing its **subtraction and its denominator in words**. Never a bare "11.1%".
 - The low-confidence warning is in **words**, not just a chip — a chip does not survive a screenshot.
-- The status block states *which* rule was checked and *which* threshold applied, so the reader can disagree with the threshold rather than the fact.
+- The status block states _which_ rule was checked and _which_ threshold applied, so the reader can disagree with the threshold rather than the fact.
 - Nothing is red. Nothing is a gauge.
 
 ## Incomplete chain — the `insufficient_data` state
@@ -105,7 +105,7 @@
 
 **Never `₹0`. Never a 100% variance against nothing.** This is `.docs/17-legal/legal-ethical-rules.md` rule 8, rendered.
 
-## S-29 · Ledger lines   ·   S-30 · Line detail   ·   S-30a · Value history
+## S-29 · Ledger lines · S-30 · Line detail · S-30a · Value history
 
 ```text
 S-29                                S-30 (sheet)

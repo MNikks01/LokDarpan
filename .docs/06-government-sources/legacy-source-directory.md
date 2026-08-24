@@ -18,74 +18,92 @@ This is a discovery directory, not a guarantee of live endpoints. The ingestion 
 # India — Central Government
 
 ### 1. Open Government Data Platform (data.gov.in) — **most important** ✅
+
 Central + state datasets, APIs, CSV/JSON exports, budget data.
 `https://data.gov.in`
 
 ### 2. India Budget Portal ✅
+
 Union Budget, ministry budgets, allocations, expenditure, receipts, demand-for-grants.
 `https://www.indiabudget.gov.in`
 
 ### 3. Ministry of Finance ✅
+
 Revenue, tax collection, fiscal deficit, budget releases.
 `https://finmin.gov.in`
 
 ### 4. Department of Expenditure 🔎
+
 Government spending, expenditure statements, budget releases, utilization.
 `https://doe.gov.in`
 
 ### 5. Controller General of Accounts (CGA) ✅
+
 Government accounts, monthly accounts of the Union, receipts, fiscal deficit. Public Financial Management System (PFMS) links.
 `https://cga.nic.in` · PFMS: `https://pfms.nic.in`
 
 ### 6. Comptroller and Auditor General (CAG) ✅
+
 Audit reports, financial/performance audits, department audits, public-expenditure reviews.
 `https://cag.gov.in`
 
 ### 7. National Data Analytics Platform (NDAP, NITI Aayog) ✅
+
 Cross-ministry datasets, public analytics, infrastructure & economic indicators.
 `https://ndap.niti.gov.in`
 
 ### 8. NITI Aayog ✅
+
 Government analytics, state rankings, development indicators.
 `https://www.niti.gov.in`
 
 ### 9. Ministry of Road Transport and Highways (MoRTH) ✅
+
 National highways, road projects, road budgets, infrastructure spending, road statistics.
 `https://morth.nic.in`
 
 ### 10. National Highways Authority of India (NHAI) 🔎
+
 NH project awards, progress, HAM/EPC/BOT contracts.
 `https://nhai.gov.in`
 
 ### 11. PM Gati Shakti / National Master Plan ✅
+
 Infrastructure planning across highways, railways, ports, logistics.
-`https://pmgatishakti.gov.in`  (also referenced as `gatishakti.gov.in`)
+`https://pmgatishakti.gov.in` (also referenced as `gatishakti.gov.in`)
 
 ### 12. Government e-Marketplace (GeM) ✅
+
 Procurement, vendor details, government purchases.
 `https://gem.gov.in`
 
 ### 13. Central Public Procurement Portal (CPPP) ✅
+
 Tenders, contracts, award values across central ministries; NIC eProcurement.
-`https://eprocure.gov.in`  · unified: `https://etenders.gov.in`
+`https://eprocure.gov.in` · unified: `https://etenders.gov.in`
 
 ### 14. National Portal of India ✅
+
 Directory of ministries, schemes, department links.
 `https://www.india.gov.in`
 
 ### 15. Reserve Bank of India — Database on Indian Economy (DBIE) ✅
+
 State finances, market borrowings (SDLs), fiscal indicators.
 `https://rbi.org.in` · DBIE: `https://dbie.rbi.org.in`
 
 ### 16. Ministry of Statistics & Programme Implementation (MoSPI) ✅
+
 National accounts, infrastructure & economic statistics, MPLADS/project monitoring.
 `https://mospi.gov.in`
 
 ### 17. Ministry of Rural Development — roads & works ✅
+
 PMGSY rural roads (see OMMAS), MGNREGA works & expenditure.
 `https://rural.nic.in` · PMGSY/OMMAS: `https://omms.nic.in` · MGNREGA: `https://nrega.nic.in`
 
 ### 18. Ministry of Housing & Urban Affairs 🔎
+
 Urban roads, Smart Cities, AMRUT, urban infrastructure.
 `https://mohua.gov.in` · Smart Cities: `https://smartcities.gov.in`
 
@@ -110,6 +128,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - **data.gov.in** ✅ — `https://www.data.gov.in/state_utes/Maharashtra`
 
 ## Andhra Pradesh
+
 - State portal ✅ `https://www.ap.gov.in`
 - Finance / Treasuries & IFMIS 🔎 `https://apfinance.gov.in` · CFMS: `https://cfms.ap.gov.in`
 - PWD / Roads & Buildings 🔎 `https://aprandb.ap.gov.in`
@@ -118,6 +137,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Andhra-Pradesh`
 
 ## Arunachal Pradesh
+
 - State portal ✅ `https://arunachalpradesh.gov.in`
 - Finance 🔎 `https://finance.arunachal.gov.in`
 - PWD 🔎 `https://pwd.arunachal.gov.in`
@@ -126,6 +146,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Arunachal-Pradesh`
 
 ## Assam
+
 - State portal ✅ `https://assam.gov.in`
 - Finance 🔎 `https://finance.assam.gov.in`
 - PWD (Roads) 🔎 `https://pwdroads.assam.gov.in`
@@ -134,6 +155,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Assam`
 
 ## Bihar
+
 - State portal ✅ `https://state.bihar.gov.in`
 - Finance 🔎 `https://state.bihar.gov.in/finance`
 - Road Construction Dept / PWD 🔎 `https://state.bihar.gov.in/rcd`
@@ -142,6 +164,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Bihar`
 
 ## Chhattisgarh
+
 - State portal ✅ `https://cgstate.gov.in`
 - Finance 🔎 `https://finance.cg.gov.in`
 - PWD 🔎 `https://cgpwd.gov.in`
@@ -150,6 +173,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Chhattisgarh`
 
 ## Goa
+
 - State portal ✅ `https://www.goa.gov.in`
 - Finance 🔎 `https://www.goa.gov.in/department/directorate-of-accounts`
 - PWD 🔎 `https://pwd.goa.gov.in`
@@ -158,6 +182,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Goa`
 
 ## Gujarat
+
 - State portal ✅ `https://gujaratindia.gov.in`
 - Finance 🔎 `https://financedepartment.gujarat.gov.in`
 - Roads & Buildings Dept 🔎 `https://rnbgujarat.gov.in`
@@ -166,6 +191,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Gujarat`
 
 ## Haryana
+
 - State portal ✅ `https://www.haryana.gov.in`
 - Finance 🔎 `https://finhry.gov.in`
 - PWD (B&R) 🔎 `https://pwdharyana.gov.in`
@@ -174,6 +200,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Haryana`
 
 ## Himachal Pradesh
+
 - State portal ✅ `https://himachal.nic.in`
 - Finance 🔎 `https://himachal.nic.in/finance`
 - PWD (HPPWD) 🔎 `https://hppwd.hp.gov.in`
@@ -182,6 +209,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Himachal-Pradesh`
 
 ## Jharkhand
+
 - State portal ✅ `https://www.jharkhand.gov.in`
 - Finance 🔎 `https://finance.jharkhand.gov.in`
 - Road Construction / PWD 🔎 `https://rcd.jharkhand.gov.in`
@@ -190,6 +218,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Jharkhand`
 
 ## Karnataka
+
 - State portal ✅ `https://www.karnataka.gov.in`
 - Finance / Khajane-II (treasury) 🔎 `https://finance.karnataka.gov.in` · `https://khajane2.karnataka.gov.in`
 - PWD 🔎 `https://kpwd.karnataka.gov.in`
@@ -198,6 +227,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Karnataka`
 
 ## Kerala
+
 - State portal ✅ `https://kerala.gov.in`
 - Finance / BaMS · IFMS 🔎 `https://finance.kerala.gov.in`
 - PWD 🔎 `https://www.pwd.kerala.gov.in`
@@ -206,6 +236,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Kerala`
 
 ## Madhya Pradesh
+
 - State portal ✅ `https://www.mp.gov.in`
 - Finance / IFMIS 🔎 `https://finance.mp.gov.in` · `https://mptreasury.gov.in`
 - PWD 🔎 `https://mppwd.gov.in`
@@ -214,6 +245,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Madhya-Pradesh`
 
 ## Manipur
+
 - State portal ✅ `https://manipur.gov.in`
 - Finance 🔎 `https://manipurfinance.gov.in`
 - PWD 🔎 `https://pwd.manipur.gov.in`
@@ -222,6 +254,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Manipur`
 
 ## Meghalaya
+
 - State portal ✅ `https://meghalaya.gov.in`
 - Finance 🔎 `https://megfinance.gov.in`
 - PWD 🔎 `https://megpwd.gov.in`
@@ -230,6 +263,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Meghalaya`
 
 ## Mizoram
+
 - State portal ✅ `https://mizoram.gov.in`
 - Finance 🔎 `https://finance.mizoram.gov.in`
 - PWD 🔎 `https://pwd.mizoram.gov.in`
@@ -238,6 +272,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Mizoram`
 
 ## Nagaland
+
 - State portal ✅ `https://www.nagaland.gov.in`
 - Finance 🔎 `https://finance.nagaland.gov.in`
 - PWD 🔎 `https://pwd.nagaland.gov.in`
@@ -246,6 +281,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Nagaland`
 
 ## Odisha
+
 - State portal ✅ `https://odisha.gov.in`
 - Finance / IFMS 🔎 `https://finance.odisha.gov.in` · `https://ifms.odisha.gov.in`
 - Works Department 🔎 `https://works.odisha.gov.in`
@@ -254,6 +290,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Odisha`
 
 ## Punjab
+
 - State portal ✅ `https://punjab.gov.in`
 - Finance / IFMS 🔎 `https://finance.punjab.gov.in` · `https://ifms.punjab.gov.in`
 - PWD (B&R) 🔎 `https://pbpwd.gov.in`
@@ -262,6 +299,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Punjab`
 
 ## Rajasthan
+
 - State portal ✅ `https://rajasthan.gov.in`
 - Finance / IFMS 🔎 `https://finance.rajasthan.gov.in` · `https://ifms.raj.nic.in`
 - PWD 🔎 `https://pwd.rajasthan.gov.in`
@@ -270,6 +308,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Rajasthan`
 
 ## Sikkim
+
 - State portal ✅ `https://sikkim.gov.in`
 - Finance 🔎 `https://sikkimfinance.gov.in`
 - Roads & Bridges Dept 🔎 `https://sikkimrb.gov.in`
@@ -278,6 +317,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Sikkim`
 
 ## Tamil Nadu
+
 - State portal ✅ `https://www.tn.gov.in`
 - Finance / IFHRMS 🔎 `https://fin.tn.gov.in` · `https://www.karuvoolam.tn.gov.in`
 - Highways & Minor Ports / PWD 🔎 `https://www.tnhighways.tn.gov.in` · `https://www.tnpwd.gov.in`
@@ -286,6 +326,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Tamil-Nadu`
 
 ## Telangana
+
 - State portal ✅ `https://www.telangana.gov.in`
 - Finance 🔎 `https://finance.telangana.gov.in` · treasuries: `https://treasury.telangana.gov.in`
 - Roads & Buildings 🔎 `https://rnb.telangana.gov.in`
@@ -294,6 +335,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Telangana`
 
 ## Tripura
+
 - State portal ✅ `https://tripura.gov.in`
 - Finance 🔎 `https://finance.tripura.gov.in`
 - PWD 🔎 `https://pwd.tripura.gov.in`
@@ -302,6 +344,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Tripura`
 
 ## Uttar Pradesh
+
 - State portal ✅ `https://up.gov.in`
 - Finance / IFMS-Koshvani 🔎 `https://updfs.gov.in` · `https://koshvani.up.nic.in`
 - PWD 🔎 `https://uppwd.gov.in`
@@ -310,6 +353,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Uttar-Pradesh`
 
 ## Uttarakhand
+
 - State portal ✅ `https://uk.gov.in`
 - Finance 🔎 `https://finance.uk.gov.in`
 - PWD 🔎 `https://uttarakhandpwd.gov.in`
@@ -318,6 +362,7 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 - data.gov.in ✅ `https://www.data.gov.in/state_utes/Uttarakhand`
 
 ## West Bengal
+
 - State portal ✅ `https://wb.gov.in`
 - Finance / IFMS 🔎 `https://wbfin.wb.gov.in` · `https://wbifms.gov.in`
 - PWD 🔎 `https://pwdwb.in` (also `https://pwd.wb.gov.in`)
@@ -330,27 +375,35 @@ Urban roads, Smart Cities, AMRUT, urban infrastructure.
 # Union Territories
 
 ## Andaman & Nicobar Islands
+
 - Portal ✅ `https://www.andaman.gov.in` · APWD 🔎 `https://apwd.andaman.gov.in` · e-Proc 🔎 `https://andamantenders.gov.in` · data.gov.in ✅ `.../Andaman-and-Nicobar-Islands`
 
 ## Chandigarh
+
 - Portal ✅ `https://chandigarh.gov.in` · Engineering/PWD 🔎 `https://chdengineering.gov.in` · e-Proc 🔎 `https://etenders.chd.nic.in` · data.gov.in ✅ `.../Chandigarh`
 
 ## Dadra & Nagar Haveli and Daman & Diu
+
 - Portal ✅ `https://dnhdd.gov.in` · PWD 🔎 `https://ddd.gov.in` · e-Proc 🔎 `https://ddtenders.gov.in` · data.gov.in ✅ `.../Dadra-and-Nagar-Haveli`
 
 ## Delhi (NCT)
+
 - Portal ✅ `https://delhi.gov.in` · Finance 🔎 `https://finance.delhi.gov.in` · PWD 🔎 `https://pwddelhi.gov.in` · e-Proc 🔎 `https://govtprocurement.delhi.gov.in` · DES 🔎 `https://des.delhi.gov.in` · data.gov.in ✅ `.../Delhi`
 
 ## Jammu & Kashmir
+
 - Portal ✅ `https://jk.gov.in` · Finance/PFMS-BEAMS 🔎 `https://jkfinance.jk.gov.in` · R&B / PWD 🔎 `https://jkpwdrb.nic.in` · e-Proc 🔎 `https://jktenders.gov.in` · DES 🔎 `https://ecostatjk.nic.in` · data.gov.in ✅ `.../Jammu-and-Kashmir`
 
 ## Ladakh
+
 - Portal ✅ `https://ladakh.gov.in` · PWD 🔎 `https://pwd.ladakh.gov.in` · e-Proc 🔎 `https://ladakhtenders.gov.in` · data.gov.in ✅ `.../Ladakh`
 
 ## Lakshadweep
+
 - Portal ✅ `https://lakshadweep.gov.in` · PWD 🔎 `https://pwd.utl.gov.in` · e-Proc 🔎 `https://lakshadweeptenders.gov.in`
 
 ## Puducherry
+
 - Portal ✅ `https://py.gov.in` · Finance 🔎 `https://finance.py.gov.in` · PWD 🔎 `https://pwd.py.gov.in` · e-Proc 🔎 `https://pudutenders.gov.in` · DES 🔎 `https://des.py.gov.in` · data.gov.in ✅ `.../Puducherry`
 
 ---
@@ -381,8 +434,8 @@ audit_reports (report) · project_status (project_progress) · anomalies
 
 # Gold mine (highest priority to wire first)
 
-1. Maharashtra State Data Bank  2. Maharashtra PWD  3. Mahatenders  4. Mahakosh
-5. data.gov.in  6. CGA / PFMS  7. CAG  8. MRSAC  9. MoRTH  10. NDAP
+1. Maharashtra State Data Bank 2. Maharashtra PWD 3. Mahatenders 4. Mahakosh
+2. data.gov.in 6. CGA / PFMS 7. CAG 8. MRSAC 9. MoRTH 10. NDAP
 
 ---
 

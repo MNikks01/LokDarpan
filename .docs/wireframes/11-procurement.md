@@ -35,6 +35,7 @@
 │    process or the parties involved.          │
 └──────────────────────────────────────────────┘
 ```
+
 "₹0.40 crore below the estimate" is stated as arithmetic. The app never characterises a bid as low, aggressive, or suspicious.
 
 ## S-42 · Contractor detail — the most constrained screen in the app
@@ -82,11 +83,11 @@
 
 ### What is deliberately absent
 
-**No verification-priority score. No risk band. No severity badge. No flag, colour-coding, warning icon, or ranking.** `.docs/08-risk/risk-scoring-engine.md`: *"Never rank people by risk."* The concentration statistic is framed as belonging to the taluka, not to the firm, and this omission is recorded in `.docs/05-data-model/screen-data-matrix.md` §3 so it stays visible and auditable rather than being "fixed" later by a component reuse.
+**No verification-priority score. No risk band. No severity badge. No flag, colour-coding, warning icon, or ranking.** `.docs/08-risk/risk-scoring-engine.md`: _"Never rank people by risk."_ The concentration statistic is framed as belonging to the taluka, not to the firm, and this omission is recorded in `.docs/05-data-model/screen-data-matrix.md` §3 so it stays visible and auditable rather than being "fixed" later by a component reuse.
 
 The alias block with its match scores is the transparency mechanism for canonicalization — merging two different firms is a serious error, and a reader must be able to check it.
 
-## S-43 · Contractor tenders   ·   S-44 · Concentration
+## S-43 · Contractor tenders · S-44 · Concentration
 
 ```text
 S-43                                S-44
@@ -127,4 +128,5 @@ S-43                                S-44
                                  │ [ How HHI is calculated ](?)│
                                  └────────────────────────────┘
 ```
+
 The bars are neutral fills, alphabetically stable, with no colour-coding of "large" shares.

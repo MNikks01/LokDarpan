@@ -107,4 +107,5 @@ Showing BE and RE side by side with a link to revision history implements `.docs
 │  ⋯                                           │
 └──────────────────────────────────────────────┘
 ```
+
 Every row carries figures, not just a name. Missing utilization is shown in place rather than filtered out.

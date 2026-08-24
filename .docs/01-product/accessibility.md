@@ -26,11 +26,13 @@ Announced:
 ```
 
 Rules:
+
 - The **crore/lakh word** is spoken, never the digit string — "₹8,00,00,000" read digit-by-digit is meaningless.
 - Confidence below 0.90 is spoken as a word ("low", "medium"), not a bare percentage.
-- Missing values announce the reason: *"Utilized: no expenditure records published for FY 2024-25. Source that would carry this: MH PWD Works."*
+- Missing values announce the reason: _"Utilized: no expenditure records published for FY 2024-25. Source that would carry this: MH PWD Works."_
 
 ### Structure
+
 - Every screen has one `accessibilityRole="header"` H1 and correctly ordered section headers, so heading navigation works.
 - Reading order follows visual order; `importantForAccessibility` hides decorative elements.
 - Live regions announce loading completion, errors, filter result counts, and streaming AI answers (announced at sentence boundaries, not per token).
@@ -38,8 +40,10 @@ Rules:
 - Lists announce position ("item 3 of 25") and load-more state.
 
 ### Charts and maps — mandatory alternatives
+
 Every chart component **must** provide:
-1. An `accessibilityLabel` carrying the full textual equivalent — *"Cost per km: this project ₹3.20 crore. Modeled estimate ₹2.60 crore, 23% above. District median ₹2.75 crore across 19 comparable roads, 16% above."*
+
+1. An `accessibilityLabel` carrying the full textual equivalent — _"Cost per km: this project ₹3.20 crore. Modeled estimate ₹2.60 crore, 23% above. District median ₹2.75 crore across 19 comparable roads, 16% above."_
 2. A **"view as list"** action rendering the same data as a `RecordList`.
 
 A chart without both fails CI (`.docs/14-testing/testing-strategy.md`). The map's alternative is the **List mode of S-18**, which is not a lesser view but the same query in a different presentation, and `Settings → Prefer list over map` makes it the default permanently.
@@ -48,17 +52,17 @@ A chart without both fails CI (`.docs/14-testing/testing-strategy.md`). The map'
 
 ## 2 · Text scaling
 
-The hardest constraint in this product: `₹12,45,67,890` cannot be truncated, ever. A truncated money figure is a *wrong* money figure.
+The hardest constraint in this product: `₹12,45,67,890` cannot be truncated, ever. A truncated money figure is a _wrong_ money figure.
 
-| Rule | |
-|---|---|
-| Support | 85% → 200% OS text scale |
-| `maxFontSizeMultiplier` | 2.0 prose · **1.6 figures** |
-| Above ~130% scale | `label + value` rows switch from horizontal to **stacked**; two-column layouts become one column |
-| Truncation | **Never** on a monetary value, a percentage, a date, or a unit name. Prose may ellipsize with an expand affordance |
-| Containers | Every card and row is height-flexible; no fixed heights on text containers |
-| Devanagari | +2 pt line height at all sizes; Marathi/Hindi strings budgeted at 1.35× English length |
-| Testing | Every screen is snapshot-tested at 100%, 150%, and 200% |
+| Rule                    |                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Support                 | 85% → 200% OS text scale                                                                                           |
+| `maxFontSizeMultiplier` | 2.0 prose · **1.6 figures**                                                                                        |
+| Above ~130% scale       | `label + value` rows switch from horizontal to **stacked**; two-column layouts become one column                   |
+| Truncation              | **Never** on a monetary value, a percentage, a date, or a unit name. Prose may ellipsize with an expand affordance |
+| Containers              | Every card and row is height-flexible; no fixed heights on text containers                                         |
+| Devanagari              | +2 pt line height at all sizes; Marathi/Hindi strings budgeted at 1.35× English length                             |
+| Testing                 | Every screen is snapshot-tested at 100%, 150%, and 200%                                                            |
 
 ---
 
@@ -77,7 +81,7 @@ The hardest constraint in this product: `₹12,45,67,890` cannot be truncated, e
 
 - Minimum **44×44 pt** for every interactive element, including the source chip on a caption line (which is visually 12 pt but has a 44 pt hit slop).
 - ≥ 8 pt between adjacent targets.
-- **No gesture is the only way to do anything.** Sheet dismissal has a visible close control; the map's pinch-zoom has +/− buttons; swipe-to-delete on saved items has a long-press menu equivalent (WCAG 2.2 *Dragging Movements*).
+- **No gesture is the only way to do anything.** Sheet dismissal has a visible close control; the map's pinch-zoom has +/− buttons; swipe-to-delete on saved items has a long-press menu equivalent (WCAG 2.2 _Dragging Movements_).
 - No double-tap, long-press, multi-finger, or shake gesture is required for any function; all are shortcuts with a visible equivalent.
 - Primary actions sit in the lower two-thirds of the screen for one-handed reach on 6.7" devices.
 - `Settings → Larger touch targets` raises the minimum to 52 pt.
@@ -94,7 +98,7 @@ The hardest constraint in this product: `₹12,45,67,890` cannot be truncated, e
 
 - **English · मराठी · हिन्दी**, switchable at first launch and any time.
 - **Numerals stay Latin in all locales.** Deliberate: every source government document uses Latin digits, and a reader cross-checking a figure against a PDF must see the same glyphs. Documented here so it is a decision, not an oversight.
-- Number *grouping* follows the Indian system (`##,##,###`) in all locales, with an international-grouping option in S-69.
+- Number _grouping_ follows the Indian system (`##,##,###`) in all locales, with an international-grouping option in S-69.
 - `lang` is set per text node so the screen reader picks the right voice — mixing Devanagari prose with Latin figures otherwise produces unintelligible output.
 - Plain language: the app avoids jargon where possible, and where a term is unavoidable (variance, HHI, BE/RE, verification priority) it carries a `(?)` opening a plain-language explanation (S-57). Reading-level target: comprehensible to a competent 15-year-old reader.
 
@@ -121,15 +125,15 @@ Both platforms' accessibility settings are respected without an app-level overri
 
 ## 9 · Testing
 
-| Layer | Method | Gate |
-|---|---|---|
-| Static | ESLint a11y rules; every `Pressable` requires a label; every image requires alt or decorative | CI blocking |
-| Token | Contrast assertions across both themes | CI blocking |
-| Component | RNTL queries by accessibility role/label — tests are written as a screen reader sees the UI | CI blocking |
-| Layout | Snapshots at 100/150/200% text scale | CI blocking |
-| Chart | Every chart must expose a text equivalent + list view | CI blocking |
-| E2E | Maestro flows for the core journey with TalkBack enabled | Pre-release |
-| Manual | Screen-reader walkthrough of J1, J3, J10 each release | Pre-release |
-| External | Audit with users of assistive technology, including Marathi screen-reader users, before public launch | Launch gate |
+| Layer     | Method                                                                                                | Gate        |
+| --------- | ----------------------------------------------------------------------------------------------------- | ----------- |
+| Static    | ESLint a11y rules; every `Pressable` requires a label; every image requires alt or decorative         | CI blocking |
+| Token     | Contrast assertions across both themes                                                                | CI blocking |
+| Component | RNTL queries by accessibility role/label — tests are written as a screen reader sees the UI           | CI blocking |
+| Layout    | Snapshots at 100/150/200% text scale                                                                  | CI blocking |
+| Chart     | Every chart must expose a text equivalent + list view                                                 | CI blocking |
+| E2E       | Maestro flows for the core journey with TalkBack enabled                                              | Pre-release |
+| Manual    | Screen-reader walkthrough of J1, J3, J10 each release                                                 | Pre-release |
+| External  | Audit with users of assistive technology, including Marathi screen-reader users, before public launch | Launch gate |
 
 **Definition of done for any screen** includes: screen-reader-navigable, 200% scale intact, 44 pt targets, contrast verified, no colour-only signal, reduced-motion respected, all figures announced with provenance.

@@ -38,17 +38,18 @@ Three failure modes must be prevented:
 
 They map to the four ways a person actually arrives at public-spending data, not to the shape of the database:
 
-| Tab | Question it answers | Primary persona |
-|---|---|---|
-| **Home** | "What's around me / in my area?" | Citizen |
-| **Explore** | "Show me the map / walk me down the hierarchy." | Citizen, researcher |
-| **Search** | "I know what I'm looking for." | Journalist, RTI activist |
-| **Saved** | "What am I tracking?" | Journalist, activist |
+| Tab         | Question it answers                             | Primary persona          |
+| ----------- | ----------------------------------------------- | ------------------------ |
+| **Home**    | "What's around me / in my area?"                | Citizen                  |
+| **Explore** | "Show me the map / walk me down the hierarchy." | Citizen, researcher      |
+| **Search**  | "I know what I'm looking for."                  | Journalist, RTI activist |
+| **Saved**   | "What am I tracking?"                           | Journalist, activist     |
 
 Alternatives rejected:
+
 - **5 tabs with "More"** — a "More" tab is where features go to die; Settings belongs in the Home header (visited rarely, never mid-task).
 - **3 tabs + header search** — Search is a first-class investigative surface here (`.docs/01-product/search-experience.md`); demoting it to an icon buries the journalist's primary path.
-- **Ask/AI as a tab** — see `adr/002-navigation.md`; it would make this a chatbot product and invite exactly the out-of-scope questions the guardrails must then refuse. Ask is entered *from* a scope.
+- **Ask/AI as a tab** — see `adr/002-navigation.md`; it would make this a chatbot product and invite exactly the out-of-scope questions the guardrails must then refuse. Ask is entered _from_ a scope.
 - **Drawer navigation** — hides the entire IA behind a hamburger; poor reachability on 6.5" phones.
 
 Full rationale and trade-offs: `adr/002-navigation.md`.
@@ -116,7 +117,7 @@ RootStack (Expo Router)
     S-07 · S-08 · S-09 · S-16 · S-19 · S-20 · S-21 · S-30 · S-50 · S-52 · S-57 · S-65
 ```
 
-### Entity routes live in *every* tab's stack
+### Entity routes live in _every_ tab's stack
 
 `project/[id]` is not owned by a tab. Opening a project from Search pushes it onto the Search stack; opening the same project from the map pushes it onto the Explore stack. Consequences:
 
@@ -129,7 +130,7 @@ RootStack (Expo Router)
 ## Depth control — three mechanisms instead of a breadcrumb
 
 **1 · The scope chip (persistent, 1 line, in the header)**
-Shows the user's *chosen scope*, not their stack position: `[Pune district ▾]`. Tapping opens S-09 to change it. It answers "where am I working?" without answering "how did I get here?", which the back button already covers. It costs one line, and it is also the FY carrier.
+Shows the user's _chosen scope_, not their stack position: `[Pune district ▾]`. Tapping opens S-09 to change it. It answers "where am I working?" without answering "how did I get here?", which the back button already covers. It costs one line, and it is also the FY carrier.
 
 **2 · The ancestor row (contextual, on entity screens only)**
 Directly under the header of S-23 / S-27:
@@ -138,12 +139,12 @@ Directly under the header of S-23 / S-27:
 ↑  India › Maharashtra › Pune › Baramati            ▸
 ```
 
-One line, horizontally scrollable, ellipsized from the left so the *nearest* ancestors stay visible. Tapping a segment pushes that unit. Tapping ▸ opens the full ancestor list as a sheet. This is a breadcrumb — but only where it carries information (an entity's position in the hierarchy), not on every screen.
+One line, horizontally scrollable, ellipsized from the left so the _nearest_ ancestors stay visible. Tapping a segment pushes that unit. Tapping ▸ opens the full ancestor list as a sheet. This is a breadcrumb — but only where it carries information (an entity's position in the hierarchy), not on every screen.
 
 **3 · Long-press back → ancestor menu**
 Long-pressing the header back button lists the current stack and offers "Back to <screen>" — the standard escape hatch for a 9-deep stack. On Android, the hardware/gesture back still pops one level.
 
-**Stack depth guard.** When a stack exceeds **12 entries**, opening a further entity *replaces* the top entry rather than pushing, and the ancestor menu remains the way back. This bounds memory (`.docs/02-architecture/performance.md`) and prevents the 40-tap unwind.
+**Stack depth guard.** When a stack exceeds **12 entries**, opening a further entity _replaces_ the top entry rather than pushing, and the ancestor menu remains the way back. This bounds memory (`.docs/02-architecture/performance.md`) and prevents the 40-tap unwind.
 
 ---
 
@@ -151,17 +152,17 @@ Long-pressing the header back button lists the current stack and offers "Back to
 
 `.docs/01-product/dashboard-design-legacy.md` specifies a `ProvenanceDrawer`, hover tooltips, and popovers — all desktop affordances. On mobile these become **bottom sheets**, which are reachable one-handed, dismissible by gesture, and preserve the underlying context.
 
-| Sheet | Detent | Dismiss | Why a sheet and not a screen |
-|---|---|---|---|
-| **S-52 Source** | 55% → full | swipe / backdrop | Must never lose the figure it explains |
-| S-57 Methodology | 45% | swipe | Reference, read and dismissed |
-| S-19 Feature preview | 30% (peek) → 70% | swipe down | Map must stay visible behind it |
-| S-20 Cluster contents | 55% → full | swipe | Same |
-| S-16/21/50 Filters | 70% | apply / swipe | Live result count needs the list behind |
-| S-08 FY · S-09 Scope | 45% | select | Global switches, no context loss |
-| S-30 Ledger line | 60% | swipe | Detail of the row behind it |
-| S-65 Watch settings | 40% | swipe | Per-item toggle |
-| S-07 Notification primer | 35% | swipe | Contextual permission |
+| Sheet                    | Detent           | Dismiss          | Why a sheet and not a screen            |
+| ------------------------ | ---------------- | ---------------- | --------------------------------------- |
+| **S-52 Source**          | 55% → full       | swipe / backdrop | Must never lose the figure it explains  |
+| S-57 Methodology         | 45%              | swipe            | Reference, read and dismissed           |
+| S-19 Feature preview     | 30% (peek) → 70% | swipe down       | Map must stay visible behind it         |
+| S-20 Cluster contents    | 55% → full       | swipe            | Same                                    |
+| S-16/21/50 Filters       | 70%              | apply / swipe    | Live result count needs the list behind |
+| S-08 FY · S-09 Scope     | 45%              | select           | Global switches, no context loss        |
+| S-30 Ledger line         | 60%              | swipe            | Detail of the row behind it             |
+| S-65 Watch settings      | 40%              | swipe            | Per-item toggle                         |
+| S-07 Notification primer | 35%              | swipe            | Contextual permission                   |
 
 **Rules.** Maximum sheet depth is **2** (a source sheet may open over a filter sheet; nothing may open over that — it opens as a screen instead). Sheets never contain their own tab bar. Every sheet is fully operable with a screen reader and closes on the Escape/back gesture.
 
@@ -189,7 +190,7 @@ lokdarpan://source/220?page=42              → source/[docId]/document
 lokdarpan://search?q=…&types=…              → search/results
 ```
 
-**Synthetic back stack.** A deep link never lands the user on a screen whose back button exits the app. Opening `lokdarpan://project/501` builds `Home → unit/7 → project/501` so "back" walks *up the hierarchy*, matching the user's mental model. The ancestor chain comes from the entity payload, so the synthetic stack is real, not guessed.
+**Synthetic back stack.** A deep link never lands the user on a screen whose back button exits the app. Opening `lokdarpan://project/501` builds `Home → unit/7 → project/501` so "back" walks _up the hierarchy_, matching the user's mental model. The ancestor chain comes from the entity payload, so the synthetic stack is real, not guessed.
 
 Full scheme, universal-link setup, validation, and security: `.docs/10-mobile/deep-linking.md`.
 
@@ -197,14 +198,14 @@ Full scheme, universal-link setup, validation, and security: `.docs/10-mobile/de
 
 ## Navigation state ownership
 
-| State | Owner | Persisted | Why |
-|---|---|---|---|
-| Route stacks | Expo Router / React Navigation | Yes (state restoration) | Survive process death mid-investigation |
-| Active tab | Router | Yes | |
-| **Scope** (unit + FY) | Zustand `scopeStore` | Yes (MMKV) | Global, cross-tab, survives relaunch |
-| Sheet presentation | Local component state | No | Transient by definition |
-| Map camera | Zustand `mapStore` | Session only | Restoring a stale camera on cold start is disorienting |
-| Filters | Per-screen, encoded in route params | In-stack only | Shareable and restorable via the URL |
+| State                 | Owner                               | Persisted               | Why                                                    |
+| --------------------- | ----------------------------------- | ----------------------- | ------------------------------------------------------ |
+| Route stacks          | Expo Router / React Navigation      | Yes (state restoration) | Survive process death mid-investigation                |
+| Active tab            | Router                              | Yes                     |                                                        |
+| **Scope** (unit + FY) | Zustand `scopeStore`                | Yes (MMKV)              | Global, cross-tab, survives relaunch                   |
+| Sheet presentation    | Local component state               | No                      | Transient by definition                                |
+| Map camera            | Zustand `mapStore`                  | Session only            | Restoring a stale camera on cold start is disorienting |
+| Filters               | Per-screen, encoded in route params | In-stack only           | Shareable and restorable via the URL                   |
 
 Filters live in route params, not global state — so a filtered list is a shareable link and back/forward restores it correctly.
 
@@ -221,12 +222,12 @@ Filters live in route params, not global state — so a filtered list is a share
 
 ## Anti-patterns explicitly excluded
 
-| Excluded | Reason |
-|---|---|
-| Persistent breadcrumb bar on every screen | 44 pt of permanent chrome duplicating the back stack |
-| Hamburger drawer | Hides the IA; poor thumb reach |
-| Nested tabs (tabs inside a tab) | Two competing "current locations" |
-| Modal-over-modal chains | Unrecoverable dismissal; iOS card-stack degradation |
-| Custom back gestures | Fights the OS; breaks Android predictive back |
-| Tab-bar badge on an "observations" count | Would turn neutral observations into a notification-driven engagement loop (`00-document-audit` PR-3) |
-| Bottom-sheet navigation as the primary pattern | Sheets are for context, not for a hierarchy — a 7-level sheet stack is unnavigable |
+| Excluded                                       | Reason                                                                                                |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Persistent breadcrumb bar on every screen      | 44 pt of permanent chrome duplicating the back stack                                                  |
+| Hamburger drawer                               | Hides the IA; poor thumb reach                                                                        |
+| Nested tabs (tabs inside a tab)                | Two competing "current locations"                                                                     |
+| Modal-over-modal chains                        | Unrecoverable dismissal; iOS card-stack degradation                                                   |
+| Custom back gestures                           | Fights the OS; breaks Android predictive back                                                         |
+| Tab-bar badge on an "observations" count       | Would turn neutral observations into a notification-driven engagement loop (`00-document-audit` PR-3) |
+| Bottom-sheet navigation as the primary pattern | Sheets are for context, not for a hierarchy — a 7-level sheet stack is unnavigable                    |

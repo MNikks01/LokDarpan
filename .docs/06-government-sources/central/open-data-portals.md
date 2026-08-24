@@ -4,14 +4,14 @@
 >
 > Verified 21 August 2026. Every URL fetched; none written from memory.
 
-| Source | URL | Status | Relevance | Page title (as fetched) |
-|---|---|---|---|---|
-| **Integrated Government Online Directory (IGOD)** | `https://igod.gov.in/` | ✅ VERIFIED | CRITICAL | Integrated Government Online Directory : Home |
-| **Open Government Data (OGD) Platform India** | `https://data.gov.in/` | ✅ VERIFIED | CRITICAL | Home | Open Government Data (OGD) Platform India |
-| **National Data and Analytics Platform (NDAP)** | `https://ndap.niti.gov.in/` | ✅ VERIFIED | HIGH | National Data and Analytics Platform |
-| **National Portal of India** | `https://www.india.gov.in/` | ✅ VERIFIED | HIGH | Home | National Portal of India |
-| **Ministry of Statistics and Programme Implementation** | `https://mospi.gov.in/` | ✅ VERIFIED | MEDIUM | Ministry of Statistics and Program Implementation | Government Of India |
-| **eSankhyiki Portal (MoSPI)** | `https://esankhyiki.mospi.gov.in/` | ✅ VERIFIED | MEDIUM | Ministry of Statistics and Program Implementation | Government Of India |
+| Source                                                  | URL                                | Status      | Relevance | Page title (as fetched)                           |
+| ------------------------------------------------------- | ---------------------------------- | ----------- | --------- | ------------------------------------------------- |
+| **Integrated Government Online Directory (IGOD)**       | `https://igod.gov.in/`             | ✅ VERIFIED | CRITICAL  | Integrated Government Online Directory : Home     |
+| **Open Government Data (OGD) Platform India**           | `https://data.gov.in/`             | ✅ VERIFIED | CRITICAL  | Home                                              | Open Government Data (OGD) Platform India |
+| **National Data and Analytics Platform (NDAP)**         | `https://ndap.niti.gov.in/`        | ✅ VERIFIED | HIGH      | National Data and Analytics Platform              |
+| **National Portal of India**                            | `https://www.india.gov.in/`        | ✅ VERIFIED | HIGH      | Home                                              | National Portal of India                  |
+| **Ministry of Statistics and Programme Implementation** | `https://mospi.gov.in/`            | ✅ VERIFIED | MEDIUM    | Ministry of Statistics and Program Implementation | Government Of India                       |
+| **eSankhyiki Portal (MoSPI)**                           | `https://esankhyiki.mospi.gov.in/` | ✅ VERIFIED | MEDIUM    | Ministry of Statistics and Program Implementation | Government Of India                       |
 
 ## data.gov.in — the only confirmed general API
 

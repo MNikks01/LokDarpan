@@ -9,7 +9,7 @@ LokDarpan presents **facts, calculations, and neutral comparisons** derived from
 ## Mandatory rules
 
 1. **Never accuse individuals.** No person, official, contractor, or firm is ever characterized as corrupt, dishonest, or guilty. Names appear only inside neutral, descriptive statistics.
-2. **Never infer corruption or wrongdoing.** A variance, deviation, delay, or concentration is a *number*. The platform never claims it was caused by theft, fraud, bribery, diversion, or misconduct.
+2. **Never infer corruption or wrongdoing.** A variance, deviation, delay, or concentration is a _number_. The platform never claims it was caused by theft, fraud, bribery, diversion, or misconduct.
 3. **Never make legal statements.** No use of terms like "illegal," "fraud," "embezzlement," "guilty," "violation," or "crime." The platform does not adjudicate.
 4. **Show only facts.** Every displayed claim is a figure from an official source or a transparent calculation over such figures.
 5. **Every number must be traceable.** No figure is displayed without a link to its source document, extraction method, and retrieval date. (Enforced by the provenance model in [04](../05-data-model/database-design.md).)
@@ -20,17 +20,17 @@ LokDarpan presents **facts, calculations, and neutral comparisons** derived from
 
 ## Allowed vs forbidden language
 
-| ✅ Allowed (neutral, factual) | ❌ Forbidden (accusatory/legal/causal) |
-|---|---|
-| "Budget mismatch detected." | "Money was stolen." |
-| "Data inconsistency found." | "This is corruption." |
-| "Unexplained variance exists." | "Funds were diverted." |
-| "Utilization percentage differs from the district median." | "The contractor overcharged." |
-| "Budget deviation detected." | "This official is guilty." |
-| "Records are missing for this period." | "They hid the money." |
-| "Reported cost per km is 35% above the district median." | "This contractor stole money." |
+| ✅ Allowed (neutral, factual)                              | ❌ Forbidden (accusatory/legal/causal) |
+| ---------------------------------------------------------- | -------------------------------------- |
+| "Budget mismatch detected."                                | "Money was stolen."                    |
+| "Data inconsistency found."                                | "This is corruption."                  |
+| "Unexplained variance exists."                             | "Funds were diverted."                 |
+| "Utilization percentage differs from the district median." | "The contractor overcharged."          |
+| "Budget deviation detected."                               | "This official is guilty."             |
+| "Records are missing for this period."                     | "They hid the money."                  |
+| "Reported cost per km is 35% above the district median."   | "This contractor stole money."         |
 
-"Unexplained variance" means *the data does not explain it* — not that an explanation is being withheld by someone. This distinction is stated in the UI.
+"Unexplained variance" means _the data does not explain it_ — not that an explanation is being withheld by someone. This distinction is stated in the UI.
 
 ## Enforcement (rules as code, not just policy)
 
@@ -51,11 +51,11 @@ LokDarpan presents **facts, calculations, and neutral comparisons** derived from
 ## Corrections & right of reply
 
 - A visible **"report a data issue"** path lets anyone (including named departments/contractors) flag an error; corrections are made by re-ingesting from source and are themselves versioned and logged.
-- Because the platform makes no allegations, there is nothing to retract *about a person* — only data to correct. This is by design.
+- Because the platform makes no allegations, there is nothing to retract _about a person_ — only data to correct. This is by design.
 
 ## Positioning statement (for the site & about page)
 
-> LokDarpan compiles official government financial and infrastructure records into a single, source-linked view and checks them for mathematical consistency. It highlights where published figures do not add up or where records are missing, so the public can understand and verify public spending. It does not investigate, accuse, or make legal findings. Every number links to its official source. A difference or gap shown here means the *data* warrants a closer look — it is not a claim of wrongdoing by any person or organization.
+> LokDarpan compiles official government financial and infrastructure records into a single, source-linked view and checks them for mathematical consistency. It highlights where published figures do not add up or where records are missing, so the public can understand and verify public spending. It does not investigate, accuse, or make legal findings. Every number links to its official source. A difference or gap shown here means the _data_ warrants a closer look — it is not a claim of wrongdoing by any person or organization.
 
 ## Disclaimers (shown in-product)
 

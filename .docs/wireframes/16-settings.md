@@ -71,9 +71,10 @@
 │  Our sources                              ▸  │
 └──────────────────────────────────────────────┘
 ```
+
 The non-affiliation block is required for app-store review and for basic honesty — a citizen must not mistake this for an official government service.
 
-## S-74 · Neutrality & legal   ·   S-75 · Privacy
+## S-74 · Neutrality & legal · S-75 · Privacy
 
 ```text
 S-74 (.docs/17-legal/legal-ethical-rules.md, verbatim, non-collapsible)   S-75
@@ -144,6 +145,7 @@ S-77                                S-78
                                  │ [ Send ]                   │
                                  └────────────────────────────┘
 ```
+
 S-78 works offline — the report queues in SQLite with an idempotency key and sends on reconnect, with the user told it is queued.
 
 ## S-70 Data & storage · S-71 Notifications · S-72 Accessibility

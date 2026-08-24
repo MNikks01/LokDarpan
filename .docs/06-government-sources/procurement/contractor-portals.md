@@ -1,35 +1,35 @@
 # Contractor & Vendor Sources
 
-> LokDarpan must answer *"who received this contract?"* — and, per `.docs/17-legal/legal-ethical-rules.md`, must do so **without any characterisation of the contractor**. This file records what official sources expose and, critically, whether a contractor can be tracked across systems.
+> LokDarpan must answer _"who received this contract?"_ — and, per `.docs/17-legal/legal-ethical-rules.md`, must do so **without any characterisation of the contractor**. This file records what official sources expose and, critically, whether a contractor can be tracked across systems.
 
 Verified 21 August 2026.
 
 ## What was identified
 
-| Source | Exposes | Status |
-|---|---|---|
-| **CPPP** `/cppp/awards`, `/cppp/resultoftendersnew` | Award records — expected to name the awarded party and value | ✅ endpoints verified public; **fields not verified** |
-| **CPPP** `/cppp/debarredbidderlist`, `/cppp/debarmentlistsearch` | **Debarred / blacklisted bidders** | ✅ endpoints verified public |
-| State GePNIC portals (`WebTenderStatusLists`) | Tender status, expected to include award outcome | ✅ 36/36 portals verified live; fields not verified |
-| GeM | Vendor and contract data | ✅ site verified; largely behind authenticated buyer/seller flows |
+| Source                                                           | Exposes                                                      | Status                                                            |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
+| **CPPP** `/cppp/awards`, `/cppp/resultoftendersnew`              | Award records — expected to name the awarded party and value | ✅ endpoints verified public; **fields not verified**             |
+| **CPPP** `/cppp/debarredbidderlist`, `/cppp/debarmentlistsearch` | **Debarred / blacklisted bidders**                           | ✅ endpoints verified public                                      |
+| State GePNIC portals (`WebTenderStatusLists`)                    | Tender status, expected to include award outcome             | ✅ 36/36 portals verified live; fields not verified               |
+| GeM                                                              | Vendor and contract data                                     | ✅ site verified; largely behind authenticated buyer/seller flows |
 
 ## §10 field checklist — actual status
 
 Not one of these was field-verified in this pass. Recording them as `UNKNOWN` rather than assuming, per §35.
 
-| Field | Status |
-|---|---|
-| Contractor / vendor / company name | **PARTIALLY_AVAILABLE** — expected in CPPP award records; not verified |
-| Bidder ID | UNKNOWN |
-| Contractor registration number | UNKNOWN |
-| GSTIN | UNKNOWN |
-| Address | UNKNOWN |
-| Class / category / registration | UNKNOWN — state PWD contractor classes exist administratively (`.docs/05-data-model/data-models.md` `classGrade`); no public register located |
-| Awarded contracts, contract value | **PARTIALLY_AVAILABLE** — CPPP awards |
-| Tender participation history | UNKNOWN |
-| Completion history | **NOT identified in the sources reviewed** |
-| Debarment / blacklisting | **AVAILABLE** — CPPP debarment list ✅ |
-| Performance information | **NOT identified in the sources reviewed** |
+| Field                              | Status                                                                                                                                        |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contractor / vendor / company name | **PARTIALLY_AVAILABLE** — expected in CPPP award records; not verified                                                                        |
+| Bidder ID                          | UNKNOWN                                                                                                                                       |
+| Contractor registration number     | UNKNOWN                                                                                                                                       |
+| GSTIN                              | UNKNOWN                                                                                                                                       |
+| Address                            | UNKNOWN                                                                                                                                       |
+| Class / category / registration    | UNKNOWN — state PWD contractor classes exist administratively (`.docs/05-data-model/data-models.md` `classGrade`); no public register located |
+| Awarded contracts, contract value  | **PARTIALLY_AVAILABLE** — CPPP awards                                                                                                         |
+| Tender participation history       | UNKNOWN                                                                                                                                       |
+| Completion history                 | **NOT identified in the sources reviewed**                                                                                                    |
+| Debarment / blacklisting           | **AVAILABLE** — CPPP debarment list ✅                                                                                                        |
+| Performance information            | **NOT identified in the sources reviewed**                                                                                                    |
 
 ## The identity problem
 

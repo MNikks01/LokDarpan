@@ -1,3 +1,4 @@
+import type React from "react";
 import type { FinanceChain } from "@lokdarpan/contracts";
 import { Money } from "@lokdarpan/money";
 import { Figure } from "./Figure";
@@ -20,14 +21,29 @@ const STATUS_COPY = {
 } as const;
 
 function VarianceRow({
-  title, minuend, subtrahend, varianceInr, deviationPct, denominatorLabel,
+  title,
+  minuend,
+  subtrahend,
+  varianceInr,
+  deviationPct,
+  denominatorLabel,
 }: {
-  title: string; minuend: string; subtrahend: string;
-  varianceInr: string | null; deviationPct: number | null; denominatorLabel: string;
+  title: string;
+  minuend: string;
+  subtrahend: string;
+  varianceInr: string | null;
+  deviationPct: number | null;
+  denominatorLabel: string;
 }) {
   if (varianceInr === null || deviationPct === null) {
     return (
-      <div style={{ padding: "12px 0 12px 20px", borderLeft: `2px solid ${color.border.hair}`, marginLeft: 12 }}>
+      <div
+        style={{
+          padding: "12px 0 12px 20px",
+          borderLeft: `2px solid ${color.border.hair}`,
+          marginLeft: 12,
+        }}
+      >
         <div style={{ fontSize: 13, color: color.text.secondary }}>
           {title}: cannot be calculated
         </div>
@@ -35,7 +51,13 @@ function VarianceRow({
     );
   }
   return (
-    <div style={{ padding: "12px 0 12px 20px", borderLeft: `2px solid ${color.border.hair}`, marginLeft: 12 }}>
+    <div
+      style={{
+        padding: "12px 0 12px 20px",
+        borderLeft: `2px solid ${color.border.hair}`,
+        marginLeft: 12,
+      }}
+    >
       <div style={{ fontSize: 13, color: color.text.secondary }}>{title}</div>
       <div style={{ fontSize: 13, color: color.text.tertiary, fontVariantNumeric: "tabular-nums" }}>
         {minuend} − {subtrahend}
@@ -51,7 +73,7 @@ function VarianceRow({
   );
 }
 
-export function MoneyTrail({ finance }: { readonly finance: FinanceChain }) {
+export function MoneyTrail({ finance }: { readonly finance: FinanceChain }): React.JSX.Element {
   const status = STATUS_COPY[finance.status];
   const shown = (f: FinanceChain["allocated"]) =>
     f.present ? Money.fromDecimalString(f.amountInr).format() : "—";
@@ -80,16 +102,26 @@ export function MoneyTrail({ finance }: { readonly finance: FinanceChain }) {
 
       <div style={{ marginTop: 20, padding: 12, background: color.bg.raised, borderRadius: 10 }}>
         <div style={{ fontWeight: 600, color: color.text.primary }}>
-          <span aria-hidden="true">{status.glyph} </span>{status.label}
+          <span aria-hidden="true">{status.glyph} </span>
+          {status.label}
         </div>
         {finance.thresholdPct !== null && finance.releaseDeviationPct !== null && (
-          <p style={{ fontSize: 13, color: color.text.secondary, margin: "6px 0 0", maxWidth: "60ch" }}>
+          <p
+            style={{
+              fontSize: 13,
+              color: color.text.secondary,
+              margin: "6px 0 0",
+              maxWidth: "60ch",
+            }}
+          >
             Allocated ≥ Released ≥ Utilized holds. The {finance.releaseDeviationPct.toFixed(1)}% gap
             between released and utilized exceeds the {finance.thresholdPct}% threshold configured
             for this category.
           </p>
         )}
-        <p style={{ fontSize: 13, color: color.text.secondary, margin: "8px 0 0", maxWidth: "60ch" }}>
+        <p
+          style={{ fontSize: 13, color: color.text.secondary, margin: "8px 0 0", maxWidth: "60ch" }}
+        >
           ⓘ This is an arithmetic observation. It does not indicate that anything is wrong.
         </p>
       </div>

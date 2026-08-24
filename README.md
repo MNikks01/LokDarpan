@@ -4,7 +4,7 @@
 
 LokDarpan links official records into one traceable ledger — revenue → budget → ministry → state → district → local body → department → scheme → tender → contractor → release → expenditure → work progress → completion → audit — and runs mathematical-consistency and variance checks over them.
 
-**It is:** a transparency and public-understanding tool · a mathematical-consistency checker over official records · an anomaly *highlighter* with full source traceability.
+**It is:** a transparency and public-understanding tool · a mathematical-consistency checker over official records · an anomaly _highlighter_ with full source traceability.
 
 **It is NOT:** an anti-corruption or accusation engine · a legal authority or investigator · a source of allegations about any individual or organization.
 
@@ -15,13 +15,13 @@ LokDarpan links official records into one traceable ledger — revenue → budge
 
 **Specification-complete; implementation just begun.** The web client is first; the mobile app follows after launch ([`.docs/decisions/web-first-pivot.md`](.docs/decisions/web-first-pivot.md)).
 
-| | |
-|---|---|
-| Documentation | Complete — 110 documents in [`.docs/`](.docs) |
+|                            |                                                                                         |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| Documentation              | Complete — 110 documents in [`.docs/`](.docs)                                           |
 | Government source registry | 99 sources, 96 verified ([`.docs/06-government-sources/`](.docs/06-government-sources)) |
-| `apps/web` | W1 foundation — builds, 38 tests passing, **fixture data only** |
-| `services/*` | Not yet implemented |
-| Backend / database | Not yet implemented |
+| `apps/web`                 | W1 foundation — builds, 38 tests passing, **fixture data only**                         |
+| `services/*`               | Not yet implemented                                                                     |
+| Backend / database         | Not yet implemented                                                                     |
 
 **No real government data is ingested yet.** Every figure the app renders is fixture data, labelled as such.
 
@@ -51,7 +51,7 @@ Requires Node ≥20 and pnpm 9.
 
 ## Two invariants worth knowing before you write code
 
-**Money is `bigint` paise, never a float.** A national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and would fail *silently* — producing a wrong government figure with a correct-looking source link. See [`packages/money`](./packages/money).
+**Money is `bigint` paise, never a float.** A national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and would fail _silently_ — producing a wrong government figure with a correct-looking source link. See [`packages/money`](./packages/money).
 
 **A figure cannot be rendered without its provenance.** `<Figure>` requires a `provenance` prop; it is a compile error, not a review note. Neutral copy cannot be authored in a component — observation text is typed as `ServerText` and can only originate from the API. See [`packages/neutrality`](./packages/neutrality).
 
@@ -71,4 +71,4 @@ Security issues: [`SECURITY.md`](./SECURITY.md) — and note that **security tes
 
 ---
 
-*LokDarpan is an independent public-interest project. It is not affiliated with, endorsed by, or operated by any government body, agency, or political party.*
+_LokDarpan is an independent public-interest project. It is not affiliated with, endorsed by, or operated by any government body, agency, or political party._

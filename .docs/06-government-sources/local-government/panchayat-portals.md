@@ -14,11 +14,11 @@ Observed coverage relevant here: 7,323 development blocks · 677,367 villages ·
 
 ## Finance and works — not solved
 
-| System | Role | Status |
-|---|---|---|
-| **eGramSwaraj** | MoPR's GP planning, work-based accounting, physical progress and reporting | 🔍 **DISCOVERED** — `egramswaraj.gov.in` unreachable from both verification channels on 21 Aug 2026 |
-| **PFMS** | Fund flow to panchayats | 🔍 partial — largely authenticated |
-| **MGNREGA MIS** ✅ | Rural works, employment, expenditure | ✅ verified live at `nrega.nic.in`; **report surface not inventoried** |
+| System             | Role                                                                       | Status                                                                                              |
+| ------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **eGramSwaraj**    | MoPR's GP planning, work-based accounting, physical progress and reporting | 🔍 **DISCOVERED** — `egramswaraj.gov.in` unreachable from both verification channels on 21 Aug 2026 |
+| **PFMS**           | Fund flow to panchayats                                                    | 🔍 partial — largely authenticated                                                                  |
+| **MGNREGA MIS** ✅ | Rural works, employment, expenditure                                       | ✅ verified live at `nrega.nic.in`; **report surface not inventoried**                              |
 
 eGramSwaraj is documented by MoPR as integrating with **LGD** (place codes) and **PFMS** (fund flow) through unique codes. If that integration is publicly queryable, it would give panchayat-level money-in/money-out joined to LGD codes — which is precisely what `.docs/wireframes/06-unit.md`'s Gram Panchayat screen needs.
 

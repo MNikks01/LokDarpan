@@ -13,6 +13,7 @@
 │                                              │
 └──────────────────────────────────────────────┘
 ```
+
 No spinner before 400 ms. **Never blocks on the network** — a dead connection still reaches cached Home.
 
 ## S-02 · Onboarding — 3 panels
@@ -79,7 +80,7 @@ PANEL 3 — a live demo, not a description
 └──────────────────────────────────────────────┘
 ```
 
-## S-04 · Location primer  ·  S-05 · Choose your area
+## S-04 · Location primer · S-05 · Choose your area
 
 ```text
 S-04                              S-05
@@ -101,10 +102,11 @@ S-04                              S-05
 │   Not now                  │   │ 📍 Use my location instead │
 └────────────────────────────┘   └────────────────────────────┘
 ```
+
 The state/district list is **bundled in the app**, so this works with no connection on first run.
 Denial is not a dead end — S-05 is a permanent equal path, never a consolation screen.
 
-## S-06 · Forced upgrade  ·  S-07 · Notification primer
+## S-06 · Forced upgrade · S-07 · Notification primer
 
 ```text
 S-06 (blocking; dismissible OFFLINE)   S-07 (sheet, on first save only)

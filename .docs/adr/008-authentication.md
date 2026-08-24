@@ -18,7 +18,7 @@ The app ships **no API key** and no client secret.
 
 ## Alternatives considered
 
-**Require an account.** Rejected outright. It would exclude the citizen audience, create a user database in a system that otherwise holds only public records, and produce the single most sensitive dataset the platform could hold — *which identified person is monitoring which government contract*. For an RTI activist that is a real risk, and it is the exact opposite of the product's purpose.
+**Require an account.** Rejected outright. It would exclude the citizen audience, create a user database in a system that otherwise holds only public records, and produce the single most sensitive dataset the platform could hold — _which identified person is monitoring which government contract_. For an RTI activist that is a real risk, and it is the exact opposite of the product's purpose.
 
 **Anonymous device identity registered server-side** (a device id the server stores). Rejected: it is an account without consent, and creates the same watch-profile dataset by a different name. The rate-limiting need it would serve is handled instead by a rotating, non-tracking install token never joined to request content (`.docs/12-security/mobile-security.md` §7).
 

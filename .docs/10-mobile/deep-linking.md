@@ -1,17 +1,17 @@
 # 21 — Deep Linking
 
-Deep links are how an investigation travels: a journalist sends a project link to an editor, an activist attaches one to an RTI, a citizen shares a village's accounts in a WhatsApp group. Because there is **no website** (`00-document-audit` §3), links are also the *only* stable public address for a record — which raises their importance rather than lowering it.
+Deep links are how an investigation travels: a journalist sends a project link to an editor, an activist attaches one to an RTI, a citizen shares a village's accounts in a WhatsApp group. Because there is **no website** (`00-document-audit` §3), links are also the _only_ stable public address for a record — which raises their importance rather than lowering it.
 
 ---
 
 ## Two schemes
 
-| Scheme | Form | Use |
-|---|---|---|
+| Scheme                              | Form                                | Use                                                                                                                                         |
+| ----------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Universal / App Links** (primary) | `https://lokdarpan.org/project/501` | Everything shared. Verified domain association means no other app can claim it; opens the app if installed, otherwise a store-redirect page |
-| **Custom scheme** (secondary) | `lokdarpan://project/501` | In-app navigation, notifications, QR codes, and contexts where an `https` link would be intercepted |
+| **Custom scheme** (secondary)       | `lokdarpan://project/501`           | In-app navigation, notifications, QR codes, and contexts where an `https` link would be intercepted                                         |
 
-Both resolve through the **same route table** — Expo Router's file tree *is* the link table (`adr/002-navigation.md`), so there is no second mapping to drift.
+Both resolve through the **same route table** — Expo Router's file tree _is_ the link table (`adr/002-navigation.md`), so there is no second mapping to drift.
 
 ### The "no website" question, answered honestly
 
@@ -75,13 +75,13 @@ The chain is taken from the entity payload's `ancestors`, so it is real, not gue
 
 ## Cold vs. warm
 
-| Case | Behaviour |
-|---|---|
-| **Cold** | Bootstrap (S-01) runs first — locale, scope, cached data. The link is held and applied after rehydration, so the target screen has theme, language and cache available. Onboarding is **not** skipped for a first-time user; the link is queued and applied after S-02–S-05, so a shared link never bypasses the neutrality framing (`.docs/01-product/screen-inventory.md` S-02) |
-| **Warm** | Pushed onto the *current* tab's stack, preserving what the user was doing |
-| **Already on target** | Route params updated in place; no duplicate push |
-| **Offline** | Cached or saved → renders with the offline bar. Not cached → `OfflineUnavailable` with the entity type named ("This project hasn't been downloaded"), retry, and save-for-later |
-| **Unresolvable id** | "This record is no longer in the published dataset. It may have been superseded or removed by the source." + search |
+| Case                  | Behaviour                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cold**              | Bootstrap (S-01) runs first — locale, scope, cached data. The link is held and applied after rehydration, so the target screen has theme, language and cache available. Onboarding is **not** skipped for a first-time user; the link is queued and applied after S-02–S-05, so a shared link never bypasses the neutrality framing (`.docs/01-product/screen-inventory.md` S-02) |
+| **Warm**              | Pushed onto the _current_ tab's stack, preserving what the user was doing                                                                                                                                                                                                                                                                                                         |
+| **Already on target** | Route params updated in place; no duplicate push                                                                                                                                                                                                                                                                                                                                  |
+| **Offline**           | Cached or saved → renders with the offline bar. Not cached → `OfflineUnavailable` with the entity type named ("This project hasn't been downloaded"), retry, and save-for-later                                                                                                                                                                                                   |
+| **Unresolvable id**   | "This record is no longer in the published dataset. It may have been superseded or removed by the source." + search                                                                                                                                                                                                                                                               |
 
 ---
 
@@ -91,8 +91,14 @@ Every link is untrusted input from an unauthenticated source.
 
 ```ts
 const ProjectLink = z.object({
-  id: z.string().regex(/^\d{1,12}$/).transform(Number),
-  fy: z.string().regex(/^FY\d{4}-\d{2}$/).optional(),
+  id: z
+    .string()
+    .regex(/^\d{1,12}$/)
+    .transform(Number),
+  fy: z
+    .string()
+    .regex(/^FY\d{4}-\d{2}$/)
+    .optional(),
 });
 ```
 
@@ -121,8 +127,9 @@ https://lokdarpan.org/project/501
 ```
 
 Constraints, from `.docs/17-legal/legal-ethical-rules.md`:
+
 - The share text carries **figures and the link**, never an observation, a verification-priority score, or an AI-generated sentence. A score pasted into a group chat without its factor breakdown is exactly the decontextualised judgment `.docs/08-risk/risk-scoring-engine.md` exists to prevent.
-- The line *"Figures from official records"* is mandatory in every share payload.
+- The line _"Figures from official records"_ is mandatory in every share payload.
 - No screenshot generation, no chart-to-image export (`.docs/01-product/screen-inventory.md` §Screens that must not exist) — an image separates a number from its provenance.
 - "Share evidence" (S-35) is the richer artefact: observation text, every input figure **with source URL, confidence and `asOf`**, the `datasetVersion`, and the standing disclaimer.
 

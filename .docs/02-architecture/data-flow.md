@@ -54,6 +54,7 @@ apiClient                   — timeout, retry, cancellation, ETag, requestId, e
 ```
 
 **Boundaries that are enforced, not merely recommended** (`.docs/02-architecture/mobile-architecture.md` §Dependency rules, ESLint `import/no-restricted-paths`):
+
 - A screen may not import `apiClient`, a Zod schema, or a SQLite handle.
 - A repository may not import React.
 - A DTO type may not escape the repository layer; screens see domain types only.
@@ -97,16 +98,16 @@ sequenceDiagram
 
 **apiClient responsibilities** (one module, no exceptions):
 
-| Concern | Behaviour |
-|---|---|
-| Timeout | 8 s default; 20 s document range requests; 30 s AI stream; per-call override |
-| Retry | GET only; 3 attempts; exponential backoff 500 ms × 2ⁿ ± 30% jitter; retries `408/429/500/502/503/504` and network errors; **never** retries `4xx` other than 408/429 |
-| `429` | Honours `Retry-After`; surfaces a distinct `RateLimited` state, not a generic error (`00-document-audit` C9) |
-| Cancellation | `AbortSignal` from the query; every in-flight request for an unmounted screen is aborted |
-| Caching | `If-None-Match` from the stored ETag; ETag is the `datasetVersion` |
-| Observability | `X-Request-Id` (client-generated UUID) on every request, echoed in errors and shown in the error UI's "copy diagnostics" — makes a user report traceable to a server log |
-| Errors | Normalized to a closed union: `Network · Timeout · RateLimited · NotFound · Server · Contract · UpgradeRequired · Offline`. Screens switch on the union; no screen inspects an HTTP status code |
-| Auth | None by default (anonymous public tier). If an account exists, a bearer token is attached from SecureStore — never from MMKV/AsyncStorage |
+| Concern       | Behaviour                                                                                                                                                                                       |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Timeout       | 8 s default; 20 s document range requests; 30 s AI stream; per-call override                                                                                                                    |
+| Retry         | GET only; 3 attempts; exponential backoff 500 ms × 2ⁿ ± 30% jitter; retries `408/429/500/502/503/504` and network errors; **never** retries `4xx` other than 408/429                            |
+| `429`         | Honours `Retry-After`; surfaces a distinct `RateLimited` state, not a generic error (`00-document-audit` C9)                                                                                    |
+| Cancellation  | `AbortSignal` from the query; every in-flight request for an unmounted screen is aborted                                                                                                        |
+| Caching       | `If-None-Match` from the stored ETag; ETag is the `datasetVersion`                                                                                                                              |
+| Observability | `X-Request-Id` (client-generated UUID) on every request, echoed in errors and shown in the error UI's "copy diagnostics" — makes a user report traceable to a server log                        |
+| Errors        | Normalized to a closed union: `Network · Timeout · RateLimited · NotFound · Server · Contract · UpgradeRequired · Offline`. Screens switch on the union; no screen inspects an HTTP status code |
+| Auth          | None by default (anonymous public tier). If an account exists, a bearer token is attached from SecureStore — never from MMKV/AsyncStorage                                                       |
 
 ---
 
@@ -114,26 +115,26 @@ sequenceDiagram
 
 Three tiers, with different lifetimes and different guarantees:
 
-| Tier | Store | Contents | Eviction | Guarantee |
-|---|---|---|---|---|
-| **Ephemeral** | TanStack Query → MMKV | Everything viewed recently | LRU, 24 MB cap, 14-day max age | "What you looked at recently still opens offline" |
-| **Durable** | SQLite | Saved items + their full offline bundles; offline packs | Only on explicit user delete | "Saved items are guaranteed complete offline" |
-| **Binary** | Filesystem | Downloaded source documents, map tile packs | Explicit delete; size shown before download | "You chose this; it stays until you remove it" |
+| Tier          | Store                 | Contents                                                | Eviction                                    | Guarantee                                         |
+| ------------- | --------------------- | ------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------- |
+| **Ephemeral** | TanStack Query → MMKV | Everything viewed recently                              | LRU, 24 MB cap, 14-day max age              | "What you looked at recently still opens offline" |
+| **Durable**   | SQLite                | Saved items + their full offline bundles; offline packs | Only on explicit user delete                | "Saved items are guaranteed complete offline"     |
+| **Binary**    | Filesystem            | Downloaded source documents, map tile packs             | Explicit delete; size shown before download | "You chose this; it stays until you remove it"    |
 
 ### Freshness policy per data class
 
-| Data | `staleTime` | `gcTime` | Refetch on focus | Rationale |
-|---|---|---|---|---|
-| Entity detail (project, unit) | 15 min | 14 d | No | Dataset publishes at most daily (`.docs/02-architecture/system-architecture.md` cron) |
-| Lists / feeds | 5 min | 7 d | No | |
-| Search suggest | 60 s | 10 min | No | |
-| Search results | 0 (always fetch) | 1 h | No | Query intent is explicit |
-| `meta/dataset-version` | 5 min | ∞ | **Yes** | The invalidation trigger |
-| `meta/client-support` | 6 h | ∞ | Yes | |
-| Map features (bbox) | 10 min | 1 h | No | |
-| MVT tiles | HTTP cache, keyed by `datasetVersion` | 30 d | — | Immutable per version |
-| AI answers | ∞ per (scope, question, datasetVersion) | 7 d | No | Deterministic key; re-asking shouldn't re-bill |
-| Provenance | Lifetime of the figure it belongs to | — | — | Embedded, never separately fetched |
+| Data                          | `staleTime`                             | `gcTime` | Refetch on focus | Rationale                                                                             |
+| ----------------------------- | --------------------------------------- | -------- | ---------------- | ------------------------------------------------------------------------------------- |
+| Entity detail (project, unit) | 15 min                                  | 14 d     | No               | Dataset publishes at most daily (`.docs/02-architecture/system-architecture.md` cron) |
+| Lists / feeds                 | 5 min                                   | 7 d      | No               |                                                                                       |
+| Search suggest                | 60 s                                    | 10 min   | No               |                                                                                       |
+| Search results                | 0 (always fetch)                        | 1 h      | No               | Query intent is explicit                                                              |
+| `meta/dataset-version`        | 5 min                                   | ∞        | **Yes**          | The invalidation trigger                                                              |
+| `meta/client-support`         | 6 h                                     | ∞        | Yes              |                                                                                       |
+| Map features (bbox)           | 10 min                                  | 1 h      | No               |                                                                                       |
+| MVT tiles                     | HTTP cache, keyed by `datasetVersion`   | 30 d     | —                | Immutable per version                                                                 |
+| AI answers                    | ∞ per (scope, question, datasetVersion) | 7 d      | No               | Deterministic key; re-asking shouldn't re-bill                                        |
+| Provenance                    | Lifetime of the figure it belongs to    | —        | —                | Embedded, never separately fetched                                                    |
 
 ### Invalidation
 
@@ -150,6 +151,7 @@ Client (on foreground, ≤ every 5 min):  GET /meta/dataset-version
 ```
 
 Rules:
+
 - **Stale data is never evicted on a version bump.** Eviction would turn a version bump into an offline outage. It is marked, refetched when visible, and always rendered with its `asOf`.
 - **Never a full cache clear** on version bump — that would re-download an offline pack over metered data.
 - Manual pull-to-refresh forces `staleTime: 0` for that screen's queries only.
@@ -196,7 +198,7 @@ sequenceDiagram
 
 One request gives: one latency, one ETag, one failure mode, **one `datasetVersion` across every figure on the screen**.
 
-**Payload budget:** ≤ 60 KB gzipped p95. Progress snapshots capped at the most recent 12 (full history behind S-32); observations capped at 10 (full list behind S-34); ledger lines are *not* included (summaries only — lines load on demand at S-29).
+**Payload budget:** ≤ 60 KB gzipped p95. Progress snapshots capped at the most recent 12 (full history behind S-32); observations capped at 10 (full list behind S-34); ledger lines are _not_ included (summaries only — lines load on demand at S-29).
 
 ---
 
@@ -214,7 +216,8 @@ flowchart LR
   SS -->|▸ Lineage| LN["S-55: document → extraction →<br/>normalization → record v3 → derived metrics"]
 ```
 
-**Contract:** `provenance` travels *with* every figure in every payload. A figure is unrenderable without it (`.docs/01-product/design-system.md` §Figure — enforced at the type level). Consequences:
+**Contract:** `provenance` travels _with_ every figure in every payload. A figure is unrenderable without it (`.docs/01-product/design-system.md` §Figure — enforced at the type level). Consequences:
+
 - The source sheet is instant and works **fully offline** for any cached figure.
 - The provenance object is part of the offline bundle, so a saved project's traceability survives with no network.
 - Only the **document body** requires the network, and its absence is stated plainly rather than hidden.
@@ -256,7 +259,7 @@ flowchart TD
   M -->|no| E["OfflineUnavailable state:<br/>'You're offline and this hasn't been downloaded.'<br/>▸ Retry  ▸ Save for offline"]
 ```
 
-**The rule that matters most:** *"we don't have this because you're offline"* and *"the government hasn't published this"* are **different states with different copy and different iconography**, and the app must never conflate them. Conflating them would turn a network failure into an implied coverage gap — a false statement about a government body. See `.docs/01-product/state-design.md`.
+**The rule that matters most:** _"we don't have this because you're offline"_ and _"the government hasn't published this"_ are **different states with different copy and different iconography**, and the app must never conflate them. Conflating them would turn a network failure into an implied coverage gap — a false statement about a government body. See `.docs/01-product/state-design.md`.
 
 ---
 
@@ -264,11 +267,11 @@ flowchart TD
 
 The public API is read-only (`.docs/11-api/api-documentation.md`). The app has exactly three writes, and all three are local-first:
 
-| Write | Path | Offline |
-|---|---|---|
-| Save / unsave | SQLite only. No server call, no account. | Always works |
-| Settings, scope, history | MMKV | Always works |
-| Report a data issue (S-78) | `POST /feedback/data-issue` ★ | Queued in SQLite with an idempotency key; flushed on reconnect; the user is told it is queued |
+| Write                      | Path                                     | Offline                                                                                       |
+| -------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Save / unsave              | SQLite only. No server call, no account. | Always works                                                                                  |
+| Settings, scope, history   | MMKV                                     | Always works                                                                                  |
+| Report a data issue (S-78) | `POST /feedback/data-issue` ★            | Queued in SQLite with an idempotency key; flushed on reconnect; the user is told it is queued |
 
 There is no optimistic-update complexity because there is no server state to be optimistic about. This is a deliberate simplification the read-only ledger buys us.
 
@@ -293,13 +296,13 @@ t≈60ms  Background, parallel, all non-blocking:
 
 ## 12 · Failure taxonomy → UI
 
-| Failure | Detected | Screen behaviour |
-|---|---|---|
-| Timeout / no route to host | apiClient | Cached render + offline bar, or `OfflineUnavailable` |
-| `429` | apiClient | "Too many requests — retrying in Ns", auto-retry with `Retry-After`; never a raw error |
-| `5xx` | apiClient | Section-level error + retry; **other sections still render** |
-| `404` | Repository | "This record is no longer in the published dataset" + link to search |
-| Zod contract mismatch | apiClient | **Keep showing cached data**, log with `requestId`, show a subtle "some details may be unavailable". Never crash, never render a partially-parsed financial figure |
-| `409 CursorStale` | Repository | Reset list to top with an explanatory chip |
-| `426 UpgradeRequired` | apiClient | S-06 (dismissible when offline) |
+| Failure                        | Detected      | Screen behaviour                                                                                                                                                                                                                                                   |
+| ------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Timeout / no route to host     | apiClient     | Cached render + offline bar, or `OfflineUnavailable`                                                                                                                                                                                                               |
+| `429`                          | apiClient     | "Too many requests — retrying in Ns", auto-retry with `Retry-After`; never a raw error                                                                                                                                                                             |
+| `5xx`                          | apiClient     | Section-level error + retry; **other sections still render**                                                                                                                                                                                                       |
+| `404`                          | Repository    | "This record is no longer in the published dataset" + link to search                                                                                                                                                                                               |
+| Zod contract mismatch          | apiClient     | **Keep showing cached data**, log with `requestId`, show a subtle "some details may be unavailable". Never crash, never render a partially-parsed financial figure                                                                                                 |
+| `409 CursorStale`              | Repository    | Reset list to top with an explanatory chip                                                                                                                                                                                                                         |
+| `426 UpgradeRequired`          | apiClient     | S-06 (dismissible when offline)                                                                                                                                                                                                                                    |
 | Missing provenance on a figure | Domain mapper | **The figure is not rendered.** A `MissingProvenance` placeholder is shown and the event is logged as a contract violation. This is the hard traceability guarantee (`.docs/17-legal/legal-ethical-rules.md` rule 5) enforced at the data layer, not by convention |

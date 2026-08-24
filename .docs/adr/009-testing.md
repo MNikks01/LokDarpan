@@ -13,6 +13,7 @@ Three failure classes here are not ordinary bugs (`.docs/14-testing/testing-stra
 ## Alternatives considered
 
 **Detox instead of Maestro.** Detox offers finer-grained synchronization (grey-box waiting on the app's internals) and is more established. **Maestro chosen because:**
+
 - Flows are YAML and readable by non-engineers. This matters concretely here: the neutrality and empty-state flows are artefacts a **product or legal reviewer** should be able to read and verify against `.docs/17-legal/legal-ethical-rules.md`. A Detox spec in JavaScript is not that artefact.
 - Setup and maintenance cost is far lower; CI flakiness is materially lower in practice.
 - Our flows are navigation and reading, not complex async choreography — Detox's main advantage is not load-bearing for this app.

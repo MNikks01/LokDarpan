@@ -15,7 +15,7 @@ Mobile constraints: intermittent, metered, high-latency networks; offline reads 
 ## Why not GraphQL
 
 1. **HTTP caching is load-bearing here.** The entire freshness and offline strategy rests on `ETag = datasetVersion` + `If-None-Match` → `304`, served from a CDN edge (`.docs/02-architecture/system-architecture.md`, `.docs/10-mobile/offline-strategy.md`). GraphQL over POST defeats edge caching and conditional requests. We would have to rebuild, in the client, a cache-coherence mechanism the HTTP stack already gives us — and rebuild it in the one place where getting it wrong means showing a stale government figure without saying so.
-2. **The problem it solves is already solved better.** GraphQL's advantage is client-shaped queries. But a *screen-shaped REST endpoint* delivers the same payload with one ETag, one `datasetVersion`, one failure mode, one cache entry — and it is cacheable at the edge. For a client with exactly the ~10 screen shapes in `.docs/11-api/screen-api-matrix.md`, server-defined shapes are strictly better than client-defined ones.
+2. **The problem it solves is already solved better.** GraphQL's advantage is client-shaped queries. But a _screen-shaped REST endpoint_ delivers the same payload with one ETag, one `datasetVersion`, one failure mode, one cache entry — and it is cacheable at the edge. For a client with exactly the ~10 screen shapes in `.docs/11-api/screen-api-matrix.md`, server-defined shapes are strictly better than client-defined ones.
 3. **Version coherence.** A GraphQL query resolving fields across services can, without care, return figures computed against different dataset versions. On this product that is not a bug class we want to manage in the client — it is a traceability defect (`.docs/17-legal/legal-ethical-rules.md`).
 4. **Cost.** A client, a cache normalizer, and generated types add ~40–80 KB to a bundle budgeted at 3.5 MB, plus a second mental model, for capability we do not use.
 5. **Attack surface.** `.docs/11-api/api-documentation.md` already notes GraphQL needs depth and complexity limits. An anonymous public mobile client is the worst possible caller to expose an arbitrary query language to.
@@ -34,7 +34,7 @@ Mobile constraints: intermittent, metered, high-latency networks; offline reads 
 
 ## Why TanStack Query specifically
 
-Stale-while-revalidate as a first-class model (paint cache, refresh behind — the basis of the 150 ms cached-screen budget) · request dedup and cancellation · `useInfiniteQuery` for cursor pagination · a persistence plugin that gives offline reads almost for free · granular invalidation for `datasetVersion` bumps *without eviction* (`.docs/02-architecture/data-flow.md` §4) · already used on the platform's web side (`.docs/02-architecture/tech-stack.md`), so the concepts are familiar.
+Stale-while-revalidate as a first-class model (paint cache, refresh behind — the basis of the 150 ms cached-screen budget) · request dedup and cancellation · `useInfiniteQuery` for cursor pagination · a persistence plugin that gives offline reads almost for free · granular invalidation for `datasetVersion` bumps _without eviction_ (`.docs/02-architecture/data-flow.md` §4) · already used on the platform's web side (`.docs/02-architecture/tech-stack.md`), so the concepts are familiar.
 
 ## Configuration
 

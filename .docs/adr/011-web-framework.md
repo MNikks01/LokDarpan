@@ -7,6 +7,7 @@
 `.docs/decisions/web-first-pivot.md` makes the website the first product. `.docs/02-architecture/tech-stack.md` originally chose Next.js App Router; the mobile-only phase discarded it. It now needs re-deciding on its merits rather than restored by default.
 
 Requirements:
+
 - **Indexability is existential.** With no app store, SEO is the acquisition channel (`.docs/02-architecture/tech-stack.md`). Every entity must be a server-rendered, crawlable page.
 - **~10⁶ concurrent users at Phase 8** (`.docs/15-scalability/scalability-plan.md`), on grant funding — the read path must be cache-served, not computed per request.
 - Read-only data publishing at most daily (`.docs/02-architecture/system-architecture.md` cron) — content is highly cacheable.
@@ -19,7 +20,7 @@ Requirements:
 
 ## Alternatives considered
 
-**Astro.** Genuinely strong for this shape of product — content-heavy, mostly static, islands for interactivity, excellent default performance. Rejected on two grounds: the interactive surfaces (map, comparison builder, filterable tables, Ask) are substantial enough that "islands" stops being a simplification, and the React ecosystem depth we need (TanStack Table, MapLibre bindings, and eventual component sharing with React Native) is better served by a React-first framework. Astro would likely produce a *faster* site; it would produce a *harder* one to share code with the deferred mobile client.
+**Astro.** Genuinely strong for this shape of product — content-heavy, mostly static, islands for interactivity, excellent default performance. Rejected on two grounds: the interactive surfaces (map, comparison builder, filterable tables, Ask) are substantial enough that "islands" stops being a simplification, and the React ecosystem depth we need (TanStack Table, MapLibre bindings, and eventual component sharing with React Native) is better served by a React-first framework. Astro would likely produce a _faster_ site; it would produce a _harder_ one to share code with the deferred mobile client.
 
 **Remix / React Router 7.** Excellent data-loading model and web-standards alignment. Rejected narrowly: its strength is dynamic, per-request, mutation-heavy apps. This product is read-only and near-static — ISR fits it better than loaders that run on every request, and the caching story is the whole cost argument.
 
@@ -34,6 +35,7 @@ Requirements:
 This is the decision that matters more than the framework name. Entity pages are **data-heavy and interaction-light** — a district page is a lot of numbers and a few links. Server Components render that content on the server, ship HTML plus almost no JavaScript, and keep the API client, the Zod schemas and the mappers entirely off the client bundle.
 
 Consequences:
+
 - The 90 KB initial-JS budget for entity pages (`.docs/02-architecture/web-architecture.md`) is achievable, not aspirational.
 - The API contract layer never reaches the browser, so `packages/api-contract` can stay strict without bundle cost.
 - Content is crawlable by construction rather than by a rendering workaround.

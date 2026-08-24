@@ -6,14 +6,14 @@
 
 `.docs/02-architecture/tech-stack.md` chose Recharts/visx — both web-only. The visualizations this product actually needs (`.docs/01-product/design-system.md` §Charts):
 
-| Visualization | Form |
-|---|---|
-| Money Trail | Vertical stepper with labelled variance connectors |
-| Variance | Two aligned bars + an explicit difference row |
+| Visualization | Form                                                     |
+| ------------- | -------------------------------------------------------- |
+| Money Trail   | Vertical stepper with labelled variance connectors       |
+| Variance      | Two aligned bars + an explicit difference row            |
 | Peer position | 1-D distribution strip, median marked, this value pinned |
-| Trend | Compact sparkline + a range segmented control |
-| Composition | Stacked horizontal bar with inline legend |
-| Cost per unit | Three aligned value rows (actual / model / median) |
+| Trend         | Compact sparkline + a range segmented control            |
+| Composition   | Stacked horizontal bar with inline legend                |
+| Cost per unit | Three aligned value rows (actual / model / median)       |
 
 **None of these is a generic chart.** There is no scatter plot, no multi-series axis chart, no interactive crosshair, no zoomable time series. Bundle budget is 3.5 MB on a low-end device (`.docs/02-architecture/performance.md`), and the design brief explicitly rejects a "generic admin dashboard" look (`.docs/01-product/design-system.md`).
 

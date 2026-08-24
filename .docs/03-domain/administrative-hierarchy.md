@@ -35,33 +35,33 @@ Government of India
 
 ### Level reference
 
-| Level | Typical unit | Notes |
-|---|---|---|
-| Nation | Government of India | Union Budget origin |
-| Ministry | e.g. MoRTH, Rural Development | Fund source; not a geographic parent |
-| State / UT | 28 states + 8 UTs | State budget |
-| Division | Revenue division | Present in most states |
-| District | ~780 districts | Core rollup level; LGD-coded |
-| Taluka / Tehsil | Sub-district | Revenue sub-unit |
-| Block | Community Development block | Rural admin unit |
-| Urban local body | Corporation / Council / Nagar Panchayat / Cantonment | Urban service delivery |
-| Zilla Parishad | District panchayat | Rural, district tier |
-| Panchayat Samiti | Block panchayat | Rural, intermediate tier |
-| Gram Panchayat | Village panchayat | Rural, village tier; owns many local works |
-| Village | Revenue village | Smallest revenue unit |
-| Ward | Corporation/GP ward | Smallest governance unit |
-| Scheme | CSS/CS/state scheme | Funding vehicle |
-| Project | Work / asset | Leaf; where money becomes an asset |
+| Level            | Typical unit                                         | Notes                                      |
+| ---------------- | ---------------------------------------------------- | ------------------------------------------ |
+| Nation           | Government of India                                  | Union Budget origin                        |
+| Ministry         | e.g. MoRTH, Rural Development                        | Fund source; not a geographic parent       |
+| State / UT       | 28 states + 8 UTs                                    | State budget                               |
+| Division         | Revenue division                                     | Present in most states                     |
+| District         | ~780 districts                                       | Core rollup level; LGD-coded               |
+| Taluka / Tehsil  | Sub-district                                         | Revenue sub-unit                           |
+| Block            | Community Development block                          | Rural admin unit                           |
+| Urban local body | Corporation / Council / Nagar Panchayat / Cantonment | Urban service delivery                     |
+| Zilla Parishad   | District panchayat                                   | Rural, district tier                       |
+| Panchayat Samiti | Block panchayat                                      | Rural, intermediate tier                   |
+| Gram Panchayat   | Village panchayat                                    | Rural, village tier; owns many local works |
+| Village          | Revenue village                                      | Smallest revenue unit                      |
+| Ward             | Corporation/GP ward                                  | Smallest governance unit                   |
+| Scheme           | CSS/CS/state scheme                                  | Funding vehicle                            |
+| Project          | Work / asset                                         | Leaf; where money becomes an asset         |
 
 ## Urban local bodies (ULB)
 
-| Body | Vernacular | Applies to |
-|---|---|---|
-| Municipal Corporation | Mahanagar Palika | Large cities |
-| Municipal Council / Municipality | Nagar Palika / Nagar Parishad | Smaller cities/towns |
-| Town Panchayat / Nagar Panchayat | — | Transitional/rural-to-urban towns |
-| Cantonment Board | — | Military station civilian areas |
-| Smart City SPV | — | Mission-specific special purpose vehicle (overlaps a ULB) |
+| Body                             | Vernacular                    | Applies to                                                |
+| -------------------------------- | ----------------------------- | --------------------------------------------------------- |
+| Municipal Corporation            | Mahanagar Palika              | Large cities                                              |
+| Municipal Council / Municipality | Nagar Palika / Nagar Parishad | Smaller cities/towns                                      |
+| Town Panchayat / Nagar Panchayat | —                             | Transitional/rural-to-urban towns                         |
+| Cantonment Board                 | —                             | Military station civilian areas                           |
+| Smart City SPV                   | —                             | Mission-specific special purpose vehicle (overlaps a ULB) |
 
 ULBs are coded in the **SBM/ULB code** systems and, increasingly, LGD; the platform stores all known codes per body for cross-source joins.
 
@@ -69,11 +69,11 @@ ULBs are coded in the **SBM/ULB code** systems and, increasingly, LGD; the platf
 
 Three-tier (per the 73rd Amendment), with names/tiers varying by state:
 
-| Tier | Standard name | Common state variants |
-|---|---|---|
-| District | Zilla Parishad | Zilla Panchayat |
+| Tier               | Standard name    | Common state variants                         |
+| ------------------ | ---------------- | --------------------------------------------- |
+| District           | Zilla Parishad   | Zilla Panchayat                               |
 | Block/Intermediate | Panchayat Samiti | Taluka/Mandal/Block Panchayat, Kshetra Samiti |
-| Village | Gram Panchayat | Village Panchayat, Gaon Panchayat |
+| Village            | Gram Panchayat   | Village Panchayat, Gaon Panchayat             |
 
 Rural finance flows heavily through **schemes** (e.g. Finance Commission grants to GPs, MGNREGA, PMGSY, PMAY-G), so the model links scheme allocations directly to PRI units.
 
@@ -93,16 +93,16 @@ Country → State → Division → District → Taluka → Block → Village →
 
 Cross-source reconciliation depends on standard codes; the platform stores them as first-class identifiers so figures from different portals join reliably:
 
-| Code | Scope | Used for |
-|---|---|---|
+| Code                                      | Scope                           | Used for                                             |
+| ----------------------------------------- | ------------------------------- | ---------------------------------------------------- |
 | **LGD (Local Government Directory)** code | State→Village, all local bodies | Primary spatial/admin key across Indian govt systems |
-| **Census code** (2011) | State→Village/Town | Demographic joins, legacy datasets |
-| **ULB code / SBM code** | Urban bodies | ULB finance & scheme data |
-| **PRI code** | Panchayati Raj units | Rural finance & scheme data |
-| **Scheme code** | CSS/CS/state schemes | Allocation/release joins |
-| **COA / budget head** | Budget documents | Revenue/expenditure classification |
-| **Work / project ID** | Departmental MIS | Project-level linkage |
-| **Tender ID** | e-procurement | Tender↔project↔contractor |
+| **Census code** (2011)                    | State→Village/Town              | Demographic joins, legacy datasets                   |
+| **ULB code / SBM code**                   | Urban bodies                    | ULB finance & scheme data                            |
+| **PRI code**                              | Panchayati Raj units            | Rural finance & scheme data                          |
+| **Scheme code**                           | CSS/CS/state schemes            | Allocation/release joins                             |
+| **COA / budget head**                     | Budget documents                | Revenue/expenditure classification                   |
+| **Work / project ID**                     | Departmental MIS                | Project-level linkage                                |
+| **Tender ID**                             | e-procurement                   | Tender↔project↔contractor                            |
 
 Where a source lacks a standard code, the ingestion layer attempts a mapping (deterministic + fuzzy) and records a **confidence**; unresolved cases are flagged, never guessed ([03](../04-data-engineering/data-collection-architecture.md)).
 

@@ -24,14 +24,14 @@ A national public-finance intelligence layer where anyone can follow a rupee fro
 
 ## Target audience
 
-| Segment | What they need | How LokDarpan serves them |
-|---|---|---|
-| **Citizens** | Plain-language understanding of local spending | Overview & Map dashboards; AI plain-language summaries |
-| **Journalists** | Leads, comparisons, source links for stories | Anomaly lists, district/historical comparisons, exportable source-linked evidence |
-| **RTI activists** | Specific figures and gaps to base filings on | Traceable line items, missing-data warnings, variance reports |
-| **Researchers / academics** | Structured, versioned datasets | API access, bulk export, historical versions |
-| **Auditors / oversight bodies** | Consistency flags and audit trails | Risk scores, audit view, immutable provenance |
-| **Civic-tech / NGOs** | Programmatic access | Public REST API |
+| Segment                         | What they need                                 | How LokDarpan serves them                                                         |
+| ------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Citizens**                    | Plain-language understanding of local spending | Overview & Map dashboards; AI plain-language summaries                            |
+| **Journalists**                 | Leads, comparisons, source links for stories   | Anomaly lists, district/historical comparisons, exportable source-linked evidence |
+| **RTI activists**               | Specific figures and gaps to base filings on   | Traceable line items, missing-data warnings, variance reports                     |
+| **Researchers / academics**     | Structured, versioned datasets                 | API access, bulk export, historical versions                                      |
+| **Auditors / oversight bodies** | Consistency flags and audit trails             | Risk scores, audit view, immutable provenance                                     |
+| **Civic-tech / NGOs**           | Programmatic access                            | Public REST API                                                                   |
 
 ## Use cases
 
@@ -54,13 +54,13 @@ A national public-finance intelligence layer where anyone can follow a rupee fro
 
 - Required data is published by official portals in a retrievable form (API, CSV, XLS, or PDF).
 - Portals are reasonably stable; schema drift is expected and handled by the ingestion layer.
-- Figures across documents *can* be reconciled by common keys (scheme code, work ID, tender ID, district, financial year) — where they cannot, that gap is itself reported.
+- Figures across documents _can_ be reconciled by common keys (scheme code, work ID, tender ID, district, financial year) — where they cannot, that gap is itself reported.
 - Currency is INR; amounts are normalized to a canonical unit (₹, with crore/lakh handling) internally.
 - The platform reports; it does not adjudicate.
 
 ## Limitations
 
-- **Data-bound:** LokDarpan can only reflect what is published. Missing or delayed publication becomes a *missing-data warning*, not an inference.
+- **Data-bound:** LokDarpan can only reflect what is published. Missing or delayed publication becomes a _missing-data warning_, not an inference.
 - **Reconciliation gaps:** if source documents use inconsistent identifiers, some links will be probabilistic and flagged with a confidence score.
 - **No intent:** a variance is a numeric fact. LokDarpan never asserts a cause (delay, revision, misreporting, or wrongdoing).
 - **OCR uncertainty:** figures extracted from scanned PDFs carry an extraction-confidence score and are marked as such.
@@ -68,13 +68,13 @@ A national public-finance intelligence layer where anyone can follow a rupee fro
 
 ## Roadmap (product)
 
-| Horizon | Product milestone |
-|---|---|
-| **M1–M2** | Ingest Maharashtra roads revenue/allocation/release/expenditure + tenders; core ledger; variance engine; API |
-| **M3** | Public dashboard (Overview, Map, Project Detail) |
-| **M4** | AI plain-language summaries with guardrails |
-| **M5** | Anomaly detection + Risk scoring + Audit view |
-| **M6** | Hardening, provenance/versioning UX, production launch (Phase 1) |
+| Horizon    | Product milestone                                                                                                                         |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **M1–M2**  | Ingest Maharashtra roads revenue/allocation/release/expenditure + tenders; core ledger; variance engine; API                              |
+| **M3**     | Public dashboard (Overview, Map, Project Detail)                                                                                          |
+| **M4**     | AI plain-language summaries with guardrails                                                                                               |
+| **M5**     | Anomaly detection + Risk scoring + Audit view                                                                                             |
+| **M6**     | Hardening, provenance/versioning UX, production launch (Phase 1)                                                                          |
 | **Beyond** | Transportation → all MH ministries → India roads → India ministries → national platform (see [14](../15-scalability/scalability-plan.md)) |
 
 Detailed engineering plan in [16 — Development Roadmap](./roadmap-platform.md).

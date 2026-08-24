@@ -1,6 +1,6 @@
 # 10 — Source Traceability
 
-> *"Every number must be traceable. No figure is displayed without a link to its source document, extraction method, and retrieval date."* — `.docs/17-legal/legal-ethical-rules.md`, rule 5.
+> _"Every number must be traceable. No figure is displayed without a link to its source document, extraction method, and retrieval date."_ — `.docs/17-legal/legal-ethical-rules.md`, rule 5.
 
 On mobile this rule is harder (screen space, network, 400-page scanned PDFs) and more important (a phone screenshot travels further than a desktop tab). This document specifies how the chain from a rendered figure to a page of a government document is built, and how it degrades honestly when it cannot be completed.
 
@@ -35,19 +35,19 @@ flowchart TD
 ```ts
 type Provenance = {
   sourceDocumentId: number;
-  sourceName: string;            // "Maharashtra PWD — Works"
-  authority: string;             // "Government of Maharashtra, Public Works Department"
-  tier: 'central' | 'state' | 'local';
-  sourceUrl: string | null;      // the publisher's URL (may be dead)
-  archivedUrl: string;           // our immutable copy — always present
+  sourceName: string; // "Maharashtra PWD — Works"
+  authority: string; // "Government of Maharashtra, Public Works Department"
+  tier: "central" | "state" | "local";
+  sourceUrl: string | null; // the publisher's URL (may be dead)
+  archivedUrl: string; // our immutable copy — always present
   artifactSha256: string;
-  docType: 'api'|'csv'|'xls'|'pdf'|'scan'|'html';
-  extractionMethod: string;      // "api" | "camelot" | "ocr:tesseract" | …
-  extractionConfidence: number;  // 0..1  — could this number be misread?     ★ C4
-  linkageConfidence: number;     // 0..1  — could this belong elsewhere?      ★ C4
-  pageLocator: string | null;    // "p.42 table 3"                            ★ C8
-  page: number | null;           //  42   — enables Range-request open        ★ C8
-  bbox: [number,number,number,number] | null;  // region highlight            ★ C8
+  docType: "api" | "csv" | "xls" | "pdf" | "scan" | "html";
+  extractionMethod: string; // "api" | "camelot" | "ocr:tesseract" | …
+  extractionConfidence: number; // 0..1  — could this number be misread?     ★ C4
+  linkageConfidence: number; // 0..1  — could this belong elsewhere?      ★ C4
+  pageLocator: string | null; // "p.42 table 3"                            ★ C8
+  page: number | null; //  42   — enables Range-request open        ★ C8
+  bbox: [number, number, number, number] | null; // region highlight            ★ C8
   retrievedAt: string;
   publishedAt: string | null;
   license: string | null;
@@ -61,10 +61,10 @@ type Provenance = {
 
 **The two confidences are separate and mean different things**, and conflating them (as the current docs do) hides a real risk:
 
-| Field | Question it answers | UI when low |
-|---|---|---|
-| `extractionConfidence` | *Did we read this number correctly?* | Amber chip + "extracted from a scanned document; the value may contain an OCR error" |
-| `linkageConfidence` | *Does this number belong to this project?* | "This record was matched to this project by name similarity (0.78). It may belong to a different work." |
+| Field                  | Question it answers                        | UI when low                                                                                             |
+| ---------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `extractionConfidence` | _Did we read this number correctly?_       | Amber chip + "extracted from a scanned document; the value may contain an OCR error"                    |
+| `linkageConfidence`    | _Does this number belong to this project?_ | "This record was matched to this project by name similarity (0.78). It may belong to a different work." |
 
 A low linkage confidence is the more serious of the two — a correctly-read number attached to the wrong project is a false statement about a specific work — and the app must never present it as merely "low confidence".
 
@@ -123,13 +123,13 @@ Dropping a user straight onto page 42 with no orientation guarantees confusion a
 
 **Failure — and this is where honesty is tested:**
 
-| Failure | Behaviour |
-|---|---|
-| Publisher URL dead | Show the **archived artifact** + "The publisher's copy is no longer reachable at its published URL. This is our archived copy, retrieved 30 Jul 2026 (sha256 …)." Never hide it |
-| Format unsupported | "Open in browser" with the archived URL |
-| Too large for the connection | State the size; offer Wi-Fi-only download; keep the extracted-value card usable |
-| Offline, not downloaded | Full provenance still shown; document body unavailable, stated plainly |
-| No page locator | Open at page 1 with "The exact page for this figure was not recorded" — an admission, not a silent default |
+| Failure                      | Behaviour                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Publisher URL dead           | Show the **archived artifact** + "The publisher's copy is no longer reachable at its published URL. This is our archived copy, retrieved 30 Jul 2026 (sha256 …)." Never hide it |
+| Format unsupported           | "Open in browser" with the archived URL                                                                                                                                         |
+| Too large for the connection | State the size; offer Wi-Fi-only download; keep the extracted-value card usable                                                                                                 |
+| Offline, not downloaded      | Full provenance still shown; document body unavailable, stated plainly                                                                                                          |
+| No page locator              | Open at page 1 with "The exact page for this figure was not recorded" — an admission, not a silent default                                                                      |
 
 ---
 
@@ -159,7 +159,7 @@ The full derivation of one figure, which is what separates this product from a c
                  Verification Priority · variance factor   ▸
 ```
 
-Step ⑤ is the reverse index and it is what an auditor actually needs: *which conclusions rest on this number?* If the figure is later corrected, the user can see exactly what changes.
+Step ⑤ is the reverse index and it is what an auditor actually needs: _which conclusions rest on this number?_ If the figure is later corrected, the user can see exactly what changes.
 
 Step ④ implements `.docs/17-legal/legal-ethical-rules.md` rule 9 (preserve historical versions) — a superseded value is visible with its own source and date, so a budget revision is a fact the reader can see, not a silent overwrite.
 
@@ -187,11 +187,11 @@ This makes the platform's **own data supply auditable by the public** — a sour
 
 Any shared artifact carries its sources. This is the mechanism that partly compensates for having no website (`00-document-audit` PR-1).
 
-| Artifact | Contents |
-|---|---|
-| Share link | Universal link to the entity; provenance travels with the entity |
+| Artifact                        | Contents                                                                                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Share link                      | Universal link to the entity; provenance travels with the entity                                                                                       |
 | Share evidence (an observation) | The neutral observation text, every input figure, each with source name + URL + confidence + `asOf`, the `datasetVersion`, and the standing disclaimer |
-| CSV of a view | One row per record, with `source_name`, `source_url`, `extraction_method`, `extraction_confidence`, `retrieved_at`, `dataset_version` as columns |
+| CSV of a view                   | One row per record, with `source_name`, `source_url`, `extraction_method`, `extraction_confidence`, `retrieved_at`, `dataset_version` as columns       |
 
 **A figure is never exported without its source columns.** An exported number that has been separated from its provenance is precisely the artifact `.docs/17-legal/legal-ethical-rules.md` exists to prevent, and it is why chart-to-PNG export is not built (`.docs/01-product/screen-inventory.md` §Screens that must not exist).
 

@@ -36,7 +36,7 @@ graph TD
 
 ## J1 · Discover public spending near me
 
-**Who** Citizen · **Intent** *"Where is public money being spent around me?"* · **Success** the user opens a real project within 3 taps of launch and can see its source.
+**Who** Citizen · **Intent** _"Where is public money being spent around me?"_ · **Success** the user opens a real project within 3 taps of launch and can see its source.
 
 ```mermaid
 sequenceDiagram
@@ -58,14 +58,14 @@ sequenceDiagram
 ```
 
 **Must be true** Home renders its header and scope from persisted state in <200 ms, before any network call. Location denial is not a dead end (S-05 is equally prominent). The map's first paint is the basemap, never a blank.
-**Fails when** location is granted but the area has no ingested coverage → S-10 empty state must say *"LokDarpan currently covers Maharashtra roads"* and offer the nearest covered unit, not an empty map.
+**Fails when** location is granted but the area has no ingested coverage → S-10 empty state must say _"LokDarpan currently covers Maharashtra roads"_ and offer the nearest covered unit, not an empty map.
 **Neutrality** the "Worth verifying" section on Home is capped at 3, scoped to the user's unit, and carries the standing disclaimer. It is never ranked nationally and never notified.
 
 ---
 
 ## J2 · Find a specific road project
 
-**Who** Journalist, citizen · **Intent** *"I heard about the Baramati ODR-14 upgrade — show me it."*
+**Who** Journalist, citizen · **Intent** _"I heard about the Baramati ODR-14 upgrade — show me it."_
 
 ```text
 S-13 Search ▸ type "ODR-14 baramati"
@@ -82,7 +82,7 @@ S-13 Search ▸ type "ODR-14 baramati"
 
 ## J3 · Follow allocation → release → expenditure
 
-**Who** All · **Intent** *"₹10 crore was allocated. How much was released, how much spent, and does it reconcile?"* · This is the product's central promise.
+**Who** All · **Intent** _"₹10 crore was allocated. How much was released, how much spent, and does it reconcile?"_ · This is the product's central promise.
 
 ```mermaid
 flowchart TD
@@ -101,16 +101,17 @@ flowchart TD
 ```
 
 **Must be true**
+
 - Both variances are shown, each with its **formula and denominator visible** — never a bare "11.1%". (`00-document-audit` C1.)
 - Status is one of `consistent` / `needs_verification` / `insufficient_data` (`.docs/07-analytics/analytics-engine.md` §2). `insufficient_data` renders as an explicit state; a missing stage is **never** drawn as ₹0.
 - Every stage total is tappable to its constituent lines, and every line to its source document page.
-**Neutrality** the trail is a diagram of arithmetic. No stage is coloured red. "Remaining" is neutral language; the app never says "unspent" or "missing money."
+  **Neutrality** the trail is a diagram of arithmetic. No stage is coloured red. "Remaining" is neutral language; the app never says "unspent" or "missing money."
 
 ---
 
 ## J4 · Investigate an unusually expensive project
 
-**Who** Journalist, auditor · **Intent** *"Why does this road cost so much per km?"* — and the app's job is to answer *"here is what the numbers say"* and stop there.
+**Who** Journalist, auditor · **Intent** _"Why does this road cost so much per km?"_ — and the app's job is to answer _"here is what the numbers say"_ and stop there.
 
 ```text
 S-27 Project
@@ -131,7 +132,7 @@ S-27 Project
 ```
 
 **Must be true** The score is never displayed without a one-tap path to its full factor breakdown and its confidence (`.docs/08-risk/risk-scoring-engine.md`). The road model always ships with its caveat block. If length or width is unpublished, the estimate is **withheld**, not guessed.
-**Neutrality — the hardest point in the product.** The band label leads with the action (*"worth a closer look"*), not a grade. No red. No siren iconography. No gauge/speedometer. The disclaimer *"data-consistency observations from official records, not findings of wrongdoing"* is present and non-collapsible on S-34/S-35/S-36.
+**Neutrality — the hardest point in the product.** The band label leads with the action (_"worth a closer look"_), not a grade. No red. No siren iconography. No gauge/speedometer. The disclaimer _"data-consistency observations from official records, not findings of wrongdoing"_ is present and non-collapsible on S-34/S-35/S-36.
 
 ---
 
@@ -148,14 +149,14 @@ S-27 ▸ Compare
   → per metric: distribution strip showing where each project sits vs the peer median (n)
 ```
 
-**Must be true** A comparison is withheld when `n < 8` (`.docs/07-analytics/analytics-engine.md` §4 minimum-sample guard) — and the withholding is *stated*, with the actual `n`. Cards, never a table. Each figure on a card retains its source chip.
+**Must be true** A comparison is withheld when `n < 8` (`.docs/07-analytics/analytics-engine.md` §4 minimum-sample guard) — and the withholding is _stated_, with the actual `n`. Cards, never a table. Each figure on a card retains its source chip.
 **Fails when** peer projects have missing lengths → those cards show `insufficient_data` for cost/km rather than dropping out silently.
 
 ---
 
 ## J6 · Investigate a contractor
 
-**Who** Journalist, researcher · **Intent** *"How much work has this firm been awarded here?"*
+**Who** Journalist, researcher · **Intent** _"How much work has this firm been awarded here?"_
 
 ```text
 S-27 ▸ Contractor  →  S-42 Contractor detail
@@ -167,7 +168,7 @@ S-27 ▸ Contractor  →  S-42 Contractor detail
 ```
 
 **Must be true** Aliases are visible, with the match confidence, so canonicalization is auditable — merging two firms wrongly is a serious error, and the app must let a reader check it.
-**Neutrality — binding.** No score, no rank, no badge, no flag, no colour-coding on a contractor. Concentration statistics attach to a **scope** (taluka/FY), never to the firm as a characteristic. `.docs/08-risk/risk-scoring-engine.md`: *"Never rank people by risk."* The screen carries: *"These are award records and market-structure statistics. They are not an assessment of this organization."*
+**Neutrality — binding.** No score, no rank, no badge, no flag, no colour-coding on a contractor. Concentration statistics attach to a **scope** (taluka/FY), never to the firm as a characteristic. `.docs/08-risk/risk-scoring-engine.md`: _"Never rank people by risk."_ The screen carries: _"These are award records and market-structure statistics. They are not an assessment of this organization."_
 
 ---
 
@@ -203,14 +204,14 @@ S-23 (district) ▸ Sub-units → S-24 → Panchayat Samiti → Gram Panchayat �
   What was built  4 works    Consistency  insufficient data — coverage below threshold
 ```
 
-**Must be true** Coverage is the *first* thing the user understands at this level, not an afterthought (`.docs/01-product/dashboard-design-legacy.md`). The screen must make absolutely clear that **absence of data ≠ absence of activity** (`.docs/17-legal/legal-ethical-rules.md` rule 8) — stated in words on the screen, not just implied by a grey box.
+**Must be true** Coverage is the _first_ thing the user understands at this level, not an afterthought (`.docs/01-product/dashboard-design-legacy.md`). The screen must make absolutely clear that **absence of data ≠ absence of activity** (`.docs/17-legal/legal-ethical-rules.md` rule 8) — stated in words on the screen, not just implied by a grey box.
 **Neutrality** an unpublished record is never rendered as ₹0 and never contributes to a variance.
 
 ---
 
 ## J9 · Find missing or inconsistent records
 
-**Who** RTI activist, auditor · **Intent** *"Where should I file, or where should I look first?"*
+**Who** RTI activist, auditor · **Intent** _"Where should I file, or where should I look first?"_
 
 ```mermaid
 flowchart LR
@@ -268,7 +269,7 @@ S-23 (Pune district) ▸ Ask about this district
       guardrail note: "Answer restricted to ingested official figures; no inference of cause."
 ```
 
-**Must be true** Every factual sentence carries a citation; an uncited answer is never displayed (`.docs/09-ai/ai-layer.md`). Out-of-scope questions return *"No ingested official records cover this."* — a refusal, not a guess. Adversarial prompts ("isn't this corruption?") deflect to neutral facts; this is a CI release gate (`.docs/14-testing/testing-strategy.md`).
+**Must be true** Every factual sentence carries a citation; an uncited answer is never displayed (`.docs/09-ai/ai-layer.md`). Out-of-scope questions return _"No ingested official records cover this."_ — a refusal, not a guess. Adversarial prompts ("isn't this corruption?") deflect to neutral facts; this is a CI release gate (`.docs/14-testing/testing-strategy.md`).
 **Offline** Ask is disabled with a plain statement; previous answers remain readable.
 
 ---
@@ -292,26 +293,26 @@ stateDiagram-v2
   Saved --> [*]: unsave (bundle deleted, size shown)
 ```
 
-**Must be true** Saving works with **no account** and guarantees the item is fully readable offline. The update tells the user *what changed* — "Utilized ₹8.00 cr → ₹8.60 cr, new expenditure record, source PWD Works, 12 Sep" — never a vague "this project was updated."
+**Must be true** Saving works with **no account** and guarantees the item is fully readable offline. The update tells the user _what changed_ — "Utilized ₹8.00 cr → ₹8.60 cr, new expenditure record, source PWD Works, 12 Sep" — never a vague "this project was updated."
 **Privacy — a deliberate design decision.** The watchlist lives **on the device**. Change detection is done by the client polling `?since=<datasetVersion>` in a background task, so the server never learns which projects a given person is monitoring. For an RTI activist tracking a specific contract, that is a meaningful protection, and it is why on-device diffing is preferred over server-side push subscriptions. Full analysis in `.docs/10-mobile/notifications.md`.
 
 ---
 
 ## Journey → screen coverage
 
-| Journey | Screens exercised |
-|---|---|
-| J1 Near me | S-01,02,03,04,05,10,18,19,27 |
-| J2 Find a road | S-13,14,15,16,27 |
-| J3 Follow the money | S-27,28,29,30,30a,52,57 |
-| J4 Unusual cost | S-27,33,34,35,36,52,57 |
-| J5 Compare | S-27,37,38,52 |
-| J6 Contractor | S-27,40,42,43,44,52 |
-| J7 District | S-22,23,24,25,26,49,51 |
-| J8 Village | S-22,23,24,51,77,78 |
-| J9 Missing records | S-23,49,50,51,35,78 |
-| J10 Source | S-52,53,54,55,56 |
-| J11 Ask | S-23,58,59,60,61,52 |
-| J12 Save & monitor | S-27,62,63,64,65,07,11 |
+| Journey             | Screens exercised            |
+| ------------------- | ---------------------------- |
+| J1 Near me          | S-01,02,03,04,05,10,18,19,27 |
+| J2 Find a road      | S-13,14,15,16,27             |
+| J3 Follow the money | S-27,28,29,30,30a,52,57      |
+| J4 Unusual cost     | S-27,33,34,35,36,52,57       |
+| J5 Compare          | S-27,37,38,52                |
+| J6 Contractor       | S-27,40,42,43,44,52          |
+| J7 District         | S-22,23,24,25,26,49,51       |
+| J8 Village          | S-22,23,24,51,77,78          |
+| J9 Missing records  | S-23,49,50,51,35,78          |
+| J10 Source          | S-52,53,54,55,56             |
+| J11 Ask             | S-23,58,59,60,61,52          |
+| J12 Save & monitor  | S-27,62,63,64,65,07,11       |
 
 Screens not exercised by a core journey — S-41, S-45–48, S-66–80 — are supporting, settings, or legal surfaces reached from Settings or from an entity, and are specified in `.docs/01-product/screen-inventory.md`.

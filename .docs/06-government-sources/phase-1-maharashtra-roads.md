@@ -6,30 +6,30 @@ Verified 21 August 2026. All URLs below were fetched.
 
 ## Priority source map
 
-| # | Role | Source | URL | Status |
-|---|---|---|---|---|
-| 1 | **Works / roads department** | Public Works Department, Maharashtra | `https://pwd.maharashtra.gov.in` | ✅ VERIFIED |
-| 2 | **Procurement** | eProcurement System, Maharashtra (GePNIC) | `https://mahatenders.gov.in` | ✅ VERIFIED |
-| 3 | **Budget / allocation** | **BEAMS** — Budget Estimation, Allocation & Monitoring System | `https://beams.mahakosh.gov.in` | ✅ VERIFIED |
-| 4 | **Finance department** | Finance Department, Maharashtra | `https://finance.maharashtra.gov.in` | ✅ VERIFIED |
-| 5 | **Treasury** | Directorate of Accounts and Treasuries (Mahakosh) | `https://mahakosh.maharashtra.gov.in` | ✅ VERIFIED |
-| 6 | **Treasury (IFMS)** | Integrated Financial Management System | `https://www.mahakosh.gov.in` | ✅ VERIFIED |
-| 7 | **Receipts** | GRAS — Government Receipt Accounting System | `https://gras.mahakosh.gov.in` | ✅ VERIFIED |
-| 8 | **Treasury ops** | ARTHWAHINI — TreasuryNet | `https://arthwahini.mahakosh.gov.in` | ✅ VERIFIED |
-| 9 | **Rural roads / local govt** | Rural Development & Panchayat Raj Dept | `https://rdd.maharashtra.gov.in` | ✅ VERIFIED |
-| 10 | **District planning** | Planning Department | `https://plan.maharashtra.gov.in` | ✅ VERIFIED |
-| 11 | **State road PSU** | MSRDC | `https://msrdc.in` | ✅ VERIFIED |
-| 12 | **Urban roads** | Urban Development Department | `https://urban.maharashtra.gov.in` | ✅ VERIFIED |
-| 13 | **GIS** | MRSAC — Maharashtra Remote Sensing Application Centre | `https://mrsac.gov.in` | ✅ VERIFIED |
-| 14 | **PMGSY procurement** | PMGSY eProcurement (national) | `https://pmgsytenders.gov.in` | ✅ VERIFIED |
-| 15 | **PMGSY monitoring** | **OMMAS** | `https://online.omms.nic.in/` | 🔍 **UNVERIFIED — unreachable** |
-| 16 | **Central procurement** | CPPP (awards, results, debarment) | `https://eprocure.gov.in/cppp/` | ✅ VERIFIED |
-| 17 | **Audit** | CAG | `https://cag.gov.in/` | ✅ VERIFIED |
-| 18 | **Hierarchy / codes** | LGD | `https://lgdirectory.gov.in/` | ✅ VERIFIED (alt channel) |
-| 19 | **National highways** | MoRTH · NHAI | `https://morth.nic.in/` · `https://nhai.gov.in/` | ✅ VERIFIED |
-| 20 | **Open data** | data.gov.in | `https://data.gov.in/` | ✅ VERIFIED |
-| 21 | **Land / revenue** | IGR Maharashtra (stamp duty) | `https://igrmaharashtra.gov.in` | ✅ VERIFIED |
-| 22 | **Districts** | 40 district entries in IGOD; 3 verified | `ahmednagar.nic.in` · `aurangabad.gov.in` · `mumbaisuburban.gov.in` | ✅ VERIFIED (3) |
+| #   | Role                         | Source                                                        | URL                                                                 | Status                          |
+| --- | ---------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------- |
+| 1   | **Works / roads department** | Public Works Department, Maharashtra                          | `https://pwd.maharashtra.gov.in`                                    | ✅ VERIFIED                     |
+| 2   | **Procurement**              | eProcurement System, Maharashtra (GePNIC)                     | `https://mahatenders.gov.in`                                        | ✅ VERIFIED                     |
+| 3   | **Budget / allocation**      | **BEAMS** — Budget Estimation, Allocation & Monitoring System | `https://beams.mahakosh.gov.in`                                     | ✅ VERIFIED                     |
+| 4   | **Finance department**       | Finance Department, Maharashtra                               | `https://finance.maharashtra.gov.in`                                | ✅ VERIFIED                     |
+| 5   | **Treasury**                 | Directorate of Accounts and Treasuries (Mahakosh)             | `https://mahakosh.maharashtra.gov.in`                               | ✅ VERIFIED                     |
+| 6   | **Treasury (IFMS)**          | Integrated Financial Management System                        | `https://www.mahakosh.gov.in`                                       | ✅ VERIFIED                     |
+| 7   | **Receipts**                 | GRAS — Government Receipt Accounting System                   | `https://gras.mahakosh.gov.in`                                      | ✅ VERIFIED                     |
+| 8   | **Treasury ops**             | ARTHWAHINI — TreasuryNet                                      | `https://arthwahini.mahakosh.gov.in`                                | ✅ VERIFIED                     |
+| 9   | **Rural roads / local govt** | Rural Development & Panchayat Raj Dept                        | `https://rdd.maharashtra.gov.in`                                    | ✅ VERIFIED                     |
+| 10  | **District planning**        | Planning Department                                           | `https://plan.maharashtra.gov.in`                                   | ✅ VERIFIED                     |
+| 11  | **State road PSU**           | MSRDC                                                         | `https://msrdc.in`                                                  | ✅ VERIFIED                     |
+| 12  | **Urban roads**              | Urban Development Department                                  | `https://urban.maharashtra.gov.in`                                  | ✅ VERIFIED                     |
+| 13  | **GIS**                      | MRSAC — Maharashtra Remote Sensing Application Centre         | `https://mrsac.gov.in`                                              | ✅ VERIFIED                     |
+| 14  | **PMGSY procurement**        | PMGSY eProcurement (national)                                 | `https://pmgsytenders.gov.in`                                       | ✅ VERIFIED                     |
+| 15  | **PMGSY monitoring**         | **OMMAS**                                                     | `https://online.omms.nic.in/`                                       | 🔍 **UNVERIFIED — unreachable** |
+| 16  | **Central procurement**      | CPPP (awards, results, debarment)                             | `https://eprocure.gov.in/cppp/`                                     | ✅ VERIFIED                     |
+| 17  | **Audit**                    | CAG                                                           | `https://cag.gov.in/`                                               | ✅ VERIFIED                     |
+| 18  | **Hierarchy / codes**        | LGD                                                           | `https://lgdirectory.gov.in/`                                       | ✅ VERIFIED (alt channel)       |
+| 19  | **National highways**        | MoRTH · NHAI                                                  | `https://morth.nic.in/` · `https://nhai.gov.in/`                    | ✅ VERIFIED                     |
+| 20  | **Open data**                | data.gov.in                                                   | `https://data.gov.in/`                                              | ✅ VERIFIED                     |
+| 21  | **Land / revenue**           | IGR Maharashtra (stamp duty)                                  | `https://igrmaharashtra.gov.in`                                     | ✅ VERIFIED                     |
+| 22  | **Districts**                | 40 district entries in IGOD; 3 verified                       | `ahmednagar.nic.in` · `aurangabad.gov.in` · `mumbaisuburban.gov.in` | ✅ VERIFIED (3)                 |
 
 Two Maharashtra sources were **not reachable** and are recorded as such, not as absent: `koshwahini.mahakosh.gov.in` (timeout) and `mahaegs.maharashtra.gov.in` (timeout — Employment Guarantee Scheme, Planning Dept).
 
@@ -61,15 +61,15 @@ BEAMS is the state's budget estimation, allocation and monitoring system — on 
 
 Based on what is verified today:
 
-| Capability | Confidence |
-|---|---|
-| Administrative hierarchy for Maharashtra, with codes | **High** — LGD |
-| Tender and award records | **High** — mahatenders + CPPP |
-| Contractor award history within Maharashtra | **Medium** — depends on award field exposure |
-| State budget and allocation | **Medium** — documents certain; structured allocation depends on BEAMS |
-| **Per-project expenditure** | **Low** — unresolved |
-| **Physical progress** | **Low** — depends entirely on Q1/OMMAS |
-| Road geometry | **Medium** — MRSAC live, endpoints unenumerated |
-| Audit findings | **High** — CAG, as documents |
+| Capability                                           | Confidence                                                             |
+| ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| Administrative hierarchy for Maharashtra, with codes | **High** — LGD                                                         |
+| Tender and award records                             | **High** — mahatenders + CPPP                                          |
+| Contractor award history within Maharashtra          | **Medium** — depends on award field exposure                           |
+| State budget and allocation                          | **Medium** — documents certain; structured allocation depends on BEAMS |
+| **Per-project expenditure**                          | **Low** — unresolved                                                   |
+| **Physical progress**                                | **Low** — depends entirely on Q1/OMMAS                                 |
+| Road geometry                                        | **Medium** — MRSAC live, endpoints unenumerated                        |
+| Audit findings                                       | **High** — CAG, as documents                                           |
 
 **The product should be planned against this table, not against the assumption that the full chain is available.** `.docs/01-product/state-design.md`'s `insufficient_data` state and the coverage-first design were built for exactly this, and this pass validates that choice.

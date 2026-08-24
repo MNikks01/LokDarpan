@@ -1,4 +1,9 @@
-import { FORBIDDEN_TERMS, FORBIDDEN_PATTERNS, PREFERRED_ALTERNATIVES, MANDATED_PHRASES } from "./vocabulary";
+import {
+  FORBIDDEN_TERMS,
+  FORBIDDEN_PATTERNS,
+  PREFERRED_ALTERNATIVES,
+  MANDATED_PHRASES,
+} from "./vocabulary";
 
 export { FORBIDDEN_TERMS, FORBIDDEN_PATTERNS, PREFERRED_ALTERNATIVES, MANDATED_PHRASES };
 
@@ -25,9 +30,7 @@ export function scan(text: string, locales: readonly Locale[] = ["en", "mr", "hi
   for (const phrase of MANDATED_PHRASES) {
     // Whitespace-flexible: JSX wraps prose across lines, so the mandated
     // phrase is rarely contiguous in source.
-    const source = phrase
-      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-      .replace(/\s+/g, "\\s+");
+    const source = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
     const re = new RegExp(source, "gi");
     scannable = scannable.replace(re, (m) => " ".repeat(m.length));
   }
@@ -54,9 +57,12 @@ export function scan(text: string, locales: readonly Locale[] = ["en", "mr", "hi
   }
 
   for (const pattern of FORBIDDEN_PATTERNS) {
-    const re = new RegExp(pattern.source, pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`);
+    const re = new RegExp(
+      pattern.source,
+      pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`,
+    );
     for (const m of scannable.matchAll(re)) {
-      found.push({ kind: "pattern", match: m[0], locale: "any", index: m.index ?? 0 });
+      found.push({ kind: "pattern", match: m[0], locale: "any", index: m.index });
     }
   }
 
@@ -81,6 +87,10 @@ export type ServerText = string & { readonly [serverTextBrand]: "server-authored
 
 /** The ONLY way to mint ServerText. Called at the API boundary, never in a component. */
 export function asServerText(value: string, origin: "api"): ServerText {
-  if (origin !== "api") throw new Error("ServerText may only originate from the API boundary");
+  // Typed callers cannot reach this; untyped JS callers can, and this is a
+  // docs/15 boundary worth guarding at runtime as well as at compile time.
+  if ((origin as string) !== "api") {
+    throw new Error("ServerText may only originate from the API boundary");
+  }
   return value as ServerText;
 }

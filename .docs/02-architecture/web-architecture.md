@@ -8,7 +8,7 @@ The web application is now the first product. This document defines its architec
 
 Three requirements are new or newly-primary, and they shape the architecture:
 
-1. **Be findable.** SEO is an acquisition channel (`.docs/02-architecture/tech-stack.md`), and with no app store it is *the* acquisition channel. Every entity — every district, village, project, contractor, scheme — must be a server-rendered, indexable, linkable page. This alone rules out a client-rendered SPA.
+1. **Be findable.** SEO is an acquisition channel (`.docs/02-architecture/tech-stack.md`), and with no app store it is _the_ acquisition channel. Every entity — every district, village, project, contractor, scheme — must be a server-rendered, indexable, linkable page. This alone rules out a client-rendered SPA.
 2. **Serve the researcher and journalist workflow.** Dense tables, sorting, filtering, multi-record comparison, bulk export, keyboard navigation. This is the audience PR-1 identified as unserved by mobile.
 3. **Stay cheap to run at national scale.** `.docs/01-product/prd.md` is grant-funded with no revenue model that could compromise neutrality. `.docs/15-scalability/scalability-plan.md` projects ~10⁶ concurrent users at Phase 8. The read path must be almost entirely cache-served.
 
@@ -16,20 +16,20 @@ Three requirements are new or newly-primary, and they shape the architecture:
 
 Reaffirming `.docs/02-architecture/tech-stack.md` where it holds, revising where the mobile phase found better answers.
 
-| Layer | Choice | Status vs `.docs/02-architecture/tech-stack.md` |
-|---|---|---|
-| Framework | **Next.js (App Router)**, TypeScript strict | Reaffirmed — see `adr/011` |
-| Rendering | **React Server Components** + ISR for entity pages; client components only for interaction | Reaffirmed and made central |
-| Styling | **Tailwind CSS**, driven by the `.docs/01-product/design-system.md` design tokens | Reaffirmed |
-| Data access | **Server-side fetch in RSC**; TanStack Query only for genuinely interactive client surfaces | Revised — most pages need no client data layer at all |
-| API | **REST**, server-side | See `adr/012` |
-| Maps | **MapLibre GL JS** + self-hosted vector tiles | Revised from `.docs/02-architecture/tech-stack.md`'s Mapbox GL JS — same cost/independence reasoning as `adr/006` |
-| Charts | Bespoke SVG chart kit; `visx` only if a general-purpose chart is genuinely needed | Revised from `.docs/02-architecture/tech-stack.md`'s Recharts — see below |
-| i18n | `next-intl`, English / मराठी / हिन्दी | New — `.docs/01-product/dashboard-design-legacy.md` required it, no library was chosen |
-| Tables | **TanStack Table** (headless) | New — the researcher surface |
-| Forms | React Hook Form + Zod | Only two surfaces need it (data-issue report, API-key management) |
-| Validation | **Zod**, shared via `packages/api-contract` | Reaffirmed |
-| Testing | Vitest + Testing Library + Playwright | Revised from the mobile Jest/Maestro stack |
+| Layer       | Choice                                                                                      | Status vs `.docs/02-architecture/tech-stack.md`                                                                   |
+| ----------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Framework   | **Next.js (App Router)**, TypeScript strict                                                 | Reaffirmed — see `adr/011`                                                                                        |
+| Rendering   | **React Server Components** + ISR for entity pages; client components only for interaction  | Reaffirmed and made central                                                                                       |
+| Styling     | **Tailwind CSS**, driven by the `.docs/01-product/design-system.md` design tokens           | Reaffirmed                                                                                                        |
+| Data access | **Server-side fetch in RSC**; TanStack Query only for genuinely interactive client surfaces | Revised — most pages need no client data layer at all                                                             |
+| API         | **REST**, server-side                                                                       | See `adr/012`                                                                                                     |
+| Maps        | **MapLibre GL JS** + self-hosted vector tiles                                               | Revised from `.docs/02-architecture/tech-stack.md`'s Mapbox GL JS — same cost/independence reasoning as `adr/006` |
+| Charts      | Bespoke SVG chart kit; `visx` only if a general-purpose chart is genuinely needed           | Revised from `.docs/02-architecture/tech-stack.md`'s Recharts — see below                                         |
+| i18n        | `next-intl`, English / मराठी / हिन्दी                                                       | New — `.docs/01-product/dashboard-design-legacy.md` required it, no library was chosen                            |
+| Tables      | **TanStack Table** (headless)                                                               | New — the researcher surface                                                                                      |
+| Forms       | React Hook Form + Zod                                                                       | Only two surfaces need it (data-issue report, API-key management)                                                 |
+| Validation  | **Zod**, shared via `packages/api-contract`                                                 | Reaffirmed                                                                                                        |
+| Testing     | Vitest + Testing Library + Playwright                                                       | Revised from the mobile Jest/Maestro stack                                                                        |
 
 ### Why not Recharts (revising `.docs/02-architecture/tech-stack.md`)
 
@@ -103,16 +103,16 @@ Aliases `/district/[id]`, `/village/[id]`, `/state/[id]` **301-redirect** to `/u
 
 ## SEO — now a first-class requirement
 
-| Concern | Approach |
-|---|---|
-| Indexability | Every entity page server-rendered with real content, no client-only data |
-| Canonical URLs | One per entity; aliases redirect. `datasetVersion` never appears in the canonical URL |
-| Metadata | Per-page `title`/`description` generated from entity data — *"Public spending in Baramati taluka, Pune — FY2024-25"* |
+| Concern         | Approach                                                                                                                                                                                                                                           |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Indexability    | Every entity page server-rendered with real content, no client-only data                                                                                                                                                                           |
+| Canonical URLs  | One per entity; aliases redirect. `datasetVersion` never appears in the canonical URL                                                                                                                                                              |
+| Metadata        | Per-page `title`/`description` generated from entity data — _"Public spending in Baramati taluka, Pune — FY2024-25"_                                                                                                                               |
 | Structured data | `Dataset` and `GovernmentOrganization` JSON-LD where accurate. **No `Review`, `Rating`, or `AggregateRating` markup** — a Verification Priority score must never be emitted as a machine-readable rating (`.docs/17-legal/legal-ethical-rules.md`) |
-| Sitemaps | Generated per level, segmented; ~10⁶ units needs a sitemap index, not one file |
-| `robots.txt` | Allow crawling of entity pages; disallow `/ask`, filter permutations, and export endpoints |
-| Core Web Vitals | Budgets below — these are ranking inputs, not just UX |
-| i18n | `hreflang` for en/mr/hi; localised URLs per locale |
+| Sitemaps        | Generated per level, segmented; ~10⁶ units needs a sitemap index, not one file                                                                                                                                                                     |
+| `robots.txt`    | Allow crawling of entity pages; disallow `/ask`, filter permutations, and export endpoints                                                                                                                                                         |
+| Core Web Vitals | Budgets below — these are ranking inputs, not just UX                                                                                                                                                                                              |
+| i18n            | `hreflang` for en/mr/hi; localised URLs per locale                                                                                                                                                                                                 |
 
 **Constraint from `.docs/17-legal/legal-ethical-rules.md`:** meta descriptions are generated from **figures and place names only** — never from an observation, a variance, or a priority band. A search-result snippet is the most decontextualised surface the product has; an anomaly string appearing there would be exactly the accusation-without-evidence the rules forbid.
 
@@ -120,15 +120,15 @@ Aliases `/district/[id]`, `/village/[id]`, `/state/[id]` **301-redirect** to `/u
 
 Stated for a **mid-range laptop on a 10 Mbps connection**, and for a **low-end Android phone on 4G** — because the responsive web app is also how phone users reach the product until the mobile app ships.
 
-| Metric | Target | Ceiling |
-|---|---|---|
-| LCP (entity page, CDN hit) | **1.2 s** | 2.5 s |
-| INP | **150 ms** | 200 ms |
-| CLS | **0.05** | 0.1 |
-| TTFB (CDN hit) | 100 ms | 300 ms |
-| Initial JS (entity page) | **≤ 90 KB** gzipped | 150 KB |
-| Initial JS (map page) | ≤ 400 KB | 600 KB |
-| Entity page HTML | ≤ 60 KB gzipped | 120 KB |
+| Metric                     | Target              | Ceiling |
+| -------------------------- | ------------------- | ------- |
+| LCP (entity page, CDN hit) | **1.2 s**           | 2.5 s   |
+| INP                        | **150 ms**          | 200 ms  |
+| CLS                        | **0.05**            | 0.1     |
+| TTFB (CDN hit)             | 100 ms              | 300 ms  |
+| Initial JS (entity page)   | **≤ 90 KB** gzipped | 150 KB  |
+| Initial JS (map page)      | ≤ 400 KB            | 600 KB  |
+| Entity page HTML           | ≤ 60 KB gzipped     | 120 KB  |
 
 Entity pages ship almost no JavaScript because they are RSC-rendered content with a few interactive islands. The map, comparison builder and Ask surfaces are dynamically imported and never load on a page that does not use them.
 
@@ -147,12 +147,12 @@ Entity pages ship almost no JavaScript because they are RSC-rendered content wit
 
 The web app must work on a phone browser — that is how mobile users reach the product until the app ships.
 
-| Breakpoint | Layout |
-|---|---|
-| ≥ 1280px | Sidebar navigation + content + optional right rail (peer context, sources) |
-| 1024–1280px | Sidebar + content; rail collapses to inline sections |
-| 768–1024px | Collapsible sidebar; tables scroll horizontally within their own container |
-| < 768px | Single column; sidebar becomes a drawer; **tables become the mobile card pattern** from `.docs/01-product/design-system.md` |
+| Breakpoint  | Layout                                                                                                                      |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ≥ 1280px    | Sidebar navigation + content + optional right rail (peer context, sources)                                                  |
+| 1024–1280px | Sidebar + content; rail collapses to inline sections                                                                        |
+| 768–1024px  | Collapsible sidebar; tables scroll horizontally within their own container                                                  |
+| < 768px     | Single column; sidebar becomes a drawer; **tables become the mobile card pattern** from `.docs/01-product/design-system.md` |
 
 The `RecordList` card pattern designed for mobile becomes the small-viewport rendering of a table. That work transfers directly.
 
@@ -195,6 +195,6 @@ packages/
 ## What is deliberately not built for launch
 
 - **User accounts**, except API-key self-service for the keyed tiers in `.docs/12-security/security.md`. Browsing requires no login.
-- **Saved items / watchlists.** These were designed around on-device storage for privacy (`.docs/10-mobile/notifications.md`). A server-side watchlist would create the one genuinely sensitive dataset the platform otherwise avoids — *which identified person is monitoring which government contract*. Defer until the privacy design is redone for web, or until the mobile app carries it on-device.
+- **Saved items / watchlists.** These were designed around on-device storage for privacy (`.docs/10-mobile/notifications.md`). A server-side watchlist would create the one genuinely sensitive dataset the platform otherwise avoids — _which identified person is monitoring which government contract_. Defer until the privacy design is redone for web, or until the mobile app carries it on-device.
 - **Notifications.** Same reasoning.
 - **Offline support.** A service worker for static shell caching is optional polish, not launch scope.

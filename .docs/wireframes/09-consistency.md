@@ -65,6 +65,7 @@ The most neutrality-sensitive screen in the app.
 ```
 
 **Design decisions, all load-bearing:**
+
 - Disclaimer is **first**, above the score, and cannot be collapsed.
 - Factors are listed **by contribution, largest first** — a reader must be able to see immediately what is actually driving the number, rather than hunt for it.
 - Each factor states its arithmetic in neutral language, and the concentration factor explicitly disclaims that it says anything about a contractor.
@@ -111,7 +112,8 @@ The most neutrality-sensitive screen in the app.
 │  [ How this is calculated ]              (?) │
 └──────────────────────────────────────────────┘
 ```
-If length, width, or surface type is missing, this whole block is replaced by *"Estimate withheld — road width not published"* (`.docs/03-domain/road-infrastructure-intelligence.md`). Never guessed.
+
+If length, width, or surface type is missing, this whole block is replaced by _"Estimate withheld — road width not published"_ (`.docs/03-domain/road-infrastructure-intelligence.md`). Never guessed.
 
 ## S-34 / S-35 · Observations
 
@@ -152,9 +154,10 @@ S-34                                S-35
                                  │ [ 💬 Explain this ]        │
                                  └────────────────────────────┘
 ```
+
 S-35 shows **the full arithmetic and every input with its source**. That is what makes an observation checkable rather than asserted.
 
-## S-49 · Observations, scoped   ·   S-50 · Filters
+## S-49 · Observations, scoped · S-50 · Filters
 
 ```text
 S-49  (always entered from a unit or project — never a global feed)
@@ -186,4 +189,4 @@ S-49  (always entered from a unit or project — never a global feed)
 
 **Sort options are: most recent, severity, project name. There is no "highest score first" default**, and no cross-unit "worst projects" view — that would be the leaderboard `.docs/08-risk/risk-scoring-engine.md` forbids.
 
-**Empty state matters here:** *"No consistency observations for Pune district in FY2024-25. This may mean the published records are consistent — or that records are missing."* → ▸ Coverage.
+**Empty state matters here:** _"No consistency observations for Pune district in FY2024-25. This may mean the published records are consistent — or that records are missing."_ → ▸ Coverage.
