@@ -130,7 +130,7 @@ The client cannot verify a figure cryptographically, but it can refuse to displa
 
 - **One `datasetVersion` per screen.** Sections from different versions are never rendered together (`.docs/10-mobile/offline-strategy.md` §Conflict).
 - **Zod validation at the boundary.** A response that does not match the contract is rejected; cached data is retained and the mismatch is logged with the `requestId`. A malformed financial payload is never partially rendered.
-- **No provenance ⇒ no render** (`.docs/10-mobile/mobile-architecture.md` §2). Structurally, an unsourced figure cannot reach the screen.
+- **No provenance ⇒ no render** (`.docs/02-architecture/mobile-architecture.md` §2). Structurally, an unsourced figure cannot reach the screen.
 - **Artifact hash verification** on downloaded documents (§4).
 
 ---

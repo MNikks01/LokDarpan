@@ -9,16 +9,16 @@ LokDarpan links official records into one traceable ledger — revenue → budge
 **It is NOT:** an anti-corruption or accusation engine · a legal authority or investigator · a source of allegations about any individual or organization.
 
 > Every figure is traceable to an official source. Every observation is a neutral, factual statement — never an accusation.
-> [`.docs/17-legal/legal-ethical-rules.md`](./.docs/17-legal/legal-ethical-rules.md) is **binding on every other document and every component.**
+> [`.docs/17-legal/legal-ethical-rules.md`](.docs/17-legal/legal-ethical-rules.md) is **binding on every other document and every component.**
 
 ## Status
 
-**Specification-complete; implementation just begun.** The web client is first; the mobile app follows after launch ([`.docs/decisions/web-first-pivot.md`](./.docs/decisions/web-first-pivot.md)).
+**Specification-complete; implementation just begun.** The web client is first; the mobile app follows after launch ([`.docs/decisions/web-first-pivot.md`](.docs/decisions/web-first-pivot.md)).
 
 | | |
 |---|---|
-| Documentation | Complete — 110 documents in [`.docs/`](./.docs/) |
-| Government source registry | 99 sources, 96 verified ([`.docs/06-government-sources/`](./.docs/06-government-sources/)) |
+| Documentation | Complete — 110 documents in [`.docs/`](.docs) |
+| Government source registry | 99 sources, 96 verified ([`.docs/06-government-sources/`](.docs/06-government-sources)) |
 | `apps/web` | W1 foundation — builds, 38 tests passing, **fixture data only** |
 | `services/*` | Not yet implemented |
 | Backend / database | Not yet implemented |
@@ -32,7 +32,7 @@ LokDarpan links official records into one traceable ledger — revenue → budge
 apps/web/       Next.js public site — the first product
 apps/mobile/    React Native / Expo — deferred until after web launch
 services/       ingestion · normalization · entity-resolution · analytics · risk-engine · ai · api
-packages/       money · neutrality · contracts · domain · validation · config · database · observability · errors · utils
+packages/       money · neutrality · contracts · domain · config · database · observability · errors
 data/           raw (immutable) · staging · normalized · reference · fixtures · samples
 database/       migrations · seeds · functions · views
 infrastructure/ docker · kubernetes · terraform · monitoring

@@ -23,7 +23,7 @@ The test pyramid is weighted accordingly: the correctness-critical domain layer 
 
 ## 1 · Unit — the domain layer
 
-`domain/` has no React and no I/O (`.docs/10-mobile/mobile-architecture.md`), so it runs in plain Node, fast, with property-based tests where the input space is large.
+`domain/` has no React and no I/O (`.docs/02-architecture/mobile-architecture.md`), so it runs in plain Node, fast, with property-based tests where the input space is large.
 
 **`Money` (highest-value tests in the codebase)**
 - Parse decimal strings → `bigint` paise, including `"0.00"`, `"0.01"`, `"99999999999999.99"`, negative, `null`, `""`, `"1e10"`, and malformed input.

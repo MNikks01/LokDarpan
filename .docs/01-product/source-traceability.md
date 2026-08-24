@@ -26,7 +26,7 @@ flowchart TD
 
 - The source sheet opens instantly, with no spinner and no request.
 - Traceability **works fully offline** for any cached or saved figure — the promise does not evaporate when the network does.
-- A figure that arrives without provenance is **not rendered** (`.docs/10-mobile/mobile-architecture.md` §2); it renders as a `MissingProvenance` placeholder and logs a contract violation. Absence of a source is a defect, not a display variation.
+- A figure that arrives without provenance is **not rendered** (`.docs/02-architecture/mobile-architecture.md` §2); it renders as a `MissingProvenance` placeholder and logs a contract violation. Absence of a source is a defect, not a display variation.
 
 ---
 

@@ -190,7 +190,7 @@ packages/
 
 ## Money handling — unchanged and still critical
 
-`.docs/05-data-model/database-design.md` stores `NUMERIC(20,2)`. A national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and fails **silently**. The `Money` value object over `bigint` paise, and amounts crossing the wire as **decimal strings**, are required exactly as in `.docs/10-mobile/mobile-architecture.md`. This is a correctness requirement, not a mobile one, and it lives in `packages/money`.
+`.docs/05-data-model/database-design.md` stores `NUMERIC(20,2)`. A national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and fails **silently**. The `Money` value object over `bigint` paise, and amounts crossing the wire as **decimal strings**, are required exactly as in `.docs/02-architecture/mobile-architecture.md`. This is a correctness requirement, not a mobile one, and it lives in `packages/money`.
 
 ## What is deliberately not built for launch
 

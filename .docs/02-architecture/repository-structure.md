@@ -52,7 +52,7 @@ bharat-platform/
 
 ```text
 apps/mobile/
-├── app/                     Expo Router — routes ONLY (tree in .docs/10-mobile/navigation-architecture.md §Navigation tree)
+├── app/                     Expo Router — routes ONLY (tree in .docs/02-architecture/mobile-navigation-architecture.md §Navigation tree)
 ├── src/
 │   ├── features/            home · search · explore · units · projects · finance
 │   │                        procurement · consistency · sources · ask · saved
@@ -81,7 +81,7 @@ apps/mobile/
 └── package.json
 ```
 
-Layer responsibilities and the enforced dependency rules: `.docs/10-mobile/mobile-architecture.md`.
+Layer responsibilities and the enforced dependency rules: `.docs/02-architecture/mobile-architecture.md`.
 
 ### Directories that carry a warning
 

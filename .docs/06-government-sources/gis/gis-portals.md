@@ -24,7 +24,7 @@
 
 **No service endpoint was enumerated for any GIS source.** §15 asks specifically for WMS / WMTS / WFS / ArcGIS / GeoJSON / shapefile availability. None was tested.
 
-This matters directly for `.docs/10-mobile/gis-mobile-architecture.md`, which assumes the platform generates its own MVT tile pyramid from PostGIS. That design is sound **provided boundary and road geometry can actually be obtained**. Confirming that is a priority:
+This matters directly for `.docs/02-architecture/mobile-gis-architecture.md`, which assumes the platform generates its own MVT tile pyramid from PostGIS. That design is sound **provided boundary and road geometry can actually be obtained**. Confirming that is a priority:
 
 - Administrative boundaries at state → ward level
 - Road centrelines by class

@@ -120,7 +120,7 @@ Web can ship a breaking API change and reload every client. App-store clients li
 → **Requirement:** `GET /meta/client-support` returning minimum-supported and recommended build numbers, plus a soft-nudge / hard-block client flow.
 
 **C12 — `16-Development-Roadmap` Month 3 builds a Next.js dashboard.**
-Directly contradicts the mobile-only decision. Superseded by `.docs/10-mobile/roadmap-mobile.md`.
+Directly contradicts the mobile-only decision. Superseded by `.docs/01-product/roadmap-mobile.md`.
 
 **C13 — `09-Dashboard-Design` mandates English + Marathi, but no other doc carries the i18n requirement.**
 `12-Tech-Stack` lists no i18n library; `10-API` returns server-formatted strings (`Money.display`, `observation`) that cannot be localized client-side.
@@ -169,8 +169,8 @@ A scrollable feed of "problems near you" with push notifications is the standard
 
 ### Architectural risks
 
-**AR-1 — Map performance at national scale on low-end Android. (High)** ~10⁶ admin units and ~10⁷+ assets. *Mitigation:* MVT pyramid + server-side clustering + zoom-gated layers + hard feature cap; see `.docs/10-mobile/gis-mobile-architecture.md`.
-**AR-2 — No backend exists yet.** The mobile app is being designed against a specification, not a running API. *Mitigation:* the Zod-validated contract layer + fixture repositories (`.docs/10-mobile/mobile-architecture.md` §Repository boundary) make the app buildable and testable before the API ships, and make drift a loud, typed failure rather than a crash.
+**AR-1 — Map performance at national scale on low-end Android. (High)** ~10⁶ admin units and ~10⁷+ assets. *Mitigation:* MVT pyramid + server-side clustering + zoom-gated layers + hard feature cap; see `.docs/02-architecture/mobile-gis-architecture.md`.
+**AR-2 — No backend exists yet.** The mobile app is being designed against a specification, not a running API. *Mitigation:* the Zod-validated contract layer + fixture repositories (`.docs/02-architecture/mobile-architecture.md` §Repository boundary) make the app buildable and testable before the API ships, and make drift a loud, typed failure rather than a crash.
 **AR-3 — Offline correctness.** Cached financial figures are the same class of object as live ones; showing a stale ₹ figure without saying so is a traceability violation under `15`. *Mitigation:* `asOf` + `datasetVersion` are carried on **every** cached record and rendered; see `.docs/10-mobile/offline-strategy.md`.
 **AR-4 — Map library maturity vs. cost.** See `adr/006-maps.md`.
 **AR-5 — App-store review of a government-data app.** Both stores scrutinise apps that appear to represent a government. *Mitigation:* explicit non-affiliation copy in the store listing, on the About screen, and in onboarding.
@@ -178,7 +178,7 @@ A scrollable feed of "problems near you" with push notifications is the standard
 ### UX risks
 
 **UR-1 — "Verification Priority" will be read as "corruption score."** *Mitigation:* never red, never a gauge/speedometer, never sorted-descending as a headline list; always shown with its factor breakdown and its confidence; the band label leads with the *action* ("worth a closer look"), not a grade.
-**UR-2 — Deep hierarchies get lost.** Seven levels deep on a phone with no breadcrumb bar. *Mitigation:* persistent scope chip + "Up to <parent>" row + a long-press-back ancestor menu (`.docs/10-mobile/navigation-architecture.md`).
+**UR-2 — Deep hierarchies get lost.** Seven levels deep on a phone with no breadcrumb bar. *Mitigation:* persistent scope chip + "Up to <parent>" row + a long-press-back ancestor menu (`.docs/02-architecture/mobile-navigation-architecture.md`).
 **UR-3 — Source documents are hostile on mobile.** Scanned Marathi budget PDFs, 400 pages, no text layer. *Mitigation:* page-anchored open, an extracted-value overlay card shown *before* the raw page, and an honest "this document is a scan; the figure was read by OCR at 82% confidence" statement.
 **UR-4 — Font scaling + Devanagari + tabular money.** At 200% text scale with Marathi labels, money columns break. *Mitigation:* no fixed-width money columns; vertical label/value stacking above a scale threshold (`.docs/01-product/accessibility.md`).
 

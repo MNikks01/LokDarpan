@@ -96,7 +96,7 @@ figure → 🔗 (one tap, zero latency) → Source sheet
        → lineage: source → extraction → normalization → version → derived metrics
 ```
 
-Provenance is **embedded in every payload**, not fetched, so the chain is instant and works offline. A figure that arrives without provenance is **not rendered** — enforced at the type level by `<Figure>` and at the data layer by the mapper (`.docs/10-mobile/mobile-architecture.md` §2). `.docs/17-legal/legal-ethical-rules.md` rule 5 is a compile error, not a code review.
+Provenance is **embedded in every payload**, not fetched, so the chain is instant and works offline. A figure that arrives without provenance is **not rendered** — enforced at the type level by `<Figure>` and at the data layer by the mapper (`.docs/02-architecture/mobile-architecture.md` §2). `.docs/17-legal/legal-ethical-rules.md` rule 5 is a compile error, not a code review.
 
 ---
 
@@ -116,7 +116,7 @@ The most important single decision: **there is no global anomaly feed and no pus
 
 ### 11 · How does navigation stay understandable at depth?
 
-Four tabs; entity routes push onto the active tab's stack; a persistent **scope chip** (where I'm working) plus a contextual **ancestor row** (where this entity sits) plus **long-press-back** (how do I get out). No breadcrumb bar — 44 pt of permanent chrome for what the back stack already encodes. A 12-entry stack guard bounds depth. Deep links build a **synthetic back stack up the hierarchy** (`.docs/10-mobile/navigation-architecture.md`).
+Four tabs; entity routes push onto the active tab's stack; a persistent **scope chip** (where I'm working) plus a contextual **ancestor row** (where this entity sits) plus **long-press-back** (how do I get out). No breadcrumb bar — 44 pt of permanent chrome for what the back stack already encodes. A 12-entry stack guard bounds depth. Deep links build a **synthetic back stack up the hierarchy** (`.docs/02-architecture/mobile-navigation-architecture.md`).
 
 ---
 

@@ -6,7 +6,7 @@
 
 **Build and launch the website first. Defer the mobile application until the web product is live.**
 
-This reverses the mobile-only decision that `.docs/00-overview/document-audit.md` through `.docs/10-mobile/roadmap-mobile.md` were written under. It does **not** cancel the mobile app — it re-orders delivery.
+This reverses the mobile-only decision that `.docs/00-overview/document-audit.md` through `.docs/01-product/roadmap-mobile.md` were written under. It does **not** cancel the mobile app — it re-orders delivery.
 
 ## Context
 
@@ -114,7 +114,7 @@ Everything else in the P0 list — search, money as decimal strings, both varian
 
 Stated plainly rather than glossed:
 
-1. **Some genuinely mobile-specific work is now deferred, not banked.** `.docs/10-mobile/navigation-architecture.md` (bottom-tab navigation), `.docs/10-mobile/gis-mobile-architecture.md` (map zoom ladder and offline tile packs), `.docs/10-mobile/offline-strategy.md` (three-tier offline storage), most of `.docs/wireframes/`, and ADRs 001–010 were written for a client that will now be built later, against a then-current toolchain. Expect some of it to need revision when mobile resumes. The IA, journeys, design system and neutrality work inside those documents remain valid.
+1. **Some genuinely mobile-specific work is now deferred, not banked.** `.docs/02-architecture/mobile-navigation-architecture.md` (bottom-tab navigation), `.docs/02-architecture/mobile-gis-architecture.md` (map zoom ladder and offline tile packs), `.docs/10-mobile/offline-strategy.md` (three-tier offline storage), most of `.docs/wireframes/`, and ADRs 001–010 were written for a client that will now be built later, against a then-current toolchain. Expect some of it to need revision when mobile resumes. The IA, journeys, design system and neutrality work inside those documents remain valid.
 
 2. **The citizen "near me" journey weakens.** J1 depended on device geolocation and a map-first entry. Browser geolocation exists but is a worse experience and is often denied. The citizen audience is genuinely better served on mobile, and this pivot accepts a delay in serving them well.
 

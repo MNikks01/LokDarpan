@@ -84,7 +84,7 @@ Which domain entities (`.docs/05-data-model/database-design.md`, `.docs/05-data-
 
 ## Structural invariants
 
-1. **Provenance appears on 37 of 50 data-bearing screens** — every one that renders a figure. There is no screen on which a monetary or derived value appears without a source affordance (`.docs/10-mobile/mobile-architecture.md` §2 makes this a compile-time property).
+1. **Provenance appears on 37 of 50 data-bearing screens** — every one that renders a figure. There is no screen on which a monetary or derived value appears without a source affordance (`.docs/02-architecture/mobile-architecture.md` §2 makes this a compile-time property).
 2. **AdminUnit is the spine.** It appears on nearly every screen because `.docs/03-domain/administrative-hierarchy.md`'s hierarchy is what makes one Unit screen serve every level. If a future screen cannot be expressed in terms of `admin_unit`, that is a signal it is a desktop pattern in disguise.
 3. **Contractor is never co-rendered with VerificationPriority.** Deliberate and load-bearing: `.docs/08-risk/risk-scoring-engine.md` forbids ranking people. Placing a risk score on a contractor screen — even accidentally, by reusing a card component — would breach `.docs/17-legal/legal-ethical-rules.md`. This matrix is the artefact that makes the omission visible and auditable.
 4. **Coverage is a first-class entity**, not a UI state. It appears on 10 screens because "what is missing, and which source would carry it" is part of the product's factual content, not an error condition (`.docs/17-legal/legal-ethical-rules.md` rule 8).

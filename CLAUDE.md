@@ -32,8 +32,8 @@ apps/web/       Next.js public site — the first product, W1 built
 apps/mobile/    React Native / Expo — deferred until after web launch
 services/       ingestion · normalization · entity-resolution · analytics
                 risk-engine · ai · api
-packages/       money · neutrality · contracts · domain · validation
-                config · database · observability · errors · utils
+packages/       money · neutrality · contracts · domain
+                config · database · observability · errors
 data/           raw (immutable) · staging · normalized · reference · fixtures · samples
 database/       migrations · seeds · functions · views
 ```
@@ -95,7 +95,7 @@ These come from cross-referencing several documents; each is load-bearing.
 
 **API** (`.docs/adr/012`): **REST, called server-side from RSC — not GraphQL.** GraphQL was genuinely reconsidered for web (the mobile arguments about bundle size and offline caching don't apply) and declined on new grounds: RSC already solves over-fetching by moving the fetch to the server, and one payload must carry one `datasetVersion` or two figures on a page carry different provenance vintages — a traceability defect, not a caching one.
 
-**Mobile, deferred** (`.docs/10-mobile/mobile-architecture.md`): Expo + React Native, four enforced layers, four bottom tabs. Stands for when mobile resumes; revalidate the toolchain at that point.
+**Mobile, deferred** (`.docs/02-architecture/mobile-architecture.md`): Expo + React Native, four enforced layers, four bottom tabs. Stands for when mobile resumes; revalidate the toolchain at that point.
 
 Twelve ADRs in `.docs/adr/` record technology decisions with alternatives and trade-offs. **ADRs append; they are never rewritten.** 011–012 are active; 001–010 carry a `Deferred` status header and stay.
 

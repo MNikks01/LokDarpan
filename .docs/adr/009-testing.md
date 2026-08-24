@@ -33,7 +33,7 @@ Trade-off accepted: less precise waiting control, occasionally requiring explici
 
 **1 · Contract tests are the most valuable tests in the repo.** With no backend, `data/contracts/` Zod schemas + recorded fixtures **are** the API specification (`.docs/11-api/client-api-contract.md`). Negative cases are as important as positive ones: money as a JS number → rejected; missing `provenance` → rejected; unknown enum → typed error, not a crash. When the backend ships, a nightly job records live responses and diffs them against the committed fixtures, **opening a PR on drift** — so schema drift becomes a review item, not a production incident.
 
-**2 · Type-level tests via `tsd`.** `<Figure>` without `provenance` and `<Observation>` with a string literal must both **fail to compile**. These assertions are how `.docs/17-legal/legal-ethical-rules.md` rules 4 and 5 become structural rather than reviewed (`.docs/10-mobile/mobile-architecture.md` §2–3).
+**2 · Type-level tests via `tsd`.** `<Figure>` without `provenance` and `<Observation>` with a string literal must both **fail to compile**. These assertions are how `.docs/17-legal/legal-ethical-rules.md` rules 4 and 5 become structural rather than reviewed (`.docs/02-architecture/mobile-architecture.md` §2–3).
 
 **3 · The guardrail suite blocks merges.** G1 neutrality lint across all locales · G2 provenance enforcement · G3 palette (no red in any band) · G4 accessibility · G5 privacy (no content in telemetry) · G6 mock isolation · G7 performance budgets · G8 security. Details in `.docs/14-testing/testing-strategy.md` §6. These are not "nice to have" checks — G1 and G2 are the automated expression of a binding legal-ethical document.
 

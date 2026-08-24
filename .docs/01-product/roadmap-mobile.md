@@ -121,4 +121,4 @@ Every phase exits only when: screens match `.docs/wireframes/` · all states fro
 | 5 — India roads | Per-state tile packs; re-validate map budgets; **map cost/licence review gate** |
 | 6–8 — India, all | Re-validate list/search/map budgets on the then-current reference device |
 
-If any of these requires new screens rather than configuration, the level- and domain-agnostic design has failed somewhere, and that is the signal to revisit `.docs/10-mobile/mobile-architecture.md` §Scaling rather than to add screens.
+If any of these requires new screens rather than configuration, the level- and domain-agnostic design has failed somewhere, and that is the signal to revisit `.docs/02-architecture/mobile-architecture.md` §Scaling rather than to add screens.

@@ -9,6 +9,6 @@
 | ER diagrams (Phase 1 + national) | [`../05-data-model/database-design.md`](../05-data-model/database-design.md) |
 | Ingestion pipeline | [`../04-data-engineering/data-collection-architecture.md`](../04-data-engineering/data-collection-architecture.md) |
 | User journeys | [`../01-product/user-journeys.md`](../01-product/user-journeys.md) |
-| Navigation tree | [`../10-mobile/navigation-architecture.md`](../10-mobile/navigation-architecture.md) |
+| Navigation tree (mobile) | [`../02-architecture/mobile-navigation-architecture.md`](../02-architecture/mobile-navigation-architecture.md) |
 
 Extract a diagram here only when it is referenced from more than one document.

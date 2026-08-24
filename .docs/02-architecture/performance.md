@@ -84,7 +84,7 @@ The last two matter commercially: on a ₹19 daily data pack, an app that spends
 
 ### Map
 
-Specified in `.docs/10-mobile/gis-mobile-architecture.md` §9: basemap ≤1.5 s, data layer ≤2.5 s, ≥50 fps pan, ≤400 features, ≤180 MB incremental.
+Specified in `.docs/02-architecture/mobile-gis-architecture.md` §9: basemap ≤1.5 s, data layer ≤2.5 s, ≥50 fps pan, ≤400 features, ≤180 MB incremental.
 
 ---
 

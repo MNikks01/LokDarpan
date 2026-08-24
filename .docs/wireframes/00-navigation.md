@@ -60,7 +60,7 @@ The scope header is per-tab and sticky. `🔔` and `⚙` appear on Home only; ot
 └──────────────────────────────────────────────┘
 ```
 
-Detents per sheet in `.docs/10-mobile/navigation-architecture.md`. **Max sheet depth 2**; a third would open as a screen.
+Detents per sheet in `.docs/02-architecture/mobile-navigation-architecture.md`. **Max sheet depth 2**; a third would open as a screen.
 
 ## Deep-link landing (synthetic stack)
 

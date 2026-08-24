@@ -4,7 +4,7 @@
 
 ## Context
 
-The data is 7–9 levels deep and densely cross-linked (project → contractor → tender → project). Sideways navigation is normal, not exceptional. Deep links must address every entity, and they are the *only* stable public address for a record now that there is no website (`.docs/10-mobile/deep-linking.md`). Full analysis: `.docs/10-mobile/navigation-architecture.md`.
+The data is 7–9 levels deep and densely cross-linked (project → contractor → tender → project). Sideways navigation is normal, not exceptional. Deep links must address every entity, and they are the *only* stable public address for a record now that there is no website (`.docs/10-mobile/deep-linking.md`). Full analysis: `.docs/02-architecture/mobile-navigation-architecture.md`.
 
 ## Decision
 
@@ -35,7 +35,7 @@ The data is 7–9 levels deep and densely cross-linked (project → contractor �
 
 - **A screen can exist in two stacks.** Accepted, and correct: two stacks are two independent investigations. Memory is bounded by the 12-entry stack guard.
 - **Deep stacks still need an escape.** Handled by long-press-back and the ancestor row; without them, a 9-deep stack would need 9 taps to unwind.
-- **File-based routing constrains route shapes.** Acceptable; the tree in `.docs/10-mobile/navigation-architecture.md` maps cleanly onto it.
+- **File-based routing constrains route shapes.** Acceptable; the tree in `.docs/02-architecture/mobile-navigation-architecture.md` maps cleanly onto it.
 - **Sheets are less discoverable than persistent panels.** Mitigated by making the source affordance a visible chip on every figure rather than a hidden gesture.
 
 ## Consequences

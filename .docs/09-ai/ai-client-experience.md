@@ -113,7 +113,7 @@ Likewise, an adversarial question ("isn't this corruption?") produces a deflecti
 
 ## Neutral copy pipeline (and the localization problem)
 
-`.docs/01-product/dashboard-design-legacy.md` requires English + Marathi. But `observation` strings and AI answers are **server-generated, neutrality-checked text** — and the client is forbidden from composing such text itself (`.docs/10-mobile/mobile-architecture.md` §3, `ServerText`). This creates a real conflict: the client cannot translate them, and shipping only English defeats the civic audience.
+`.docs/01-product/dashboard-design-legacy.md` requires English + Marathi. But `observation` strings and AI answers are **server-generated, neutrality-checked text** — and the client is forbidden from composing such text itself (`.docs/02-architecture/mobile-architecture.md` §3, `ServerText`). This creates a real conflict: the client cannot translate them, and shipping only English defeats the civic audience.
 
 **Requirement (`00-document-audit` C13 / M6):** neutral text crosses the wire as a **template key plus typed parameters**, alongside the rendered English:
 

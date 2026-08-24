@@ -168,7 +168,7 @@ Fast, purposeful, cheap on a mid-range GPU.
 
 ### Neutrality primitives — the components that encode `.docs/17-legal/legal-ethical-rules.md`
 
-These four are the reason the design system exists. Each makes a rule from `.docs/17-legal/legal-ethical-rules.md` structurally impossible to violate (see `.docs/10-mobile/mobile-architecture.md` §3).
+These four are the reason the design system exists. Each makes a rule from `.docs/17-legal/legal-ethical-rules.md` structurally impossible to violate (see `.docs/02-architecture/mobile-architecture.md` §3).
 
 **`<Figure>`** — the only way to display a fact.
 ```text

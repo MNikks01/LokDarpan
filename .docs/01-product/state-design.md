@@ -124,7 +124,7 @@ Every error states what happened, what it means, and what to do — and preserve
 | **Location denied** | Not an error — S-05 "Choose your area" is offered as an equal path | Choose area · Open settings |
 | **Document unavailable** | "The publisher's copy is no longer reachable. This is our archived copy from 30 Jul 2026." | View archived · Open original |
 
-**Section-level, not screen-level.** A failed road-intelligence section shows an inline retry while the Money Trail beside it keeps working (`.docs/10-mobile/mobile-architecture.md` §Error boundaries). A whole-screen error for a partial failure discards data the user could have used.
+**Section-level, not screen-level.** A failed road-intelligence section shows an inline retry while the Money Trail beside it keeps working (`.docs/02-architecture/mobile-architecture.md` §Error boundaries). A whole-screen error for a partial failure discards data the user could have used.
 
 **Never:** a raw HTTP status · a stack trace · "Oops!" · a blaming tone · a dead end without an action · an error that clears already-loaded content.
 

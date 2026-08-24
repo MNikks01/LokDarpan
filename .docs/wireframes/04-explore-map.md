@@ -33,7 +33,7 @@
 └──────────────────────────────────────────────┘
 ```
 
-- Individual projects appear only at **z ≥ 11**; below that, choropleths and clusters (`.docs/10-mobile/gis-mobile-architecture.md` §3).
+- Individual projects appear only at **z ≥ 11**; below that, choropleths and clusters (`.docs/02-architecture/mobile-gis-architecture.md` §3).
 - Hard cap 400 features, and exceeding it is stated, never silent.
 - `⊕ ⊖` exist because pinch must not be the only way to zoom (WCAG 2.2).
 

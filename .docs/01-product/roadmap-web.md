@@ -1,6 +1,6 @@
 # 28 — Web Implementation Roadmap
 
-**Status:** Accepted · 2026-08-24 · Supersedes `.docs/10-mobile/roadmap-mobile.md` as the active plan (25 is retained for the deferred mobile build)
+**Status:** Accepted · 2026-08-24 · Supersedes `.docs/01-product/roadmap-mobile.md` as the active plan (25 is retained for the deferred mobile build)
 
 Replaces Month 3 of `.docs/01-product/roadmap-platform.md` with a fuller plan; Months 1, 2, 4, 5, 6 of `.docs/01-product/roadmap-platform.md` (backend, analytics, AI, anomaly/risk, hardening) stand, with the contract additions in `.docs/11-api/client-api-contract.md`.
 

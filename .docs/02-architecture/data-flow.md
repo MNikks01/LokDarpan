@@ -53,7 +53,7 @@ Repository                  — the ONLY place that knows about the network or S
 apiClient                   — timeout, retry, cancellation, ETag, requestId, error normalization
 ```
 
-**Boundaries that are enforced, not merely recommended** (`.docs/10-mobile/mobile-architecture.md` §Dependency rules, ESLint `import/no-restricted-paths`):
+**Boundaries that are enforced, not merely recommended** (`.docs/02-architecture/mobile-architecture.md` §Dependency rules, ESLint `import/no-restricted-paths`):
 - A screen may not import `apiClient`, a Zod schema, or a SQLite handle.
 - A repository may not import React.
 - A DTO type may not escape the repository layer; screens see domain types only.

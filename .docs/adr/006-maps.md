@@ -4,7 +4,7 @@
 
 ## Context
 
-Maps are core (`.docs/03-domain/gis-intelligence.md`, `.docs/10-mobile/gis-mobile-architecture.md`). Requirements:
+Maps are core (`.docs/03-domain/gis-intelligence.md`, `.docs/02-architecture/mobile-gis-architecture.md`). Requirements:
 
 - Consume the **MVT tile pyramid the GIS service already builds** (`.docs/03-domain/gis-intelligence.md`) — this is decided infrastructure, not a choice.
 - **Data-driven choropleths** (fill colour from a feature property) — the precomputed per-unit metric is baked into the tile.
