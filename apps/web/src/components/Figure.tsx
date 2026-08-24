@@ -1,3 +1,4 @@
+import type React from "react";
 import type { Provenance, Figure as FigureData } from "@lokdarpan/contracts";
 import { Money } from "@lokdarpan/money";
 import { color, figureFontFeatures } from "@/ui/tokens";
@@ -26,7 +27,7 @@ function confidenceNote(p: Provenance): string | null {
   return null;
 }
 
-export function Figure({ label, data, emphasis = "md" }: FigureProps) {
+export function Figure({ label, data, emphasis = "md" }: FigureProps): React.JSX.Element {
   if (!data.present) {
     // docs/15 rule 8: absence is shown explicitly, never as ₹0, never blank.
     return (
@@ -37,8 +38,8 @@ export function Figure({ label, data, emphasis = "md" }: FigureProps) {
           {data.missingReason}
         </div>
         <p style={{ fontSize: 13, color: color.text.secondary, margin: "8px 0 0" }}>
-          This does not mean no money was spent — it means the record has not been
-          published or collected yet.
+          This does not mean no money was spent — it means the record has not been published or
+          collected yet.
         </p>
         {data.expectedSource && (
           <div style={{ fontSize: 12, color: color.text.tertiary, marginTop: 6 }}>
@@ -59,7 +60,12 @@ export function Figure({ label, data, emphasis = "md" }: FigureProps) {
     <div>
       <div style={{ fontSize: 13, color: color.text.secondary }}>{label}</div>
       <div
-        style={{ fontSize: size, fontWeight: 600, color: color.text.primary, ...figureFontFeatures }}
+        style={{
+          fontSize: size,
+          fontWeight: 600,
+          color: color.text.primary,
+          ...figureFontFeatures,
+        }}
         // Screen reader hears the value AND its source AND its confidence.
         aria-label={`${label}: ${money.toAccessibleString()}. Source: ${p.sourceName}. ${
           note ?? "High confidence."
@@ -68,7 +74,7 @@ export function Figure({ label, data, emphasis = "md" }: FigureProps) {
         {money.format()}
       </div>
       <a
-        href={`/source/${p.sourceDocumentId}${p.page ? `?page=${p.page}` : ""}`}
+        href={`/source/${String(p.sourceDocumentId)}${p.page === null ? "" : `?page=${String(p.page)}`}`}
         style={{ fontSize: 12, color: color.text.secondary, textDecoration: "none" }}
       >
         🔗 {p.sourceName}

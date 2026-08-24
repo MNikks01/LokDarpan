@@ -10,15 +10,15 @@ Everything else is rejected. The reasoning matters more than the feature list, b
 
 ## What is rejected, and why
 
-| Rejected | Why |
-|---|---|
-| **"3 new anomalies near you"** | The single most dangerous feature the product could ship. A push notification is a decontextualised, un-sourced, un-caveated sentence on a lock screen — with no factor breakdown, no confidence, no disclaimer, no source link. `.docs/17-legal/legal-ethical-rules.md` forbids implying wrongdoing; a lock-screen alert about "anomalies" implies it before the phone is unlocked. It would also train users to read variance as scandal, which is the exact failure mode `00-document-audit` PR-3 identifies |
-| **Trending / most-viewed projects** | Manufactures salience the data does not support, and would rank projects by attention rather than fact |
-| **"Your district ranks 3rd worst"** | `.docs/08-risk/risk-scoring-engine.md` explicitly forbids ranking. Not built |
-| **Re-engagement pushes** ("you haven't checked in") | Engagement machinery in a civic tool; erodes the seriousness the product depends on |
-| **Any AI-generated notification text** | `.docs/09-ai/ai-layer.md` guardrails cannot be verified by a user on a lock screen, and an AI sentence without its citations violates the citation-enforcement rule |
-| **Marketing, feature announcements, surveys** | Use the app's own surfaces |
-| **Badge counts on the tab bar** | A permanent red dot over "observations" is an anxiety loop attached to neutral data |
+| Rejected                                            | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **"3 new anomalies near you"**                      | The single most dangerous feature the product could ship. A push notification is a decontextualised, un-sourced, un-caveated sentence on a lock screen — with no factor breakdown, no confidence, no disclaimer, no source link. `.docs/17-legal/legal-ethical-rules.md` forbids implying wrongdoing; a lock-screen alert about "anomalies" implies it before the phone is unlocked. It would also train users to read variance as scandal, which is the exact failure mode `00-document-audit` PR-3 identifies |
+| **Trending / most-viewed projects**                 | Manufactures salience the data does not support, and would rank projects by attention rather than fact                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **"Your district ranks 3rd worst"**                 | `.docs/08-risk/risk-scoring-engine.md` explicitly forbids ranking. Not built                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Re-engagement pushes** ("you haven't checked in") | Engagement machinery in a civic tool; erodes the seriousness the product depends on                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Any AI-generated notification text**              | `.docs/09-ai/ai-layer.md` guardrails cannot be verified by a user on a lock screen, and an AI sentence without its citations violates the citation-enforcement rule                                                                                                                                                                                                                                                                                                                                             |
+| **Marketing, feature announcements, surveys**       | Use the app's own surfaces                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **Badge counts on the tab bar**                     | A permanent red dot over "observations" is an anxiety loop attached to neutral data                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ---
 
@@ -26,15 +26,15 @@ Everything else is rejected. The reasoning matters more than the feature list, b
 
 Per **saved item**, opt-in per change type (S-65). Default: figures only.
 
-| Change | Default | Example |
-|---|---|---|
-| **A financial figure changed** | ✅ on | "Utilized: ₹8.00 cr → ₹8.60 cr — new expenditure record" |
-| **A new ledger record was published** | ✅ on | "New release recorded: ₹1.00 cr, 12 Sep 2026" |
-| Project status changed | off | "Status: in progress → completed" |
-| A value was superseded (budget revision) | off | "Allocation revised: ₹10.00 cr → ₹11.50 cr" |
-| A new observation appeared | **off** | "1 new consistency observation" — **count only, never the text** |
-| A source document was superseded | off | "The source for this project's expenditure was updated" |
-| Coverage improved for a saved unit | off | "Expenditure records are now available for Katewadi GP" |
+| Change                                   | Default | Example                                                          |
+| ---------------------------------------- | ------- | ---------------------------------------------------------------- |
+| **A financial figure changed**           | ✅ on   | "Utilized: ₹8.00 cr → ₹8.60 cr — new expenditure record"         |
+| **A new ledger record was published**    | ✅ on   | "New release recorded: ₹1.00 cr, 12 Sep 2026"                    |
+| Project status changed                   | off     | "Status: in progress → completed"                                |
+| A value was superseded (budget revision) | off     | "Allocation revised: ₹10.00 cr → ₹11.50 cr"                      |
+| A new observation appeared               | **off** | "1 new consistency observation" — **count only, never the text** |
+| A source document was superseded         | off     | "The source for this project's expenditure was updated"          |
+| Coverage improved for a saved unit       | off     | "Expenditure records are now available for Katewadi GP"          |
 
 Note the deliberate asymmetry: a **new observation** is off by default and, when enabled, carries only a count. The observation text — even though it is server-generated and neutrality-checked — does not belong on a lock screen where it will be read without its evidence, confidence, and disclaimer.
 
@@ -44,7 +44,7 @@ Note the deliberate asymmetry: a **new observation** is off by default and, when
 
 The conventional design registers `(deviceToken, entityId)` pairs on the server and pushes. That creates a database of **which anonymous person is monitoring which government contract**.
 
-For this product's audience that is a genuinely sensitive dataset. An RTI activist tracking one contractor's awards, a local journalist watching a specific road, a resident monitoring their panchayat's accounts — a server-side subscription table records exactly that intent, and it is a dataset that can be breached, subpoenaed, or correlated with other logs. It would be the *only* meaningfully sensitive dataset the platform holds, in a system that otherwise deals exclusively in public records.
+For this product's audience that is a genuinely sensitive dataset. An RTI activist tracking one contractor's awards, a local journalist watching a specific road, a resident monitoring their panchayat's accounts — a server-side subscription table records exactly that intent, and it is a dataset that can be breached, subpoenaed, or correlated with other logs. It would be the _only_ meaningfully sensitive dataset the platform holds, in a system that otherwise deals exclusively in public records.
 
 **Chosen design — client-side diffing:**
 
@@ -60,14 +60,14 @@ sequenceDiagram
   D->>D: schedule a LOCAL notification (never leaves the device)
 ```
 
-| Property | Server push | On-device diff |
-|---|---|---|
-| Server knows what you watch | **Yes** | **No** |
-| Requires a device token | Yes | No |
-| Works with no account | Yes | Yes |
-| Latency | Seconds | Up to ~6 h |
-| Battery / data | Lower | One small request per cycle |
-| Works if push is denied | No | **Yes** — updates still appear in S-11 |
+| Property                    | Server push | On-device diff                         |
+| --------------------------- | ----------- | -------------------------------------- |
+| Server knows what you watch | **Yes**     | **No**                                 |
+| Requires a device token     | Yes         | No                                     |
+| Works with no account       | Yes         | Yes                                    |
+| Latency                     | Seconds     | Up to ~6 h                             |
+| Battery / data              | Lower       | One small request per cycle            |
+| Works if push is denied     | No          | **Yes** — updates still appear in S-11 |
 
 Latency is the cost, and it is an acceptable one: the underlying data publishes at most daily (`.docs/02-architecture/system-architecture.md` cron), so a six-hour detection window is well inside the data's own cadence. There is no scenario in this product where six hours of notification latency harms a user, and there is a clear scenario where a subscription database harms one.
 

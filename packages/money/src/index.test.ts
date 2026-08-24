@@ -14,7 +14,18 @@ describe("Money.fromDecimalString", () => {
   });
 
   it("rejects anything that is not an exact decimal amount", () => {
-    for (const bad of ["", " ", "abc", "1e10", "1.234", "1,000", "NaN", "Infinity", "--1", "1.2.3"]) {
+    for (const bad of [
+      "",
+      " ",
+      "abc",
+      "1e10",
+      "1.234",
+      "1,000",
+      "NaN",
+      "Infinity",
+      "--1",
+      "1.2.3",
+    ]) {
       expect(() => Money.fromDecimalString(bad)).toThrow(TypeError);
     }
   });
@@ -31,6 +42,9 @@ describe("national-scale precision (the reason bigint exists)", () => {
     const exact = Money.fromDecimalString("90071992547409.93");
     expect(exact.toDecimalString()).toBe("90071992547409.93");
     // Demonstrate the failure this class exists to prevent:
+    // The precision loss IS the point: this literal is what a float produces,
+    // and asserting it differs is how we demonstrate the bug Money prevents.
+    // eslint-disable-next-line no-loss-of-precision
     expect(Number("90071992547409.93") * 100).not.toBe(9007199254740993);
   });
 
@@ -75,7 +89,7 @@ describe("Indian formatting", () => {
 describe("arithmetic", () => {
   it("adds and subtracts exactly", () => {
     const a = Money.fromDecimalString("100000000.00"); // ₹10 cr
-    const b = Money.fromDecimalString("80000000.00");  // ₹8 cr
+    const b = Money.fromDecimalString("80000000.00"); // ₹8 cr
     expect(a.minus(b).format()).toBe("₹2.00 crore");
     expect(a.plus(b).format()).toBe("₹18.00 crore");
   });
@@ -100,7 +114,9 @@ describe("arithmetic", () => {
 describe("accessibility", () => {
   it("speaks the unit rather than a digit string", () => {
     expect(Money.fromDecimalString("80000000").toAccessibleString()).toBe("8.00 crore rupees");
-    expect(Money.fromDecimalString("-80000000").toAccessibleString()).toBe("minus 8.00 crore rupees");
+    expect(Money.fromDecimalString("-80000000").toAccessibleString()).toBe(
+      "minus 8.00 crore rupees",
+    );
   });
 });
 

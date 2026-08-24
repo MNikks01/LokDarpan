@@ -19,9 +19,9 @@ S-35 Observation  ▸ "Explain this observation"       → scope = observation
 S-49 Observations ▸ "Explain these"                  → scope = unit + type
 ```
 
-Why this matters more on mobile than on web: a full-screen chat box with a blinking cursor is an invitation to ask *anything*, and the great majority of "anything" is outside the ingested ledger. Every such question ends in the mandated refusal — *"No ingested official records cover this"* — which trains users that the feature is broken. Binding the scope means the question space is one the retriever can actually serve, and the first answer a user sees is a good one.
+Why this matters more on mobile than on web: a full-screen chat box with a blinking cursor is an invitation to ask _anything_, and the great majority of "anything" is outside the ingested ledger. Every such question ends in the mandated refusal — _"No ingested official records cover this"_ — which trains users that the feature is broken. Binding the scope means the question space is one the retriever can actually serve, and the first answer a user sees is a good one.
 
-A visible, immutable scope header also does neutrality work: the answer is manifestly *about these records*, not about a place, a department, or a person in general.
+A visible, immutable scope header also does neutrality work: the answer is manifestly _about these records_, not about a place, a department, or a person in general.
 
 ```text
 ┌────────────────────────────────────────────┐
@@ -52,7 +52,7 @@ Every answer renders in four parts, in this order:
 1. **The answer** — short, neutral, with a superscript citation on every factual sentence.
 2. **Figures** — the numbers used, as `<Figure>` components with full provenance. The reader can verify without re-reading prose.
 3. **Citations** — the source documents, tappable to S-52 → S-54.
-4. **Guardrail note** — always present: *"Answer restricted to ingested official figures; no inference of cause."* plus any `refusedClaims`.
+4. **Guardrail note** — always present: _"Answer restricted to ingested official figures; no inference of cause."_ plus any `refusedClaims`.
 
 ```text
 For rural roads in Pune district (FY2024-25), ingested official records
@@ -69,6 +69,7 @@ present in the ingested sources⁴.
 ```
 
 **Hard client rules:**
+
 - An answer with **zero citations is never displayed** — the client drops it and falls back to the template summary. This is client-side defence in depth behind `.docs/09-ai/ai-layer.md`'s server-side citation enforcement.
 - Numbers in prose are rendered by `<Figure>`, not as plain text, so every one of them is tappable to its source.
 - The AI **never** renders a `<VerificationPriorityChip>`, a severity badge, or any judgment-bearing component. It renders prose, figures, and citations.
@@ -87,7 +88,7 @@ Checking figures against sources…                    ← validation step
 <tokens stream>
 ```
 
-Naming the steps is not cosmetic: it tells the user the answer is being built *from records*, which is the entire trust proposition. It is also the honest description of what the pipeline is doing.
+Naming the steps is not cosmetic: it tells the user the answer is being built _from records_, which is the entire trust proposition. It is also the honest description of what the pipeline is doing.
 
 **Client rule:** the streamed text is held in a pending state and is **not** treated as final until the terminal event carrying citations and the guardrail verdict arrives. If the stream ends without that terminal event, the partial text is discarded and the template fallback is shown. A half-validated financial statement must never remain on screen.
 
@@ -95,7 +96,7 @@ Naming the steps is not cosmetic: it tells the user the answer is being built *f
 
 ## Refusals are a designed state, not an error
 
-The `.docs/09-ai/ai-layer.md` refusal — *"No ingested official records cover this"* — is rendered as a **first-class informational state**, never as an error, never with an apology, never with a retry-the-same-question button:
+The `.docs/09-ai/ai-layer.md` refusal — _"No ingested official records cover this"_ — is rendered as a **first-class informational state**, never as an error, never with an apology, never with a retry-the-same-question button:
 
 ```text
 No ingested official records cover this.
@@ -122,7 +123,9 @@ Likewise, an adversarial question ("isn't this corruption?") produces a deflecti
   "observation": {
     "key": "cost_per_km_above_district_median",
     "params": { "pct": 23.1, "n": 19, "category": "rural_road" },
-    "rendered": { "en": "Reported cost per km is 23% above the district median for comparable rural roads (n=19)." }
+    "rendered": {
+      "en": "Reported cost per km is 23% above the district median for comparable rural roads (n=19)."
+    }
   }
 }
 ```
@@ -137,7 +140,7 @@ Free-form AI answers cannot use this mechanism. For non-English locales in Phase
 
 AI is one tap from every entity screen and is the most expensive endpoint in the system.
 
-- Anonymous per-install quota, surfaced honestly *before* it is hit: *"3 questions left today."*
+- Anonymous per-install quota, surfaced honestly _before_ it is hit: _"3 questions left today."_
 - Identical (scope, question, `datasetVersion`) tuples are served from cache and **do not consume quota** — re-reading an answer must be free.
 - On quota exhaustion: the deterministic template summary from `.docs/09-ai/ai-layer.md` §Templated fallback is still available, so the user is never left with nothing.
 - Client-side: no auto-retry on failure, no background pre-fetching of speculative answers, no "regenerate" button (a second generation of a neutrality-checked financial statement invites shopping for a preferred answer).
@@ -172,6 +175,6 @@ Beyond the `.docs/09-ai/ai-layer.md` prohibitions, which bind here identically:
 
 - No push notification containing an AI-generated statement.
 - No AI-generated text in a shared card, a screenshot overlay, or an export — shared artifacts carry figures and sources only.
-- No AI summary rendered *above* the source-linked figures on any screen; the deterministic ledger is always the primary content and the AI is always secondary (`.docs/09-ai/ai-layer.md`: *"if AI and ledger disagree, the ledger wins"*).
+- No AI summary rendered _above_ the source-linked figures on any screen; the deterministic ledger is always the primary content and the AI is always secondary (`.docs/09-ai/ai-layer.md`: _"if AI and ledger disagree, the ledger wins"_).
 - No proactive/unsolicited AI commentary anywhere — no "insights", no "did you know", no auto-generated observations on Home.
 - No persona, no name, no avatar, no conversational filler. The surface is labelled "Ask", not given a personality; a personality invites trust the guardrails cannot underwrite.

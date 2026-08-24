@@ -28,8 +28,8 @@ export const FiscalYearSchema = z.string().regex(/^FY\d{4}-\d{2}$/);
  * different risks, and conflating them hides the most serious one.
  */
 export const ExtractionConfidenceSchema = z.number().min(0).max(1); // did we read it right?
-export const LinkageConfidenceSchema = z.number().min(0).max(1);    // does it belong to this project?
-export const ScoreConfidenceSchema = z.number().min(0).max(1);      // how sure is the derived score?
+export const LinkageConfidenceSchema = z.number().min(0).max(1); // does it belong to this project?
+export const ScoreConfidenceSchema = z.number().min(0).max(1); // how sure is the derived score?
 
 /**
  * Provenance travels WITH every fact — never fetched separately.
@@ -70,7 +70,11 @@ export type Missing = z.infer<typeof MissingSchema>;
 
 /** Every figure is either present WITH provenance, or explicitly missing. */
 export const FigureSchema = z.union([
-  z.object({ present: z.literal(true), amountInr: StrictAmountSchema, provenance: ProvenanceSchema }),
+  z.object({
+    present: z.literal(true),
+    amountInr: StrictAmountSchema,
+    provenance: ProvenanceSchema,
+  }),
   z.object({ present: z.literal(false) }).merge(MissingSchema),
 ]);
 export type Figure = z.infer<typeof FigureSchema>;

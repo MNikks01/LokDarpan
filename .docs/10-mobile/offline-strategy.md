@@ -20,11 +20,11 @@ Conflating them turns a dropped connection into an implied accusation of non-pub
 
 ## Three storage tiers
 
-| Tier | Store | Contents | Lifetime | Guarantee |
-|---|---|---|---|---|
-| **1 · Ephemeral** | TanStack Query → MMKV | Everything recently viewed | LRU, 24 MB, 14-day max age | "What you looked at recently still opens" |
-| **2 · Durable** | SQLite (Drizzle) | Saved items + full offline bundles; queued reports | Until the user deletes | "Saved means saved" |
-| **3 · Binary** | Filesystem + map tile store | Downloaded documents; offline map packs | Until the user deletes | "You chose this; it stays" |
+| Tier              | Store                       | Contents                                           | Lifetime                   | Guarantee                                 |
+| ----------------- | --------------------------- | -------------------------------------------------- | -------------------------- | ----------------------------------------- |
+| **1 · Ephemeral** | TanStack Query → MMKV       | Everything recently viewed                         | LRU, 24 MB, 14-day max age | "What you looked at recently still opens" |
+| **2 · Durable**   | SQLite (Drizzle)            | Saved items + full offline bundles; queued reports | Until the user deletes     | "Saved means saved"                       |
+| **3 · Binary**    | Filesystem + map tile store | Downloaded documents; offline map packs            | Until the user deletes     | "You chose this; it stays"                |
 
 Rationale for two stores rather than one: an LRU cache and a user's saved evidence file have opposite requirements. The cache must be free to evict; the saved file must never be. Merging them means either an unbounded cache or silently losing a journalist's saved project. See `adr/005-local-storage.md`.
 
@@ -49,7 +49,7 @@ Saved project 501  (~40–90 KB, stated before download)
 └── asOf + datasetVersion
 ```
 
-Provenance is in the bundle, so **traceability survives offline**: the source sheet opens, names the authority, the page locator, the extraction method and the confidence, with no network. Only the document *body* requires a connection, and that gap is stated plainly.
+Provenance is in the bundle, so **traceability survives offline**: the source sheet opens, names the authority, the page locator, the extraction method and the confidence, with no network. Only the document _body_ requires a connection, and that gap is stated plainly.
 
 Documents are **not** auto-downloaded — a scanned budget PDF can be 80 MB. The bundle stores the document metadata; downloading the artifact is a separate, size-labelled action (S-54).
 
@@ -59,11 +59,11 @@ Documents are **not** auto-downloaded — a scanned budget PDF can be 80 MB. The
 
 Opt-in, Wi-Fi-preferred, explicitly sized:
 
-| Pack | Contents | Typical size |
-|---|---|---|
-| District | unit tree (talukas → GPs), project index, per-unit finance summaries, map tiles z6–13 for the bbox | 8–40 MB |
-| Taluka | as above, one level down, tiles z9–14 | 2–8 MB |
-| Item bundle | one project/unit as above | 40–200 KB |
+| Pack        | Contents                                                                                           | Typical size |
+| ----------- | -------------------------------------------------------------------------------------------------- | ------------ |
+| District    | unit tree (talukas → GPs), project index, per-unit finance summaries, map tiles z6–13 for the bbox | 8–40 MB      |
+| Taluka      | as above, one level down, tiles z9–14                                                              | 2–8 MB       |
+| Item bundle | one project/unit as above                                                                          | 40–200 KB    |
 
 Rules: size shown **before** download · resumable, and a partial pack is usable (with a statement of what is missing) · pinned to a `datasetVersion` · refreshed by delta (`?since=` — `00-document-audit` M4), never re-downloaded · Wi-Fi-only toggle, default on · storage usage and per-pack delete in S-70.
 
@@ -86,20 +86,20 @@ flowchart TD
 
 ## Degradation by feature
 
-| Feature | Offline behaviour |
-|---|---|
-| Home | Cached scope summary + offline bar; "Near you" falls back to the last known scope unit |
-| Search | Local FTS5 over saved + recently-viewed, labelled *"searching your saved items only (24 items)"* |
-| Map | Cached tiles + downloaded packs; un-cached area is a **labelled hatch**, never a blank |
-| Unit / Project | Cached or saved; per-section `OfflineUnavailable` for sections not in cache |
-| Money Trail | Full, from the bundle |
-| Source sheet | **Full** — metadata, confidence, page locator, authority |
-| Document viewer | Only if downloaded; otherwise the size and a queued-download option |
-| Observations | Cached list; filters that need a server round trip are disabled with a reason |
-| Ask | **Disabled**, stated plainly; history readable (`.docs/09-ai/ai-client-experience.md`) |
-| Save / unsave | Works. Local-first by design |
-| Report a data issue | Queued in SQLite with an idempotency key; the user is told it is queued and will send |
-| Settings | Fully functional |
+| Feature             | Offline behaviour                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| Home                | Cached scope summary + offline bar; "Near you" falls back to the last known scope unit           |
+| Search              | Local FTS5 over saved + recently-viewed, labelled _"searching your saved items only (24 items)"_ |
+| Map                 | Cached tiles + downloaded packs; un-cached area is a **labelled hatch**, never a blank           |
+| Unit / Project      | Cached or saved; per-section `OfflineUnavailable` for sections not in cache                      |
+| Money Trail         | Full, from the bundle                                                                            |
+| Source sheet        | **Full** — metadata, confidence, page locator, authority                                         |
+| Document viewer     | Only if downloaded; otherwise the size and a queued-download option                              |
+| Observations        | Cached list; filters that need a server round trip are disabled with a reason                    |
+| Ask                 | **Disabled**, stated plainly; history readable (`.docs/09-ai/ai-client-experience.md`)           |
+| Save / unsave       | Works. Local-first by design                                                                     |
+| Report a data issue | Queued in SQLite with an idempotency key; the user is told it is queued and will send            |
+| Settings            | Fully functional                                                                                 |
 
 ---
 
@@ -141,12 +141,12 @@ Slow is often worse than absent, because the app looks broken rather than honest
 
 Conservative by design:
 
-| Task | When | Constraint |
-|---|---|---|
-| Dataset-version check | App foreground, ≤ every 5 min | One tiny request |
-| Watchlist diff | Background fetch, ≥ 6 h apart | Wi-Fi preferred; a single `?since=` call (`.docs/10-mobile/notifications.md`) |
-| Offline pack delta | User-initiated, or on Wi-Fi if auto-update is enabled (default **off**) | Delta only |
-| Queued report flush | On reconnect | Idempotency key prevents duplicates |
+| Task                  | When                                                                    | Constraint                                                                    |
+| --------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Dataset-version check | App foreground, ≤ every 5 min                                           | One tiny request                                                              |
+| Watchlist diff        | Background fetch, ≥ 6 h apart                                           | Wi-Fi preferred; a single `?since=` call (`.docs/10-mobile/notifications.md`) |
+| Offline pack delta    | User-initiated, or on Wi-Fi if auto-update is enabled (default **off**) | Delta only                                                                    |
+| Queued report flush   | On reconnect                                                            | Idempotency key prevents duplicates                                           |
 
 No periodic content prefetch, no silent push-triggered downloads, no "warming" the cache. Every byte the app spends is either user-requested or a few hundred bytes of version check.
 
@@ -164,14 +164,14 @@ There is no write conflict to resolve — the ledger is read-only (`.docs/11-api
 
 ## Storage budget
 
-| Item | Default cap | User-visible |
-|---|---|---|
-| Query cache (MMKV) | 24 MB | Yes, clearable |
-| Saved bundles (SQLite) | unbounded (small) | Yes, per item |
-| Map tile cache | 60 MB LRU | Yes, clearable |
-| Offline packs | unbounded | Yes, per pack with size |
-| Documents | unbounded | Yes, per document with size |
-| **Total default footprint** | **< 120 MB** without explicit downloads | Shown in S-70 |
+| Item                        | Default cap                             | User-visible                |
+| --------------------------- | --------------------------------------- | --------------------------- |
+| Query cache (MMKV)          | 24 MB                                   | Yes, clearable              |
+| Saved bundles (SQLite)      | unbounded (small)                       | Yes, per item               |
+| Map tile cache              | 60 MB LRU                               | Yes, clearable              |
+| Offline packs               | unbounded                               | Yes, per pack with size     |
+| Documents                   | unbounded                               | Yes, per document with size |
+| **Total default footprint** | **< 120 MB** without explicit downloads | Shown in S-70               |
 
 On low-storage warnings from the OS, the app evicts tier 1 and the tile cache **only** — never a saved bundle or a downloaded pack, and it tells the user what it did.
 

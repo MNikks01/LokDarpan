@@ -10,7 +10,7 @@
 
 The platform links official records into a single traceable ledger — revenue → budget → ministry → state → district → local body → department → scheme → tender → contractor → release → expenditure → work progress → completion → audit — and runs **mathematical-consistency and variance checks** over them. It surfaces facts, calculations, and neutral anomalies so journalists, researchers, RTI activists, auditors, and citizens can understand and verify public spending at any level of the administrative hierarchy.
 
-**It is:** a transparency and public-understanding tool · a mathematical-consistency checker over official records · an anomaly *highlighter* with full source traceability.
+**It is:** a transparency and public-understanding tool · a mathematical-consistency checker over official records · an anomaly _highlighter_ with full source traceability.
 
 **It is NOT:** an anti-corruption or accusation engine · a legal authority or investigator · a source of allegations about any individual or organization.
 
@@ -59,28 +59,28 @@ Status:     Needs verification
 
 ## Document index
 
-| # | Document | Purpose |
-|---|----------|---------|
-| 01 | [Product Requirements Document](../01-product/prd.md) | Mission, vision, audience, use cases, roadmap |
-| 02 | [System Architecture](../02-architecture/system-architecture.md) | Microservices, event-driven pipeline, queues, caching |
-| 03 | [Data Collection / Engineering](../04-data-engineering/data-collection-architecture.md) | Ingestion, scraping, PDF/OCR, validation, versioning, snapshots |
-| 04 | [Database Design](../05-data-model/database-design.md) | PostgreSQL schemas, hierarchy, local bodies, GIS, ER diagrams |
-| 05 | [Data Models](../05-data-model/data-models.md) | TypeScript interfaces |
-| 06 | [Analytics Engine](../07-analytics/analytics-engine.md) | Variance, comparisons, cost-per-km/school/bed, formulas |
-| 07 | [Risk Scoring Engine](../08-risk/risk-scoring-engine.md) | 0–100 verification-priority score |
-| 08 | [Road Infrastructure Intelligence](../03-domain/road-infrastructure-intelligence.md) | Cost/km, material & asphalt estimation (domain-module template) |
-| 09 | [Dashboard Design](../01-product/dashboard-design-legacy.md) | National, State, District, Village, Infrastructure, Audit |
-| 10 | [API Documentation](../11-api/api-documentation.md) | REST + GraphQL, filtering, pagination, auth |
-| 11 | [AI Layer](../09-ai/ai-layer.md) | Summarization & Q&A with strict guardrails |
-| 12 | [Tech Stack](../02-architecture/tech-stack.md) | Chosen technologies and rationale |
-| 13 | [Security](../12-security/security.md) | RBAC, audit logs, rate limiting, encryption, traceability |
-| 14 | [Scalability Plan](../15-scalability/scalability-plan.md) | Eight-phase village→nation expansion |
-| 15 | [Legal & Ethical Rules](../17-legal/legal-ethical-rules.md) | **Binding** neutrality & traceability rules |
-| 16 | [Development Roadmap](../01-product/roadmap-platform.md) | Build plan |
-| 17 | [Deliverables & Folder Structure](../02-architecture/deliverables-and-risk.md) | Monorepo layout, risk analysis, legal notes |
-| 18 | [Data Source Registry](../06-government-sources/legacy-source-directory.md) | Official portals: Central, all States, UTs, local bodies |
-| 19 | [Administrative Hierarchy & Local Bodies](../03-domain/administrative-hierarchy.md) | Village→nation model, LGD codes, geographic hierarchy |
-| 20 | [GIS Intelligence](../03-domain/gis-intelligence.md) | Map layers, asset GIS, heat & expenditure maps |
+| #   | Document                                                                                | Purpose                                                         |
+| --- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 01  | [Product Requirements Document](../01-product/prd.md)                                   | Mission, vision, audience, use cases, roadmap                   |
+| 02  | [System Architecture](../02-architecture/system-architecture.md)                        | Microservices, event-driven pipeline, queues, caching           |
+| 03  | [Data Collection / Engineering](../04-data-engineering/data-collection-architecture.md) | Ingestion, scraping, PDF/OCR, validation, versioning, snapshots |
+| 04  | [Database Design](../05-data-model/database-design.md)                                  | PostgreSQL schemas, hierarchy, local bodies, GIS, ER diagrams   |
+| 05  | [Data Models](../05-data-model/data-models.md)                                          | TypeScript interfaces                                           |
+| 06  | [Analytics Engine](../07-analytics/analytics-engine.md)                                 | Variance, comparisons, cost-per-km/school/bed, formulas         |
+| 07  | [Risk Scoring Engine](../08-risk/risk-scoring-engine.md)                                | 0–100 verification-priority score                               |
+| 08  | [Road Infrastructure Intelligence](../03-domain/road-infrastructure-intelligence.md)    | Cost/km, material & asphalt estimation (domain-module template) |
+| 09  | [Dashboard Design](../01-product/dashboard-design-legacy.md)                            | National, State, District, Village, Infrastructure, Audit       |
+| 10  | [API Documentation](../11-api/api-documentation.md)                                     | REST + GraphQL, filtering, pagination, auth                     |
+| 11  | [AI Layer](../09-ai/ai-layer.md)                                                        | Summarization & Q&A with strict guardrails                      |
+| 12  | [Tech Stack](../02-architecture/tech-stack.md)                                          | Chosen technologies and rationale                               |
+| 13  | [Security](../12-security/security.md)                                                  | RBAC, audit logs, rate limiting, encryption, traceability       |
+| 14  | [Scalability Plan](../15-scalability/scalability-plan.md)                               | Eight-phase village→nation expansion                            |
+| 15  | [Legal & Ethical Rules](../17-legal/legal-ethical-rules.md)                             | **Binding** neutrality & traceability rules                     |
+| 16  | [Development Roadmap](../01-product/roadmap-platform.md)                                | Build plan                                                      |
+| 17  | [Deliverables & Folder Structure](../02-architecture/deliverables-and-risk.md)          | Monorepo layout, risk analysis, legal notes                     |
+| 18  | [Data Source Registry](../06-government-sources/legacy-source-directory.md)             | Official portals: Central, all States, UTs, local bodies        |
+| 19  | [Administrative Hierarchy & Local Bodies](../03-domain/administrative-hierarchy.md)     | Village→nation model, LGD codes, geographic hierarchy           |
+| 20  | [GIS Intelligence](../03-domain/gis-intelligence.md)                                    | Map layers, asset GIS, heat & expenditure maps                  |
 
 **Where the requested "national" sections live:** PRD → 01 · System Design (microservices/event-driven/caching) → 02 · Database Design + ER → 04 (+ 19 for hierarchy) · Data Engineering → 03 · Analytics → 06 (+ 08) · Risk Engine → 07 · GIS → 20 · Dashboard → 09 · API (REST+GraphQL) → 10 · AI → 11 · Security → 13 · Scalability → 14 · Folder Structure → 17 · Legal/Ethical → 15 · Development Roadmap → 16 · Risk Analysis → 17.
 

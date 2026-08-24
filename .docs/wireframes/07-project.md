@@ -152,9 +152,10 @@
 │  ○  Expected completion  30 Jun 2026      🔗 │
 └──────────────────────────────────────────────┘
 ```
+
 The dotted segment is a **gap made visible**. It is never interpolated, and no "delay" is asserted — only that no record exists after that date.
 
-## S-32 · Progress history   ·   S-39 · Location
+## S-32 · Progress history · S-39 · Location
 
 ```text
 S-32                                S-39
@@ -178,4 +179,5 @@ S-32                                S-39
 │   31 Mar 2026              │
 └────────────────────────────┘
 ```
+
 Every chart carries `[ View as list ]` — a hard accessibility requirement (`.docs/01-product/accessibility.md`).

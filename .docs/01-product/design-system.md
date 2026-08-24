@@ -11,6 +11,7 @@ Three constraints are unusual here and shape everything:
 3. **Numbers are the content.** Not decoration around content — the content. Typography is chosen for tabular figures before it is chosen for headlines.
 
 ### Reference points, not templates
+
 The quality bar is that of a well-made reference tool — a good transit app, a good banking statement, a good reader — where restraint, alignment, and legibility do the work. Explicitly **not**: admin dashboards, gradient SaaS marketing, glassmorphism, neon data-viz, or a 2012 government portal.
 
 ---
@@ -19,11 +20,11 @@ The quality bar is that of a well-made reference tool — a good transit app, a 
 
 ### Typefaces
 
-| Role | Family | Why |
-|---|---|---|
-| Latin + **all numerals** | **Inter** (variable) | Genuine tabular lining figures, a disambiguated `1`/`l`/`I` and `0`/`O`, excellent at 11–13 pt on low-DPI screens, OFL |
-| Devanagari (मराठी, हिन्दी) | **Noto Sans Devanagari** | Full conjunct coverage, matched x-height to Inter, OFL, designed for UI |
-| Monospace (IDs, hashes, work IDs) | **JetBrains Mono** | Only for identifiers — work IDs, tender IDs, artifact hashes |
+| Role                              | Family                   | Why                                                                                                                    |
+| --------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Latin + **all numerals**          | **Inter** (variable)     | Genuine tabular lining figures, a disambiguated `1`/`l`/`I` and `0`/`O`, excellent at 11–13 pt on low-DPI screens, OFL |
+| Devanagari (मराठी, हिन्दी)        | **Noto Sans Devanagari** | Full conjunct coverage, matched x-height to Inter, OFL, designed for UI                                                |
+| Monospace (IDs, hashes, work IDs) | **JetBrains Mono**       | Only for identifiers — work IDs, tender IDs, artifact hashes                                                           |
 
 **Bundled, not fetched.** Fonts ship in the binary — a font that requires the network is a font that fails offline, and the app must be fully legible with no connection.
 
@@ -33,21 +34,21 @@ The quality bar is that of a well-made reference tool — a good transit app, a 
 
 Base 16 pt, ratio ≈1.2, capped so 200% OS scaling stays usable.
 
-| Token | Size / line | Weight | Tracking | Use |
-|---|---|---|---|---|
-| `display` | 34 / 40 | 600 | −0.02em | The one headline figure on a screen |
-| `headline` | 24 / 30 | 600 | −0.01em | Entity names |
-| `title` | 20 / 26 | 600 | 0 | Section headers |
-| `subtitle` | 17 / 24 | 500 | 0 | Card titles |
-| `body` | 15 / 22 | 400 | 0 | Prose, observations |
-| `bodyStrong` | 15 / 22 | 600 | 0 | Inline emphasis |
-| `label` | 13 / 18 | 500 | +0.01em | Field labels |
-| `caption` | 12 / 16 | 400 | +0.01em | Source chips, `asOf`, confidence |
-| `overline` | 11 / 14 | 600 | +0.06em, uppercase | Section eyebrows |
-| **`figureLg`** | 28 / 32 | 600 | **tabular** | Money Trail stage totals |
-| **`figureMd`** | 20 / 24 | 600 | **tabular** | Card figures |
-| **`figureSm`** | 15 / 20 | 500 | **tabular** | In-list figures |
-| `mono` | 13 / 18 | 400 | 0 | Identifiers |
+| Token          | Size / line | Weight | Tracking           | Use                                 |
+| -------------- | ----------- | ------ | ------------------ | ----------------------------------- |
+| `display`      | 34 / 40     | 600    | −0.02em            | The one headline figure on a screen |
+| `headline`     | 24 / 30     | 600    | −0.01em            | Entity names                        |
+| `title`        | 20 / 26     | 600    | 0                  | Section headers                     |
+| `subtitle`     | 17 / 24     | 500    | 0                  | Card titles                         |
+| `body`         | 15 / 22     | 400    | 0                  | Prose, observations                 |
+| `bodyStrong`   | 15 / 22     | 600    | 0                  | Inline emphasis                     |
+| `label`        | 13 / 18     | 500    | +0.01em            | Field labels                        |
+| `caption`      | 12 / 16     | 400    | +0.01em            | Source chips, `asOf`, confidence    |
+| `overline`     | 11 / 14     | 600    | +0.06em, uppercase | Section eyebrows                    |
+| **`figureLg`** | 28 / 32     | 600    | **tabular**        | Money Trail stage totals            |
+| **`figureMd`** | 20 / 24     | 600    | **tabular**        | Card figures                        |
+| **`figureSm`** | 15 / 20     | 500    | **tabular**        | In-list figures                     |
+| `mono`         | 13 / 18     | 400    | 0                  | Identifiers                         |
 
 **Every numeric token sets `fontVariantNumeric: ['tabular-nums','lining-nums']`.** Money in a vertical list that does not align by digit is unreadable, and misreading a crore as a lakh is the exact failure this product cannot have.
 
@@ -121,6 +122,7 @@ Coverage / missing data
 ```
 
 ### Dark mode
+
 Required (night reading, OLED battery, low-light rural use). Not an inversion: surfaces lift with lightness rather than shadow, the sequential ramp is re-tuned for a dark ground, and the amber band colours are lightened to hold ≥4.5:1. Both themes are defined explicitly; neither is derived from the other.
 
 ---
@@ -136,12 +138,12 @@ gutter  16 pt screen edge · 12 pt card padding · 8 pt inline gaps
 
 **Near-flat elevation.** Hairline borders (`border/hair`, 1 px) do the separation work; shadows are reserved for surfaces that genuinely float:
 
-| Level | Use | Light | Dark |
-|---|---|---|---|
-| 0 | Cards, rows | border only | border only |
-| 1 | Sticky headers | y1 blur2 @4% | border + `bg/raised` |
-| 2 | Bottom sheets | y−4 blur16 @10% | border/strong + `bg/raised` |
-| 3 | Modals, map callouts | y8 blur24 @14% | as above |
+| Level | Use                  | Light           | Dark                        |
+| ----- | -------------------- | --------------- | --------------------------- |
+| 0     | Cards, rows          | border only     | border only                 |
+| 1     | Sticky headers       | y1 blur2 @4%    | border + `bg/raised`        |
+| 2     | Bottom sheets        | y−4 blur16 @10% | border/strong + `bg/raised` |
+| 3     | Modals, map callouts | y8 blur24 @14%  | as above                    |
 
 Shadows on data cards make a screen look like a dashboard template. They are not used.
 
@@ -151,16 +153,16 @@ Shadows on data cards make a screen look like a dashboard template. They are not
 
 Fast, purposeful, cheap on a mid-range GPU.
 
-| Motion | Duration | Curve |
-|---|---|---|
-| Press feedback | 90 ms | ease-out, scale 0.98 |
-| Sheet present | 300 ms | spring (damping 26, stiffness 260) |
-| Screen push | platform default | platform |
-| Skeleton shimmer | 1200 ms loop | linear, ≤6% opacity delta |
-| Value change (updated figure) | 400 ms | background-tint flash, no movement |
-| Chart draw-in | 350 ms | ease-out, **once**, never on re-render |
+| Motion                        | Duration         | Curve                                  |
+| ----------------------------- | ---------------- | -------------------------------------- |
+| Press feedback                | 90 ms            | ease-out, scale 0.98                   |
+| Sheet present                 | 300 ms           | spring (damping 26, stiffness 260)     |
+| Screen push                   | platform default | platform                               |
+| Skeleton shimmer              | 1200 ms loop     | linear, ≤6% opacity delta              |
+| Value change (updated figure) | 400 ms           | background-tint flash, no movement     |
+| Chart draw-in                 | 350 ms           | ease-out, **once**, never on re-render |
 
-`reduceMotion` collapses every one of these to an opacity change ≤120 ms. No parallax, no hero transitions, no animated counters (an animated money figure is unreadable *and* implies precision it may not have).
+`reduceMotion` collapses every one of these to an opacity change ≤120 ms. No parallax, no hero transitions, no animated counters (an animated money figure is unreadable _and_ implies precision it may not have).
 
 ---
 
@@ -171,6 +173,7 @@ Fast, purposeful, cheap on a mid-range GPU.
 These four are the reason the design system exists. Each makes a rule from `.docs/17-legal/legal-ethical-rules.md` structurally impossible to violate (see `.docs/02-architecture/mobile-architecture.md` §3).
 
 **`<Figure>`** — the only way to display a fact.
+
 ```text
 ┌──────────────────────────────────────────┐
 │ Utilized                                 │  label
@@ -178,49 +181,50 @@ These four are the reason the design system exists. Each makes a rule from `.doc
 │ 🔗 MH PWD — Works · OCR 82% · 30 Jul 26  │  caption, tappable → S-52
 └──────────────────────────────────────────┘
 ```
+
 Requires `provenance`. Renders `missingReason` instead of the value when null (never ₹0). Screen-reader label reads value **and** source **and** confidence.
 
 **`<Observation>`** — accepts only `ServerText` (branded). A literal string will not compile.
 
-**`<MissingData>`** — states *what* is missing, *which source* would carry it, and *when it was last checked*. Never a blank, never a zero, never a shrug.
+**`<MissingData>`** — states _what_ is missing, _which source_ would carry it, and _when it was last checked_. Never a blank, never a zero, never a shrug.
 
 **`<VerificationPriorityChip>`** — the 0–100 score. Band label leads with the action ("worth a closer look"), amber ramp only, always with a one-tap path to the factor breakdown, never renderable without its confidence.
 
 ### Product components
 
-| Component | Notes |
-|---|---|
-| `AppHeader` | Scope chip + FY chip + up to 2 actions. Collapses on scroll to a title bar |
-| `AncestorRow` | Left-ellipsized hierarchy path, horizontally scrollable, ▸ opens the full chain |
-| `ScopeChip` · `FiscalYearChip` | Open S-09 / S-08 |
-| `SearchBar` | Debounced, cancellable, voice-optional, clearable |
-| `FilterSheet` | Live result count; Apply / Reset |
-| `DataCard` | Base card: title, optional eyebrow, optional action, hairline border |
-| `FinanceCard` | A stage of the chain — amount + record count + source + status |
-| **`MoneyTrail`** | The signature component. See below |
-| **`VarianceRow`** | Two figures, their difference, the percentage, **and its denominator in words**. Never a bare % |
-| `Metric` | label + `figureMd` + optional peer context + `?` → S-57 |
-| `PeerDistributionStrip` | Where this value sits in the peer distribution; median marked; `n` always shown; withheld below n=8 |
-| `Timeline` | Vertical, dated nodes, each source-linked; gaps drawn as gaps |
-| `ProjectCard` | Name, category, place, headline figure, priority chip, status |
-| `UnitCard` | Name, level, headline metric, coverage indicator |
-| `SourceCard` · `SourceChip` | Authority, doc, page locator, method, confidence |
-| `EvidenceCard` | An observation's inputs: each figure + its source |
-| `ComparisonCard` | One entity per card; swipeable set shares a metric rail. **Replaces tables** |
-| `CoverageNote` | Expected vs. present vs. missing, with the responsible source |
-| `ConfidenceChip` | High (no chip) / Medium / Low, with an explanation on tap |
-| `StatusIndicator` | Icon + text + colour, in that order of importance |
-| `Badge` · `Chip` | Neutral by default; no semantic colour without a matching icon and label |
-| `BottomSheet` | Detented, gesture-dismissible, a11y-complete, max depth 2 |
-| `EmptyState` · `ErrorState` · `OfflineState` | Distinct components, never one generic "no data" (`.docs/01-product/state-design.md`) |
-| `LoadingSkeleton` | Shape-matched to the real content, not grey rectangles |
-| `MapMarker` · `MapCluster` | Type icon + count; ≥44 pt tap target |
-| `Chart*` | See `.docs/01-product/design-system.md` §Charts below |
-| `RecordList` | **The mobile replacement for a data table** — see below |
+| Component                                    | Notes                                                                                               |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `AppHeader`                                  | Scope chip + FY chip + up to 2 actions. Collapses on scroll to a title bar                          |
+| `AncestorRow`                                | Left-ellipsized hierarchy path, horizontally scrollable, ▸ opens the full chain                     |
+| `ScopeChip` · `FiscalYearChip`               | Open S-09 / S-08                                                                                    |
+| `SearchBar`                                  | Debounced, cancellable, voice-optional, clearable                                                   |
+| `FilterSheet`                                | Live result count; Apply / Reset                                                                    |
+| `DataCard`                                   | Base card: title, optional eyebrow, optional action, hairline border                                |
+| `FinanceCard`                                | A stage of the chain — amount + record count + source + status                                      |
+| **`MoneyTrail`**                             | The signature component. See below                                                                  |
+| **`VarianceRow`**                            | Two figures, their difference, the percentage, **and its denominator in words**. Never a bare %     |
+| `Metric`                                     | label + `figureMd` + optional peer context + `?` → S-57                                             |
+| `PeerDistributionStrip`                      | Where this value sits in the peer distribution; median marked; `n` always shown; withheld below n=8 |
+| `Timeline`                                   | Vertical, dated nodes, each source-linked; gaps drawn as gaps                                       |
+| `ProjectCard`                                | Name, category, place, headline figure, priority chip, status                                       |
+| `UnitCard`                                   | Name, level, headline metric, coverage indicator                                                    |
+| `SourceCard` · `SourceChip`                  | Authority, doc, page locator, method, confidence                                                    |
+| `EvidenceCard`                               | An observation's inputs: each figure + its source                                                   |
+| `ComparisonCard`                             | One entity per card; swipeable set shares a metric rail. **Replaces tables**                        |
+| `CoverageNote`                               | Expected vs. present vs. missing, with the responsible source                                       |
+| `ConfidenceChip`                             | High (no chip) / Medium / Low, with an explanation on tap                                           |
+| `StatusIndicator`                            | Icon + text + colour, in that order of importance                                                   |
+| `Badge` · `Chip`                             | Neutral by default; no semantic colour without a matching icon and label                            |
+| `BottomSheet`                                | Detented, gesture-dismissible, a11y-complete, max depth 2                                           |
+| `EmptyState` · `ErrorState` · `OfflineState` | Distinct components, never one generic "no data" (`.docs/01-product/state-design.md`)               |
+| `LoadingSkeleton`                            | Shape-matched to the real content, not grey rectangles                                              |
+| `MapMarker` · `MapCluster`                   | Type icon + count; ≥44 pt tap target                                                                |
+| `Chart*`                                     | See `.docs/01-product/design-system.md` §Charts below                                               |
+| `RecordList`                                 | **The mobile replacement for a data table** — see below                                             |
 
 ### `MoneyTrail` — the signature component
 
-Vertical because the phone is vertical, and because the flow *is* a sequence. It is the visual argument of the whole product.
+Vertical because the phone is vertical, and because the flow _is_ a sequence. It is the visual argument of the whole product.
 
 ```text
   ┌────────────────────────────────────────────┐
@@ -247,6 +251,7 @@ Vertical because the phone is vertical, and because the flow *is* a sequence. It
 ```
 
 Rules, all load-bearing:
+
 - **Both variances, both labeled with their formula and their denominator in words.** Never a bare "11.1%" (`00-document-audit` C1).
 - A missing stage renders as `MissingData`, **never ₹0**, and no variance is computed across it — the status becomes `insufficient_data`.
 - Every stage total is tappable → ledger lines; every figure carries its source chip.
@@ -263,6 +268,7 @@ Rules, all load-bearing:
 │ 02 Nov 2024 · MH Treasury · 🔗            │   ← secondary: when + source
 └────────────────────────────────────────────┘
 ```
+
 Two lines, one figure, always source-linked, sortable via a header control, virtualised with `FlashList`. Where a genuine matrix is unavoidable (comparison), `ComparisonCard` + a shared metric rail is used — never horizontal scroll of a grid.
 
 ---
@@ -271,14 +277,14 @@ Two lines, one figure, always source-linked, sortable via a header control, virt
 
 Built in-house on `react-native-svg`; **no charting library in Phase 1** (`adr/007-charting.md`). The visualizations this product needs are bespoke and simple; a generic chart library would deliver a generic dashboard look and 200 KB of bundle for shapes we can draw in 40 lines.
 
-| Chart | Form | Mobile-first because |
-|---|---|---|
-| Money trail | Vertical stepper | Not a Sankey — a phone is tall, and a chain is a sequence |
-| Variance | Two aligned bars + an explicit difference row | A pie or donut cannot express "9 minus 8" |
-| Peer position | 1-D distribution strip, median marked, this value pinned | A boxplot is unreadable at 350 pt; a scatter needs axes we don't have room for |
-| Trend | Compact sparkline + a range segmented control (3y / 5y / all) | No scrubbing crosshair — a fat finger cannot hit a data point |
-| Composition | Stacked horizontal bar with an inline legend | Donuts hide small slices and require a legend lookup |
-| Cost per unit | Value vs. model vs. median as three aligned rows | Direct comparison beats a chart when n=3 |
+| Chart         | Form                                                          | Mobile-first because                                                           |
+| ------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Money trail   | Vertical stepper                                              | Not a Sankey — a phone is tall, and a chain is a sequence                      |
+| Variance      | Two aligned bars + an explicit difference row                 | A pie or donut cannot express "9 minus 8"                                      |
+| Peer position | 1-D distribution strip, median marked, this value pinned      | A boxplot is unreadable at 350 pt; a scatter needs axes we don't have room for |
+| Trend         | Compact sparkline + a range segmented control (3y / 5y / all) | No scrubbing crosshair — a fat finger cannot hit a data point                  |
+| Composition   | Stacked horizontal bar with an inline legend                  | Donuts hide small slices and require a legend lookup                           |
+| Cost per unit | Value vs. model vs. median as three aligned rows              | Direct comparison beats a chart when n=3                                       |
 
 **Every chart is required to ship a text equivalent** (`accessibilityLabel` + a "view as list" action) and a `Chart→RecordList` fallback honoured by the `alwaysShowDataAsList` accessibility setting. A chart without a text equivalent fails CI.
 

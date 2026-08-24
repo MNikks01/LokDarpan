@@ -10,16 +10,16 @@ Every State and UT was crawled from the Integrated Government Online Directory (
 
 The complete catalogue — organisation name, official URL, IGOD category, and state — is machine-readable at [`.docs/06-government-sources/igod-organization-catalogue.csv`](../igod-organization-catalogue.csv) (6,466 rows). These are **`DISCOVERED`**: they came from an official directory but were not individually fetched. Only the sources promoted into [`.docs/06-government-sources/source-registry.json`](../source-registry.json) carry `VERIFIED` status.
 
-| UT | Orgs in IGOD | Departments | Districts | Boards/PSUs | Schemes/Apps | e-Procurement portal | Status |
-|---|---:|---:|---:|---:|---:|---|---|
-| **Andaman and Nicobar Islands** | 51 | 23 | 7 | 0 | 0 | `https://eprocure.gov.in/epublish/app` | ✅ |
-| **Chandigarh** | 82 | 30 | 0 | 8 | 0 | `https://etenders.chd.nic.in` | ✅ |
-| **Dadra and Nagar Haveli and Daman and Diu** | 47 | 35 | 7 | 0 | 0 | `https://dnhtenders.gov.in` | ✅ |
-| **Delhi** | 252 | 48 | 14 | 29 | 12 | `https://govtprocurement.delhi.gov.in` | ✅ |
-| **Jammu and Kashmir** | 170 | 40 | 24 | 16 | 12 | `https://jktenders.gov.in` | ✅ |
-| **Ladakh** | 44 | 37 | 0 | 0 | 0 | `https://tenders.ladakh.gov.in/` | ✅ |
-| **Lakshadweep** | 22 | 9 | 0 | 0 | 0 | `https://tendersutl.gov.in` | ✅ |
-| **Puducherry** | 79 | 44 | 0 | 6 | 8 | `https://pudutenders.gov.in` | ✅ |
+| UT                                           | Orgs in IGOD | Departments | Districts | Boards/PSUs | Schemes/Apps | e-Procurement portal                   | Status |
+| -------------------------------------------- | -----------: | ----------: | --------: | ----------: | -----------: | -------------------------------------- | ------ |
+| **Andaman and Nicobar Islands**              |           51 |          23 |         7 |           0 |            0 | `https://eprocure.gov.in/epublish/app` | ✅     |
+| **Chandigarh**                               |           82 |          30 |         0 |           8 |            0 | `https://etenders.chd.nic.in`          | ✅     |
+| **Dadra and Nagar Haveli and Daman and Diu** |           47 |          35 |         7 |           0 |            0 | `https://dnhtenders.gov.in`            | ✅     |
+| **Delhi**                                    |          252 |          48 |        14 |          29 |           12 | `https://govtprocurement.delhi.gov.in` | ✅     |
+| **Jammu and Kashmir**                        |          170 |          40 |        24 |          16 |           12 | `https://jktenders.gov.in`             | ✅     |
+| **Ladakh**                                   |           44 |          37 |         0 |           0 |            0 | `https://tenders.ladakh.gov.in/`       | ✅     |
+| **Lakshadweep**                              |           22 |           9 |         0 |           0 |            0 | `https://tendersutl.gov.in`            | ✅     |
+| **Puducherry**                               |           79 |          44 |         0 |           6 |            8 | `https://pudutenders.gov.in`           | ✅     |
 
 ## What each State/UT inventory contains
 
@@ -33,6 +33,6 @@ The `Departments`, `Districts` and `Schemes / Programmes / Missions / Applicatio
 
 Discovery used IGOD as the authoritative directory (§4), supplemented by domain-restricted search for specific functional systems. **What this does not yet give us:**
 
-- Per-state finance/treasury/PWD portals have been *catalogued* but only Maharashtra's have been *verified* — see [`.docs/06-government-sources/phase-1-maharashtra-roads.md`](../phase-1-maharashtra-roads.md).
+- Per-state finance/treasury/PWD portals have been _catalogued_ but only Maharashtra's have been _verified_ — see [`.docs/06-government-sources/phase-1-maharashtra-roads.md`](../phase-1-maharashtra-roads.md).
 - IGOD's own coverage is uneven: Lakshadweep has 22 organisations listed, Gujarat 386. A low count means **fewer entries in the directory**, not fewer government bodies.
 - Districts: IGOD lists 870 district entries nationally against LGD's authoritative count of **784 districts**. The two directories disagree, and neither has been reconciled to the other. See [`.docs/06-government-sources/administrative-hierarchy-sources.md`](../administrative-hierarchy-sources.md).

@@ -12,10 +12,11 @@ The AI layer makes the ledger **readable** — plain-language summaries, anomaly
 ## Hard prohibitions (non-negotiable)
 
 The AI must **never**:
+
 - Accuse or imply corruption, fraud, bribery, theft, or misappropriation.
 - Attribute intent or motive to any person, official, department, or contractor.
 - Make legal conclusions or use legal-liability language ("illegal," "guilty," "embezzled").
-- Assert a *cause* for a variance (delay vs revision vs misreporting vs wrongdoing).
+- Assert a _cause_ for a variance (delay vs revision vs misreporting vs wrongdoing).
 - State anything not supported by cited ingested figures. No outside knowledge, no speculation.
 - Name individuals in a negative light. (Contractor/department names appear only in neutral, descriptive statistics.)
 
@@ -46,7 +47,7 @@ user question / summary request
 answer + citations + guardrail note   (else safe refusal)
 ```
 
-**Retrieval-Augmented Generation** ensures the model reasons over *supplied* official figures rather than its training memory. If the retriever returns nothing for a scope, the answer is _"No ingested official records cover this,"_ never a guess.
+**Retrieval-Augmented Generation** ensures the model reasons over _supplied_ official figures rather than its training memory. If the retriever returns nothing for a scope, the answer is _"No ingested official records cover this,"_ never a guess.
 
 ## Guardrail stack (defense in depth)
 

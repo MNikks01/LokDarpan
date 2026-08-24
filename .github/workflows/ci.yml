@@ -1,42 +1,129 @@
 name: CI
 
 on:
-  push: { branches: [main] }
   pull_request:
+    branches: [development, main]
+  push:
+    branches: [development, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "9.12.0"
 
 jobs:
-  verify:
+  # ── Fast gates. Everything here must pass before anything expensive runs. ──
+  quality:
+    name: Format · Lint · Types
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: 9.12.0 }
+        with: { version: "${{ env.PNPM_VERSION }}" }
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Formatting
+        run: pnpm format:check
+      - name: Lint
+        run: pnpm lint
+      - name: Type-check
+        run: pnpm typecheck
 
+  guardrails:
+    name: Neutrality · Palette · Fixtures
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
       - run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm -r typecheck
-
-      # ── docs/15 guardrails — a hit is a release blocker, not a warning ──
+      # docs/15 is binding. A hit here is a release blocker, not a warning.
       - name: G1 · Neutrality (all locales)
-        run: pnpm exec tsx packages/neutrality/src/cli.ts apps packages
+        run: pnpm neutrality
 
-      - name: Unit + contract tests
-        run: pnpm exec vitest run
-
-      - name: G3 · Palette (no red in any data token)
+      - name: G3 · Palette — no red in any data token
         run: pnpm exec vitest run apps/web/src/ui/tokens.test.ts
 
-      - name: G6 · Fixtures absent from production bundle
+      - name: G6 · Fixture data absent from the production bundle
         run: |
           pnpm --filter @lokdarpan/web build
-          if grep -rl "FIXTURE — not a government source" apps/web/.next/static 2>/dev/null; then
-            echo "::error::fixture data leaked into the production bundle (guardrail G6)"
+          if grep -rl "not a government source" apps/web/.next/static 2>/dev/null; then
+            echo "::error::fixture data leaked into the production bundle"
             exit 1
           fi
-          echo "✓ no fixture data in static bundle"
+          echo "no fixture data in static bundle"
 
-      - name: Build
-        run: pnpm --filter @lokdarpan/web build
+  test:
+    name: Unit + Integration
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Unit + integration tests
+        run: pnpm test
+      - name: Coverage thresholds (domain + api)
+        run: pnpm exec vitest run --coverage
+
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @lokdarpan/web exec playwright install --with-deps chromium
+      - name: Playwright
+        run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  security:
+    name: Dependencies · Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Known vulnerabilities (high and above)
+        run: pnpm audit --audit-level high
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

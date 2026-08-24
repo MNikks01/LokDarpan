@@ -1,6 +1,6 @@
 # 20 — GIS Intelligence
 
-Geography is a first-class dimension of the platform: every administrative unit has a boundary, every asset has a location, and every rupee can be rendered on a map. GIS turns the ledger into something a citizen can *see* — "what was built near me, and does its cost look normal?" This document covers the spatial data model, map layers, tiling/serving, heat/expenditure maps, and the asset-GIS architecture for each infrastructure type.
+Geography is a first-class dimension of the platform: every administrative unit has a boundary, every asset has a location, and every rupee can be rendered on a map. GIS turns the ledger into something a citizen can _see_ — "what was built near me, and does its cost look normal?" This document covers the spatial data model, map layers, tiling/serving, heat/expenditure maps, and the asset-GIS architecture for each infrastructure type.
 
 **Stack:** PostgreSQL + **PostGIS** (spatial store & queries), vector tiles (Mapbox Vector Tiles / MVT), Mapbox GL on the frontend, with GeoJSON for small/detail queries ([12](../02-architecture/tech-stack.md)).
 
@@ -8,16 +8,16 @@ Geography is a first-class dimension of the platform: every administrative unit 
 
 All geometries are stored in **EPSG:4326 (WGS84)**; area/length computations use a projected CRS (e.g. India-appropriate UTM zones / EPSG:7755) via `ST_Transform` to get metres.
 
-| Layer | Geometry | Source |
-|---|---|---|
-| Country / State / Division / District / Taluka / Block / Village / Ward boundaries | `MultiPolygon` | Survey of India / LGD / Census / state GIS (e.g. MRSAC) |
-| Survey number (parcel) | `Polygon` | State land records / GIS |
-| Roads / highways | `MultiLineString` | PWD / MoRTH / NHAI / MRSAC |
-| Railways / metro | `MultiLineString` | Railways / metro authorities |
-| Pipelines / sewage / gas | `MultiLineString` | Water/utility departments |
-| Bridges / tunnels / flyovers | `Point` or `LineString` | PWD / MoRTH |
-| Hospitals / schools / anganwadis / colleges | `Point` | Health / Education / WCD dept registries |
-| Buildings / public assets | `Point` / `Polygon` | Asset registers (e.g. MARS) |
+| Layer                                                                              | Geometry                | Source                                                  |
+| ---------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------- |
+| Country / State / Division / District / Taluka / Block / Village / Ward boundaries | `MultiPolygon`          | Survey of India / LGD / Census / state GIS (e.g. MRSAC) |
+| Survey number (parcel)                                                             | `Polygon`               | State land records / GIS                                |
+| Roads / highways                                                                   | `MultiLineString`       | PWD / MoRTH / NHAI / MRSAC                              |
+| Railways / metro                                                                   | `MultiLineString`       | Railways / metro authorities                            |
+| Pipelines / sewage / gas                                                           | `MultiLineString`       | Water/utility departments                               |
+| Bridges / tunnels / flyovers                                                       | `Point` or `LineString` | PWD / MoRTH                                             |
+| Hospitals / schools / anganwadis / colleges                                        | `Point`                 | Health / Education / WCD dept registries                |
+| Buildings / public assets                                                          | `Point` / `Polygon`     | Asset registers (e.g. MARS)                             |
 
 Every geometry row carries the same **provenance + confidence + version** columns as the rest of the ledger ([04](../05-data-model/database-design.md)); geo-coordinates from OCR/geocoding carry a positional confidence and are labeled approximate.
 

@@ -26,6 +26,7 @@ The test pyramid is weighted accordingly: the correctness-critical domain layer 
 `domain/` has no React and no I/O (`.docs/02-architecture/mobile-architecture.md`), so it runs in plain Node, fast, with property-based tests where the input space is large.
 
 **`Money` (highest-value tests in the codebase)**
+
 - Parse decimal strings → `bigint` paise, including `"0.00"`, `"0.01"`, `"99999999999999.99"`, negative, `null`, `""`, `"1e10"`, and malformed input.
 - **Precision:** a national-scale aggregate (~₹50 lakh crore) round-trips exactly — the regression test for `00-document-audit` C3.
 - Indian grouping: `800000000` → `₹8,00,00,000` and `₹8.00 crore`; boundaries at 1 lakh, 1 crore, 100 crore, 1 lakh crore.
@@ -51,17 +52,17 @@ Queried by **accessibility role and label**, never by test ID where a role exist
 
 **The neutrality primitives get the most attention:**
 
-| Component | Tests |
-|---|---|
-| `<Figure>` | Renders value + source affordance · **fails to compile without `provenance`** (type test via `tsd`) · null → `MissingData` with reason, **never ₹0** · low extraction confidence renders the words, not just a chip · low linkage confidence renders distinct wording · a11y label includes value, source, confidence, `asOf` |
-| `<Observation>` | **A string literal fails to type-check** (`tsd`) · only `ServerText` accepted |
-| `<MissingData>` | Always names the expected source and last-checked date (type-enforced, asserted) |
-| `<VerificationPriorityChip>` | Band label leads with the action · **no red token in any band** (asserted against the token file) · one-tap path to the breakdown exists · never renders without confidence |
-| `MoneyTrail` | Both variances labelled with formula and denominator · missing stage → `insufficient_data`, no variance across it · every stage tappable · no colour encodes variance magnitude |
-| `RecordList` | Virtualized; row memoization; every row has a source affordance |
-| `EmptyState` | All five variants distinct; E1 includes the "does not mean no money was spent" sentence |
-| `OfflineState` | O2 copy explicitly distinguishes offline from unpublished (**R2** of `.docs/01-product/state-design.md`) |
-| Every chart | Exposes a text equivalent **and** a list view — absence fails the test |
+| Component                    | Tests                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<Figure>`                   | Renders value + source affordance · **fails to compile without `provenance`** (type test via `tsd`) · null → `MissingData` with reason, **never ₹0** · low extraction confidence renders the words, not just a chip · low linkage confidence renders distinct wording · a11y label includes value, source, confidence, `asOf` |
+| `<Observation>`              | **A string literal fails to type-check** (`tsd`) · only `ServerText` accepted                                                                                                                                                                                                                                                 |
+| `<MissingData>`              | Always names the expected source and last-checked date (type-enforced, asserted)                                                                                                                                                                                                                                              |
+| `<VerificationPriorityChip>` | Band label leads with the action · **no red token in any band** (asserted against the token file) · one-tap path to the breakdown exists · never renders without confidence                                                                                                                                                   |
+| `MoneyTrail`                 | Both variances labelled with formula and denominator · missing stage → `insufficient_data`, no variance across it · every stage tappable · no colour encodes variance magnitude                                                                                                                                               |
+| `RecordList`                 | Virtualized; row memoization; every row has a source affordance                                                                                                                                                                                                                                                               |
+| `EmptyState`                 | All five variants distinct; E1 includes the "does not mean no money was spent" sentence                                                                                                                                                                                                                                       |
+| `OfflineState`               | O2 copy explicitly distinguishes offline from unpublished (**R2** of `.docs/01-product/state-design.md`)                                                                                                                                                                                                                      |
+| Every chart                  | Exposes a text equivalent **and** a list view — absence fails the test                                                                                                                                                                                                                                                        |
 
 **Snapshot policy:** no full-tree snapshots (they rot and get rubber-stamped). Snapshots are used only for layout regression at 100/150/200% text scale, on a small set of representative screens.
 
@@ -141,7 +142,7 @@ Bundle-size delta ≤5% without justification; startup benchmark within 10% on t
 
 ---
 
-## 7 · What is *not* tested here
+## 7 · What is _not_ tested here
 
 The **AI guardrail evaluation** — red-team prompts, golden-set factuality, neutrality classification — lives server-side and is a gate on the AI service (`.docs/09-ai/ai-layer.md` §Evaluation, `.docs/01-product/roadmap-platform.md` M4). The client's obligation is narrower and is tested here: an answer with zero citations is dropped, a partial stream is discarded, and no AI text is rendered above the source-linked ledger.
 
@@ -154,12 +155,12 @@ The **AI guardrail evaluation** — red-team prompts, golden-set factuality, neu
 TypeScript is `strict` with `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and `noImplicitOverride`. `any` is banned outside `data/contracts` boundary code, where it is `unknown` narrowed by Zod.
 
 ```yaml
-PR:            typecheck · lint · boundaries · unit · component · contract
-               · integration · G1–G6 · bundle delta        (~6 min)
+PR: typecheck · lint · boundaries · unit · component · contract
+  · integration · G1–G6 · bundle delta        (~6 min)
 Merge to main: + E2E on device farm · G7 · G8               (~25 min)
-Nightly:       + fixture drift diff · full 3G-throttled E2E · a11y sweep
-Pre-release:   + manual a11y walkthrough · manual perf on reference device
-               · legal/neutrality copy review (.docs/17-legal/legal-ethical-rules.md)
+Nightly: + fixture drift diff · full 3G-throttled E2E · a11y sweep
+Pre-release: + manual a11y walkthrough · manual perf on reference device
+  · legal/neutrality copy review (.docs/17-legal/legal-ethical-rules.md)
 ```
 
 **Definition of done for a feature:** domain logic unit-tested · components tested by role/label · contract test with negative cases · one integration test · states from `.docs/01-product/state-design.md` implemented and tested · a11y verified at 200% · guardrails green · performance budget checked.

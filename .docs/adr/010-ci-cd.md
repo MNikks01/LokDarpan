@@ -13,29 +13,25 @@
 ## Pipelines
 
 ```yaml
-PR:
-  typecheck · lint · dependency-cruiser boundaries
+PR: typecheck · lint · dependency-cruiser boundaries
   unit · component · contract · integration
   guardrails G1–G6 (neutrality · provenance · palette · a11y · privacy · mock isolation)
   bundle-size delta
   preview build (internal distribution) on the `mobile` label
   ≈ 6 min
 
-main:
-  everything above
+main: everything above
   + E2E (Maestro, 12 flows) on real reference-class devices
   + G7 performance benchmarks · G8 security (audit, secret scan, SBOM)
   + EAS Update → `preview` channel
   ≈ 25 min
 
-release tag:
-  + EAS Build (iOS + Android, production profile)
+release tag: + EAS Build (iOS + Android, production profile)
   + source maps → Sentry
   + EAS Submit → TestFlight / Play internal
   → manual gates → staged rollout
 
-nightly:
-  + fixture drift diff (opens a PR on API drift)
+nightly: + fixture drift diff (opens a PR on API drift)
   + full 3G-throttled E2E · a11y sweep · dependency audit
 ```
 

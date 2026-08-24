@@ -20,11 +20,11 @@ The mobile arguments largely dissolve. Three new ones replace them:
 
 1. **ISR caching is keyed on the request, and the request should be cacheable.** The entire cost model (`.docs/02-architecture/web-architecture.md`) depends on rendering once per `datasetVersion` and serving from CDN. REST GETs with `ETag: "v{datasetVersion}"` compose naturally with that. GraphQL over POST does not, and working around it (persisted queries, GET-with-query-params) reconstructs REST's properties with extra machinery.
 
-2. **RSC already solves the over-fetching problem GraphQL exists to solve.** GraphQL's core value is letting a client request exactly the fields it needs, to avoid shipping unused data over a slow link. With Server Components, the fetch happens *on the server*, next to the API, and unused fields never cross a network the user is paying for. The problem GraphQL solves has been moved rather than left unsolved.
+2. **RSC already solves the over-fetching problem GraphQL exists to solve.** GraphQL's core value is letting a client request exactly the fields it needs, to avoid shipping unused data over a slow link. With Server Components, the fetch happens _on the server_, next to the API, and unused fields never cross a network the user is paying for. The problem GraphQL solves has been moved rather than left unsolved.
 
 3. **Version coherence.** A GraphQL query resolving fields across services can return figures computed against different `datasetVersion`s. On this product that is not a caching bug — it is a **traceability defect** (`.docs/17-legal/legal-ethical-rules.md`), because two figures on one page would carry different provenance vintages. REST endpoints that each return an explicit `datasetVersion` make the mismatch detectable; the client can then refuse to render a page whose sections disagree.
 
-The bundle-size argument is genuinely gone. The caching and coherence arguments got *stronger*, not weaker.
+The bundle-size argument is genuinely gone. The caching and coherence arguments got _stronger_, not weaker.
 
 ## Alternatives considered
 

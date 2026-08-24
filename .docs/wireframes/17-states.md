@@ -212,4 +212,5 @@ LOCATION                        NOTIFICATIONS
                              │    OCR · 82%           │
                              └────────────────────────┘
 ```
+
 Above ~130% scale, `label + value` rows switch from horizontal to stacked. **A monetary value is never truncated** — a truncated figure is a wrong figure (`.docs/01-product/accessibility.md`).

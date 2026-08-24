@@ -16,7 +16,7 @@ The mobile-only architecture phase produced a complete specification and, in doi
 
 This decision acts on that finding. Three reasons make web-first the stronger opening move:
 
-1. **The audience that can act on the data works on a desktop.** A journalist cross-checking 40 projects, a researcher pulling a versioned dataset, an RTI activist assembling an application — all of it is multi-window, copy-paste, spreadsheet work. The product's *impact* runs through these users even though its *reach* runs through citizens on phones.
+1. **The audience that can act on the data works on a desktop.** A journalist cross-checking 40 projects, a researcher pulling a versioned dataset, an RTI activist assembling an application — all of it is multi-window, copy-paste, spreadsheet work. The product's _impact_ runs through these users even though its _reach_ runs through citizens on phones.
 
 2. **Discovery.** With no website there is no search-engine surface at all. A civic transparency platform that cannot be found by someone searching their district's name has a structural acquisition problem, and app-store search does not substitute for it. Shared links also degrade: `.docs/10-mobile/deep-linking.md` had to invent a "link-resolution host that is not a website" to make citations work at all.
 
@@ -24,15 +24,15 @@ This decision acts on that finding. Three reasons make web-first the stronger op
 
 ## What this changes
 
-| Area | Change |
-|---|---|
-| **Delivery order** | Web to production first; mobile after |
-| **`.docs/01-product/roadmap-platform.md` Month 3** | Un-superseded — the Next.js dashboard month is back in force |
-| **`.docs/02-architecture/deliverables-and-risk.md` `apps/web/`** | Restored to the monorepo; `apps/mobile/` becomes a later addition |
-| **`.docs/02-architecture/tech-stack.md` frontend stack** | Back in force, with the revisions in `.docs/02-architecture/web-architecture.md` |
-| **`.docs/` 00–25** | Retained as the **mobile specification**, deferred not deleted. Their platform-agnostic content is promoted (see below) |
-| **`.docs/adr/001`–`010`** | Mobile-stack decisions — marked **Deferred**, not withdrawn. They stand for when mobile is built |
-| **`.docs/06-government-sources/`** | **Unaffected.** Source discovery is platform-independent |
+| Area                                                             | Change                                                                                                                  |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Delivery order**                                               | Web to production first; mobile after                                                                                   |
+| **`.docs/01-product/roadmap-platform.md` Month 3**               | Un-superseded — the Next.js dashboard month is back in force                                                            |
+| **`.docs/02-architecture/deliverables-and-risk.md` `apps/web/`** | Restored to the monorepo; `apps/mobile/` becomes a later addition                                                       |
+| **`.docs/02-architecture/tech-stack.md` frontend stack**         | Back in force, with the revisions in `.docs/02-architecture/web-architecture.md`                                        |
+| **`.docs/` 00–25**                                               | Retained as the **mobile specification**, deferred not deleted. Their platform-agnostic content is promoted (see below) |
+| **`.docs/adr/001`–`010`**                                        | Mobile-stack decisions — marked **Deferred**, not withdrawn. They stand for when mobile is built                        |
+| **`.docs/06-government-sources/`**                               | **Unaffected.** Source discovery is platform-independent                                                                |
 
 ---
 
@@ -69,30 +69,30 @@ The mobile phase rejected 14 patterns (`.docs/01-product/screen-inventory.md` §
 
 ### Rejected because of the phone → these return on web
 
-| Pattern | Why it returns |
-|---|---|
-| **Wide data tables** | A 1440px viewport renders a 12-column table well. This was a 390pt constraint, and it is the single most-requested affordance for the researcher and journalist audiences |
-| **Bulk export / dataset download** | `.docs/01-product/prd.md` names it explicitly for researchers. Trivial on web |
-| **API key management UI** | The keyed tiers in `.docs/12-security/security.md` (`journalist`, `researcher`) need a self-serve surface |
-| **Multi-pane / split views** | Compare a project against its peer distribution side by side |
-| **Persistent breadcrumb bar** | Costs ~24px on desktop instead of 44pt of a phone screen. `.docs/01-product/dashboard-design-legacy.md`'s `India / Maharashtra / Pune / Baramati` breadcrumb returns |
-| **Sidebar navigation** | Reasonable on desktop; the 4-tab bottom bar was a thumb-reach solution to a problem web does not have |
-| **A dedicated Analytics surface** | Rejected on mobile as "a chart looking for a question"; on desktop, a comparison explorer with room for controls is genuinely useful (`.docs/01-product/dashboard-design-legacy.md` §4) |
-| **Dense keyboard workflows** | Keyboard navigation, shortcuts, multi-select — desktop-native and valuable for repetitive verification work |
+| Pattern                            | Why it returns                                                                                                                                                                          |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Wide data tables**               | A 1440px viewport renders a 12-column table well. This was a 390pt constraint, and it is the single most-requested affordance for the researcher and journalist audiences               |
+| **Bulk export / dataset download** | `.docs/01-product/prd.md` names it explicitly for researchers. Trivial on web                                                                                                           |
+| **API key management UI**          | The keyed tiers in `.docs/12-security/security.md` (`journalist`, `researcher`) need a self-serve surface                                                                               |
+| **Multi-pane / split views**       | Compare a project against its peer distribution side by side                                                                                                                            |
+| **Persistent breadcrumb bar**      | Costs ~24px on desktop instead of 44pt of a phone screen. `.docs/01-product/dashboard-design-legacy.md`'s `India / Maharashtra / Pune / Baramati` breadcrumb returns                    |
+| **Sidebar navigation**             | Reasonable on desktop; the 4-tab bottom bar was a thumb-reach solution to a problem web does not have                                                                                   |
+| **A dedicated Analytics surface**  | Rejected on mobile as "a chart looking for a question"; on desktop, a comparison explorer with room for controls is genuinely useful (`.docs/01-product/dashboard-design-legacy.md` §4) |
+| **Dense keyboard workflows**       | Keyboard navigation, shortcuts, multi-select — desktop-native and valuable for repetitive verification work                                                                             |
 
 ### Rejected because of `.docs/17-legal/legal-ethical-rules.md` → these stay rejected, permanently
 
-| Pattern | Why it does not return |
-|---|---|
-| **Global anomaly feed** | Turns neutral observations into an engagement stream. The reasoning was never about screen size |
-| **"Worst districts / worst contractors" rankings** | `.docs/08-risk/risk-scoring-engine.md` forbids ranking people. A bigger screen does not make a leaderboard acceptable |
-| **Any score, rank, badge or flag on a contractor** | Same |
-| **Chart-to-PNG export** | Exports a number stripped of its source, breaking `.docs/17-legal/legal-ethical-rules.md` rule 5. A desktop right-click "save image" is *more* dangerous here, not less — it is the easiest way to put an unsourced government figure into circulation |
-| **Free-floating AI chat** | `.docs/09-ai/ai-layer.md`'s guardrails work because scope is bound. An open chat box invites out-of-scope questions that can only be refused |
-| **Gamification, streaks, badges** | Trivialises public finance |
-| **Onboarding that fully skips the neutrality framing** | The "what this is not" statement is not optional on any platform |
+| Pattern                                                | Why it does not return                                                                                                                                                                                                                                 |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Global anomaly feed**                                | Turns neutral observations into an engagement stream. The reasoning was never about screen size                                                                                                                                                        |
+| **"Worst districts / worst contractors" rankings**     | `.docs/08-risk/risk-scoring-engine.md` forbids ranking people. A bigger screen does not make a leaderboard acceptable                                                                                                                                  |
+| **Any score, rank, badge or flag on a contractor**     | Same                                                                                                                                                                                                                                                   |
+| **Chart-to-PNG export**                                | Exports a number stripped of its source, breaking `.docs/17-legal/legal-ethical-rules.md` rule 5. A desktop right-click "save image" is _more_ dangerous here, not less — it is the easiest way to put an unsourced government figure into circulation |
+| **Free-floating AI chat**                              | `.docs/09-ai/ai-layer.md`'s guardrails work because scope is bound. An open chat box invites out-of-scope questions that can only be refused                                                                                                           |
+| **Gamification, streaks, badges**                      | Trivialises public finance                                                                                                                                                                                                                             |
+| **Onboarding that fully skips the neutrality framing** | The "what this is not" statement is not optional on any platform                                                                                                                                                                                       |
 
-**This distinction is the main thing to carry into the web build.** When someone proposes a pattern the mobile docs rejected, the question is always: *was that a viewport constraint or a `.docs/17-legal/legal-ethical-rules.md` constraint?* The first reverses; the second never does.
+**This distinction is the main thing to carry into the web build.** When someone proposes a pattern the mobile docs rejected, the question is always: _was that a viewport constraint or a `.docs/17-legal/legal-ethical-rules.md` constraint?_ The first reverses; the second never does.
 
 ---
 
@@ -100,11 +100,11 @@ The mobile phase rejected 14 patterns (`.docs/01-product/screen-inventory.md` §
 
 Two items from `.docs/11-api/client-api-contract.md` shift, and one becomes less urgent:
 
-| Item | Change |
-|---|---|
-| **M3 — the mobile BFF** | **Downgraded from P0 to P2.** Screen-shaped composite endpoints existed to collapse 7 round trips on a 300ms-RTT cellular connection. A web client on broadband can tolerate parallel requests. Composites remain *desirable* for `datasetVersion` coherence — one payload guarantees every figure on a page shares one version — but they no longer block delivery |
-| **GraphQL** | **Reopened.** `.docs/adr/004` rejected it for mobile on HTTP-caching and bundle-size grounds. Neither argument is decisive for a server-rendered web client, and `.docs/11-api/api-documentation.md` already specifies a GraphQL schema for hierarchical drill-downs. Re-decided in `.docs/adr/012-web-api-strategy.md` — the caching argument still has force, so this was genuinely open, not a foregone reversal |
-| **C9 — the CGNAT rate-limit fix** | **Still required**, and still P0. Indian users reach a website over the same carrier-NAT'd mobile networks. Per-IP limits misfire identically |
+| Item                              | Change                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M3 — the mobile BFF**           | **Downgraded from P0 to P2.** Screen-shaped composite endpoints existed to collapse 7 round trips on a 300ms-RTT cellular connection. A web client on broadband can tolerate parallel requests. Composites remain _desirable_ for `datasetVersion` coherence — one payload guarantees every figure on a page shares one version — but they no longer block delivery                                                 |
+| **GraphQL**                       | **Reopened.** `.docs/adr/004` rejected it for mobile on HTTP-caching and bundle-size grounds. Neither argument is decisive for a server-rendered web client, and `.docs/11-api/api-documentation.md` already specifies a GraphQL schema for hierarchical drill-downs. Re-decided in `.docs/adr/012-web-api-strategy.md` — the caching argument still has force, so this was genuinely open, not a foregone reversal |
+| **C9 — the CGNAT rate-limit fix** | **Still required**, and still P0. Indian users reach a website over the same carrier-NAT'd mobile networks. Per-IP limits misfire identically                                                                                                                                                                                                                                                                       |
 
 Everything else in the P0 list — search, money as decimal strings, both variances, three confidences, provenance page anchors — is unchanged and still blocking.
 
@@ -134,9 +134,9 @@ Each mobile-specific ADR gets a status header (`Deferred — pending web-first d
 
 New web documents:
 
-| Document | Contents |
-|---|---|
-| [`.docs/02-architecture/web-architecture.md`](../02-architecture/web-architecture.md) | The web application architecture |
-| [`.docs/01-product/roadmap-web.md`](../01-product/roadmap-web.md) | Phased delivery to launch |
-| [`adr/011-web-framework.md`](../adr/011-web-framework.md) | Framework decision |
-| [`adr/012-web-api-strategy.md`](../adr/012-web-api-strategy.md) | REST vs GraphQL, re-decided for web |
+| Document                                                                              | Contents                            |
+| ------------------------------------------------------------------------------------- | ----------------------------------- |
+| [`.docs/02-architecture/web-architecture.md`](../02-architecture/web-architecture.md) | The web application architecture    |
+| [`.docs/01-product/roadmap-web.md`](../01-product/roadmap-web.md)                     | Phased delivery to launch           |
+| [`adr/011-web-framework.md`](../adr/011-web-framework.md)                             | Framework decision                  |
+| [`adr/012-web-api-strategy.md`](../adr/012-web-api-strategy.md)                       | REST vs GraphQL, re-decided for web |

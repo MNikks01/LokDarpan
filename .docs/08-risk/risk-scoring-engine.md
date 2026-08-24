@@ -9,19 +9,19 @@ The risk score is a **0–100 "needs-verification" indicator** — a triage numb
 - **Transparent:** the score = a documented weighted sum of factor sub-scores; the breakdown is always shown.
 - **Bounded & stable:** each factor is normalized to 0–100 before weighting; total clamped to 0–100.
 - **Robust:** uses median/MAD-based signals from [06](../07-analytics/analytics-engine.md), so a single outlier input can't silently swing everything.
-- **Honest about gaps:** missing data raises the score modestly (because it *reduces verifiability*) and is labeled as such — we never treat "missing" as "bad actor."
+- **Honest about gaps:** missing data raises the score modestly (because it _reduces verifiability_) and is labeled as such — we never treat "missing" as "bad actor."
 
 ## Factors and weights
 
-| Factor | What it measures (from official figures) | Weight |
-|---|---|---:|
-| `variance` | Magnitude of |release/allocation deviation %| vs comparable projects | 25 |
-| `excessive_cost` | Cost/km deviation above district/peer median (positive side only) | 20 |
-| `delay` | Schedule slippage vs expected end date / low physical progress for elapsed time | 15 |
-| `missing_records` | Share of expected finance/progress records that are absent | 15 |
-| `budget_revisions` | Number/size of allocation revisions across versions | 10 |
-| `contractor_concentration` | Scope-level HHI / top-k share around this project's tender | 15 |
-| **Total** | | **100** |
+| Factor                     | What it measures (from official figures)                                        |                         Weight |
+| -------------------------- | ------------------------------------------------------------------------------- | -----------------------------: |
+| `variance`                 | Magnitude of                                                                    | release/allocation deviation % | vs comparable projects | 25  |
+| `excessive_cost`           | Cost/km deviation above district/peer median (positive side only)               |                             20 |
+| `delay`                    | Schedule slippage vs expected end date / low physical progress for elapsed time |                             15 |
+| `missing_records`          | Share of expected finance/progress records that are absent                      |                             15 |
+| `budget_revisions`         | Number/size of allocation revisions across versions                             |                             10 |
+| `contractor_concentration` | Scope-level HHI / top-k share around this project's tender                      |                             15 |
+| **Total**                  |                                                                                 |                        **100** |
 
 Weights are configuration, versioned alongside the dataset so any historical score is reproducible.
 
@@ -60,12 +60,12 @@ RiskScore ≈ 40  → band: "Medium — review recommended"
 
 ## Bands
 
-| Score | Band | Meaning (verification priority) |
-|---|---|---|
-| 0–24 | Low | Figures are internally consistent and well-covered |
-| 25–49 | Medium | Some deviation or gaps; worth a look |
-| 50–74 | High | Notable deviation and/or missing records |
-| 75–100 | Very high | Multiple strong signals; prioritize verification |
+| Score  | Band      | Meaning (verification priority)                    |
+| ------ | --------- | -------------------------------------------------- |
+| 0–24   | Low       | Figures are internally consistent and well-covered |
+| 25–49  | Medium    | Some deviation or gaps; worth a look               |
+| 50–74  | High      | Notable deviation and/or missing records           |
+| 75–100 | Very high | Multiple strong signals; prioritize verification   |
 
 Bands are advisory labels for triage. They never appear as conclusions about people.
 
@@ -87,5 +87,5 @@ Written to `risk_score(project_id, score, factors JSONB, computed_at, dataset_ve
 
 - Never output a label implying theft, fraud, bribery, or wrongdoing.
 - Never combine factors into a claim of cause.
-- Never rank *people* (contractors/officials) by "risk"; it scores **projects' data consistency and coverage** only. (Contractor concentration is a market-structure statistic about the scope, not a judgment of a contractor.)
+- Never rank _people_ (contractors/officials) by "risk"; it scores **projects' data consistency and coverage** only. (Contractor concentration is a market-structure statistic about the scope, not a judgment of a contractor.)
 - Never hide the breakdown — the score is meaningless to the user without its factors and sources.

@@ -8,18 +8,18 @@
 
 ## 1 · Threat model (mobile-specific)
 
-| # | Asset | Threat | Priority | Control |
-|---|---|---|---|---|
-| T1 | Figure integrity in transit | MITM altering a financial figure | **Critical** | TLS 1.2+, cleartext disabled, ATS/network-security-config, `datasetVersion` + ETag consistency; pinning assessed in §3 |
-| T2 | What a user investigates | Search queries, AI questions, watchlists, location leaking to analytics, crash logs, or the server | **High** | On-device watchlist, no query/question telemetry, coarse location never stored (§5) |
-| T3 | Device | Malicious content in a government-published PDF | **High** | Sandboxed viewer, host allow-list, no JS, size cap (§4) |
-| T4 | Deep-link surface | Crafted links driving unintended navigation or opening arbitrary URLs | **High** | Strict param validation, server-resolved IDs, no action links, URL allow-list (§6) |
-| T5 | Service availability | Client-driven API abuse; a bug causing a retry storm | Medium | Bounded retries, jitter, circuit breaker, honoured `Retry-After` (§7) |
-| T6 | Tokens (only if an account exists) | Theft from device storage | Medium | SecureStore only; never MMKV/AsyncStorage (§2) |
-| T7 | Supply chain | A malicious npm dependency in a civic app | **High** | Lockfile, `npm audit`/OSV in CI, SBOM, pinned versions, minimal dependency surface (§9) |
-| T8 | Impersonation | A fake "LokDarpan" app publishing altered figures | Medium | Store verification, signed builds, publicised official listing, open-source binary reproducibility where feasible |
+| #   | Asset                              | Threat                                                                                             | Priority     | Control                                                                                                                |
+| --- | ---------------------------------- | -------------------------------------------------------------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| T1  | Figure integrity in transit        | MITM altering a financial figure                                                                   | **Critical** | TLS 1.2+, cleartext disabled, ATS/network-security-config, `datasetVersion` + ETag consistency; pinning assessed in §3 |
+| T2  | What a user investigates           | Search queries, AI questions, watchlists, location leaking to analytics, crash logs, or the server | **High**     | On-device watchlist, no query/question telemetry, coarse location never stored (§5)                                    |
+| T3  | Device                             | Malicious content in a government-published PDF                                                    | **High**     | Sandboxed viewer, host allow-list, no JS, size cap (§4)                                                                |
+| T4  | Deep-link surface                  | Crafted links driving unintended navigation or opening arbitrary URLs                              | **High**     | Strict param validation, server-resolved IDs, no action links, URL allow-list (§6)                                     |
+| T5  | Service availability               | Client-driven API abuse; a bug causing a retry storm                                               | Medium       | Bounded retries, jitter, circuit breaker, honoured `Retry-After` (§7)                                                  |
+| T6  | Tokens (only if an account exists) | Theft from device storage                                                                          | Medium       | SecureStore only; never MMKV/AsyncStorage (§2)                                                                         |
+| T7  | Supply chain                       | A malicious npm dependency in a civic app                                                          | **High**     | Lockfile, `npm audit`/OSV in CI, SBOM, pinned versions, minimal dependency surface (§9)                                |
+| T8  | Impersonation                      | A fake "LokDarpan" app publishing altered figures                                                  | Medium       | Store verification, signed builds, publicised official listing, open-source binary reproducibility where feasible      |
 
-**Not in the threat model:** confidentiality of the *data* (it is public by design), and DRM/anti-tamper on the client (there is nothing on the device worth protecting from its owner).
+**Not in the threat model:** confidentiality of the _data_ (it is public by design), and DRM/anti-tamper on the client (there is nothing on the device worth protecting from its owner).
 
 ---
 
@@ -29,12 +29,12 @@
 
 If the optional sync account is later enabled:
 
-| Item | Store | Never |
-|---|---|---|
-| Access token (short-lived) | Memory | Disk |
-| Refresh token | **`expo-secure-store`** (Keychain / Android Keystore) | MMKV, AsyncStorage, SQLite, logs |
-| Device/install id (rotating, non-tracking) | MMKV | Sent to third parties; joined to a query or a saved item |
-| Saved items, history, settings | SQLite / MMKV, unencrypted | — (public data; encrypting it would imply a protection the app cannot give against a compromised device) |
+| Item                                       | Store                                                 | Never                                                                                                    |
+| ------------------------------------------ | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Access token (short-lived)                 | Memory                                                | Disk                                                                                                     |
+| Refresh token                              | **`expo-secure-store`** (Keychain / Android Keystore) | MMKV, AsyncStorage, SQLite, logs                                                                         |
+| Device/install id (rotating, non-tracking) | MMKV                                                  | Sent to third parties; joined to a query or a saved item                                                 |
+| Saved items, history, settings             | SQLite / MMKV, unencrypted                            | — (public data; encrypting it would imply a protection the app cannot give against a compromised device) |
 
 A leaked token grants read access to public data plus a synced list of saved items. Blast radius is small by design — but the saved list is the one genuinely sensitive artifact (T2), which is why it is on-device by default.
 
@@ -53,31 +53,31 @@ A leaked token grants read access to public data plus a synced list of saved ite
 
 The app renders PDFs fetched from ~1,000 government portals of highly variable operational quality. Some of those files are decades old, some are scans produced by third-party vendors, and any of them could be replaced upstream.
 
-| Control | |
-|---|---|
-| **Host allow-list** | Only hosts present in the ingested source registry, plus the platform artifact store. A URL from a payload that fails the allow-list is not opened, and the mismatch is logged |
-| **Prefer the archived artifact** | The content-addressed copy (`artifact_sha256`) is preferred over the live publisher URL — it is what the platform actually extracted from, and it cannot have been swapped since |
-| **Integrity check** | The downloaded artifact's sha256 is verified against `provenance.artifactSha256`; a mismatch shows "This document does not match the copy we extracted from" and refuses to render |
-| **No script execution** | JavaScript disabled in the viewer; no embedded form submission; no external resource loading |
-| **Sandbox** | Rendering in an isolated view with no filesystem or app-storage access |
-| **Caps** | 50 MB per document, 60 s render timeout, page-at-a-time `Range` fetching |
-| **No auto-open** | A document opens only on an explicit user action, never from a notification or a deep link without a confirmation step |
+| Control                          |                                                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Host allow-list**              | Only hosts present in the ingested source registry, plus the platform artifact store. A URL from a payload that fails the allow-list is not opened, and the mismatch is logged     |
+| **Prefer the archived artifact** | The content-addressed copy (`artifact_sha256`) is preferred over the live publisher URL — it is what the platform actually extracted from, and it cannot have been swapped since   |
+| **Integrity check**              | The downloaded artifact's sha256 is verified against `provenance.artifactSha256`; a mismatch shows "This document does not match the copy we extracted from" and refuses to render |
+| **No script execution**          | JavaScript disabled in the viewer; no embedded form submission; no external resource loading                                                                                       |
+| **Sandbox**                      | Rendering in an isolated view with no filesystem or app-storage access                                                                                                             |
+| **Caps**                         | 50 MB per document, 60 s render timeout, page-at-a-time `Range` fetching                                                                                                           |
+| **No auto-open**                 | A document opens only on an explicit user action, never from a notification or a deep link without a confirmation step                                                             |
 
 ---
 
 ## 5 · Privacy as a security control (T2)
 
-For an RTI activist, *what they are looking at* is the sensitive asset — not the data itself. Several architectural decisions exist for this reason:
+For an RTI activist, _what they are looking at_ is the sensitive asset — not the data itself. Several architectural decisions exist for this reason:
 
-| Data | Treatment |
-|---|---|
-| Search queries | **Never** transmitted to analytics or crash reporting. Stored on-device only, clearable |
-| AI questions | Same. Server-side `.docs/09-ai/ai-layer.md` audit logs carry no user identifier, so they cannot be joined to a person |
-| Watchlist / saved items | **On-device.** Change detection is a client-side `?since=` poll, so the server never learns which projects a person monitors (`.docs/10-mobile/notifications.md`) |
-| Location | `WhenInUse` only; never background; used in-memory for a bbox; never written to disk; never sent to analytics; server-side never logged with an identifier |
-| Contacts, calendar, photos, mic (except explicit voice search), advertising id | **Never requested** |
-| Crash reports | PII-scrubbed in `beforeSend`: no query text, no question text, no coordinates, no entity names in breadcrumbs — screen IDs and error codes only |
-| Screenshots of financial figures | Not blocked (users need to share evidence), but shared artifacts always carry their sources (`.docs/01-product/source-traceability.md`) |
+| Data                                                                           | Treatment                                                                                                                                                         |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search queries                                                                 | **Never** transmitted to analytics or crash reporting. Stored on-device only, clearable                                                                           |
+| AI questions                                                                   | Same. Server-side `.docs/09-ai/ai-layer.md` audit logs carry no user identifier, so they cannot be joined to a person                                             |
+| Watchlist / saved items                                                        | **On-device.** Change detection is a client-side `?since=` poll, so the server never learns which projects a person monitors (`.docs/10-mobile/notifications.md`) |
+| Location                                                                       | `WhenInUse` only; never background; used in-memory for a bbox; never written to disk; never sent to analytics; server-side never logged with an identifier        |
+| Contacts, calendar, photos, mic (except explicit voice search), advertising id | **Never requested**                                                                                                                                               |
+| Crash reports                                                                  | PII-scrubbed in `beforeSend`: no query text, no question text, no coordinates, no entity names in breadcrumbs — screen IDs and error codes only                   |
+| Screenshots of financial figures                                               | Not blocked (users need to share evidence), but shared artifacts always carry their sources (`.docs/01-product/source-traceability.md`)                           |
 
 ---
 
@@ -98,7 +98,7 @@ Deep links are unauthenticated, spoofable, and reachable from any web page or me
 
 `.docs/12-security/security.md` specifies per-IP rate limiting. **Indian mobile carriers operate large-scale CGNAT** — hundreds of thousands of subscribers behind shared egress IPs. Per-IP limits would throttle the app's users collectively, and would hit hardest exactly the mobile-only, low-income users the product exists for (`00-document-audit` C9).
 
-**Requirement on the backend:** a per-install anonymous token bucket (a rotating install identifier that is *not* a user identifier and is never joined to query content), or a substantially raised mobile tier keyed on `X-Client-Build`. This is a genuine backend requirement, not a client workaround.
+**Requirement on the backend:** a per-install anonymous token bucket (a rotating install identifier that is _not_ a user identifier and is never joined to query content), or a substantially raised mobile tier keyed on `X-Client-Build`. This is a genuine backend requirement, not a client workaround.
 
 **Client-side controls:** max 3 retries with exponential backoff and jitter; `Retry-After` always honoured; a circuit breaker that stops calling an endpoint after 5 consecutive failures for 60 s; every request cancelled on unmount; debounced search; no polling except the 5-minute version check; no background prefetch on cellular. `429` renders as an explicit, non-alarming state with a countdown — never a raw error.
 
@@ -137,13 +137,13 @@ The client cannot verify a figure cryptographically, but it can refuse to displa
 
 ## 11 · Incident response (client)
 
-| Scenario | Response |
-|---|---|
-| Malicious/altered artifact reported | Server revokes the source document; the client's allow-list refreshes on next launch; affected figures show a "source under review" state |
-| Dependency CVE | Patch, expedited build; OTA if JS-only |
-| Contract break causing mass client errors | Server-side compatibility shim first; `/meta/client-support` raises the minimum build only as a last resort |
-| Data-tamper suspicion upstream | `.docs/12-security/security.md` platform runbook; the client shows the affected `datasetVersion` as "under review" and offers the prior version |
-| Leaked crash-reporting DSN | Rotate; the DSN grants write-only ingest and carries no user data |
+| Scenario                                  | Response                                                                                                                                        |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Malicious/altered artifact reported       | Server revokes the source document; the client's allow-list refreshes on next launch; affected figures show a "source under review" state       |
+| Dependency CVE                            | Patch, expedited build; OTA if JS-only                                                                                                          |
+| Contract break causing mass client errors | Server-side compatibility shim first; `/meta/client-support` raises the minimum build only as a last resort                                     |
+| Data-tamper suspicion upstream            | `.docs/12-security/security.md` platform runbook; the client shows the affected `datasetVersion` as "under review" and offers the prior version |
+| Leaked crash-reporting DSN                | Rotate; the DSN grants write-only ingest and carries no user data                                                                               |
 
 ---
 

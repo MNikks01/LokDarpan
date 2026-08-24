@@ -2,7 +2,7 @@
 
 ## Position
 
-The product's audience includes people whose *investigative intent* is sensitive — an activist searching a contractor's name before filing an RTI, a journalist tracking one project. `.docs/12-security/security.md` commits to "no behavioural tracking beyond privacy-respecting, aggregate analytics; no ad tech." This document takes that seriously enough to make it structural.
+The product's audience includes people whose _investigative intent_ is sensitive — an activist searching a contractor's name before filing an RTI, a journalist tracking one project. `.docs/12-security/security.md` commits to "no behavioural tracking beyond privacy-respecting, aggregate analytics; no ad tech." This document takes that seriously enough to make it structural.
 
 **Three rules that override any product-learning benefit:**
 
@@ -38,9 +38,9 @@ Every numeric or free value is bucketed at the source, on device: counts → `0 
 
 ### Explicitly never collected
 
-Query text · AI question or answer text · entity names or IDs the user viewed (only *types* and *levels*) · coordinates or any geohash · saved-item contents · exact timestamps beyond hour granularity · IP-derived location · advertising identifiers · contacts, calendar, photos · device fingerprint components · session replay · heatmaps or touch coordinates.
+Query text · AI question or answer text · entity names or IDs the user viewed (only _types_ and _levels_) · coordinates or any geohash · saved-item contents · exact timestamps beyond hour granularity · IP-derived location · advertising identifiers · contacts, calendar, photos · device fingerprint components · session replay · heatmaps or touch coordinates.
 
-**Note on entity IDs:** the app deliberately does not report *which* project or contractor was viewed. Knowing that "project 501 was viewed 4,000 times" would be genuinely useful product data — and it is exactly the dataset that could later be subpoenaed, breached, or correlated. The trade is made knowingly: we accept weaker product analytics to guarantee that no record exists of who looked at what.
+**Note on entity IDs:** the app deliberately does not report _which_ project or contractor was viewed. Knowing that "project 501 was viewed 4,000 times" would be genuinely useful product data — and it is exactly the dataset that could later be subpoenaed, breached, or correlated. The trade is made knowingly: we accept weaker product analytics to guarantee that no record exists of who looked at what.
 
 ### Consent
 
@@ -95,7 +95,7 @@ Sampled at 10%. Thresholds are the ceilings in `.docs/02-architecture/performanc
 
 ## API observability
 
-Every request carries `X-Request-Id` (client UUID) and `X-Client-Build`. The request id is echoed in error responses, surfaced in the error UI's "copy diagnostics", and logged server-side — so a user's report ("this screen was broken at 4pm") maps to an exact server log line without the app needing to know who the user is. This is the whole tracing story, and it works precisely *because* nothing else is identifying.
+Every request carries `X-Request-Id` (client UUID) and `X-Client-Build`. The request id is echoed in error responses, surfaced in the error UI's "copy diagnostics", and logged server-side — so a user's report ("this screen was broken at 4pm") maps to an exact server log line without the app needing to know who the user is. This is the whole tracing story, and it works precisely _because_ nothing else is identifying.
 
 Client-observed API health: error rate by endpoint and status, cache-hit ratio, `429` rate (the CGNAT canary — `.docs/12-security/mobile-security.md` §7), contract-validation failure rate by endpoint.
 
@@ -105,18 +105,18 @@ Client-observed API health: error rate by endpoint and status, cache-hit ratio, 
 
 Beyond engagement, these tell us whether the product is doing its job:
 
-| Metric | Why | Target |
-|---|---|---|
-| **Source-open rate** — `source_opened / project_viewed` | Are people using traceability, or just reading numbers? The single best signal that the product's core promise is landing | ≥ 0.15 |
-| **Document-open rate** — `document_opened / source_opened` | Does the chain complete all the way to the government page? | ≥ 0.20 |
-| **Zero-result search rate** | Coverage and matching quality | ≤ 0.15 |
-| **Empty-state rate by variant** | How often users hit unpublished data — a *platform coverage* metric surfaced through the client | tracked, not targeted |
-| **`insufficient_data` rate on Money Trail** | What share of projects lack a complete chain — this is `.docs/01-product/prd.md`'s "Coverage" success metric, measured in the field | tracked |
-| **AI refusal rate** | Too high ⇒ scoping is wrong; too low ⇒ guardrails may be loose | 0.05–0.25 |
-| **`ai_answer_shown{citation_count: 0}`** | Should be structurally impossible; any occurrence is a **contract violation to investigate**, not a usage number | 0 |
-| **Contract-validation failure rate** | Backend drift, detected from the field | ≈ 0 |
-| **`map_feature_cap_hit` rate** | How often users see a truncated map | tracked |
-| **Crash-free sessions (reference-device cohort)** | | ≥ 99.5% |
+| Metric                                                     | Why                                                                                                                                 | Target                |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| **Source-open rate** — `source_opened / project_viewed`    | Are people using traceability, or just reading numbers? The single best signal that the product's core promise is landing           | ≥ 0.15                |
+| **Document-open rate** — `document_opened / source_opened` | Does the chain complete all the way to the government page?                                                                         | ≥ 0.20                |
+| **Zero-result search rate**                                | Coverage and matching quality                                                                                                       | ≤ 0.15                |
+| **Empty-state rate by variant**                            | How often users hit unpublished data — a _platform coverage_ metric surfaced through the client                                     | tracked, not targeted |
+| **`insufficient_data` rate on Money Trail**                | What share of projects lack a complete chain — this is `.docs/01-product/prd.md`'s "Coverage" success metric, measured in the field | tracked               |
+| **AI refusal rate**                                        | Too high ⇒ scoping is wrong; too low ⇒ guardrails may be loose                                                                      | 0.05–0.25             |
+| **`ai_answer_shown{citation_count: 0}`**                   | Should be structurally impossible; any occurrence is a **contract violation to investigate**, not a usage number                    | 0                     |
+| **Contract-validation failure rate**                       | Backend drift, detected from the field                                                                                              | ≈ 0                   |
+| **`map_feature_cap_hit` rate**                             | How often users see a truncated map                                                                                                 | tracked               |
+| **Crash-free sessions (reference-device cohort)**          |                                                                                                                                     | ≥ 99.5%               |
 
 ---
 

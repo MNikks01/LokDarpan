@@ -25,6 +25,7 @@
 │    🏠        🗺         🔍          ☆        │
 └──────────────────────────────────────────────┘
 ```
+
 The examples are not filler — they teach that IDs, road numbers, and aliases are all searchable, which most users would not guess.
 
 ## S-14 · Results — grouped, never flat
@@ -92,9 +93,10 @@ Scope raises ranking; it never hides results (`ELSEWHERE` divider).
 │                        │  │                        │  │  [ Report an issue ]   │
 └────────────────────────┘  └────────────────────────┘  └────────────────────────┘
 ```
-Case (c) never says *"this project does not exist."* The platform knows what it ingested, not what exists.
 
-## S-16 · Filters   ·   Offline search
+Case (c) never says _"this project does not exist."_ The platform knows what it ingested, not what exists.
+
+## S-16 · Filters · Offline search
 
 ```text
 S-16                                OFFLINE

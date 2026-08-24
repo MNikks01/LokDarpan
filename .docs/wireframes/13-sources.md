@@ -133,9 +133,9 @@ Only page 42 is fetched (HTTP `Range`) — the 78 MB total is stated, never down
 └──────────────────────────────────────────────┘
 ```
 
-Step ⑤ is the reverse index — *which conclusions rest on this number?* It is what an auditor actually needs, and what makes a correction's impact visible.
+Step ⑤ is the reverse index — _which conclusions rest on this number?_ It is what an auditor actually needs, and what makes a correction's impact visible.
 
-## S-56 · Source registry   ·   S-57 · Methodology
+## S-56 · Source registry · S-57 · Methodology
 
 ```text
 S-56                                S-57 (sheet)

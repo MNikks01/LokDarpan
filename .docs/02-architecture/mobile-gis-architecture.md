@@ -1,6 +1,6 @@
 # 07 — GIS / Map Experience (Mobile)
 
-The map is how a citizen answers *"what was built near me, and does its cost look normal?"* It is also the fastest way to make a phone unusable. This document defines the mobile GIS architecture so that it does neither.
+The map is how a citizen answers _"what was built near me, and does its cost look normal?"_ It is also the fastest way to make a phone unusable. This document defines the mobile GIS architecture so that it does neither.
 
 **Inherited unchanged from `.docs/03-domain/gis-intelligence.md`:** PostGIS as the spatial store, EPSG:4326 geometries, the MVT tile pyramid keyed by `datasetVersion`, precomputed per-unit choropleth metrics, and the honesty rules (approximate coordinates marked, missing geometry listed, legend states that colour encodes a measurement).
 
@@ -35,13 +35,13 @@ Map SDK: **MapLibre React Native**, self-hosted vector tiles, self-hosted basema
 
 The single most important design decision for map performance: **what is even queryable is a function of zoom.**
 
-| Zoom | Boundary layer | Data shown | Interaction | Query |
-|---|---|---|---|---|
-| 3–5 | State | State choropleth | Tap → S-23 (state) | none — tiles only |
-| 6–7 | District | District choropleth | Tap → S-23 (district) | none — tiles only |
-| 8–10 | Taluka / block | Taluka choropleth **+ server-side clusters** | Tap cluster → zoom or S-20 | cluster tiles |
-| 11–13 | Local body / village | Individual **projects and assets** | Tap → S-19 preview | `GET /mobile/map/features?bbox&z` |
-| 14–18 | Ward | Assets + road geometry + parcel context | Tap → S-19 → entity | same, tighter bbox |
+| Zoom  | Boundary layer       | Data shown                                   | Interaction                | Query                             |
+| ----- | -------------------- | -------------------------------------------- | -------------------------- | --------------------------------- |
+| 3–5   | State                | State choropleth                             | Tap → S-23 (state)         | none — tiles only                 |
+| 6–7   | District             | District choropleth                          | Tap → S-23 (district)      | none — tiles only                 |
+| 8–10  | Taluka / block       | Taluka choropleth **+ server-side clusters** | Tap cluster → zoom or S-20 | cluster tiles                     |
+| 11–13 | Local body / village | Individual **projects and assets**           | Tap → S-19 preview         | `GET /mobile/map/features?bbox&z` |
+| 14–18 | Ward                 | Assets + road geometry + parcel context      | Tap → S-19 → entity        | same, tighter bbox                |
 
 **Individual assets do not exist below z11.** A user at national zoom sees choropleths, not a million pins — which is both the only way it performs and the more truthful representation (an individual ₹40 lakh road is not meaningful at national scale).
 
@@ -82,19 +82,19 @@ The list shows the **same query, same filters, same viewport** — sorted by dis
 
 ## 6 · Layers and the legend
 
-| Layer | Geometry | Default | Source |
-|---|---|---|---|
-| Administrative boundaries | polygon | on | MVT |
-| Choropleth fill | polygon | on | MVT feature property (precomputed metric) |
-| Roads | line | on (z≥11) | MVT |
-| Projects / assets | point | on (z≥11) | MVT + feature API |
-| Facilities (school, hospital…) | point | off | MVT |
-| Utility networks | line | off | MVT |
-| This project's geometry | line/point | context-only (S-39) | GeoJSON, small |
+| Layer                          | Geometry   | Default             | Source                                    |
+| ------------------------------ | ---------- | ------------------- | ----------------------------------------- |
+| Administrative boundaries      | polygon    | on                  | MVT                                       |
+| Choropleth fill                | polygon    | on                  | MVT feature property (precomputed metric) |
+| Roads                          | line       | on (z≥11)           | MVT                                       |
+| Projects / assets              | point      | on (z≥11)           | MVT + feature API                         |
+| Facilities (school, hospital…) | point      | off                 | MVT                                       |
+| Utility networks               | line       | off                 | MVT                                       |
+| This project's geometry        | line/point | context-only (S-39) | GeoJSON, small                            |
 
 Choropleth metrics (from `.docs/03-domain/gis-intelligence.md`): utilization %, per-capita expenditure, project count, median cost/km, verification-priority band distribution.
 
-**The legend is mandatory and always visible when a choropleth is on**, and it states, in words, on the map: *"Colour shows <metric>. It is a measurement, not an assessment."* (`.docs/17-legal/legal-ethical-rules.md`, `.docs/03-domain/gis-intelligence.md`). It also names the FY and the `datasetVersion`.
+**The legend is mandatory and always visible when a choropleth is on**, and it states, in words, on the map: _"Colour shows <metric>. It is a measurement, not an assessment."_ (`.docs/17-legal/legal-ethical-rules.md`, `.docs/03-domain/gis-intelligence.md`). It also names the FY and the `datasetVersion`.
 
 **No heat map in Phase 1.** `.docs/03-domain/gis-intelligence.md` defines kernel-density heat maps; on a phone, a red-hot blob over a district is the single most accusatory visual the product could produce, and its meaning (density of ₹ or of assets) is not readable without a legend most users will not open. Deferred, and if it ships it uses the sequential teal ramp, never a thermal palette.
 
@@ -122,9 +122,9 @@ The primer (S-04) states the retention rule before the OS dialog appears. For an
 
 Two tiers:
 
-| Tier | What | Trigger | Size |
-|---|---|---|---|
-| **Implicit** | Tiles the OS/SDK cached while panning | automatic | LRU, 60 MB cap |
+| Tier              | What                                                     | Trigger           | Size                                                   |
+| ----------------- | -------------------------------------------------------- | ----------------- | ------------------------------------------------------ |
+| **Implicit**      | Tiles the OS/SDK cached while panning                    | automatic         | LRU, 60 MB cap                                         |
 | **Explicit pack** | A district's tiles z6–13 + its unit tree + project index | user action, S-64 | stated before download; typically 8–40 MB per district |
 
 Un-cached area offline renders as a **neutral hatch with a label** ("Map data not downloaded for this area"), never as a blank white void that reads as "there is nothing here." Packs are pinned to a `datasetVersion` and refreshed by delta (`?since=`), not re-downloaded.
@@ -133,15 +133,15 @@ Un-cached area offline renders as a **neutral hatch with a label** ("Map data no
 
 ## 9 · Performance budgets (reference device: Android 11, 4 GB, Snapdragon 6-series)
 
-| Metric | Budget |
-|---|---|
-| Basemap first paint | ≤ 1.5 s from Explore mount |
-| Data layer paint | ≤ 2.5 s |
-| Pan/zoom | ≥ 50 fps sustained; no frame >32 ms during a fling |
-| Camera-settle → feature query | 300 ms debounce, previous request aborted |
-| Features rendered | ≤ 400 (hard) |
-| Map memory | ≤ 180 MB incremental over the app baseline |
-| Tile cache | 60 MB implicit; packs unbounded but user-visible and deletable |
+| Metric                        | Budget                                                         |
+| ----------------------------- | -------------------------------------------------------------- |
+| Basemap first paint           | ≤ 1.5 s from Explore mount                                     |
+| Data layer paint              | ≤ 2.5 s                                                        |
+| Pan/zoom                      | ≥ 50 fps sustained; no frame >32 ms during a fling             |
+| Camera-settle → feature query | 300 ms debounce, previous request aborted                      |
+| Features rendered             | ≤ 400 (hard)                                                   |
+| Map memory                    | ≤ 180 MB incremental over the app baseline                     |
+| Tile cache                    | 60 MB implicit; packs unbounded but user-visible and deletable |
 
 Mitigations: the map screen is a **lazy route segment** (the SDK is not in the initial bundle); the map instance is destroyed on tab blur after 60 s; symbol layers are used rather than React-rendered markers (a React marker per feature is the classic mobile-map performance failure); annotations are capped; the style is a static bundled JSON, not fetched.
 
@@ -150,5 +150,5 @@ Mitigations: the map screen is a **lazy route segment** (the SDK is not in the i
 ## 10 · Honesty on the map (inherited from `.docs/03-domain/gis-intelligence.md`, made concrete)
 
 - **Approximate coordinates** — assets geocoded or OCR-derived render with a hollow marker and a "approximate location" note in the preview. Exact and approximate must be visually distinguishable.
-- **Missing geometry** — units and projects with no geometry are *not silently dropped*. The map surface shows a persistent count: *"18 projects in this view have no published location."* → tap opens them as a list. This is the spatial equivalent of a missing-data warning and it matters: a map that quietly omits unmapped projects understates spending in exactly the places with the weakest publication.
+- **Missing geometry** — units and projects with no geometry are _not silently dropped_. The map surface shows a persistent count: _"18 projects in this view have no published location."_ → tap opens them as a list. This is the spatial equivalent of a missing-data warning and it matters: a map that quietly omits unmapped projects understates spending in exactly the places with the weakest publication.
 - **Version pinning** — the map always renders one `datasetVersion`; tiles and feature data can never be from two different versions on the same screen.

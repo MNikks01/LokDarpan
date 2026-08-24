@@ -26,14 +26,14 @@ Only official Government of India, State, UT, and government-body sources. News 
 
 ## Machine-readable registry
 
-| File | Contents |
-|---|---|
-| **[`.docs/06-government-sources/source-registry.json`](./source-registry.json)** | 99 curated sources, full schema per §28 |
-| **[`.docs/06-government-sources/source-registry.csv`](./source-registry.csv)** | The same, flattened |
+| File                                                                                                   | Contents                                                                                    |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| **[`.docs/06-government-sources/source-registry.json`](./source-registry.json)**                       | 99 curated sources, full schema per §28                                                     |
+| **[`.docs/06-government-sources/source-registry.csv`](./source-registry.csv)**                         | The same, flattened                                                                         |
 | **[`.docs/06-government-sources/igod-organization-catalogue.csv`](./igod-organization-catalogue.csv)** | **6,466 government organisations** crawled from IGOD — all 36 States/UTs + Union Government |
-| [`.docs/06-government-sources/data/union-ministries.json`](./data/union-ministries.json) | 106 Union ministries/departments with URLs, addresses, sub-organisation counts |
-| [`.docs/06-government-sources/data/igod_all.json`](./data/igod_all.json) | Raw IGOD State/UT crawl |
-| [`.docs/06-government-sources/data/verif_lookup.json`](./data/verif_lookup.json) | Raw verification results (168 URLs) |
+| [`.docs/06-government-sources/data/union-ministries.json`](./data/union-ministries.json)               | 106 Union ministries/departments with URLs, addresses, sub-organisation counts              |
+| [`.docs/06-government-sources/data/igod_all.json`](./data/igod_all.json)                               | Raw IGOD State/UT crawl                                                                     |
+| [`.docs/06-government-sources/data/verif_lookup.json`](./data/verif_lookup.json)                       | Raw verification results (168 URLs)                                                         |
 
 Fields with no evidence are `null` or `"unknown"` — never guessed.
 
@@ -42,47 +42,50 @@ Fields with no evidence are `null` or `"unknown"` — never guessed.
 ## Documents
 
 ### Start here
-| File | |
-|---|---|
-| **[`.docs/06-government-sources/SOURCE-DISCOVERY-REPORT.md`](./SOURCE-DISCOVERY-REPORT.md)** | Executive summary, numbers, both chain assessments, gaps, next steps |
-| **[`.docs/06-government-sources/phase-1-maharashtra-roads.md`](./phase-1-maharashtra-roads.md)** | The 22-source Phase-1 map and the two blocking unknowns |
+
+| File                                                                                             |                                                                      |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| **[`.docs/06-government-sources/SOURCE-DISCOVERY-REPORT.md`](./SOURCE-DISCOVERY-REPORT.md)**     | Executive summary, numbers, both chain assessments, gaps, next steps |
+| **[`.docs/06-government-sources/phase-1-maharashtra-roads.md`](./phase-1-maharashtra-roads.md)** | The 22-source Phase-1 map and the two blocking unknowns              |
 
 ### The analysis that matters
-| File | |
-|---|---|
-| [`.docs/06-government-sources/infrastructure/project-monitoring-portals.md`](./infrastructure/project-monitoring-portals.md) | **§33 chain assessment** — the critical gap |
-| [`.docs/04-data-engineering/entity-linking.md`](../04-data-engineering/entity-linking.md) | **§22** — can records be joined? LGD, and the two joins that decide the product |
-| [`.docs/04-data-engineering/source-to-data-model.md`](../04-data-engineering/source-to-data-model.md) | **§23** — source field → `.docs/05-data-model/database-design.md` field |
-| [`.docs/06-government-sources/infrastructure/resource-boq-sources.md`](./infrastructure/resource-boq-sources.md) | **§34 resource chain** + the IRC licensing problem |
-| [`.docs/06-government-sources/source-quality.md`](./source-quality.md) | Status model, A–F grades, verification method |
-| [`.docs/04-data-engineering/ingestion-methods.md`](../04-data-engineering/ingestion-methods.md) | **§24** — the GePNIC single-connector finding |
+
+| File                                                                                                                         |                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [`.docs/06-government-sources/infrastructure/project-monitoring-portals.md`](./infrastructure/project-monitoring-portals.md) | **§33 chain assessment** — the critical gap                                     |
+| [`.docs/04-data-engineering/entity-linking.md`](../04-data-engineering/entity-linking.md)                                    | **§22** — can records be joined? LGD, and the two joins that decide the product |
+| [`.docs/04-data-engineering/source-to-data-model.md`](../04-data-engineering/source-to-data-model.md)                        | **§23** — source field → `.docs/05-data-model/database-design.md` field         |
+| [`.docs/06-government-sources/infrastructure/resource-boq-sources.md`](./infrastructure/resource-boq-sources.md)             | **§34 resource chain** + the IRC licensing problem                              |
+| [`.docs/06-government-sources/source-quality.md`](./source-quality.md)                                                       | Status model, A–F grades, verification method                                   |
+| [`.docs/04-data-engineering/ingestion-methods.md`](../04-data-engineering/ingestion-methods.md)                              | **§24** — the GePNIC single-connector finding                                   |
 
 ### Inventories
-| File | |
-|---|---|
-| [`.docs/06-government-sources/central/central-government.md`](./central/central-government.md) | Union ministries, agencies, national systems |
-| [`.docs/06-government-sources/states/state-governments.md`](./states/state-governments.md) | All 28 States |
-| [`.docs/06-government-sources/uts/union-territories.md`](./uts/union-territories.md) | All 8 UTs |
-| [`.docs/06-government-sources/procurement/procurement-portals.md`](./procurement/procurement-portals.md) · [`.docs/06-government-sources/procurement/tender-portals.md`](./procurement/tender-portals.md) | **All 36 State/UT portals + CPPP endpoints** |
-| [`.docs/06-government-sources/finance/finance-portals.md`](./finance/finance-portals.md) · [`.docs/06-government-sources/finance/budget-portals.md`](./finance/budget-portals.md) | Treasury, expenditure, budget |
-| [`.docs/06-government-sources/finance/scheme-portals.md`](./finance/scheme-portals.md) | PMGSY, MGNREGA, urban missions |
-| [`.docs/06-government-sources/infrastructure/infrastructure-portals.md`](./infrastructure/infrastructure-portals.md) · [`.docs/06-government-sources/infrastructure/roads-portals.md`](./infrastructure/roads-portals.md) | Works departments; road authorities by class |
-| [`.docs/06-government-sources/procurement/contractor-portals.md`](./procurement/contractor-portals.md) | Award records, debarment, the identity problem |
-| [`.docs/06-government-sources/gis/gis-portals.md`](./gis/gis-portals.md) | Bhuvan, Bharat Maps, MRSAC |
-| [`.docs/06-government-sources/audit/audit-portals.md`](./audit/audit-portals.md) | CAG, and how audit findings must be handled |
-| [`.docs/06-government-sources/local-government/local-government-portals.md`](./local-government/local-government-portals.md) · [`.docs/06-government-sources/local-government/panchayat-portals.md`](./local-government/panchayat-portals.md) · [`.docs/06-government-sources/local-government/municipal-portals.md`](./local-government/municipal-portals.md) | Local bodies |
-| [`.docs/06-government-sources/administrative-hierarchy-sources.md`](./administrative-hierarchy-sources.md) | **LGD** — the canonical hierarchy |
-| [`.docs/06-government-sources/central/open-data-portals.md`](./central/open-data-portals.md) | data.gov.in, NDAP, eSankhyiki |
+
+| File                                                                                                                                                                                                                                                                                                                                                           |                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| [`.docs/06-government-sources/central/central-government.md`](./central/central-government.md)                                                                                                                                                                                                                                                                 | Union ministries, agencies, national systems   |
+| [`.docs/06-government-sources/states/state-governments.md`](./states/state-governments.md)                                                                                                                                                                                                                                                                     | All 28 States                                  |
+| [`.docs/06-government-sources/uts/union-territories.md`](./uts/union-territories.md)                                                                                                                                                                                                                                                                           | All 8 UTs                                      |
+| [`.docs/06-government-sources/procurement/procurement-portals.md`](./procurement/procurement-portals.md) · [`.docs/06-government-sources/procurement/tender-portals.md`](./procurement/tender-portals.md)                                                                                                                                                      | **All 36 State/UT portals + CPPP endpoints**   |
+| [`.docs/06-government-sources/finance/finance-portals.md`](./finance/finance-portals.md) · [`.docs/06-government-sources/finance/budget-portals.md`](./finance/budget-portals.md)                                                                                                                                                                              | Treasury, expenditure, budget                  |
+| [`.docs/06-government-sources/finance/scheme-portals.md`](./finance/scheme-portals.md)                                                                                                                                                                                                                                                                         | PMGSY, MGNREGA, urban missions                 |
+| [`.docs/06-government-sources/infrastructure/infrastructure-portals.md`](./infrastructure/infrastructure-portals.md) · [`.docs/06-government-sources/infrastructure/roads-portals.md`](./infrastructure/roads-portals.md)                                                                                                                                      | Works departments; road authorities by class   |
+| [`.docs/06-government-sources/procurement/contractor-portals.md`](./procurement/contractor-portals.md)                                                                                                                                                                                                                                                         | Award records, debarment, the identity problem |
+| [`.docs/06-government-sources/gis/gis-portals.md`](./gis/gis-portals.md)                                                                                                                                                                                                                                                                                       | Bhuvan, Bharat Maps, MRSAC                     |
+| [`.docs/06-government-sources/audit/audit-portals.md`](./audit/audit-portals.md)                                                                                                                                                                                                                                                                               | CAG, and how audit findings must be handled    |
+| [`.docs/06-government-sources/local-government/local-government-portals.md`](./local-government/local-government-portals.md) · [`.docs/06-government-sources/local-government/panchayat-portals.md`](./local-government/panchayat-portals.md) · [`.docs/06-government-sources/local-government/municipal-portals.md`](./local-government/municipal-portals.md) | Local bodies                                   |
+| [`.docs/06-government-sources/administrative-hierarchy-sources.md`](./administrative-hierarchy-sources.md)                                                                                                                                                                                                                                                     | **LGD** — the canonical hierarchy              |
+| [`.docs/06-government-sources/central/open-data-portals.md`](./central/open-data-portals.md)                                                                                                                                                                                                                                                                   | data.gov.in, NDAP, eSankhyiki                  |
 
 ---
 
 ## Status model (§31)
 
-| Status | Meaning | Count |
-|---|---|---|
-| `DISCOVERED` | Found in an official directory or search | 6,466 catalogue rows + 3 registry entries |
-| `VERIFIED` | Fetched — status, final URL, page title recorded. **Confirms it responds, not what it holds.** | **96** |
-| `PRODUCTION_READY` | Data exposure, retrieval, identifiers, cadence, history, extraction, legality and entity mapping all known | **0** |
+| Status             | Meaning                                                                                                    | Count                                     |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `DISCOVERED`       | Found in an official directory or search                                                                   | 6,466 catalogue rows + 3 registry entries |
+| `VERIFIED`         | Fetched — status, final URL, page title recorded. **Confirms it responds, not what it holds.**             | **96**                                    |
+| `PRODUCTION_READY` | Data exposure, retrieval, identifiers, cadence, history, extraction, legality and entity mapping all known | **0**                                     |
 
 **Zero sources are production-ready, and that is the correct state after a discovery pass.** Promotion requires field-level inspection — the next phase.
 
@@ -90,12 +93,12 @@ Fields with no evidence are `null` or `"unknown"` — never guessed.
 
 ## The rule this registry is built on (§35)
 
-> Never record *"the government does not publish X"* because we could not find X.
-> Record *"X was not identified in the sources reviewed as of [date]."*
+> Never record _"the government does not publish X"_ because we could not find X.
+> Record _"X was not identified in the sources reviewed as of [date]."_
 
 This matters concretely here. A set of `.gov.in`/`.nic.in` hosts — including **OMMAS**, eGramSwaraj, and MoRD — were unreachable from this environment. `lgdirectory.gov.in` was among them and then **succeeded on a second network channel**, proving the pattern is a vantage-point restriction rather than site failure.
 
-Every such host is recorded as *"not reachable from the verification vantage point on 21 August 2026; existence not disproven"* — and flagged for re-verification from an Indian network.
+Every such host is recorded as _"not reachable from the verification vantage point on 21 August 2026; existence not disproven"_ — and flagged for re-verification from an Indian network.
 
 ---
 

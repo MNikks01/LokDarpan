@@ -31,25 +31,25 @@ Mobile API                 →  .docs/11-api/client-api-contract.md
 
 Only mappings supported by something actually observed in this pass.
 
-| Government source | Government field | LokDarpan entity | LokDarpan field | Confidence |
-|---|---|---|---|---|
-| **LGD** ✅ | State/UT | `admin_unit` | `level='state'`, `name`, `lgd_code` | **High** |
-| LGD ✅ | District (784) | `admin_unit` | `level='district'`, `lgd_code` | **High** |
-| LGD ✅ | Sub-district (7,092) | `admin_unit` | `level='taluka'`, `lgd_code` | **High** |
-| LGD ✅ | Block (7,323) | `admin_unit` | `level='block'`, `lgd_code` | **High** |
-| LGD ✅ | Village (677,367) | `admin_unit` | `level='village'`, `lgd_code`, `census_code` | **High** |
-| LGD ✅ | Local body (rural/urban) | `admin_unit` | `level`, `pri_code` / `ulb_code` | **High** |
-| LGD ✅ | Ward mapping | `admin_unit` | `level='ward'`, `parent_id` | **High** |
-| LGD ✅ | Modification history + govt order | `admin_unit` | `valid_from`, `valid_to` + `source_document` | **High** |
-| **IGOD** ✅ | Organization name + URL | `department` / `ministry` | `name`, reference URL | Medium |
-| **CPPP** ✅ | Tender listing | `tender` | `external_tender_id`, `title`, `status` | Medium — fields unverified |
-| CPPP ✅ | Award record | `tender` | `contractor_id`, `awarded_amount`, `awarded_date` | **Low — unverified** |
-| CPPP ✅ | Debarred bidder list | *(new)* `contractor_debarment` | official finding, attributed | Medium |
-| **State GePNIC** ✅ | Tender pages | `tender` | as CPPP | Medium — unverified |
-| **India Budget** ✅ | Demand for Grants | `allocation` | `amount_inr`, `estimate_type`, `fiscal_year_id` | Medium — PDF extraction |
-| **CGA** ✅ | Monthly accounts | `expenditure` | `amount_inr` (aggregate) | Medium — **not per-project** |
-| **CAG** ✅ | Audit report | `source_document` + citation | narrative, attributed | Medium |
-| **MRSAC / Bhuvan** ✅ | Geometry | `admin_unit.geom`, `road.geom` | `GEOMETRY(...,4326)` | **Unverified** — endpoints unenumerated |
+| Government source     | Government field                  | LokDarpan entity               | LokDarpan field                                   | Confidence                              |
+| --------------------- | --------------------------------- | ------------------------------ | ------------------------------------------------- | --------------------------------------- |
+| **LGD** ✅            | State/UT                          | `admin_unit`                   | `level='state'`, `name`, `lgd_code`               | **High**                                |
+| LGD ✅                | District (784)                    | `admin_unit`                   | `level='district'`, `lgd_code`                    | **High**                                |
+| LGD ✅                | Sub-district (7,092)              | `admin_unit`                   | `level='taluka'`, `lgd_code`                      | **High**                                |
+| LGD ✅                | Block (7,323)                     | `admin_unit`                   | `level='block'`, `lgd_code`                       | **High**                                |
+| LGD ✅                | Village (677,367)                 | `admin_unit`                   | `level='village'`, `lgd_code`, `census_code`      | **High**                                |
+| LGD ✅                | Local body (rural/urban)          | `admin_unit`                   | `level`, `pri_code` / `ulb_code`                  | **High**                                |
+| LGD ✅                | Ward mapping                      | `admin_unit`                   | `level='ward'`, `parent_id`                       | **High**                                |
+| LGD ✅                | Modification history + govt order | `admin_unit`                   | `valid_from`, `valid_to` + `source_document`      | **High**                                |
+| **IGOD** ✅           | Organization name + URL           | `department` / `ministry`      | `name`, reference URL                             | Medium                                  |
+| **CPPP** ✅           | Tender listing                    | `tender`                       | `external_tender_id`, `title`, `status`           | Medium — fields unverified              |
+| CPPP ✅               | Award record                      | `tender`                       | `contractor_id`, `awarded_amount`, `awarded_date` | **Low — unverified**                    |
+| CPPP ✅               | Debarred bidder list              | _(new)_ `contractor_debarment` | official finding, attributed                      | Medium                                  |
+| **State GePNIC** ✅   | Tender pages                      | `tender`                       | as CPPP                                           | Medium — unverified                     |
+| **India Budget** ✅   | Demand for Grants                 | `allocation`                   | `amount_inr`, `estimate_type`, `fiscal_year_id`   | Medium — PDF extraction                 |
+| **CGA** ✅            | Monthly accounts                  | `expenditure`                  | `amount_inr` (aggregate)                          | Medium — **not per-project**            |
+| **CAG** ✅            | Audit report                      | `source_document` + citation   | narrative, attributed                             | Medium                                  |
+| **MRSAC / Bhuvan** ✅ | Geometry                          | `admin_unit.geom`, `road.geom` | `GEOMETRY(...,4326)`                              | **Unverified** — endpoints unenumerated |
 
 ## Provenance — every row
 
@@ -68,14 +68,14 @@ The `verification_status`, `http_status`, `final_url`, `page_title`, `verified_a
 
 ## Unmapped — the gaps
 
-| `.docs/05-data-model/database-design.md` element | Source status |
-|---|---|
-| `project.external_work_id` | **No works register located** |
-| `project_progress.physical_pct` / `financial_pct` | **No source verified** (OMMAS unverified) |
-| `release` (per project) | PFMS, largely authenticated |
-| `expenditure.project_id` | **The critical gap** — expenditure is published by budget head, not by work |
-| `road.length_km` / `width_m` / `surface_type` | No source verified — required by `.docs/03-domain/road-infrastructure-intelligence.md` |
-| `contractor.registration_no` | No public register located |
-| `facility` / `utility_asset` / `transport_asset` | Out of Phase-1 scope; unassessed |
+| `.docs/05-data-model/database-design.md` element  | Source status                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `project.external_work_id`                        | **No works register located**                                                          |
+| `project_progress.physical_pct` / `financial_pct` | **No source verified** (OMMAS unverified)                                              |
+| `release` (per project)                           | PFMS, largely authenticated                                                            |
+| `expenditure.project_id`                          | **The critical gap** — expenditure is published by budget head, not by work            |
+| `road.length_km` / `width_m` / `surface_type`     | No source verified — required by `.docs/03-domain/road-infrastructure-intelligence.md` |
+| `contractor.registration_no`                      | No public register located                                                             |
+| `facility` / `utility_asset` / `transport_asset`  | Out of Phase-1 scope; unassessed                                                       |
 
 **Five of `.docs/05-data-model/database-design.md`'s core project-and-execution fields have no verified source.** That is the honest state after discovery, and it is the agenda for the next phase.

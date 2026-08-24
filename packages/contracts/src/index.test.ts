@@ -31,7 +31,12 @@ describe("contract: both variances, never a bare `variance` (audit C1)", () => {
   it("forbids a variance computed across a missing stage (docs/06 §2)", () => {
     const bad = {
       ...FIXTURE_PROJECT_501.finance,
-      utilized: { present: false, missingReason: "No expenditure records published", expectedSource: "MH PWD — Works", lastCheckedAt: "2026-08-18" },
+      utilized: {
+        present: false,
+        missingReason: "No expenditure records published",
+        expectedSource: "MH PWD — Works",
+        lastCheckedAt: "2026-08-18",
+      },
       status: "insufficient_data" as const,
     };
     expect(() => FinanceChainSchema.parse(bad)).toThrow(/missing stage/);

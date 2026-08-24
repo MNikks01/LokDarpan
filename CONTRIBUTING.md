@@ -16,19 +16,48 @@ A variance is a number. The platform never claims it was caused by theft, fraud,
 
 ---
 
+## Branching — never push to `main` or `development`
+
+```text
+feature/*  ──PR──>  development  ──release PR──>  main
+hotfix/*   ──PR──>  main  ──back-merge──>  development
+```
+
+Both `main` and `development` are protected: no direct pushes, CI must pass, and a review is required.
+
+```bash
+git checkout development && git pull
+git checkout -b feature/short-description
+# … work, commit …
+git push -u origin feature/short-description
+gh pr create --base development
+```
+
+**Hotfixes branch from `main`**, and the fix **must be merged back into `development`** afterwards — forgetting silently reintroduces the bug in the next release.
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/); `commitlint` enforces this on `commit-msg`. Scopes: `web`, `api`, `money`, `neutrality`, `contracts`, `ingestion`, `docs`, `ci`, `deps`, `repo`.
+
+Rationale: [`.docs/adr/013-branching-and-release.md`](./.docs/adr/013-branching-and-release.md).
+
 ## Getting set up
 
 Requires **Node ≥20** and **pnpm 9**.
+
+Husky runs the gates for you: **pre-commit** formats and lints staged files, **commit-msg** validates the message, **pre-push** runs typecheck, tests and the neutrality gate. Anything slower than a few seconds belongs in CI, not in your push.
 
 ```bash
 git clone https://github.com/MNikks01/LokDarpan.git
 cd LokDarpan
 pnpm install
 
-pnpm test                        # 38 tests: money, neutrality, contracts, palette
-pnpm dev                         # web client at http://localhost:3000
-pnpm neutrality apps packages    # language gate — a hit blocks release
-pnpm -r typecheck
+pnpm test          # 56 unit + integration tests
+pnpm test:e2e      # 7 Playwright journeys (builds the app first)
+pnpm dev           # web client  → http://localhost:3000
+pnpm dev:api       # API         → http://localhost:4000
+pnpm lint          # eslint, strict type-aware rules
+pnpm format        # prettier
+pnpm typecheck
+pnpm neutrality    # docs/15 language gate
 ```
 
 The backend does not exist yet. The app runs on fixtures from `packages/contracts/src/fixtures/`, all labelled as such. **No real government data is ingested.**
@@ -47,7 +76,7 @@ Before writing a connector:
 
 ### Rules for collection — not negotiable
 
-- **Honour `robots.txt`, terms of use, and rate limits.** Check them *before* writing the connector, and record what you found.
+- **Honour `robots.txt`, terms of use, and rate limits.** Check them _before_ writing the connector, and record what you found.
 - **Never bypass a CAPTCHA or any access control.** Where one gates access, use an official download or API route, or do not ingest the source.
 - **Only public, non-authenticated pages.** No credentialed access, ever.
 - **Be polite:** throttle per domain, schedule off-peak, use an identifiable user agent. Collection is scheduled and cached — never triggered by a user request.
@@ -57,16 +86,16 @@ Before writing a connector:
 
 Every source carries a verification status:
 
-| Status | Meaning |
-|---|---|
-| `DISCOVERED` | Found in an official directory or search. Nothing known about its data |
-| `VERIFIED` | Fetched — HTTP status, final URL and page title recorded. Confirms it **responds**, not what it contains |
+| Status             | Meaning                                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `DISCOVERED`       | Found in an official directory or search. Nothing known about its data                                            |
+| `VERIFIED`         | Fetched — HTTP status, final URL and page title recorded. Confirms it **responds**, not what it contains          |
 | `PRODUCTION_READY` | Data exposure, retrieval, identifiers, cadence, history, extraction method, legality and entity mapping all known |
 
 **The rule this registry is built on:**
 
-> Never record *"the government does not publish X"* because you could not find X.
-> Record *"X was not identified in the sources reviewed as of \[date\]."*
+> Never record _"the government does not publish X"_ because you could not find X.
+> Record _"X was not identified in the sources reviewed as of \[date\]."_
 
 This is not pedantry. During discovery, a set of `.gov.in` hosts were unreachable from one network and reachable from another — including the Local Government Directory. Recording them as unavailable would have been false. **Verify from at least two network paths before concluding anything, and never state a negative about a government body you have not established.**
 
@@ -78,7 +107,7 @@ Fields you cannot evidence are `null` or `"unknown"` — never guessed.
 
 Each of these is enforced by a test or the type system, so you will usually find out before review. They exist for reasons documented in [`.docs/00-overview/document-audit.md`](./.docs/00-overview/document-audit.md).
 
-**Money is `bigint` paise, never a float or a JSON number.** A national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and fails *silently* — producing a wrong government figure carrying a correct-looking source link. Use `@lokdarpan/money`. There is deliberately no `fromNumber()`.
+**Money is `bigint` paise, never a float or a JSON number.** A national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and fails _silently_ — producing a wrong government figure carrying a correct-looking source link. Use `@lokdarpan/money`. There is deliberately no `fromNumber()`.
 
 **A figure cannot be rendered without its provenance.** `<Figure>` requires a `provenance` prop. This is a compile error, not a review note.
 
@@ -90,7 +119,7 @@ Each of these is enforced by a test or the type system, so you will usually find
 
 **No red** in any variance, severity, verification-priority or status style. Red asserts wrongdoing before a word is read. It is reserved for destructive user actions, and a palette test enforces this.
 
-**No score, rank, badge or flag on a contractor.** Concentration statistics attach to a *scope* — a taluka, a financial year — never to a firm.
+**No score, rank, badge or flag on a contractor.** Concentration statistics attach to a _scope_ — a taluka, a financial year — never to a firm.
 
 ---
 
@@ -102,9 +131,9 @@ The neutrality gate scans every locale file and source string:
 pnpm neutrality apps packages
 ```
 
-Forbidden: corrupt, scam, stolen, fraud, embezzle, guilty, illegal, bribe, siphon, divert, loot, suspicious — and their Marathi and Hindi equivalents — plus causal constructions like *"because the contractor…"* or *"due to misuse"*.
+Forbidden: corrupt, scam, stolen, fraud, embezzle, guilty, illegal, bribe, siphon, divert, loot, suspicious — and their Marathi and Hindi equivalents — plus causal constructions like _"because the contractor…"_ or _"due to misuse"_.
 
-Use instead: *deviation*, *inconsistency*, *unexplained variance*, *records are missing*, *verification priority*, *requires verification*.
+Use instead: _deviation_, _inconsistency_, _unexplained variance_, _records are missing_, _verification priority_, _requires verification_.
 
 **If you speak Marathi or Hindi, the vocabulary lists in `packages/neutrality/src/vocabulary.ts` need native-speaker review.** They are a starting set, and a forbidden word we failed to list is a forbidden word that ships. This is one of the most valuable contributions available right now.
 
@@ -128,7 +157,7 @@ pnpm -r typecheck && pnpm test && pnpm neutrality apps packages
 
 Keep PRs focused. A connector, a bug fix, or one feature — not three.
 
-**Commit messages** explain *why*, not just *what*, and name the document the change implements.
+**Commit messages** explain _why_, not just _what_, and name the document the change implements.
 
 ---
 
@@ -138,7 +167,7 @@ You do not need to be a developer. If a figure looks wrong, open an issue with t
 
 Corrections are made by **re-ingesting from source**, never by editing a value — that is what preserves traceability. Every correction is versioned and logged.
 
-Because the platform makes no allegations about anyone, there is nothing to retract *about a person* — only data to correct. That is by design.
+Because the platform makes no allegations about anyone, there is nothing to retract _about a person_ — only data to correct. That is by design.
 
 ---
 

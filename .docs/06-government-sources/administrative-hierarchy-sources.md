@@ -12,17 +12,17 @@ Ministry of Panchayati Raj, with the Office of the Registrar General of India. I
 
 ### Coverage observed
 
-| Level | Count |
-|---|---|
-| States / UTs | 36 |
-| Districts | 784 |
-| Sub-districts (taluka / tehsil) | 7,092 |
-| Development blocks | 7,323 |
-| **Villages** | **677,367** (657,989 inhabited · 18,373 uninhabited · 1,005 forest) |
-| Parliamentary constituencies | 543 |
-| Assembly constituencies | 4,116 |
-| Local bodies | Rural panchayats, urban municipalities, traditional councils, cantonment boards |
-| Wards | Mapped to urban and rural local bodies |
+| Level                           | Count                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| States / UTs                    | 36                                                                              |
+| Districts                       | 784                                                                             |
+| Sub-districts (taluka / tehsil) | 7,092                                                                           |
+| Development blocks              | 7,323                                                                           |
+| **Villages**                    | **677,367** (657,989 inhabited · 18,373 uninhabited · 1,005 forest)             |
+| Parliamentary constituencies    | 543                                                                             |
+| Assembly constituencies         | 4,116                                                                           |
+| Local bodies                    | Rural panchayats, urban municipalities, traditional councils, cantonment boards |
+| Wards                           | Mapped to urban and rural local bodies                                          |
 
 ### Capabilities
 
@@ -53,16 +53,16 @@ Modification history      →  valid_from / valid_to
 
 ## Secondary sources
 
-| Source | Role | Status |
-|---|---|---|
-| **IGOD** ✅ | Organisation directory, including 870 district-portal entries | ✅ crawled — see [`.docs/06-government-sources/igod-organization-catalogue.csv`](./igod-organization-catalogue.csv) |
-| Census of India | Census codes, historical demographic joins | 🔍 `censusindia.gov.in` timed out from this vantage point |
-| data.gov.in ✅ | Publishes an **LGD catalogue** | ✅ verified |
-| State portals ✅ | State-specific administrative codes | catalogued, not verified individually |
+| Source           | Role                                                          | Status                                                                                                              |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **IGOD** ✅      | Organisation directory, including 870 district-portal entries | ✅ crawled — see [`.docs/06-government-sources/igod-organization-catalogue.csv`](./igod-organization-catalogue.csv) |
+| Census of India  | Census codes, historical demographic joins                    | 🔍 `censusindia.gov.in` timed out from this vantage point                                                           |
+| data.gov.in ✅   | Publishes an **LGD catalogue**                                | ✅ verified                                                                                                         |
+| State portals ✅ | State-specific administrative codes                           | catalogued, not verified individually                                                                               |
 
 ## Two discrepancies to resolve
 
-1. **District counts disagree between official directories.** LGD reports 784 districts; IGOD's crawl yielded 870 district entries. Both are Government of India directories. Neither has been reconciled. LGD should be treated as authoritative for *administrative* units; IGOD's entries are *portals*, and the surplus likely reflects police commissionerates, sub-divisions and multiple portals per district — **but that is a hypothesis, not a verified explanation.**
+1. **District counts disagree between official directories.** LGD reports 784 districts; IGOD's crawl yielded 870 district entries. Both are Government of India directories. Neither has been reconciled. LGD should be treated as authoritative for _administrative_ units; IGOD's entries are _portals_, and the surplus likely reflects police commissionerates, sub-divisions and multiple portals per district — **but that is a hypothesis, not a verified explanation.**
 
 2. **Districts change.** The crawl surfaced Ahilyanagar (formerly Ahmednagar) and Chhatrapati Sambhajinagar (formerly Aurangabad) — both Maharashtra districts renamed recently, still on their old domains (`ahmednagar.nic.in`, `aurangabad.gov.in`). LGD's modification tracking with government-order references is the correct source of truth for this, and `.docs/05-data-model/database-design.md`'s `valid_from`/`valid_to` columns are the correct place to store it.
 

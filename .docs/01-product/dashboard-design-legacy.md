@@ -48,7 +48,7 @@ Purpose: spatial exploration.
 - **District choropleth** (PostGIS → vector tiles/GeoJSON) colored by a chosen neutral metric (utilization %, project count, median cost/km).
 - **Roads** as line layer, **bridges** as point layer; click → mini-card → link to Project Detail.
 - **Filters:** category, status, FY, verification-priority band.
-- **Legend** states the metric and that color encodes a *measurement*, not a judgment.
+- **Legend** states the metric and that color encodes a _measurement_, not a judgment.
 - Clusters at low zoom; hover tooltips with source date.
 
 ### 3. Project Detail (`/project/[id]`)
@@ -104,7 +104,7 @@ Purpose: a reviewer's worklist of inconsistencies — explicitly framed as _item
 
 ## Empty / low-data states
 
-Every widget has an explicit empty state that names *what* is missing and *why* (e.g., "No tender record linked to this project in the ingested sources"), reinforcing that absence of data ≠ absence of activity.
+Every widget has an explicit empty state that names _what_ is missing and _why_ (e.g., "No tender record linked to this project in the ingested sources"), reinforcing that absence of data ≠ absence of activity.
 
 ---
 
@@ -113,6 +113,7 @@ Every widget has an explicit empty state that names *what* is missing and *why* 
 The public app is a **drill-down** from nation → state → district → local body/village → project, each level reusing the shared components and UI contracts above. A breadcrumb (`India / Maharashtra / Pune / Baramati / GP Katewadi / Project`) is always present; every figure stays source-linked at every level.
 
 ### National Dashboard (`/`)
+
 - **Revenue** by source (income tax, GST, corporate, customs, excise, non-tax, borrowings, grants), source-linked, nominal/real toggle.
 - **Expenditure** by ministry and by domain (roads, health, education, water, …).
 - **Fiscal deficit** = total expenditure − total receipts (shown as a figure with its source, not a judgment).
@@ -120,26 +121,31 @@ The public app is a **drill-down** from nation → state → district → local 
 - **India choropleth** ([20](../03-domain/gis-intelligence.md)) by per-capita expenditure / utilization; click a state to drill down.
 
 ### State Dashboard (`/state/[id]`)
+
 - State finances: own revenue + central transfers, allocation vs release vs utilized.
 - Department & scheme spending within the state.
 - District choropleth; ranked district comparison (per-capita, utilization).
 
 ### District Dashboard (`/district/[id]`)
+
 - District analytics: allocation/release/expenditure, project counts by domain & status.
 - Local-body breakdown (ULBs + PRIs); taluka/block map.
 - Peer comparison against sibling districts; verification-priority bands.
 
 ### Village / Local-Body Dashboard (`/unit/[id]`)
+
 - Gram Panchayat / ULB expenditure: scheme grants received (Finance Commission, MGNREGA, PMGSY, PMAY, etc.), works undertaken, per-capita spend.
 - Ward-level project list; local map with asset points.
 - Missing-data warnings are especially prominent here (local publication is the most uneven) — coverage gaps are shown, never inferred.
 
 ### Infrastructure Dashboard (`/infrastructure`)
+
 - Cross-cutting view by asset type: roads, bridges, hospitals, schools, railways, pipelines, power.
 - Cost-per-unit distributions (cost/km, cost/bed, cost/classroom) with the selected asset marked ([06](../07-analytics/analytics-engine.md)).
 - Map + table linked; export with sources.
 
 ### Audit Dashboard (`/audit`)
+
 As in Phase 1, but scoped to any hierarchy level: inconsistencies, warnings, roll-up gaps, and per-item neutral explanations with evidence links — with the standing disclaimer that these are data-consistency observations from official records, not findings of wrongdoing.
 
-**Level-agnostic pattern:** every level shows the same four panels — *money in* (allocation/transfers), *money out* (release/expenditure), *what was built* (assets/progress), *consistency* (variance/observations) — so users learn one layout and apply it everywhere.
+**Level-agnostic pattern:** every level shows the same four panels — _money in_ (allocation/transfers), _money out_ (release/expenditure), _what was built_ (assets/progress), _consistency_ (variance/observations) — so users learn one layout and apply it everywhere.

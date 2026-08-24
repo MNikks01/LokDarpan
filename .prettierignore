@@ -1,0 +1,8 @@
+.next/
+dist/
+coverage/
+node_modules/
+pnpm-lock.yaml
+graphify-out/
+.docs/06-government-sources/*.csv
+.docs/06-government-sources/data/

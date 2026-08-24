@@ -1,0 +1,4 @@
+# Fast gates only. Anything slower belongs in CI, not in a developer's push.
+pnpm -r typecheck
+pnpm exec vitest run
+pnpm exec tsx packages/neutrality/src/cli.ts apps packages services

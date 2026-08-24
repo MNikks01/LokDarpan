@@ -2,26 +2,26 @@
 
 ## Deliverables checklist
 
-| Deliverable | Where |
-|---|---|
-| PRD | [01](../01-product/prd.md) |
-| System Design Document | [02](./system-architecture.md) |
-| Data Collection Architecture | [03](../04-data-engineering/data-collection-architecture.md) |
-| Database Design + ER diagrams | [04](../05-data-model/database-design.md) |
-| Data Models (TypeScript) | [05](../05-data-model/data-models.md) |
-| Analytics Specification | [06](../07-analytics/analytics-engine.md) |
-| Risk Scoring Specification | [07](../08-risk/risk-scoring-engine.md) |
-| Road Intelligence Specification | [08](../03-domain/road-infrastructure-intelligence.md) |
-| Dashboard Design | [09](../01-product/dashboard-design-legacy.md) |
-| API Documentation | [10](../11-api/api-documentation.md) |
-| AI Layer Specification | [11](../09-ai/ai-layer.md) |
-| Tech Stack | [12](./tech-stack.md) |
-| Security Design | [13](../12-security/security.md) |
-| Scalability Plan | [14](../15-scalability/scalability-plan.md) |
-| Legal & Ethical Rules | [15](../17-legal/legal-ethical-rules.md) |
-| Development Roadmap | [16](../01-product/roadmap-platform.md) |
-| Infrastructure Diagrams | [02](./system-architecture.md) (topology) + this doc |
-| Folder Structure · Risk Analysis · Legal Notes | this doc |
+| Deliverable                                    | Where                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| PRD                                            | [01](../01-product/prd.md)                                   |
+| System Design Document                         | [02](./system-architecture.md)                               |
+| Data Collection Architecture                   | [03](../04-data-engineering/data-collection-architecture.md) |
+| Database Design + ER diagrams                  | [04](../05-data-model/database-design.md)                    |
+| Data Models (TypeScript)                       | [05](../05-data-model/data-models.md)                        |
+| Analytics Specification                        | [06](../07-analytics/analytics-engine.md)                    |
+| Risk Scoring Specification                     | [07](../08-risk/risk-scoring-engine.md)                      |
+| Road Intelligence Specification                | [08](../03-domain/road-infrastructure-intelligence.md)       |
+| Dashboard Design                               | [09](../01-product/dashboard-design-legacy.md)               |
+| API Documentation                              | [10](../11-api/api-documentation.md)                         |
+| AI Layer Specification                         | [11](../09-ai/ai-layer.md)                                   |
+| Tech Stack                                     | [12](./tech-stack.md)                                        |
+| Security Design                                | [13](../12-security/security.md)                             |
+| Scalability Plan                               | [14](../15-scalability/scalability-plan.md)                  |
+| Legal & Ethical Rules                          | [15](../17-legal/legal-ethical-rules.md)                     |
+| Development Roadmap                            | [16](../01-product/roadmap-platform.md)                      |
+| Infrastructure Diagrams                        | [02](./system-architecture.md) (topology) + this doc         |
+| Folder Structure · Risk Analysis · Legal Notes | this doc                                                     |
 
 ## Repository / folder structure
 
@@ -162,19 +162,19 @@ lokdarpan/
 
 ## Risk analysis
 
-| # | Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|---|
-| R1 | **Source data unavailable / behind no-API PDFs** | High | High | PDF/OCR pipeline; polite scraping fallback; confidence scoring; missing-data warnings instead of gaps |
-| R2 | **OCR / extraction errors produce wrong figures** | Medium | High | Confidence scores, sanity checks, quarantine, human review of low-confidence, never present uncertain as certain |
-| R3 | **Reconciliation fails (inconsistent identifiers across sources)** | High | Medium | Deterministic + fuzzy entity matching, review queue, confidence-tagged links, report the gap itself |
-| R4 | **Source schema/URL drift breaks connectors** | High | Medium | Declarative connectors, link-health cron, circuit breakers, alerts, versioned registry |
-| R5 | **Misinterpretation → the platform is read as accusing someone** | Medium | **Critical** | Binding neutrality rules ([15](../17-legal/legal-ethical-rules.md)), templated/guardrailed language, disclaimers, "Verification Priority" not "corruption," legal review |
-| R6 | **AI generates an accusatory/hallucinated claim** | Medium | **Critical** | RAG grounding, numeric fidelity + neutrality classifier + citation enforcement, templated fallback, CI red-team gate |
-| R7 | **Data tampering / integrity attack** | Low | Critical | Read-only values, append-only hash-chained audit logs, immutable artifacts, RBAC, backups |
-| R8 | **Defamation / legal exposure** | Low–Med | High | No allegations by design; facts + sources only; right-of-reply/correction flow; counsel review per phase |
-| R9 | **Scaling cost/complexity as domains grow** | Medium | Medium | Source-driven architecture, partitioning, contributor connector model, phased plan ([14](../15-scalability/scalability-plan.md)) |
-| R10 | **Availability under traffic spikes (viral story)** | Medium | Medium | CDN + cache + read replicas + rate limits + autoscaling |
-| R11 | **Reputational: a data error is read as bias** | Medium | High | Full traceability, confidence display, visible corrections, open methodology |
+| #   | Risk                                                               | Likelihood | Impact       | Mitigation                                                                                                                                                               |
+| --- | ------------------------------------------------------------------ | ---------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R1  | **Source data unavailable / behind no-API PDFs**                   | High       | High         | PDF/OCR pipeline; polite scraping fallback; confidence scoring; missing-data warnings instead of gaps                                                                    |
+| R2  | **OCR / extraction errors produce wrong figures**                  | Medium     | High         | Confidence scores, sanity checks, quarantine, human review of low-confidence, never present uncertain as certain                                                         |
+| R3  | **Reconciliation fails (inconsistent identifiers across sources)** | High       | Medium       | Deterministic + fuzzy entity matching, review queue, confidence-tagged links, report the gap itself                                                                      |
+| R4  | **Source schema/URL drift breaks connectors**                      | High       | Medium       | Declarative connectors, link-health cron, circuit breakers, alerts, versioned registry                                                                                   |
+| R5  | **Misinterpretation → the platform is read as accusing someone**   | Medium     | **Critical** | Binding neutrality rules ([15](../17-legal/legal-ethical-rules.md)), templated/guardrailed language, disclaimers, "Verification Priority" not "corruption," legal review |
+| R6  | **AI generates an accusatory/hallucinated claim**                  | Medium     | **Critical** | RAG grounding, numeric fidelity + neutrality classifier + citation enforcement, templated fallback, CI red-team gate                                                     |
+| R7  | **Data tampering / integrity attack**                              | Low        | Critical     | Read-only values, append-only hash-chained audit logs, immutable artifacts, RBAC, backups                                                                                |
+| R8  | **Defamation / legal exposure**                                    | Low–Med    | High         | No allegations by design; facts + sources only; right-of-reply/correction flow; counsel review per phase                                                                 |
+| R9  | **Scaling cost/complexity as domains grow**                        | Medium     | Medium       | Source-driven architecture, partitioning, contributor connector model, phased plan ([14](../15-scalability/scalability-plan.md))                                         |
+| R10 | **Availability under traffic spikes (viral story)**                | Medium     | Medium       | CDN + cache + read replicas + rate limits + autoscaling                                                                                                                  |
+| R11 | **Reputational: a data error is read as bias**                     | Medium     | High         | Full traceability, confidence display, visible corrections, open methodology                                                                                             |
 
 ## Legal notes
 
@@ -183,7 +183,7 @@ lokdarpan/
 - **Data licensing/terms:** each source's open-data license and usage terms are honored and displayed; `robots.txt` and rate limits respected; only public, non-authenticated data used.
 - **IT/scraping norms:** ingestion is polite and scheduled; no circumvention of access controls; no authenticated or restricted data.
 - **Privacy:** only public official data; incidental PII minimized/redacted in display; no re-identification.
-- **Right of reply & corrections:** a visible channel to report data issues; corrections via re-ingestion, versioned and logged — because the platform asserts no wrongdoing, corrections concern *data*, not retractions about people.
+- **Right of reply & corrections:** a visible channel to report data issues; corrections via re-ingestion, versioned and logged — because the platform asserts no wrongdoing, corrections concern _data_, not retractions about people.
 - **Disclaimers:** persistent, in-context disclaimers on anomaly/audit/estimate surfaces (text in [15](../17-legal/legal-ethical-rules.md)).
 - **Not legal/financial advice or adjudication:** the platform informs; it does not investigate, accuse, or determine liability.
 

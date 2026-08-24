@@ -30,13 +30,13 @@ S-54 (document viewer) is sixth and is the hardest to get right.
 
 ### 3 · What must appear above the fold?
 
-| Screen | Above the fold |
-|---|---|
-| Home | Scope, "near you" count + money, the four-panel scope summary |
-| Unit | Name, level, ancestors, **money in / money out with both variances** |
-| Project | Name, category, status, **the complete Money Trail** |
-| Money Trail | Allocated → Released → Utilized with both variances and the status |
-| Source sheet | The value, the authority, the page locator, the confidence caveat |
+| Screen       | Above the fold                                                       |
+| ------------ | -------------------------------------------------------------------- |
+| Home         | Scope, "near you" count + money, the four-panel scope summary        |
+| Unit         | Name, level, ancestors, **money in / money out with both variances** |
+| Project      | Name, category, status, **the complete Money Trail**                 |
+| Money Trail  | Allocated → Released → Utilized with both variances and the status   |
+| Source sheet | The value, the authority, the page locator, the confidence caveat    |
 
 **Rule:** every one of these has at least one source affordance visible without scrolling. A screen whose first viewport contains a figure but no source chip has failed.
 
@@ -46,7 +46,7 @@ S-54 (document viewer) is sixth and is the hardest to get right.
 
 Ledger lines · value/version history · full timeline · full progress history · road-model coefficients · the six risk factors · the observation arithmetic · peer distributions · the document itself · lineage · sub-unit lists · full source registry.
 
-**Principle:** the *conclusion and its provenance* are on the surface; the *evidence and the arithmetic* are one tap away. Never the reverse — a screen that shows a formula before it shows the number is a spreadsheet, not a product.
+**Principle:** the _conclusion and its provenance_ are on the surface; the _evidence and the arithmetic_ are one tap away. Never the reverse — a screen that shows a formula before it shows the number is a spreadsheet, not a product.
 
 ---
 
@@ -60,11 +60,11 @@ Ledger lines · value/version history · full timeline · full progress history 
 
 Everything except an AI answer's generation. Three tiers (`.docs/10-mobile/offline-strategy.md`):
 
-| Tier | Store | Guarantee |
-|---|---|---|
-| Ephemeral | TanStack Query → MMKV, 24 MB LRU | "What you looked at recently opens" |
-| Durable | SQLite, user-controlled | "Saved means saved — including provenance" |
-| Binary | Filesystem | "You chose this; it stays" |
+| Tier      | Store                            | Guarantee                                  |
+| --------- | -------------------------------- | ------------------------------------------ |
+| Ephemeral | TanStack Query → MMKV, 24 MB LRU | "What you looked at recently opens"        |
+| Durable   | SQLite, user-controlled          | "Saved means saved — including provenance" |
+| Binary    | Filesystem                       | "You chose this; it stays"                 |
 
 Invalidated by `datasetVersion` via ETag. **Stale data is marked, never evicted** — eviction would turn a version bump into an offline outage.
 
@@ -74,7 +74,7 @@ Invalidated by `datasetVersion` via ETag. **Stale data is marked, never evicted*
 
 The app opens, from cache, with an honest label. 27 screens fully functional; 11 more fully functional for saved items; 2 explicitly unavailable (Ask, Sign-in). Source traceability works completely offline for any cached figure — only the document body needs a connection.
 
-**The rule that matters:** *"we don't have this because you're offline"* and *"the government hasn't published this"* are different states, with different copy and different icons (`.docs/01-product/state-design.md` R2). Conflating them turns a dropped connection into an implied accusation against a government body.
+**The rule that matters:** _"we don't have this because you're offline"_ and _"the government hasn't published this"_ are different states, with different copy and different icons (`.docs/01-product/state-design.md` R2). Conflating them turns a dropped connection into an implied accusation against a government body.
 
 ---
 
@@ -82,7 +82,7 @@ The app opens, from cache, with an honest label. 27 screens fully functional; 11
 
 - A null financial value renders `MissingData` with its reason, the **expected source**, and when it was last checked. **Never `₹0`, never blank, never a dash** (R1).
 - **No variance is computed across a missing stage.** Status becomes `insufficient_data` — a first-class visual state, distinct from both "consistent" and "needs verification".
-- Every empty state carries the sentence: *"This does not mean no money was spent — it means the record has not been published or collected yet."*
+- Every empty state carries the sentence: _"This does not mean no money was spent — it means the record has not been published or collected yet."_
 - Coverage is a **first-class entity**, on 10 screens, not an error condition.
 - Deviations and coverage gaps are **never mixed in one list** (`.docs/01-product/dashboard-design-legacy.md`).
 
@@ -107,7 +107,7 @@ Five layers, in increasing order of strength:
 1. **Language** — server-generated, template-based, neutrality-checked; the client cannot author it (`ServerText` branded type).
 2. **Structure** — no anomaly feed, no notification of an observation's text, no ranking, no leaderboard, no score on a contractor. `.docs/01-product/screen-inventory.md` §Screens that must not exist.
 3. **Visual** — no red anywhere in variance, severity, priority, or status; no gauges; no warning iconography; colour-blind-safe ramps that are simultaneously an accessibility and a neutrality decision.
-4. **Framing** — the neutrality panel in onboarding is non-skippable; disclaimers on every observation surface are non-collapsible; every band label leads with the *action* ("worth a closer look"), not a grade.
+4. **Framing** — the neutrality panel in onboarding is non-skippable; disclaimers on every observation surface are non-collapsible; every band label leads with the _action_ ("worth a closer look"), not a grade.
 5. **CI** — `packages/neutrality` lints every locale on every PR; `tsd` proves a literal cannot be passed as an observation; a palette test proves no red token appears in any band.
 
 The most important single decision: **there is no global anomaly feed and no push notification about observations.** The standard mobile engagement pattern is, here, the fastest route to teaching users that variance means scandal.
@@ -152,15 +152,15 @@ Two **integrity alarms**, targeting zero and alerting immediately rather than ap
 
 `.docs/15-scalability/scalability-plan.md` grows the platform from ~10³ admin units to ~10⁶ and from ~10⁶ fact rows to ~10¹⁰. What absorbs it:
 
-| Pressure | Absorbed by |
-|---|---|
-| New levels | `admin_unit.level` is data; the UI orders levels from a config array |
-| New domains | The Unit screen is level- **and domain-agnostic**; a domain registers an asset-section renderer and a cost-per-unit descriptor. **No new screens** |
-| New asset types | One `AssetSection` interface + a registry |
-| Map scale | Server-side tiles and clusters; a zoom ladder that caps national feature counts by construction |
-| Data volume | Server-side aggregation only; the client never computes an aggregate; every list is cursor-paged |
-| Bundle growth | Lazy route segments |
-| More languages | ICU catalogues; the neutrality lint runs on every locale |
-| More contributors | Enforced layer boundaries + feature isolation |
+| Pressure          | Absorbed by                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New levels        | `admin_unit.level` is data; the UI orders levels from a config array                                                                               |
+| New domains       | The Unit screen is level- **and domain-agnostic**; a domain registers an asset-section renderer and a cost-per-unit descriptor. **No new screens** |
+| New asset types   | One `AssetSection` interface + a registry                                                                                                          |
+| Map scale         | Server-side tiles and clusters; a zoom ladder that caps national feature counts by construction                                                    |
+| Data volume       | Server-side aggregation only; the client never computes an aggregate; every list is cursor-paged                                                   |
+| Bundle growth     | Lazy route segments                                                                                                                                |
+| More languages    | ICU catalogues; the neutrality lint runs on every locale                                                                                           |
+| More contributors | Enforced layer boundaries + feature isolation                                                                                                      |
 
-**What would break it:** per-level or per-domain screens — a `DistrictScreen`, a `VillageScreen`, a `HealthProjectScreen`. `.docs/01-product/dashboard-design-legacy.md` already found the general pattern ("money in / money out / what was built / consistency"); making it the *only* implementation is what keeps a 15-level, 12-domain national platform inside one app. That is the single most important architectural decision in this suite.
+**What would break it:** per-level or per-domain screens — a `DistrictScreen`, a `VillageScreen`, a `HealthProjectScreen`. `.docs/01-product/dashboard-design-legacy.md` already found the general pattern ("money in / money out / what was built / consistency"); making it the _only_ implementation is what keeps a 15-level, 12-domain national platform inside one app. That is the single most important architectural decision in this suite.

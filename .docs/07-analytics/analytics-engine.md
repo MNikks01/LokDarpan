@@ -39,11 +39,11 @@ Release deviation % = (1 / 9) × 100 = 11.1%
 
 **Directional flags (facts, not verdicts):**
 
-| Condition | Recorded observation | Anomaly type |
-|---|---|---|
-| `U > R` | "Utilized amount exceeds released amount by X%." | `utilization_exceeds_release` |
-| `R > A` | "Released amount exceeds allocated amount by X%." | `release_exceeds_allocation` |
-| `abs(deviation%) > τ` | "Utilization deviates from released amount by X%." | `variance_gap` |
+| Condition             | Recorded observation                               | Anomaly type                  |
+| --------------------- | -------------------------------------------------- | ----------------------------- |
+| `U > R`               | "Utilized amount exceeds released amount by X%."   | `utilization_exceeds_release` |
+| `R > A`               | "Released amount exceeds allocated amount by X%."  | `release_exceeds_allocation`  |
+| `abs(deviation%) > τ` | "Utilization deviates from released amount by X%." | `variance_gap`                |
 
 `τ` (threshold) is configurable per category and documented; default illustrative `τ = 10%`.
 
@@ -143,11 +143,11 @@ CRk (top-k concentration) = Σ_{i=1..k} share_i × 100     (%)
 
 Interpretation labels (descriptive, standard economics; **not** accusatory):
 
-| HHI | Descriptive label |
-|---|---|
-| < 1500 | "competitive / low concentration" |
-| 1500–2500 | "moderate concentration" |
-| > 2500 | "high concentration" |
+| HHI       | Descriptive label                 |
+| --------- | --------------------------------- |
+| < 1500    | "competitive / low concentration" |
+| 1500–2500 | "moderate concentration"          |
+| > 2500    | "high concentration"              |
 
 Observation example: _"In this taluka, the top 3 contractors account for 78% of road tender value in FY2024-25 (HHI 3120)."_ Purely a market-structure statistic.
 

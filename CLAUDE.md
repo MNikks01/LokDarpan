@@ -59,7 +59,7 @@ This is not a policy document to nod at — it determines concrete engineering d
 
 - **No red anywhere** in variance, severity, verification priority or status. A red badge implies wrongdoing before a word is read. Red is reserved for destructive user actions only. No red/green diverging ramps (also fails colour-vision deficiency).
 - **No global anomaly feed, no anomaly push notifications, no rankings or leaderboards.** `.docs/08-risk/risk-scoring-engine.md` forbids ranking people. Observations are always scoped to an entity the user navigated to.
-- **Contractor screens carry no score, rank, badge or flag.** Concentration statistics (HHI) attach to a *scope* (taluka, FY), never to a firm. This omission is deliberate and tracked in `.docs/05-data-model/screen-data-matrix.md` §3 so it stays auditable.
+- **Contractor screens carry no score, rank, badge or flag.** Concentration statistics (HHI) attach to a _scope_ (taluka, FY), never to a firm. This omission is deliberate and tracked in `.docs/05-data-model/screen-data-matrix.md` §3 so it stays auditable.
 - The risk score is labelled **"Verification Priority"**, never "corruption risk", and is never rendered without its factor breakdown and confidence.
 - Audit findings are **cited documents**, never inputs to the analytics engine — an auditor's conclusion is categorically different from arithmetic.
 
@@ -67,7 +67,7 @@ This is not a policy document to nod at — it determines concrete engineering d
 
 These come from cross-referencing several documents; each is load-bearing.
 
-**Money is a `bigint` of paise, never a float or a JSON number.** `.docs/05-data-model/database-design.md` stores `NUMERIC(20,2)`; a national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and would fail *silently*, producing a wrong government figure with a correct-looking source link. Amounts cross the wire as decimal strings.
+**Money is a `bigint` of paise, never a float or a JSON number.** `.docs/05-data-model/database-design.md` stores `NUMERIC(20,2)`; a national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and would fail _silently_, producing a wrong government figure with a correct-looking source link. Amounts cross the wire as decimal strings.
 
 **A figure cannot be rendered without its provenance.** `<Figure>` requires a `provenance` prop — it is a compile error, not a code review item. A fact arriving without provenance is suppressed and logged as a contract violation.
 
@@ -105,7 +105,7 @@ Twelve ADRs in `.docs/adr/` record technology decisions with alternatives and tr
 
 **The rule the registry is built on:** never record "the government does not publish X" because you could not find X. Record "X was not identified in the sources reviewed as of \[date\]."
 
-This is not pedantry. A set of `.gov.in`/`.nic.in` hosts were unreachable from the verification environment; `lgdirectory.gov.in` was among them and then succeeded on a second network channel — proving the pattern was a vantage-point restriction, not site failure. Verification therefore uses **two independent network channels**, and every unreachable host is recorded as *"not reachable from the verification vantage point on \[date\]; existence not disproven"*.
+This is not pedantry. A set of `.gov.in`/`.nic.in` hosts were unreachable from the verification environment; `lgdirectory.gov.in` was among them and then succeeded on a second network channel — proving the pattern was a vantage-point restriction, not site failure. Verification therefore uses **two independent network channels**, and every unreachable host is recorded as _"not reachable from the verification vantage point on \[date\]; existence not disproven"_.
 
 **No URL is written from memory.** Every one is discovered from an official government directory or a `gov.in`/`nic.in`-restricted search, then fetched with HTTP status, final URL and page title recorded. Status model: `DISCOVERED` → `VERIFIED` (it responds) → `PRODUCTION_READY` (we know what it holds and how to get it). Nothing is `PRODUCTION_READY` yet.
 
@@ -123,7 +123,7 @@ Do not treat these as settled; they are tracked in `.docs/README.md` and `.docs/
 
 ## Conventions
 
-- `docs/` is the platform spec; `.docs/` is the mobile spec; `.docs/adr/` holds decisions. Code comments explain *why*; `.docs/` explains *what and how*.
+- `docs/` is the platform spec; `.docs/` is the mobile spec; `.docs/adr/` holds decisions. Code comments explain _why_; `.docs/` explains _what and how_.
 - A change to an architectural decision updates the relevant `.docs/` file or adds an ADR **in the same PR**. A decision that lives only in a commit message will be silently reversed within two quarters.
 - Every document in `.docs/` is intended to have at least one automated check backing it once code exists (`.docs/02-architecture/repository-structure.md` maps them). A specification with no enforcement mechanism becomes fiction.
 - When code lands, `apps/web` joins the monorepo of `.docs/02-architecture/deliverables-and-risk.md` (with `apps/mobile` added later) — not separate repositories — so the neutrality word list, API contract, domain types and money formatting are shared packages rather than duplicated copies that drift.

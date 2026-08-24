@@ -11,30 +11,30 @@
 
 ## Map
 
-| Area | Contents |
-|---|---|
-| [`00-overview/`](./00-overview) | Platform overview · the audit of the original documentation set |
-| [`01-product/`](./01-product) | PRD · screen inventory · user journeys · design system · search · source traceability · accessibility · state design · roadmaps (platform & web) |
-| [`02-architecture/`](./02-architecture) | System architecture · web architecture · tech stack · data flow · repository structure · performance |
-| [`03-domain/`](./03-domain) | Administrative hierarchy · road-infrastructure intelligence · GIS intelligence |
-| [`04-data-engineering/`](./04-data-engineering) | Collection architecture · ingestion methods · source→data-model mapping · **entity linking** |
-| [`05-data-model/`](./05-data-model) | Database design · data models · screen/entity matrix |
-| [`06-government-sources/`](./06-government-sources) | **The verified source registry** — 99 sources, 96 verified, plus a 6,466-row catalogue |
-| [`07-analytics/`](./07-analytics) | Variance, comparisons, cost-per-unit, concentration, roll-up |
-| [`08-risk/`](./08-risk) | Verification Priority — never "corruption risk" |
-| [`09-ai/`](./09-ai) | Guardrailed AI layer · scope-bound client experience |
-| [`10-mobile/`](./10-mobile) | **Deferred** mobile specification — architecture, navigation, offline, deep links, notifications, GIS, roadmap |
-| [`11-api/`](./11-api) | API documentation · client contract · screen/API matrix |
-| [`12-security/`](./12-security) | Platform security · client security |
-| [`13-observability/`](./13-observability) | Privacy-first analytics and monitoring |
-| [`14-testing/`](./14-testing) | Test strategy and the guardrail gates |
-| [`15-scalability/`](./15-scalability) | The eight-phase village→nation plan |
-| [`16-operations/`](./16-operations) | Runbooks and operational procedure *(to be populated)* |
-| [`17-legal/`](./17-legal) | **Binding** legal and ethical rules |
-| [`adr/`](./adr) | 12 decisions — **011–012 active (web); 001–010 deferred (mobile)** |
-| [`wireframes/`](./wireframes) | Low-fidelity wireframes (mobile; desktop pass due in W3–W5) |
-| [`diagrams/`](./diagrams) | Architecture diagrams *(to be populated)* |
-| [`decisions/`](./decisions) | Cross-cutting product decisions |
+| Area                                                | Contents                                                                                                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`00-overview/`](./00-overview)                     | Platform overview · the audit of the original documentation set                                                                                  |
+| [`01-product/`](./01-product)                       | PRD · screen inventory · user journeys · design system · search · source traceability · accessibility · state design · roadmaps (platform & web) |
+| [`02-architecture/`](./02-architecture)             | System architecture · web architecture · tech stack · data flow · repository structure · performance                                             |
+| [`03-domain/`](./03-domain)                         | Administrative hierarchy · road-infrastructure intelligence · GIS intelligence                                                                   |
+| [`04-data-engineering/`](./04-data-engineering)     | Collection architecture · ingestion methods · source→data-model mapping · **entity linking**                                                     |
+| [`05-data-model/`](./05-data-model)                 | Database design · data models · screen/entity matrix                                                                                             |
+| [`06-government-sources/`](./06-government-sources) | **The verified source registry** — 99 sources, 96 verified, plus a 6,466-row catalogue                                                           |
+| [`07-analytics/`](./07-analytics)                   | Variance, comparisons, cost-per-unit, concentration, roll-up                                                                                     |
+| [`08-risk/`](./08-risk)                             | Verification Priority — never "corruption risk"                                                                                                  |
+| [`09-ai/`](./09-ai)                                 | Guardrailed AI layer · scope-bound client experience                                                                                             |
+| [`10-mobile/`](./10-mobile)                         | **Deferred** mobile specification — architecture, navigation, offline, deep links, notifications, GIS, roadmap                                   |
+| [`11-api/`](./11-api)                               | API documentation · client contract · screen/API matrix                                                                                          |
+| [`12-security/`](./12-security)                     | Platform security · client security                                                                                                              |
+| [`13-observability/`](./13-observability)           | Privacy-first analytics and monitoring                                                                                                           |
+| [`14-testing/`](./14-testing)                       | Test strategy and the guardrail gates                                                                                                            |
+| [`15-scalability/`](./15-scalability)               | The eight-phase village→nation plan                                                                                                              |
+| [`16-operations/`](./16-operations)                 | Runbooks and operational procedure _(to be populated)_                                                                                           |
+| [`17-legal/`](./17-legal)                           | **Binding** legal and ethical rules                                                                                                              |
+| [`adr/`](./adr)                                     | 12 decisions — **011–012 active (web); 001–010 deferred (mobile)**                                                                               |
+| [`wireframes/`](./wireframes)                       | Low-fidelity wireframes (mobile; desktop pass due in W3–W5)                                                                                      |
+| [`diagrams/`](./diagrams)                           | Architecture diagrams _(to be populated)_                                                                                                        |
+| [`decisions/`](./decisions)                         | Cross-cutting product decisions                                                                                                                  |
 
 ---
 
@@ -72,14 +72,14 @@ Web-specific:
 
 ## Open items
 
-| # | Item | Blocks |
-|---|---|---|
-| 1 | **Licence undecided** — see `/LICENSE`. Recommend Apache-2.0 or MPL-2.0 | Open-source release; store submission later |
-| 2 | Backend acceptance of the P0 contract items (`11-api/client-api-contract.md` §7) | W4, W5 |
-| 3 | **The execution-data gap** — per-project expenditure and physical progress have no verified source | What the Money Trail can show at launch |
-| 4 | Q1: does Maharashtra PWD publish a works register? Q2: is OMMAS reachable? | Phase-1 scope |
-| 5 | Confirm self-hosted deployability is tested, not assumed (`adr/011`) | W1 |
+| #   | Item                                                                                               | Blocks                                      |
+| --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| 1   | **Licence undecided** — see `/LICENSE`. Recommend Apache-2.0 or MPL-2.0                            | Open-source release; store submission later |
+| 2   | Backend acceptance of the P0 contract items (`11-api/client-api-contract.md` §7)                   | W4, W5                                      |
+| 3   | **The execution-data gap** — per-project expenditure and physical progress have no verified source | What the Money Trail can show at launch     |
+| 4   | Q1: does Maharashtra PWD publish a works register? Q2: is OMMAS reachable?                         | Phase-1 scope                               |
+| 5   | Confirm self-hosted deployability is tested, not assumed (`adr/011`)                               | W1                                          |
 
 ---
 
-*Documentation written 21–24 August 2026. Restructured into this layout 24 August 2026.*
+_Documentation written 21–24 August 2026. Restructured into this layout 24 August 2026._
