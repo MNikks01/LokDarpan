@@ -27,11 +27,13 @@ A six-month plan to a Phase-1 production launch (Maharashtra roads). Each month 
 
 ## Month 3 — Dashboard
 
-> **Superseded.** The product is now **mobile-only** (no website, no responsive web app, no desktop
-> dashboard). This month is replaced by the 12-phase mobile plan in
-> [`.docs/25-implementation-roadmap.md`](../.docs/25-implementation-roadmap.md). The UI contracts below
-> (`FigureWithSource`, `MissingDataWarning`, provenance on every figure, WCAG, English/Marathi) carry over
-> unchanged to the mobile client. See [`.docs/00-document-audit.md`](../.docs/00-document-audit.md) §3.
+> **Reinstated 2026-08-24.** The product is **web-first**: the website ships first, the mobile app
+> follows (see [`.docs/26-web-first-pivot.md`](../.docs/26-web-first-pivot.md)). This month is back in
+> force, expanded into the 10-phase plan in
+> [`.docs/28-web-implementation-roadmap.md`](../.docs/28-web-implementation-roadmap.md), with the
+> architecture in [`.docs/27-web-architecture.md`](../.docs/27-web-architecture.md). The UI contracts
+> below (`FigureWithSource`, `MissingDataWarning`, provenance on every figure, WCAG, English/Marathi)
+> are unchanged and binding.
 
 **Goals:** the public surface.
 

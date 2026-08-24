@@ -25,10 +25,12 @@
 
 ## Repository / folder structure
 
-> **Amended for the mobile-only decision.** `apps/web/` (the Next.js public dashboard) is removed and
-> replaced by `apps/mobile/` (React Native / Expo). `packages/ui/` becomes `packages/ui-web/`, scoped to the
-> admin console. Three shared packages are added — `api-contract`, `neutrality`, and `money`. Full layout in
-> [`.docs/23-repository-structure.md`](../.docs/23-repository-structure.md).
+> **Amended 2026-08-24 (web-first).** `apps/web/` (the Next.js public dashboard) is **retained** and is
+> the first product to ship; `apps/mobile/` (React Native / Expo) is added after web launch. `packages/ui/`
+> keeps its original purpose as shared React components. Three packages are added — `api-contract`,
+> `neutrality`, and `money` — so the two clients cannot drift. Layout in
+> [`.docs/27-web-architecture.md`](../.docs/27-web-architecture.md) §Repository placement; the deferred
+> mobile layout is in [`.docs/23-repository-structure.md`](../.docs/23-repository-structure.md).
 
 Monorepo (pnpm + uv/poetry). Declarative source connectors so contributors can add sources without touching core. National-scale layout (`apps` / `services` / `packages` / `workers` / `infrastructure`):
 

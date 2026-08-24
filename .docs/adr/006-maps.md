@@ -1,6 +1,6 @@
 # ADR-006 — Maps: MapLibre React Native, self-hosted vector tiles
 
-**Status:** Accepted · 2026-08-21 · **Review gate: Phase 5 (India roads)**
+**Status:** Accepted · 2026-08-21 · **Review gate: Phase 5 (India roads)** · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`../26-web-first-pivot.md`](../26-web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
 
 ## Context
 

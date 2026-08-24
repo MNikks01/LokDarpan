@@ -1,6 +1,6 @@
 # ADR-003 — Client state: Zustand (four small slices)
 
-**Status:** Accepted · 2026-08-21
+**Status:** Accepted · 2026-08-21 · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`../26-web-first-pivot.md`](../26-web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
 
 ## Context
 

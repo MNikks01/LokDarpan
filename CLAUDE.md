@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **LokDarpan (लोकदर्पण)** — a public-finance, governance and infrastructure intelligence platform for India, built entirely on official government records. It links revenue → budget → allocation → release → expenditure → tender → contractor → work progress → audit into one traceable ledger and runs mathematical-consistency checks over it.
 
-**There is no application code yet.** This repository currently contains only specifications, architecture, and a verified data-source registry. There is no `package.json`, no build, no lint, no test suite — do not go looking for them, and do not invent them. The first code to be written is `apps/mobile/` (see `.docs/25-implementation-roadmap.md`).
+**There is no application code yet.** This repository currently contains only specifications, architecture, and a verified data-source registry. There is no `package.json`, no build, no lint, no test suite — do not go looking for them, and do not invent them.
+
+**The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The first code to be written is `apps/web/` — a Next.js app — per `.docs/28-web-implementation-roadmap.md`. This reversed an earlier mobile-only decision, so **treat `.docs/00`–`25` as the deferred mobile specification, not the active plan**. `.docs/26-web-first-pivot.md` records what changed and, more usefully, what did not.
 
 `.agents/`, `.claude/` and `skills-lock.json` are local skill installations, untracked and unrelated to the project.
 
@@ -17,12 +19,22 @@ Read in this order; later layers supersede earlier ones where they conflict.
 | Layer | Contents | Authority |
 |---|---|---|
 | `docs/` (00–20) | Platform spec: mission, PRD, system architecture, PostgreSQL/PostGIS schema, analytics formulas, risk scoring, AI guardrails, security, scalability, **legal/ethical rules** | Backend and data model |
-| `.docs/` (00–25 + `adr/` + `wireframes/`) | Mobile product & architecture. The product is **mobile-only** — no website, no responsive web app, no desktop dashboard | The client |
+| `.docs/26`–`28` + `adr/011`–`012` | **Active web specification** — architecture, roadmap, framework and API decisions | The client being built |
+| `.docs/00`–`25` + `adr/001`–`010` + `wireframes/` | **Deferred mobile specification.** Retained, not deleted. Much of it (journeys, IA, design system, neutrality primitives, contract findings) is platform-agnostic and carries over | Reference + future mobile |
 | `.docs/data-sources/` | Verified government source registry — where the data actually comes from | Ingestion |
 
-Two supersessions are annotated in place: `docs/16` Month 3 (built a Next.js dashboard) and `docs/17`'s `apps/web/`. Both are replaced by the mobile plan.
+`docs/16` Month 3 (the Next.js dashboard month) and `docs/17`'s `apps/web/` were annotated as superseded during the mobile-only phase; both are now **reinstated** and annotated accordingly.
 
-Start points: `.docs/README.md`, `.docs/data-sources/SOURCE-DISCOVERY-REPORT.md`.
+Start points: `.docs/26-web-first-pivot.md`, then `.docs/README.md` and `.docs/data-sources/SOURCE-DISCOVERY-REPORT.md`.
+
+### The distinction that matters most when reading the mobile docs
+
+The mobile phase rejected 14 UI patterns. They were rejected for **two different reasons**, and only one kind reverses on web:
+
+- **Rejected because of the phone** — wide data tables, bulk export, multi-pane views, breadcrumbs, sidebar navigation, a dedicated analytics surface. These all **return on desktop**.
+- **Rejected because of `docs/15`** — global anomaly feeds, rankings, any score on a contractor, chart-to-PNG export, free-floating AI chat, gamification. These **never return**, on any platform.
+
+When someone proposes something the mobile docs rejected, ask which kind it was. `.docs/26` §"What reverses — and what does not" has the full table.
 
 ## `docs/15-Legal-Ethical-Rules.md` is binding on everything
 
@@ -52,21 +64,25 @@ These come from cross-referencing several documents; each is load-bearing.
 
 **Missing is never zero.** A null financial value renders a missing-data state naming the expected source and last-checked date. No variance is computed across a missing stage — status becomes `insufficient_data`.
 
-**"Offline" and "not published" are different states** with different copy and iconography. Conflating them turns a dropped connection into an implied accusation against a government body.
+**"Offline" and "not published" are different states** with different copy and iconography. Conflating them turns a dropped connection into an implied accusation against a government body. (Mobile-specific in practice, but the underlying rule — never imply non-publication — binds every surface.)
 
 **The client computes no financial arithmetic.** Variance, deviation %, cost/km, peer medians, HHI, roll-up gaps and Verification Priority all arrive computed, versioned and source-linked from the backend.
 
-**`admin_unit` is the one hierarchy.** `docs/04` retains a legacy `district` table alongside the generic `admin_unit` closure; the mobile client targets `/units/:id` exclusively. Two code paths for "a place" is the fastest route to an unmaintainable app.
+**`admin_unit` is the one hierarchy.** `docs/04` retains a legacy `district` table alongside the generic `admin_unit` closure; clients target `/units/:id` exclusively. Two code paths for "a place" is the fastest route to an unmaintainable app, and on web it would also produce two indexable URLs for one entity.
 
 ## Architecture in one pass
 
 **Backend** (`docs/02`): source-driven ingestion → ETL (parse/validate/normalize/dedupe/load with provenance) → PostgreSQL+PostGIS canonical ledger → analytics/anomaly/risk → materialized views → read-only API. The only write path to the ledger is ETL; everything downstream is read-only. Event-driven on the write path, cache-served on the read path, keyed by a monotonic `datasetVersion`.
 
-**Mobile** (`.docs/05-mobile-architecture.md`): Expo + React Native, TypeScript strict, four enforced layers (`app/` → `features/` → `domain/` ← `data/` → `platform/`), boundaries enforced by `dependency-cruiser` and ESLint rather than convention. Four bottom tabs; entity routes push onto the active tab's stack. **One level-agnostic Unit screen replaces the six dashboards of `docs/09`** — same six sections at state, district, taluka, ULB, Gram Panchayat and ward. This is what keeps a 15-level, 12-domain national platform inside one app; per-level or per-domain screens would break it.
+**Web** (`.docs/27-web-architecture.md`): Next.js App Router, TypeScript strict, **React Server Components + ISR** for entity pages with client islands only for interaction. Entity pages ship almost no JavaScript and are server-rendered because **SEO is the acquisition channel** — with no app store, an unfindable civic site has a structural reach problem. ISR is revalidated by `datasetVersion` cache tag, not by time, which is what makes ~10⁶ concurrent users affordable on grant funding.
 
-**Data flow** (`.docs/04-data-flow.md`): screen-shaped composite endpoints (a mobile BFF), REST only — **not GraphQL**, because edge caching keyed on `datasetVersion` is what makes the offline story and the running cost work, and because one payload means one `datasetVersion` across every figure on a screen.
+**One level-agnostic Unit page replaces the six dashboards of `docs/09`** — same six sections (money in / money out / what was built / consistency / sub-units / coverage) at state, district, taluka, ULB, Gram Panchayat and ward. This is what keeps a 15-level, 12-domain national platform inside one codebase; per-level or per-domain pages would break it. The insight came from the mobile phase and carries over.
 
-Ten ADRs in `.docs/adr/` record the technology decisions with their alternatives and trade-offs. **ADRs append; they are never rewritten.** A superseded ADR gets a status header and stays.
+**API** (`.docs/adr/012`): **REST, called server-side from RSC — not GraphQL.** GraphQL was genuinely reconsidered for web (the mobile arguments about bundle size and offline caching don't apply) and declined on new grounds: RSC already solves over-fetching by moving the fetch to the server, and one payload must carry one `datasetVersion` or two figures on a page carry different provenance vintages — a traceability defect, not a caching one.
+
+**Mobile, deferred** (`.docs/05-mobile-architecture.md`): Expo + React Native, four enforced layers, four bottom tabs. Stands for when mobile resumes; revalidate the toolchain at that point.
+
+Twelve ADRs in `.docs/adr/` record technology decisions with alternatives and trade-offs. **ADRs append; they are never rewritten.** 011–012 are active; 001–010 carry a `Deferred` status header and stay.
 
 ## Working with the data-source registry
 
@@ -86,12 +102,13 @@ Do not treat these as settled; they are tracked in `.docs/README.md` and `.docs/
 
 - **Code licence is undecided.** AGPL has known friction with App Store distribution. This blocks store submission. Recommendation on file: Apache-2.0 or MPL-2.0 for `apps/mobile`.
 - **The execution-data gap.** No public works register was located; no verified source for physical progress, financial progress, work orders, completion or per-project expenditure. `docs/06`'s central `Released − Utilized` variance therefore has **no verified source today**. The project-level Money Trail — the product's signature screen — depends on it. PMGSY's OMMAS is the highest-value unverified candidate.
-- **Backend P0 items** (`.docs/18-mobile-api-contract.md` §7): the mobile BFF, a search endpoint (absent entirely from `docs/10`), money as decimal strings, provenance page anchors, and a mobile rate tier — per-IP limits misfire on Indian carrier CGNAT and would throttle exactly the mobile-only users the product exists for.
-- **Mobile-only removes the desktop workflow** for researchers and journalists, two of the six audiences named in `docs/01`, and removes SEO discovery. Recorded as PR-1 in `.docs/00-document-audit.md`; the public REST API is the designated mitigation.
+- **Backend P0 items** (`.docs/18-mobile-api-contract.md` §7, re-prioritised for web in `.docs/28` §Backend dependencies): a search endpoint (absent entirely from `docs/10`), money as decimal strings, both variances, three confidences, provenance page anchors, no inline geometry, and a CGNAT-safe rate tier — per-IP limits misfire on Indian carrier NAT, which affects web users too. The composite BFF dropped from P0 to P2: a server-rendered client can make parallel calls.
+- ~~Mobile-only removes the desktop workflow for researchers and journalists~~ — **resolved.** PR-1 was the reason for the web-first pivot; the researcher surfaces (tables, bulk export, API access) ship before launch in W9.
+- **A second platform pivot would be expensive.** Web-first should be treated as settled through launch.
 
 ## Conventions
 
 - `docs/` is the platform spec; `.docs/` is the mobile spec; `.docs/adr/` holds decisions. Code comments explain *why*; `.docs/` explains *what and how*.
 - A change to an architectural decision updates the relevant `.docs/` file or adds an ADR **in the same PR**. A decision that lives only in a commit message will be silently reversed within two quarters.
 - Every document in `.docs/` is intended to have at least one automated check backing it once code exists (`.docs/23-repository-structure.md` maps them). A specification with no enforcement mechanism becomes fiction.
-- When code lands, the mobile app joins the monorepo as `apps/mobile` — not a separate repository — so the neutrality word list, API contract, domain types and money formatting are shared packages rather than duplicated copies that drift.
+- When code lands, `apps/web` joins the monorepo of `docs/17` (with `apps/mobile` added later) — not separate repositories — so the neutrality word list, API contract, domain types and money formatting are shared packages rather than duplicated copies that drift.
