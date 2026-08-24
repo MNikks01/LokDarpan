@@ -9,3 +9,13 @@ skills-lock.json
 # but allow a shared project settings.json (permissions, hooks) if one is added.
 .claude/skills/
 .claude/settings.local.json
+
+# graphify knowledge-graph output (local build artifact)
+graphify-out/
+
+# node / next build artifacts
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+.turbo/

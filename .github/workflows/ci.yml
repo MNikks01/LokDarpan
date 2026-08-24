@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      # ── docs/15 guardrails — a hit is a release blocker, not a warning ──
+      - name: G1 · Neutrality (all locales)
+        run: pnpm exec tsx packages/neutrality/src/cli.ts apps packages
+
+      - name: Unit + contract tests
+        run: pnpm exec vitest run
+
+      - name: G3 · Palette (no red in any data token)
+        run: pnpm exec vitest run apps/web/src/ui/tokens.test.ts
+
+      - name: G6 · Fixtures absent from production bundle
+        run: |
+          pnpm --filter @lokdarpan/web build
+          if grep -rl "FIXTURE — not a government source" apps/web/.next/static 2>/dev/null; then
+            echo "::error::fixture data leaked into the production bundle (guardrail G6)"
+            exit 1
+          fi
+          echo "✓ no fixture data in static bundle"
+
+      - name: Build
+        run: pnpm --filter @lokdarpan/web build

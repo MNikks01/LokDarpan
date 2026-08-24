@@ -1,0 +1,104 @@
+{
+  "id": 501,
+  "name": "Upgradation of ODR-14, Baramati",
+  "category": "rural_road",
+  "status": "in_progress",
+  "externalWorkId": "PWD-PUN-2024-1408",
+  "fiscalYear": "FY2024-25",
+  "unit": {
+    "id": 412,
+    "name": "Baramati",
+    "level": "taluka",
+    "lgdCode": "4108"
+  },
+  "finance": {
+    "allocated": {
+      "present": true,
+      "amountInr": "100000000.00",
+      "provenance": {
+        "sourceDocumentId": 88,
+        "sourceName": "MH Finance \u2014 Demand for Grants",
+        "authority": "Government of Maharashtra, Finance Department",
+        "tier": "state",
+        "sourceUrl": "https://finance.maharashtra.gov.in/",
+        "archivedUrl": "https://artifacts.lokdarpan.example/4f3a.pdf",
+        "artifactSha256": "f6388baea0aa0384ea4dfc098ff208a1a0cbec928c96f187e79745ebe4b962b0",
+        "docType": "pdf",
+        "extractionMethod": "camelot",
+        "extractionConfidence": 0.98,
+        "linkageConfidence": 1,
+        "pageLocator": "p.118 table 4",
+        "page": 118,
+        "bbox": null,
+        "retrievedAt": "2026-07-30T02:00:00Z",
+        "publishedAt": "2025-03-10",
+        "license": "Government Open Data",
+        "recordVersion": 1,
+        "supersededById": null,
+        "datasetVersion": 137
+      }
+    },
+    "released": {
+      "present": true,
+      "amountInr": "90000000.00",
+      "provenance": {
+        "sourceDocumentId": 91,
+        "sourceName": "MH Treasury \u2014 Releases",
+        "authority": "Government of Maharashtra, Directorate of Accounts and Treasuries",
+        "tier": "state",
+        "sourceUrl": "https://mahakosh.maharashtra.gov.in/",
+        "archivedUrl": "https://artifacts.lokdarpan.example/9b21.pdf",
+        "artifactSha256": "00938bfba3293890175fc305abda12c37897f9b87b6ec9e19872248704c8a982",
+        "docType": "pdf",
+        "extractionMethod": "camelot",
+        "extractionConfidence": 0.98,
+        "linkageConfidence": 1,
+        "pageLocator": "p.7 table 2",
+        "page": 7,
+        "bbox": null,
+        "retrievedAt": "2026-07-30T02:00:00Z",
+        "publishedAt": "2024-11-05",
+        "license": "Government Open Data",
+        "recordVersion": 1,
+        "supersededById": null,
+        "datasetVersion": 137
+      }
+    },
+    "utilized": {
+      "present": true,
+      "amountInr": "80000000.00",
+      "provenance": {
+        "sourceDocumentId": 220,
+        "sourceName": "MH PWD \u2014 Works",
+        "authority": "Government of Maharashtra, Public Works Department",
+        "tier": "state",
+        "sourceUrl": "https://pwd.maharashtra.gov.in/",
+        "archivedUrl": "https://artifacts.lokdarpan.example/220a.pdf",
+        "artifactSha256": "75d84de4633e0d973a592e134af292b1e1b64825a40e30b7b352be8fcbd720a9",
+        "docType": "scan",
+        "extractionMethod": "ocr:tesseract",
+        "extractionConfidence": 0.82,
+        "linkageConfidence": 1,
+        "pageLocator": "p.42 table 3",
+        "page": 42,
+        "bbox": null,
+        "retrievedAt": "2026-07-30T02:00:00Z",
+        "publishedAt": "2025-12-01",
+        "license": "Government Open Data",
+        "recordVersion": 3,
+        "supersededById": null,
+        "datasetVersion": 137
+      }
+    },
+    "releaseVarianceInr": "10000000.00",
+    "releaseDeviationPct": 11.1,
+    "allocationVarianceInr": "20000000.00",
+    "allocationDeviationPct": 20.0,
+    "status": "needs_verification",
+    "thresholdPct": 10
+  },
+  "meta": {
+    "datasetVersion": 137,
+    "asOf": "2026-08-04T22:10:00Z"
+  }
+}
