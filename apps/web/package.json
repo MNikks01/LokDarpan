@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@lokdarpan/api-contract": "workspace:*",
+    "@lokdarpan/contracts": "workspace:*",
     "@lokdarpan/money": "workspace:*",
     "@lokdarpan/neutrality": "workspace:*",
     "next": "^15.1.3",

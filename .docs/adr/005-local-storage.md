@@ -1,10 +1,10 @@
 # ADR-005 — Local storage: MMKV + SQLite, split by guarantee
 
-**Status:** Accepted · 2026-08-21 · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`../26-web-first-pivot.md`](../26-web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
+**Status:** Accepted · 2026-08-21 · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`.docs/decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
 
 ## Context
 
-Four distinct storage needs (`.docs/11-offline-strategy.md`):
+Four distinct storage needs (`.docs/10-mobile/offline-strategy.md`):
 
 1. A **query cache** persisted across launches so a cold start with no network still renders (LRU, evictable).
 2. **Saved items** with full offline bundles — *must never be silently evicted*, and must be queryable (list, filter, join, diff against a new dataset version).
@@ -30,13 +30,13 @@ The requirements of (1) and (2) are opposites: the cache must be free to evict; 
 
 **SQLite for everything.** Rejected: asynchronous, so the synchronous first-paint rehydration disappears and cold start regresses. Overkill for `theme = 'dark'`.
 
-**WatermelonDB.** Strong for large offline datasets with sync. Rejected: its value is a **bidirectional sync engine**, and this app has no writes to sync (the ledger is read-only, `docs/10`). Adopting a sync framework where there is nothing to sync is unnecessary complexity plus a lazy-loading model we do not need.
+**WatermelonDB.** Strong for large offline datasets with sync. Rejected: its value is a **bidirectional sync engine**, and this app has no writes to sync (the ledger is read-only, `.docs/11-api/api-documentation.md`). Adopting a sync framework where there is nothing to sync is unnecessary complexity plus a lazy-loading model we do not need.
 
 **Realm / MongoDB Realm.** Rejected: heavy native dependency, larger binary, licensing and vendor considerations that sit poorly with an auditable public-interest codebase.
 
 **op-sqlite instead of expo-sqlite.** Faster (JSI). Reconsider if profiling shows SQLite is a bottleneck; `expo-sqlite` is chosen first for managed-workflow simplicity and one fewer config plugin. Drizzle abstracts the driver, so switching is contained.
 
-**WatermelonDB/Realm-style encryption at rest.** Rejected deliberately: the stored data is public government information. Encrypting it would imply a protection the app cannot actually provide against a compromised device, and would add key-management complexity for no threat in the model (`.docs/13-mobile-security.md` §1). The genuinely sensitive artefact — the **watchlist** — is protected by never leaving the device, not by local encryption.
+**WatermelonDB/Realm-style encryption at rest.** Rejected deliberately: the stored data is public government information. Encrypting it would imply a protection the app cannot actually provide against a compromised device, and would add key-management complexity for no threat in the model (`.docs/12-security/mobile-security.md` §1). The genuinely sensitive artefact — the **watchlist** — is protected by never leaving the device, not by local encryption.
 
 ## The two-tier rule (the decision that matters)
 
@@ -52,8 +52,8 @@ A single unified store forces a choice between an unbounded cache and silently l
 
 ## Consequences
 
-- Cold start can rehydrate synchronously → 1.2 s first paint (`.docs/14-performance.md`).
-- "Saved means saved," including provenance, so traceability survives offline (`.docs/10-source-traceability.md`).
+- Cold start can rehydrate synchronously → 1.2 s first paint (`.docs/02-architecture/performance.md`).
+- "Saved means saved," including provenance, so traceability survives offline (`.docs/01-product/source-traceability.md`).
 - Offline search via SQLite FTS5 over saved and recently-viewed items.
 - Queued data-issue reports survive process death and flush idempotently.
 - Storage is user-visible and per-item deletable (S-70) — a phone with 16 GB of storage cannot host an app that quietly grows.

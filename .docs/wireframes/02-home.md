@@ -70,7 +70,7 @@ Deliberately **not** a KPI dashboard. An intent launcher: where am I, what's nea
 
 ### Why it is built this way
 
-- **"Worth verifying" is capped at 3, scoped to the user's own unit, and carries the disclaimer above the list** — it is never an infinite feed and never national. Removing that cap would turn neutral observations into an engagement stream (`.docs/00-document-audit.md` PR-3).
+- **"Worth verifying" is capped at 3, scoped to the user's own unit, and carries the disclaimer above the list** — it is never an infinite feed and never national. Removing that cap would turn neutral observations into an engagement stream (`.docs/00-overview/document-audit.md` PR-3).
 - The district card is the **same four-panel pattern** as S-23, so Home teaches the layout the rest of the app uses.
 - Every figure has 🔗. The variance shows its denominator in words, never a bare percentage.
 - Coverage sits at the bottom of Home, not hidden in a settings screen.

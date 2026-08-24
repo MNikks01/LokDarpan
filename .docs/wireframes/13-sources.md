@@ -166,7 +166,7 @@ S-56                                S-57 (sheet)
 │ CENTRAL ⋯                  │   │  the expenditure record    │
 └────────────────────────────┘   │  may not be published yet. │
                                  │                            │
-                                 │  Source: docs/06 §1        │
+                                 │  Source: .docs/07-analytics/analytics-engine.md §1        │
                                  └────────────────────────────┘
 ```
 

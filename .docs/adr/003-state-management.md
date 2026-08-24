@@ -1,6 +1,6 @@
 # ADR-003 — Client state: Zustand (four small slices)
 
-**Status:** Accepted · 2026-08-21 · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`../26-web-first-pivot.md`](../26-web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
+**Status:** Accepted · 2026-08-21 · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`.docs/decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
 
 ## Context
 
@@ -36,7 +36,7 @@ Most React Native apps have large client stores because they hold server data. H
 
 ## Consequences
 
-- Selector subscriptions keep a scope change from re-rendering four tabs (`.docs/14-performance.md`).
+- Selector subscriptions keep a scope change from re-rendering four tabs (`.docs/02-architecture/performance.md`).
 - Stores are plain functions — unit-testable with no provider or harness.
 - Bundle cost is ~1 KB.
 - Guardrail: if a slice grows past ~150 lines or acquires cross-slice orchestration, revisit this ADR rather than quietly growing a bespoke framework.

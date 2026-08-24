@@ -103,7 +103,7 @@
 │  ⊘ Insufficient data                         │
 ```
 
-**Never `₹0`. Never a 100% variance against nothing.** This is `docs/15` rule 8, rendered.
+**Never `₹0`. Never a 100% variance against nothing.** This is `.docs/17-legal/legal-ethical-rules.md` rule 8, rendered.
 
 ## S-29 · Ledger lines   ·   S-30 · Line detail   ·   S-30a · Value history
 
@@ -129,7 +129,7 @@ S-29                                S-30 (sheet)
                                   │ [ Value history ]          │
                                   └────────────────────────────┘
 
-S-30a — implements docs/15 rule 9 (preserve historical versions)
+S-30a — implements .docs/17-legal/legal-ethical-rules.md rule 9 (preserve historical versions)
 ┌──────────────────────────────────────────────┐
 │ ←  Value history · Allocation                │
 ├──────────────────────────────────────────────┤

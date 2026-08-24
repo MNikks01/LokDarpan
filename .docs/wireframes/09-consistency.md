@@ -111,7 +111,7 @@ The most neutrality-sensitive screen in the app.
 │  [ How this is calculated ]              (?) │
 └──────────────────────────────────────────────┘
 ```
-If length, width, or surface type is missing, this whole block is replaced by *"Estimate withheld — road width not published"* (`docs/08`). Never guessed.
+If length, width, or surface type is missing, this whole block is replaced by *"Estimate withheld — road width not published"* (`.docs/03-domain/road-infrastructure-intelligence.md`). Never guessed.
 
 ## S-34 / S-35 · Observations
 
@@ -184,6 +184,6 @@ S-49  (always entered from a unit or project — never a global feed)
 └──────────────────────────────────────────────┘
 ```
 
-**Sort options are: most recent, severity, project name. There is no "highest score first" default**, and no cross-unit "worst projects" view — that would be the leaderboard `docs/07` forbids.
+**Sort options are: most recent, severity, project name. There is no "highest score first" default**, and no cross-unit "worst projects" view — that would be the leaderboard `.docs/08-risk/risk-scoring-engine.md` forbids.
 
 **Empty state matters here:** *"No consistency observations for Pune district in FY2024-25. This may mean the published records are consistent — or that records are missing."* → ▸ Coverage.

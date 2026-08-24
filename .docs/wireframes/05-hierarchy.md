@@ -34,7 +34,7 @@
 └──────────────────────────────────────────────┘
 ```
 
-**Each row carries a metric, not just a name.** A list of 14 names is a directory; a list of 14 names with utilized amounts is a screen you can reason from. (This is why `GET /units/:id/children` must return a per-child metric — `.docs/18-mobile-api-contract.md`.)
+**Each row carries a metric, not just a name.** A list of 14 names is a directory; a list of 14 names with utilized amounts is a screen you can reason from. (This is why `GET /units/:id/children` must return a per-child metric — `.docs/11-api/client-api-contract.md`.)
 
 Missing rows are shown **in place**, not filtered out, so the reader sees the gap in the sequence.
 
@@ -68,7 +68,7 @@ Pune district
 └──────────────────────────────────────────────┘
 ```
 
-The note is genuinely necessary — `docs/19` states the hierarchy "is not a single clean tree", and a user who does not know that will read the two branches as a duplication or an error.
+The note is genuinely necessary — `.docs/03-domain/administrative-hierarchy.md` states the hierarchy "is not a single clean tree", and a user who does not know that will read the two branches as a duplication or an error.
 
 ## Deepest level — where coverage dominates
 
@@ -90,4 +90,4 @@ The note is genuinely necessary — `docs/19` states the hierarchy "is not a sin
 └──────────────────────────────────────────────┘
 ```
 
-Coverage is the **first** thing shown at local-body level, not a footnote — `docs/09` requires missing-data warnings to be especially prominent here.
+Coverage is the **first** thing shown at local-body level, not a footnote — `.docs/01-product/dashboard-design-legacy.md` requires missing-data warnings to be especially prominent here.

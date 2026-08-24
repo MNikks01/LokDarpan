@@ -1,0 +1,19 @@
+LICENCE — NOT YET DECIDED
+=========================
+
+The licence for this repository is an OPEN DECISION, tracked in
+.docs/README.md §Open items and in CLAUDE.md.
+
+Context:
+  - .docs/02-architecture/tech-stack.md commits to an open-source licence so the
+    methodology itself is auditable. Public trust in this platform depends on
+    that auditability.
+  - AGPL-3.0 has well-known friction with Apple App Store distribution terms,
+    which matters once apps/mobile ships (.docs/adr/001-mobile-framework.md).
+
+Recommendation on file: Apache-2.0 or MPL-2.0, which preserve auditability
+without the distribution conflict. Per-package licensing is also viable if the
+project wants copyleft for the backend services.
+
+This placeholder exists so the decision stays visible. Replace it with the
+chosen licence text before any public release or store submission.

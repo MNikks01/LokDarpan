@@ -59,7 +59,7 @@ PANEL 3 — a live demo, not a description
 └────────────────────────────┘
 ```
 
-**"Skip" skips panels 1 and 3. Panel 2 is always shown** — the neutrality frame is not optional (`docs/15`).
+**"Skip" skips panels 1 and 3. Panel 2 is always shown** — the neutrality frame is not optional (`.docs/17-legal/legal-ethical-rules.md`).
 
 ## S-03 · Language
 

@@ -76,7 +76,7 @@ The non-affiliation block is required for app-store review and for basic honesty
 ## S-74 · Neutrality & legal   ·   S-75 · Privacy
 
 ```text
-S-74 (docs/15, verbatim, non-collapsible)   S-75
+S-74 (.docs/17-legal/legal-ethical-rules.md, verbatim, non-collapsible)   S-75
 ┌────────────────────────────┐   ┌────────────────────────────┐
 │ ←  Neutrality & legal      │   │ ←  Privacy                 │
 ├────────────────────────────┤   ├────────────────────────────┤

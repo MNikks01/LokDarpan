@@ -1,6 +1,6 @@
 # Wireframes — Cross-cutting states
 
-Specification in `.docs/15-state-design.md`. These are the visual forms of the three inviolable rules:
+Specification in `.docs/01-product/state-design.md`. These are the visual forms of the three inviolable rules:
 
 > **R1** Missing is never zero · **R2** "Offline" ≠ "not published" · **R3** Every state names its responsible source.
 
@@ -44,7 +44,7 @@ E1 · NO RECORDS PUBLISHED (the most sensitive)
 │   This does not mean no money was spent —    │
 │   it means the record has not been           │
 │   published or collected yet.                │   ← MANDATORY sentence
-│                                              │      (docs/15 rule 8)
+│                                              │      (.docs/17-legal/legal-ethical-rules.md rule 8)
 │   Expected source   MH PWD — Works           │   ← R3
 │   Last checked      18 Aug 2026              │
 │                                              │
@@ -212,4 +212,4 @@ LOCATION                        NOTIFICATIONS
                              │    OCR · 82%           │
                              └────────────────────────┘
 ```
-Above ~130% scale, `label + value` rows switch from horizontal to stacked. **A monetary value is never truncated** — a truncated figure is a wrong figure (`.docs/12-accessibility.md`).
+Above ~130% scale, `label + value` rows switch from horizontal to stacked. **A monetary value is never truncated** — a truncated figure is a wrong figure (`.docs/01-product/accessibility.md`).

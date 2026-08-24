@@ -1,0 +1,14 @@
+# Default
+*                                   @MNikks01
+
+# docs/15 is binding on the whole platform. Changes to the legal/ethical rules,
+# or to the code that enforces them, need deliberate review.
+/.docs/17-legal/                    @MNikks01
+/packages/neutrality/               @MNikks01
+/packages/money/                    @MNikks01
+
+# The API contract encodes the audit fixes (C1-C13); drift here is a data defect.
+/packages/contracts/                @MNikks01
+
+# The verified government source registry.
+/.docs/06-government-sources/       @MNikks01

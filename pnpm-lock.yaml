@@ -23,9 +23,9 @@ importers:
 
   apps/web:
     dependencies:
-      '@lokdarpan/api-contract':
+      '@lokdarpan/contracts':
         specifier: workspace:*
-        version: link:../../packages/api-contract
+        version: link:../../packages/contracts
       '@lokdarpan/money':
         specifier: workspace:*
         version: link:../../packages/money
@@ -49,7 +49,7 @@ importers:
         specifier: ^19.0.2
         version: 19.2.5(@types/react@19.2.18)
 
-  packages/api-contract:
+  packages/contracts:
     dependencies:
       zod:
         specifier: ^3.24.1

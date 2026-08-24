@@ -1,15 +1,15 @@
 # ADR-011 — Web framework: Next.js (App Router) with RSC + ISR
 
-**Status:** Accepted · 2026-08-24 · Supersedes the deferral of `docs/12`'s frontend choice
+**Status:** Accepted · 2026-08-24 · Supersedes the deferral of `.docs/02-architecture/tech-stack.md`'s frontend choice
 
 ## Context
 
-`.docs/26-web-first-pivot.md` makes the website the first product. `docs/12` originally chose Next.js App Router; the mobile-only phase discarded it. It now needs re-deciding on its merits rather than restored by default.
+`.docs/decisions/web-first-pivot.md` makes the website the first product. `.docs/02-architecture/tech-stack.md` originally chose Next.js App Router; the mobile-only phase discarded it. It now needs re-deciding on its merits rather than restored by default.
 
 Requirements:
-- **Indexability is existential.** With no app store, SEO is the acquisition channel (`docs/12`). Every entity must be a server-rendered, crawlable page.
-- **~10⁶ concurrent users at Phase 8** (`docs/14`), on grant funding — the read path must be cache-served, not computed per request.
-- Read-only data publishing at most daily (`docs/02` cron) — content is highly cacheable.
+- **Indexability is existential.** With no app store, SEO is the acquisition channel (`.docs/02-architecture/tech-stack.md`). Every entity must be a server-rendered, crawlable page.
+- **~10⁶ concurrent users at Phase 8** (`.docs/15-scalability/scalability-plan.md`), on grant funding — the read path must be cache-served, not computed per request.
+- Read-only data publishing at most daily (`.docs/02-architecture/system-architecture.md` cron) — content is highly cacheable.
 - Type sharing with `packages/api-contract` and the backend.
 - Three locales including Devanagari.
 
@@ -23,7 +23,7 @@ Requirements:
 
 **Remix / React Router 7.** Excellent data-loading model and web-standards alignment. Rejected narrowly: its strength is dynamic, per-request, mutation-heavy apps. This product is read-only and near-static — ISR fits it better than loaders that run on every request, and the caching story is the whole cost argument.
 
-**SvelteKit.** Smaller bundles, pleasant DX. Rejected: abandons React, which forfeits type/component sharing with the future mobile app and the existing `.docs/06` component designs, for a benefit (bundle size) that RSC already largely delivers.
+**SvelteKit.** Smaller bundles, pleasant DX. Rejected: abandons React, which forfeits type/component sharing with the future mobile app and the existing `.docs/01-product/design-system.md` component designs, for a benefit (bundle size) that RSC already largely delivers.
 
 **Plain React SPA (Vite).** Rejected outright — **not indexable**, which fails the primary requirement. Everything else about it is irrelevant given that.
 
@@ -34,7 +34,7 @@ Requirements:
 This is the decision that matters more than the framework name. Entity pages are **data-heavy and interaction-light** — a district page is a lot of numbers and a few links. Server Components render that content on the server, ship HTML plus almost no JavaScript, and keep the API client, the Zod schemas and the mappers entirely off the client bundle.
 
 Consequences:
-- The 90 KB initial-JS budget for entity pages (`.docs/27`) is achievable, not aspirational.
+- The 90 KB initial-JS budget for entity pages (`.docs/02-architecture/web-architecture.md`) is achievable, not aspirational.
 - The API contract layer never reaches the browser, so `packages/api-contract` can stay strict without bundle cost.
 - Content is crawlable by construction rather than by a rendering workaround.
 
@@ -48,6 +48,6 @@ Consequences:
 ## Consequences
 
 - Every entity page is indexable and CDN-cacheable — the two things the pivot exists to buy.
-- `datasetVersion`-tagged revalidation gives correct invalidation without time-based guessing (`.docs/27`).
+- `datasetVersion`-tagged revalidation gives correct invalidation without time-based guessing (`.docs/02-architecture/web-architecture.md`).
 - Component and type sharing with the deferred mobile client stays possible via `packages/ui` and `packages/api-contract`.
 - Self-hosted deployability must be a tested property, not an assumption.

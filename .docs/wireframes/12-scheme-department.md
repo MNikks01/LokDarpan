@@ -45,7 +45,7 @@ These reuse the **same four-panel pattern** as S-23 — money in, money out, wha
 └──────────────────────────────────────────────┘
 ```
 
-The central/state split is shown because `docs/19` treats scheme transfers as a distinct funding mechanism from budget allocation, and a reader tracing money needs to know which it is.
+The central/state split is shown because `.docs/03-domain/administrative-hierarchy.md` treats scheme transfers as a distinct funding mechanism from budget allocation, and a reader tracing money needs to know which it is.
 
 ## S-47 · Department / ministry detail
 
@@ -82,7 +82,7 @@ The central/state split is shown because `docs/19` treats scheme transfers as a 
 └──────────────────────────────────────────────┘
 ```
 
-Showing BE and RE side by side with a link to revision history implements `docs/15` rule 9 at department level — a revised allocation is a fact with its own source, never a silent overwrite.
+Showing BE and RE side by side with a link to revision history implements `.docs/17-legal/legal-ethical-rules.md` rule 9 at department level — a revised allocation is a fact with its own source, never a silent overwrite.
 
 ## S-46 / S-48 · Lists
 

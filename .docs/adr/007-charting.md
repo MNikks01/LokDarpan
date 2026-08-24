@@ -1,10 +1,10 @@
 # ADR-007 — Charting: `react-native-svg` only; no chart library
 
-**Status:** Accepted · 2026-08-21 · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`../26-web-first-pivot.md`](../26-web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
+**Status:** Accepted · 2026-08-21 · **Deferred 2026-08-24** — mobile delivery postponed until after web launch (see [`.docs/decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). This decision stands for when the mobile client is built; revalidate the toolchain at that point.
 
 ## Context
 
-`docs/12` chose Recharts/visx — both web-only. The visualizations this product actually needs (`.docs/06-design-system.md` §Charts):
+`.docs/02-architecture/tech-stack.md` chose Recharts/visx — both web-only. The visualizations this product actually needs (`.docs/01-product/design-system.md` §Charts):
 
 | Visualization | Form |
 |---|---|
@@ -15,11 +15,11 @@
 | Composition | Stacked horizontal bar with inline legend |
 | Cost per unit | Three aligned value rows (actual / model / median) |
 
-**None of these is a generic chart.** There is no scatter plot, no multi-series axis chart, no interactive crosshair, no zoomable time series. Bundle budget is 3.5 MB on a low-end device (`.docs/14-performance.md`), and the design brief explicitly rejects a "generic admin dashboard" look (`.docs/06-design-system.md`).
+**None of these is a generic chart.** There is no scatter plot, no multi-series axis chart, no interactive crosshair, no zoomable time series. Bundle budget is 3.5 MB on a low-end device (`.docs/02-architecture/performance.md`), and the design brief explicitly rejects a "generic admin dashboard" look (`.docs/01-product/design-system.md`).
 
 ## Decision
 
-**Build a small internal chart kit on `react-native-svg`.** No third-party charting library in Phase 1. Every chart component is required to expose a text equivalent and a "view as list" fallback (`.docs/12-accessibility.md`).
+**Build a small internal chart kit on `react-native-svg`.** No third-party charting library in Phase 1. Every chart component is required to expose a text equivalent and a "view as list" fallback (`.docs/01-product/accessibility.md`).
 
 ## Alternatives considered
 
@@ -36,15 +36,15 @@
 ## Why bespoke is genuinely correct here (not NIH)
 
 1. **The signature component cannot be bought.** `MoneyTrail` — the vertical chain with labelled variance connectors, per-stage record counts, source chips, and an `insufficient_data` state — is not a chart type any library ships. It is the product's central visual argument and must be built regardless.
-2. **Accessibility is a hard requirement, not a feature.** Every chart must emit a full textual equivalent and a list view (`.docs/12-accessibility.md`, CI-gated). Retrofitting that onto a library's internal SVG output is harder than writing the SVG.
-3. **Neutrality binds the rendering.** No red, no traffic lights, no colour-only encoding, colour-blind-safe ramps (`.docs/06-design-system.md`). A library's default palette is the first thing we would override, and its defaults would keep reappearing as new charts are added.
+2. **Accessibility is a hard requirement, not a feature.** Every chart must emit a full textual equivalent and a list view (`.docs/01-product/accessibility.md`, CI-gated). Retrofitting that onto a library's internal SVG output is harder than writing the SVG.
+3. **Neutrality binds the rendering.** No red, no traffic lights, no colour-only encoding, colour-blind-safe ramps (`.docs/01-product/design-system.md`). A library's default palette is the first thing we would override, and its defaults would keep reappearing as new charts are added.
 4. **Bundle.** 150–250 KB avoided, on a 3.5 MB budget targeting a 4 GB phone.
 5. **`react-native-svg` is needed anyway** — icons, the Money Trail connectors, map callouts. It is not an added dependency.
 
 ## Trade-offs
 
 - **We maintain the chart code.** Bounded: six components, each under ~150 lines, pure and directly unit-testable.
-- **No free interactivity.** Deliberate — a fat finger cannot hit a data point on a 350 pt chart, so tooltips and crosshairs were never in the design (`.docs/06-design-system.md`).
+- **No free interactivity.** Deliberate — a fat finger cannot hit a data point on a 350 pt chart, so tooltips and crosshairs were never in the design (`.docs/01-product/design-system.md`).
 - **Adding a genuinely complex chart later would mean writing it.** Accepted, with a documented escape hatch below.
 
 ## Escape hatch

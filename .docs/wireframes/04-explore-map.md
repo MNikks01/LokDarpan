@@ -24,7 +24,7 @@
 │  ┌── LEGEND ──────────────────────────────┐  │
 │  │ Utilization % · FY2024-25 · v137       │  │
 │  │ ░░ 0%  ▒▒ 50%  ▓▓ 75%  ██ 100%         │  │
-│  │ Colour shows a measurement,            │  │  ← mandatory (docs/15, docs/20)
+│  │ Colour shows a measurement,            │  │  ← mandatory (.docs/17-legal/legal-ethical-rules.md, .docs/03-domain/gis-intelligence.md)
 │  │ not an assessment.                     │  │
 │  └────────────────────────────────────────┘  │
 │                            📍  ⊕  ⊖  ⧉      │
@@ -33,7 +33,7 @@
 └──────────────────────────────────────────────┘
 ```
 
-- Individual projects appear only at **z ≥ 11**; below that, choropleths and clusters (`.docs/07-gis-mobile-architecture.md` §3).
+- Individual projects appear only at **z ≥ 11**; below that, choropleths and clusters (`.docs/10-mobile/gis-mobile-architecture.md` §3).
 - Hard cap 400 features, and exceeding it is stated, never silent.
 - `⊕ ⊖` exist because pinch must not be the only way to zoom (WCAG 2.2).
 
@@ -67,7 +67,7 @@
 
 The bottom note matters: a map that quietly omits unmapped projects understates spending exactly where publication is weakest.
 
-**List is also the accessibility equivalent of the map** (`.docs/12-accessibility.md`); `Settings → Prefer list over map` makes it the default landing state permanently.
+**List is also the accessibility equivalent of the map** (`.docs/01-product/accessibility.md`); `Settings → Prefer list over map` makes it the default landing state permanently.
 
 ## S-19 · Feature preview (peek sheet)   ·   S-20 · Cluster contents
 

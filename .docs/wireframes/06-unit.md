@@ -1,6 +1,6 @@
 # Wireframes — Unit detail (S-23, S-25, S-26, S-51)
 
-**S-23 is the single most important screen in the app.** It replaces the six separate dashboards of `docs/09` (National, State, District, Village/Local-Body, Infrastructure, Audit). The same six sections, in the same order, at *every* level — learned once at district level, applied in a village.
+**S-23 is the single most important screen in the app.** It replaces the six separate dashboards of `.docs/01-product/dashboard-design-legacy.md` (National, State, District, Village/Local-Body, Infrastructure, Audit). The same six sections, in the same order, at *every* level — learned once at district level, applied in a village.
 
 ## S-23 · Unit detail
 
@@ -207,7 +207,7 @@ Naming which children are **missing from the sum** is what turns a suspicious-lo
 └──────────────────────────────────────────────┘
 ```
 
-The list is **alphabetical, never ranked by the metric.** A descending list is a leaderboard, and a leaderboard of districts by spending is an implicit judgment (`docs/07`).
+The list is **alphabetical, never ranked by the metric.** A descending list is a leaderboard, and a leaderboard of districts by spending is an implicit judgment (`.docs/08-risk/risk-scoring-engine.md`).
 
 Below n=8: *"Fewer than 8 comparable districts have published data — comparison withheld."*
 
@@ -242,4 +242,4 @@ Below n=8: *"Fewer than 8 comparable districts have published data — compariso
 └──────────────────────────────────────────────┘
 ```
 
-Coverage gaps and low-confidence values are kept **separate from deviations** (`docs/09`) — a gap is a reason to ask a department a question; a deviation is a reason to check a figure.
+Coverage gaps and low-confidence values are kept **separate from deviations** (`.docs/01-product/dashboard-design-legacy.md`) — a gap is a reason to ask a department a question; a deviation is a reason to check a figure.

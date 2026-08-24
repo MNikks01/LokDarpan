@@ -1,4 +1,4 @@
-import type { FinanceChain } from "@lokdarpan/api-contract";
+import type { FinanceChain } from "@lokdarpan/contracts";
 import { Money } from "@lokdarpan/money";
 import { Figure } from "./Figure";
 import { color } from "@/ui/tokens";

@@ -1,4 +1,4 @@
-import type { Provenance, Figure as FigureData } from "@lokdarpan/api-contract";
+import type { Provenance, Figure as FigureData } from "@lokdarpan/contracts";
 import { Money } from "@lokdarpan/money";
 import { color, figureFontFeatures } from "@/ui/tokens";
 

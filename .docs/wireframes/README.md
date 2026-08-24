@@ -1,6 +1,6 @@
 # Wireframes
 
-Low-fidelity wireframes for every screen in `.docs/01-screen-inventory.md`. These are a **product specification**, not decoration: they define information hierarchy, content density, primary actions, and state behaviour. Visual design (colour, type, spacing) is specified separately in `.docs/06-design-system.md` and is deliberately absent here.
+Low-fidelity wireframes for every screen in `.docs/01-product/screen-inventory.md`. These are a **product specification**, not decoration: they define information hierarchy, content density, primary actions, and state behaviour. Visual design (colour, type, spacing) is specified separately in `.docs/01-product/design-system.md` and is deliberately absent here.
 
 ## Reading these
 

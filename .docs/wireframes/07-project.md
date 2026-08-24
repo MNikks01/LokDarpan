@@ -118,7 +118,7 @@
 
 1. **Money Trail first.** It is what the user came for, and it is above the fold.
 2. **Verification Priority second, but immediately caveated**, with its confidence and a one-tap path to all six factors. Never a gauge, never red.
-3. **Road intelligence carries its caveat inline**, not behind a tooltip — `docs/08` requires the caveat to always be displayed.
+3. **Road intelligence carries its caveat inline**, not behind a tooltip — `.docs/03-domain/road-infrastructure-intelligence.md` requires the caveat to always be displayed.
 4. **Observations are near the bottom, under a non-collapsible disclaimer.** Their position is deliberate: the figures and their sources come first; observations are secondary.
 5. **Coverage before the footer**, so an incomplete record can never read as a complete one.
 
@@ -178,4 +178,4 @@ S-32                                S-39
 │   31 Mar 2026              │
 └────────────────────────────┘
 ```
-Every chart carries `[ View as list ]` — a hard accessibility requirement (`.docs/12-accessibility.md`).
+Every chart carries `[ View as list ]` — a hard accessibility requirement (`.docs/01-product/accessibility.md`).

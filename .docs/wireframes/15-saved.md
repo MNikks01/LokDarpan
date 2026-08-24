@@ -159,6 +159,6 @@ S-63                                S-65 (sheet)
                                  └────────────────────────────┘
 ```
 
-The last sentence in S-65 is the user-facing statement of the privacy architecture in `.docs/22-notifications.md` — it is a commitment worth making visible.
+The last sentence in S-65 is the user-facing statement of the privacy architecture in `.docs/10-mobile/notifications.md` — it is a commitment worth making visible.
 
 **Export CSV** always carries the source columns (`source_name`, `source_url`, `extraction_method`, `extraction_confidence`, `retrieved_at`, `dataset_version`). A figure is never exported without its provenance.

@@ -10,7 +10,7 @@
  * source link. That is the single worst failure this product can have, so the
  * type system forbids it.
  *
- * Amounts cross the wire as decimal STRINGS (see @lokdarpan/api-contract).
+ * Amounts cross the wire as decimal STRINGS (see @lokdarpan/contracts).
  * There is no `fromNumber`, deliberately.
  */
 

@@ -82,7 +82,7 @@
 
 ### What is deliberately absent
 
-**No verification-priority score. No risk band. No severity badge. No flag, colour-coding, warning icon, or ranking.** `docs/07`: *"Never rank people by risk."* The concentration statistic is framed as belonging to the taluka, not to the firm, and this omission is recorded in `.docs/20-screen-data-matrix.md` §3 so it stays visible and auditable rather than being "fixed" later by a component reuse.
+**No verification-priority score. No risk band. No severity badge. No flag, colour-coding, warning icon, or ranking.** `.docs/08-risk/risk-scoring-engine.md`: *"Never rank people by risk."* The concentration statistic is framed as belonging to the taluka, not to the firm, and this omission is recorded in `.docs/05-data-model/screen-data-matrix.md` §3 so it stays visible and auditable rather than being "fixed" later by a component reuse.
 
 The alias block with its match scores is the transparency mechanism for canonicalization — merging two different firms is a serious error, and a reader must be able to check it.
 

@@ -1,5 +1,5 @@
-import { FinanceChainSchema } from "@lokdarpan/api-contract";
-import { FIXTURE_PROJECT_501, FIXTURE_WARNING } from "@lokdarpan/api-contract/fixtures";
+import { FinanceChainSchema } from "@lokdarpan/contracts";
+import { FIXTURE_PROJECT_501, FIXTURE_WARNING } from "@lokdarpan/contracts/fixtures";
 import { MoneyTrail } from "@/components/MoneyTrail";
 import { color } from "@/ui/tokens";
 
