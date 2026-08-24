@@ -1,1 +1,11 @@
 .DS_Store
+
+# Local agent tooling — installed per-machine, not part of this project.
+# Reinstall with: /plugin marketplace add … && /plugin install …
+.agents/
+skills-lock.json
+
+# Claude Code: ignore installed skills and personal overrides,
+# but allow a shared project settings.json (permissions, hooks) if one is added.
+.claude/skills/
+.claude/settings.local.json
