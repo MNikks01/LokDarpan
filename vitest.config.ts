@@ -9,10 +9,20 @@ export default defineConfig({
       "services/**/*.test.ts",
     ],
     coverage: {
-      // Correctness-critical domain logic is gated hard; UI is not.
-      thresholds: { branches: 90 },
+      provider: "v8",
+      // Correctness-critical logic is gated hard; UI is not.
+      thresholds: { branches: 90, functions: 85, statements: 85 },
       include: ["packages/money/src/**", "packages/neutrality/src/**", "services/api/src/**"],
-      exclude: ["**/fixtures/**", "**/index.ts"],
+      exclude: [
+        "**/fixtures/**",
+        // Process entrypoints: top-level side effects, signal handlers and
+        // process.exit. Covered by the E2E and integration suites instead of
+        // being contorted into unit tests.
+        "services/api/src/index.ts",
+        "packages/neutrality/src/cli.ts",
+        // Pure re-export barrels.
+        "packages/contracts/src/index.ts",
+      ],
     },
   },
 });
