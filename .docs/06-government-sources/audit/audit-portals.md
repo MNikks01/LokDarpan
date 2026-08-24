@@ -4,9 +4,9 @@
 >
 > Verified 21 August 2026. Every URL fetched; none written from memory.
 
-| Source | URL | Status | Relevance | Page title (as fetched) |
-|---|---|---|---|---|
-| **Comptroller and Auditor General of India (CAG)** | `https://cag.gov.in/` | ✅ VERIFIED | CRITICAL | Home | Comptroller and Auditor General of India |
+| Source                                             | URL                   | Status      | Relevance | Page title (as fetched) |
+| -------------------------------------------------- | --------------------- | ----------- | --------- | ----------------------- |
+| **Comptroller and Auditor General of India (CAG)** | `https://cag.gov.in/` | ✅ VERIFIED | CRITICAL  | Home                    | Comptroller and Auditor General of India |
 
 ## What was found
 
@@ -32,4 +32,4 @@ Practically, for ingestion:
 - It must never be restated in stronger language than the auditor used.
 - It must never be merged into a computed anomaly or a Verification Priority factor as though it were a numeric signal — an audit finding is an official body's conclusion, categorically different from `.docs/07-analytics/analytics-engine.md`'s arithmetic observations, and `.docs/01-product/design-system.md`'s `FACT / CALCULATION / OBSERVATION / SOURCE / INFERENCE` distinction must keep them apart.
 
-**Recommendation:** treat audit reports as a *document* class linked to an entity, displayed as citations — not as a data source feeding the analytics engine.
+**Recommendation:** treat audit reports as a _document_ class linked to an entity, displayed as citations — not as a data source feeding the analytics engine.

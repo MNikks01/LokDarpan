@@ -43,12 +43,12 @@ Layer mass (tonnes)    = Layer volume × density (t/m³)
 
 Illustrative coefficients (config — **must be replaced with official spec values**):
 
-| Layer | Default thickness `t` | Default density |
-|---|---|---|
-| Bituminous surface (BC) | 0.040 m | 2.4 t/m³ |
-| Dense bituminous macadam (DBM) | 0.075 m | 2.4 t/m³ |
-| Wet mix macadam (WMM) base | 0.250 m | 2.2 t/m³ |
-| Granular sub-base (GSB) | 0.200 m | 2.1 t/m³ |
+| Layer                          | Default thickness `t` | Default density |
+| ------------------------------ | --------------------- | --------------- |
+| Bituminous surface (BC)        | 0.040 m               | 2.4 t/m³        |
+| Dense bituminous macadam (DBM) | 0.075 m               | 2.4 t/m³        |
+| Wet mix macadam (WMM) base     | 0.250 m               | 2.2 t/m³        |
+| Granular sub-base (GSB)        | 0.200 m               | 2.1 t/m³        |
 
 ### Expected asphalt (bituminous) quantity
 

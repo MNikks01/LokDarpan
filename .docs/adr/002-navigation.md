@@ -4,13 +4,13 @@
 
 ## Context
 
-The data is 7–9 levels deep and densely cross-linked (project → contractor → tender → project). Sideways navigation is normal, not exceptional. Deep links must address every entity, and they are the *only* stable public address for a record now that there is no website (`.docs/10-mobile/deep-linking.md`). Full analysis: `.docs/02-architecture/mobile-navigation-architecture.md`.
+The data is 7–9 levels deep and densely cross-linked (project → contractor → tender → project). Sideways navigation is normal, not exceptional. Deep links must address every entity, and they are the _only_ stable public address for a record now that there is no website (`.docs/10-mobile/deep-linking.md`). Full analysis: `.docs/02-architecture/mobile-navigation-architecture.md`.
 
 ## Decision
 
 1. **Expo Router** (file-based, built on React Navigation).
 2. **Four bottom tabs:** Home · Explore · Search · Saved.
-3. **Entity routes are shared** and push onto the *active tab's* stack, not a tab of their own.
+3. **Entity routes are shared** and push onto the _active tab's_ stack, not a tab of their own.
 4. **No breadcrumb bar.** Depth is handled by a persistent scope chip, a contextual ancestor row on entity screens, and a long-press-back ancestor menu.
 5. **Bottom sheets** replace every desktop hover/popover/drawer affordance; maximum sheet depth 2.
 6. **Ask (AI) is not a tab** — it is entered from a scope.
@@ -23,7 +23,7 @@ The data is 7–9 levels deep and densely cross-linked (project → contractor �
 
 **Three tabs + header search icon.** Rejected: Search is the journalist's and RTI activist's primary path (`.docs/01-product/prd.md`); demoting it to an icon buries the workflow of two of the six named audiences.
 
-**Ask/AI as a fifth tab.** Rejected, and this is a product decision as much as a navigation one. A standing chat surface invites unscoped questions, most of which the ledger cannot answer — producing a stream of `.docs/09-ai/ai-layer.md`-mandated refusals that teach users the feature is broken. Scoped entry (`Ask about this district`) guarantees the retriever can serve the question and keeps the answer manifestly about *these records* (`.docs/09-ai/ai-client-experience.md`).
+**Ask/AI as a fifth tab.** Rejected, and this is a product decision as much as a navigation one. A standing chat surface invites unscoped questions, most of which the ledger cannot answer — producing a stream of `.docs/09-ai/ai-layer.md`-mandated refusals that teach users the feature is broken. Scoped entry (`Ask about this district`) guarantees the retriever can serve the question and keeps the answer manifestly about _these records_ (`.docs/09-ai/ai-client-experience.md`).
 
 **Drawer navigation.** Rejected: hides the IA behind a hamburger; poor thumb reach on the 6.5"+ devices common in this market.
 

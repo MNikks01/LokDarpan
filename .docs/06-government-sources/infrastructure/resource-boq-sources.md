@@ -1,23 +1,23 @@
 # Resource, BOQ & Specification Sources
 
-> Can we answer *"what materials and quantities did this road actually require?"* (§12, §34) — the inputs `.docs/03-domain/road-infrastructure-intelligence.md`'s road model needs.
+> Can we answer _"what materials and quantities did this road actually require?"_ (§12, §34) — the inputs `.docs/03-domain/road-infrastructure-intelligence.md`'s road model needs.
 
 Verified 21 August 2026.
 
 ## The resource chain, assessed (§34)
 
-| Link | Status | Basis |
-|---|---|---|
-| Project | **UNKNOWN** | No works-MIS located (see [`.docs/06-government-sources/infrastructure/project-monitoring-portals.md`](./project-monitoring-portals.md)) |
-| **BOQ** (Bill of Quantities) | **PARTIALLY_AVAILABLE** | GePNIC portals list `StandardBiddingDocuments` and tender documents; BOQ is conventionally among them. **Not verified, and typically a PDF/XLS attachment rather than structured data.** |
-| Material (item) | **PARTIALLY_AVAILABLE** | Would come from BOQ line items, if extractable |
-| Quantity | **PARTIALLY_AVAILABLE** | Same |
-| Unit rate | **PARTIALLY_AVAILABLE** | BOQ, and Schedule of Rates (CPWD ✅) |
-| Cost | **PARTIALLY_AVAILABLE** | Derived from quantity × rate |
-| Labour | **NOT identified in the sources reviewed** | — |
-| Equipment / machinery | **NOT identified in the sources reviewed** | — |
-| Technical specification | **PARTIALLY_AVAILABLE** | Tender documents; IRC/MoRTH standards (licensing issue below) |
-| **Actual execution** (as-built quantities) | **NOT identified in the sources reviewed** | — |
+| Link                                       | Status                                     | Basis                                                                                                                                                                                    |
+| ------------------------------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project                                    | **UNKNOWN**                                | No works-MIS located (see [`.docs/06-government-sources/infrastructure/project-monitoring-portals.md`](./project-monitoring-portals.md))                                                 |
+| **BOQ** (Bill of Quantities)               | **PARTIALLY_AVAILABLE**                    | GePNIC portals list `StandardBiddingDocuments` and tender documents; BOQ is conventionally among them. **Not verified, and typically a PDF/XLS attachment rather than structured data.** |
+| Material (item)                            | **PARTIALLY_AVAILABLE**                    | Would come from BOQ line items, if extractable                                                                                                                                           |
+| Quantity                                   | **PARTIALLY_AVAILABLE**                    | Same                                                                                                                                                                                     |
+| Unit rate                                  | **PARTIALLY_AVAILABLE**                    | BOQ, and Schedule of Rates (CPWD ✅)                                                                                                                                                     |
+| Cost                                       | **PARTIALLY_AVAILABLE**                    | Derived from quantity × rate                                                                                                                                                             |
+| Labour                                     | **NOT identified in the sources reviewed** | —                                                                                                                                                                                        |
+| Equipment / machinery                      | **NOT identified in the sources reviewed** | —                                                                                                                                                                                        |
+| Technical specification                    | **PARTIALLY_AVAILABLE**                    | Tender documents; IRC/MoRTH standards (licensing issue below)                                                                                                                            |
+| **Actual execution** (as-built quantities) | **NOT identified in the sources reviewed** | —                                                                                                                                                                                        |
 
 ## The honest summary
 
@@ -28,11 +28,11 @@ Cost ──🟡──> Labour ──❌──> Equipment ──❌──> Specif
 
 **Tendered quantities may be obtainable. Actual executed quantities almost certainly are not.**
 
-This distinction is important for `.docs/03-domain/road-infrastructure-intelligence.md` and for the product's neutrality. The road model computes an *expected* cost from published physical attributes and compares it to *reported* expenditure. It does **not** need as-built quantities — and this pass confirms that is fortunate, because they do not appear to be published.
+This distinction is important for `.docs/03-domain/road-infrastructure-intelligence.md` and for the product's neutrality. The road model computes an _expected_ cost from published physical attributes and compares it to _reported_ expenditure. It does **not** need as-built quantities — and this pass confirms that is fortunate, because they do not appear to be published.
 
 ## Consequence for `.docs/03-domain/road-infrastructure-intelligence.md`
 
-`.docs/03-domain/road-infrastructure-intelligence.md` already frames its outputs correctly: *"expected under model X"* vs *"reported"*, with a mandatory caveat that deviations can be legitimate. This discovery pass supports that framing and adds two constraints:
+`.docs/03-domain/road-infrastructure-intelligence.md` already frames its outputs correctly: _"expected under model X"_ vs _"reported"_, with a mandatory caveat that deviations can be legitimate. This discovery pass supports that framing and adds two constraints:
 
 1. **BOQ extraction is a PDF/XLS problem, not an API problem.** If BOQ line items are wanted, they come out of tender-document attachments — grade D/E work, per document, at scale. This is expensive and should be scoped deliberately, not assumed.
 

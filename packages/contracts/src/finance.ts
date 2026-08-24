@@ -24,13 +24,13 @@ export const FinanceChainSchema = z
     thresholdPct: z.number().nullable(),
   })
   .strict()
+  .refine((f) => !("variance" in f), {
+    message: "a bare `variance` field is forbidden — name which subtraction it is (audit C1)",
+  })
   .refine(
-    (f) => !("variance" in f),
-    { message: "a bare `variance` field is forbidden — name which subtraction it is (audit C1)" },
-  )
-  .refine(
-    (f) => f.status !== "insufficient_data" ||
-           (f.releaseVarianceInr === null && f.allocationVarianceInr === null),
+    (f) =>
+      f.status !== "insufficient_data" ||
+      (f.releaseVarianceInr === null && f.allocationVarianceInr === null),
     { message: "no variance may be computed across a missing stage (docs/06 §2)" },
   );
 export type FinanceChain = z.infer<typeof FinanceChainSchema>;

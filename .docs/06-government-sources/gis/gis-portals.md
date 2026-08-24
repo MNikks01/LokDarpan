@@ -4,21 +4,21 @@
 >
 > Verified 21 August 2026. Every URL fetched; none written from memory.
 
-| Source | URL | Status | Relevance | Page title (as fetched) |
-|---|---|---|---|---|
-| **Bhuvan — Indian Geo-Platform of ISRO** | `https://bhuvan.nrsc.gov.in/` | ✅ VERIFIED | CRITICAL | Bhuvan-Indian Geoportal of ISRO |
-| **Maharashtra Remote Sensing Application Centre (MRSAC)** | `https://mrsac.gov.in` | ✅ VERIFIED | CRITICAL | Home Maharashtra Remote Sensing Application Centre |
-| **Bharat Maps (NIC national basemap)** | `https://bharatmaps.gov.in/` | ✅ VERIFIED | HIGH | Bharat Maps |
-| **National Remote Sensing Centre (NRSC)** | `https://www.nrsc.gov.in/` | ✅ VERIFIED | HIGH | NRSC | NRSC Website |
+| Source                                                    | URL                           | Status      | Relevance | Page title (as fetched)                            |
+| --------------------------------------------------------- | ----------------------------- | ----------- | --------- | -------------------------------------------------- |
+| **Bhuvan — Indian Geo-Platform of ISRO**                  | `https://bhuvan.nrsc.gov.in/` | ✅ VERIFIED | CRITICAL  | Bhuvan-Indian Geoportal of ISRO                    |
+| **Maharashtra Remote Sensing Application Centre (MRSAC)** | `https://mrsac.gov.in`        | ✅ VERIFIED | CRITICAL  | Home Maharashtra Remote Sensing Application Centre |
+| **Bharat Maps (NIC national basemap)**                    | `https://bharatmaps.gov.in/`  | ✅ VERIFIED | HIGH      | Bharat Maps                                        |
+| **National Remote Sensing Centre (NRSC)**                 | `https://www.nrsc.gov.in/`    | ✅ VERIFIED | HIGH      | NRSC                                               | NRSC Website |
 
 ## What was found
 
-| Source | Role | Status |
-|---|---|---|
-| **Bhuvan** (NRSC/ISRO) | National geoportal | ✅ verified |
-| **Bharat Maps** (NIC) | National multi-layer basemap | ✅ verified |
-| NRSC | Satellite/geospatial datasets | ✅ verified |
-| **MRSAC** | Maharashtra state GIS — named in `.docs/03-domain/gis-intelligence.md` | ✅ verified |
+| Source                 | Role                                                                   | Status      |
+| ---------------------- | ---------------------------------------------------------------------- | ----------- |
+| **Bhuvan** (NRSC/ISRO) | National geoportal                                                     | ✅ verified |
+| **Bharat Maps** (NIC)  | National multi-layer basemap                                           | ✅ verified |
+| NRSC                   | Satellite/geospatial datasets                                          | ✅ verified |
+| **MRSAC**              | Maharashtra state GIS — named in `.docs/03-domain/gis-intelligence.md` | ✅ verified |
 
 ## What was NOT determined
 

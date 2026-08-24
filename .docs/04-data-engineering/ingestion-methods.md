@@ -6,17 +6,17 @@ Verified 21 August 2026.
 
 ## Method by source class (§24)
 
-| Source class | Method | Notes |
-|---|---|---|
-| data.gov.in | **API** | Only confirmed general-purpose API. Per-dataset assessment still needed |
-| LGD | **Download + API** | State/district downloads; NAPIX API is registration-gated |
-| CPPP / GePNIC portals | **HTML scraping** | Server-rendered; predictable page structure |
-| Non-GePNIC state portals | **HTML scraping, bespoke per state** | 6+ distinct platforms |
-| Budget documents | **PDF extraction** (Camelot/pdfplumber) | `.docs/04-data-engineering/data-collection-architecture.md`'s existing design applies |
-| CAG reports | **PDF extraction + manual review** | Narrative documents; findings are not tabular |
-| State department sites | **HTML + PDF** | Mixed |
-| GeM, PFMS | **Partial / blocked** | Authenticated flows; only public surfaces ingestable |
-| IGOD | **HTML scraping** | Already done — this registry's backbone |
+| Source class             | Method                                  | Notes                                                                                 |
+| ------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------- |
+| data.gov.in              | **API**                                 | Only confirmed general-purpose API. Per-dataset assessment still needed               |
+| LGD                      | **Download + API**                      | State/district downloads; NAPIX API is registration-gated                             |
+| CPPP / GePNIC portals    | **HTML scraping**                       | Server-rendered; predictable page structure                                           |
+| Non-GePNIC state portals | **HTML scraping, bespoke per state**    | 6+ distinct platforms                                                                 |
+| Budget documents         | **PDF extraction** (Camelot/pdfplumber) | `.docs/04-data-engineering/data-collection-architecture.md`'s existing design applies |
+| CAG reports              | **PDF extraction + manual review**      | Narrative documents; findings are not tabular                                         |
+| State department sites   | **HTML + PDF**                          | Mixed                                                                                 |
+| GeM, PFMS                | **Partial / blocked**                   | Authenticated flows; only public surfaces ingestable                                  |
+| IGOD                     | **HTML scraping**                       | Already done — this registry's backbone                                               |
 
 ## The GePNIC advantage
 
@@ -36,7 +36,7 @@ Roughly 28 of 36 State/UT portals are GePNIC deployments. **One connector, param
 
 This maps directly onto `.docs/04-data-engineering/data-collection-architecture.md`'s declarative YAML source registry: one `gepnic` connector type plus per-state config, rather than 36 connectors.
 
-**Caveat:** the page *structure* is shared; the **fields exposed** may still differ by deployment, and none has been field-verified.
+**Caveat:** the page _structure_ is shared; the **fields exposed** may still differ by deployment, and none has been field-verified.
 
 ## Scraping constraints (§24 — binding)
 
@@ -59,14 +59,14 @@ Not yet established for any portal, and required before writing a connector:
 
 ## Document formats expected (§19)
 
-| Format | Where | OCR needed |
-|---|---|---|
-| HTML | Portals, department sites | No |
-| PDF (digital) | Budgets, CAG reports, government orders | No — table extraction |
-| PDF (scanned) | Expected in state/local documents | **Yes** — none confirmed yet |
-| XLS/XLSX | Budget annexes | No |
-| CSV/JSON | data.gov.in, LGD, NDAP | No |
-| GIS | Bhuvan, Bharat Maps, MRSAC | Format-specific |
+| Format        | Where                                   | OCR needed                   |
+| ------------- | --------------------------------------- | ---------------------------- |
+| HTML          | Portals, department sites               | No                           |
+| PDF (digital) | Budgets, CAG reports, government orders | No — table extraction        |
+| PDF (scanned) | Expected in state/local documents       | **Yes** — none confirmed yet |
+| XLS/XLSX      | Budget annexes                          | No                           |
+| CSV/JSON      | data.gov.in, LGD, NDAP                  | No                           |
+| GIS           | Bhuvan, Bharat Maps, MRSAC              | Format-specific              |
 
 **No scanned PDF was confirmed in this pass.** `.docs/04-data-engineering/data-collection-architecture.md`'s OCR pipeline is likely still needed — state and local-body documents are where scans typically appear — but this is an expectation, not a verified finding.
 
@@ -91,6 +91,6 @@ Confirmed: India Budget **annual**; CGA monthly accounts **monthly**. Everything
 2. **One GePNIC portal, field-verified end to end** (Maharashtra) — establishes the connector template and the real tender field set.
 3. **CPPP awards + debarment** — the contractor surface.
 4. **India Budget + Maharashtra finance/BEAMS** — the money-in side.
-5. **OMMAS**, *if verification succeeds* — potentially closes the execution gap.
+5. **OMMAS**, _if verification succeeds_ — potentially closes the execution gap.
 6. Remaining GePNIC states via the parameterised connector.
 7. Non-GePNIC states, bespoke.

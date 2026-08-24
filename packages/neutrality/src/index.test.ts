@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scan, isNeutral, asServerText } from "./index";
+import { scan, isNeutral, asServerText, type ServerText } from "./index";
 
 describe("forbidden terms (docs/15 §Allowed vs forbidden language)", () => {
   it("flags the exact forbidden examples from docs/15", () => {
@@ -42,8 +42,8 @@ describe("forbidden terms (docs/15 §Allowed vs forbidden language)", () => {
   });
 
   it("scans Devanagari terms", () => {
-    expect(isNeutral("हा भ्रष्टाचार आहे.")).toBe(false);   // Marathi
-    expect(isNeutral("यह घोटाला है.")).toBe(false);        // Hindi
+    expect(isNeutral("हा भ्रष्टाचार आहे.")).toBe(false); // Marathi
+    expect(isNeutral("यह घोटाला है.")).toBe(false); // Hindi
     expect(isNeutral("पुणे जिल्ह्यातील खर्च.")).toBe(true); // neutral Marathi
   });
 
@@ -73,7 +73,7 @@ describe("ServerText brand", () => {
     // Compile-time proof: this must be an error, which is what makes
     // <Observation text="..."> impossible to write with a literal.
     // @ts-expect-error — string is not ServerText
-    const _bad: import("./index.js").ServerText = "This contractor overcharged";
+    const _bad: ServerText = "This contractor overcharged";
     expect(typeof _bad).toBe("string");
   });
 });

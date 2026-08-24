@@ -8,17 +8,17 @@ Because the backend does not exist yet, these schemas **are** the API specificat
 
 An earlier draft of the layout had both `contracts/` and `validation/`. They were merged, deliberately.
 
-The distinction was never real: contracts here *are* Zod schemas, so a separate validation package would either duplicate them or hold a thin wrapper nobody imports. An unclear boundary between two packages is worse than one package with a clear job — both end up half-used, and neither becomes the obvious place to add a schema.
+The distinction was never real: contracts here _are_ Zod schemas, so a separate validation package would either duplicate them or hold a thin wrapper nobody imports. An unclear boundary between two packages is worse than one package with a clear job — both end up half-used, and neither becomes the obvious place to add a schema.
 
 **One rule: every shape that crosses the network boundary is defined here, once.**
 
 ## What lives here
 
-| File | Contents |
-|---|---|
+| File                | Contents                                                                                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/primitives.ts` | `Amount` (decimal string, JSON numbers rejected by name), the three confidences, `Provenance` with page anchors, `Figure` (present-with-provenance \| explicitly-missing), localisable observation text |
-| `src/finance.ts` | `FinanceChain` with **both** variances and a bare `variance` field refused; `VerificationPriority`, unusable without its factor breakdown |
-| `src/fixtures/` | ⚠ Synthetic data only, for development before the backend exists |
+| `src/finance.ts`    | `FinanceChain` with **both** variances and a bare `variance` field refused; `VerificationPriority`, unusable without its factor breakdown                                                               |
+| `src/fixtures/`     | ⚠ Synthetic data only, for development before the backend exists                                                                                                                                        |
 
 ## The invariants this package enforces
 

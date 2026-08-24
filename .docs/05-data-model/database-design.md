@@ -390,7 +390,7 @@ CREATE TABLE expenditure (
 CREATE INDEX idx_expenditure_project ON expenditure(project_id);
 ```
 
-> **Why no `CHECK (utilized <= released)`?** Because the *source data itself* may violate it, and our job is to display the real figures and **flag** the inconsistency — not to reject official data. That flag lives in `anomaly`.
+> **Why no `CHECK (utilized <= released)`?** Because the _source data itself_ may violate it, and our job is to display the real figures and **flag** the inconsistency — not to reject official data. That flag lives in `anomaly`.
 
 ## Audit: anomalies & reports
 

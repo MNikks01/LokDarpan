@@ -8,10 +8,10 @@ Use **[GitHub private vulnerability reporting](https://github.com/MNikks01/LokDa
 
 Please include: what you found, how to reproduce it, what an attacker could achieve, and any suggested fix.
 
-| | |
-|---|---|
-| Acknowledgement | within 5 working days |
-| Initial assessment | within 10 working days |
+|                        |                            |
+| ---------------------- | -------------------------- |
+| Acknowledgement        | within 5 working days      |
+| Initial assessment     | within 10 working days     |
 | Fix or mitigation plan | communicated once assessed |
 
 This is a small, grant-funded public-interest project with no paid security team, and **no bug bounty**. Response is best-effort but taken seriously. Credit is given in the advisory unless you prefer otherwise.
@@ -60,7 +60,7 @@ The platform's language controls are a safety property, not styling. Report:
 
 ### 3. What users investigate — high
 
-For an RTI activist, *what they are looking at* is the sensitive asset. Report:
+For an RTI activist, _what they are looking at_ is the sensitive asset. Report:
 
 - Search queries, AI questions, saved items or location leaking into telemetry, logs or crash reports
 - Anything that would let a third party learn which entities a user viewed

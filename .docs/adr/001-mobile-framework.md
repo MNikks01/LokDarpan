@@ -31,16 +31,16 @@ LokDarpan is now mobile-only (iOS + Android). Constraints from the existing docu
 
 ## Why Expo specifically
 
-| Need | Expo provides |
-|---|---|
-| Builds for two platforms without a Mac fleet | EAS Build |
-| Rapid, safe JS-only fixes | EAS Update (staged, signed, native-code-invariant) |
-| Secure token storage | `expo-secure-store` (Keychain / Keystore) |
-| Background change detection (`.docs/10-mobile/notifications.md`) | `expo-background-task` |
-| Local notifications with no push service | `expo-notifications` |
-| Deep links = routes | Expo Router (`adr/002`) |
-| Bundled fonts, i18n, localization | `expo-font`, `expo-localization` |
-| Custom native deps (MapLibre, PDF) | Config plugins — no eject |
+| Need                                                             | Expo provides                                      |
+| ---------------------------------------------------------------- | -------------------------------------------------- |
+| Builds for two platforms without a Mac fleet                     | EAS Build                                          |
+| Rapid, safe JS-only fixes                                        | EAS Update (staged, signed, native-code-invariant) |
+| Secure token storage                                             | `expo-secure-store` (Keychain / Keystore)          |
+| Background change detection (`.docs/10-mobile/notifications.md`) | `expo-background-task`                             |
+| Local notifications with no push service                         | `expo-notifications`                               |
+| Deep links = routes                                              | Expo Router (`adr/002`)                            |
+| Bundled fonts, i18n, localization                                | `expo-font`, `expo-localization`                   |
+| Custom native deps (MapLibre, PDF)                               | Config plugins — no eject                          |
 
 New Architecture + Hermes are the performance floor for the reference device: lower bridge overhead, faster startup, smaller memory (`.docs/02-architecture/performance.md`).
 

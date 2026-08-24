@@ -69,7 +69,7 @@ The bottom note matters: a map that quietly omits unmapped projects understates 
 
 **List is also the accessibility equivalent of the map** (`.docs/01-product/accessibility.md`); `Settings → Prefer list over map` makes it the default landing state permanently.
 
-## S-19 · Feature preview (peek sheet)   ·   S-20 · Cluster contents
+## S-19 · Feature preview (peek sheet) · S-20 · Cluster contents
 
 ```text
 S-19  (30% detent, map visible behind)   S-20
@@ -87,9 +87,10 @@ S-19  (30% detent, map visible behind)   S-20
 └────────────────────────────┘          │ ⋯  (cursor-paged)          │
                                         └────────────────────────────┘
 ```
+
 S-19 renders entirely from the tile/feature payload — **tapping a pin costs no request**.
 
-Approximate locations render as a hollow marker and the preview says *"approximate location"*.
+Approximate locations render as a hollow marker and the preview says _"approximate location"_.
 
 ## S-21 · Map filters (includes the legend)
 

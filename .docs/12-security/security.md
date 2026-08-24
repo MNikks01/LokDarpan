@@ -4,26 +4,26 @@ The data is public, but **integrity, availability, and traceability** are the se
 
 ## Threat model (summary)
 
-| Asset | Threat | Priority |
-|---|---|---|
-| Canonical ledger integrity | Tampering with figures/provenance | **Critical** |
-| Provenance/audit trail | Deletion/alteration to break traceability | **Critical** |
-| Availability | DDoS / scraping abuse of the public API | High |
-| Admin/ingestion control plane | Account takeover, malicious ingestion config | High |
-| API keys & secrets | Leakage | High |
-| Public PII | Minimal (official data), but incidental PII in documents | Medium |
+| Asset                         | Threat                                                   | Priority     |
+| ----------------------------- | -------------------------------------------------------- | ------------ |
+| Canonical ledger integrity    | Tampering with figures/provenance                        | **Critical** |
+| Provenance/audit trail        | Deletion/alteration to break traceability                | **Critical** |
+| Availability                  | DDoS / scraping abuse of the public API                  | High         |
+| Admin/ingestion control plane | Account takeover, malicious ingestion config             | High         |
+| API keys & secrets            | Leakage                                                  | High         |
+| Public PII                    | Minimal (official data), but incidental PII in documents | Medium       |
 
 ## RBAC (role-based access control)
 
-| Role | Capabilities |
-|---|---|
-| **public** (anonymous) | Read public endpoints; rate-limited; no keys |
-| **journalist** | Higher rate limits, exports, saved queries (keyed) |
-| **researcher** | Bulk export, version pinning, dataset downloads (keyed) |
+| Role                   | Capabilities                                                                              |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| **public** (anonymous) | Read public endpoints; rate-limited; no keys                                              |
+| **journalist**         | Higher rate limits, exports, saved queries (keyed)                                        |
+| **researcher**         | Bulk export, version pinning, dataset downloads (keyed)                                   |
 | **analyst** (internal) | Review quarantine, resolve entity matches, author reports; **cannot** edit source figures |
-| **admin** (internal) | Manage sources, users, deploys; all actions audited |
+| **admin** (internal)   | Manage sources, users, deploys; all actions audited                                       |
 
-- **Principle:** *no role can alter an ingested figure.* Corrections happen only by re-ingesting from source (new version), never by manual edit of a value — this preserves traceability. Analysts curate *linkage* (entity matches, quarantine decisions), not *values*.
+- **Principle:** _no role can alter an ingested figure._ Corrections happen only by re-ingesting from source (new version), never by manual edit of a value — this preserves traceability. Analysts curate _linkage_ (entity matches, quarantine decisions), not _values_.
 - Enforced at the API (middleware) and DB (least-privilege roles; the public API DB user is **read-only**).
 - Internal auth via SSO/OIDC + MFA for analyst/admin.
 
@@ -31,7 +31,7 @@ The data is public, but **integrity, availability, and traceability** are the se
 
 - Every mutating action (ingest, load, version bump, entity merge, quarantine decision, export, login, config change) writes to `audit_log` with `actor`, `action`, `entity`, `detail`, `at` ([04](../05-data-model/database-design.md)).
 - Logs are **append-only**; shipped to a separate, restricted store; tamper-evident (hash-chained batches).
-- Data-provenance and audit logs together let anyone reconstruct *how any displayed number came to be*.
+- Data-provenance and audit logs together let anyone reconstruct _how any displayed number came to be_.
 
 ## API rate limiting
 

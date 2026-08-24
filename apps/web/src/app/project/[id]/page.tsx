@@ -1,3 +1,4 @@
+import type React from "react";
 import { FinanceChainSchema } from "@lokdarpan/contracts";
 import { FIXTURE_PROJECT_501, FIXTURE_WARNING } from "@lokdarpan/contracts/fixtures";
 import { MoneyTrail } from "@/components/MoneyTrail";
@@ -12,7 +13,11 @@ import { color } from "@/ui/tokens";
  */
 export const revalidate = false;
 
-export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProjectPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<React.JSX.Element> {
   const { id } = await params;
 
   // Validated at the boundary: a contract violation is a typed failure here,
@@ -32,8 +37,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
       <div
         style={{
-          margin: "16px 0", padding: 12, borderRadius: 10,
-          background: color.band.high.bg, color: color.band.high.fg, fontSize: 13,
+          margin: "16px 0",
+          padding: 12,
+          borderRadius: 10,
+          background: color.band.high.bg,
+          color: color.band.high.fg,
+          fontSize: 13,
         }}
       >
         ⚠ {FIXTURE_WARNING} · project id {id}

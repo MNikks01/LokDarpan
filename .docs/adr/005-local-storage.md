@@ -7,7 +7,7 @@
 Four distinct storage needs (`.docs/10-mobile/offline-strategy.md`):
 
 1. A **query cache** persisted across launches so a cold start with no network still renders (LRU, evictable).
-2. **Saved items** with full offline bundles — *must never be silently evicted*, and must be queryable (list, filter, join, diff against a new dataset version).
+2. **Saved items** with full offline bundles — _must never be silently evicted_, and must be queryable (list, filter, join, diff against a new dataset version).
 3. **Offline packs** — unit trees, project indexes, map tiles.
 4. **Secrets** — only if the optional sync account exists.
 
@@ -15,12 +15,12 @@ The requirements of (1) and (2) are opposites: the cache must be free to evict; 
 
 ## Decision
 
-| Need | Store | Why |
-|---|---|---|
-| Query cache, preferences, small state | **MMKV** (`react-native-mmkv`) | Synchronous, ~30× faster than AsyncStorage, JSI-based (no bridge). Synchronous read is what allows scope and cache rehydration before first paint, holding the 1.2 s cold-start budget |
-| Saved items, bundles, offline packs, search index, queued reports | **SQLite** (`expo-sqlite` + **Drizzle ORM**) | Needs querying, joins, ordering, FTS5 for offline search, and durable non-evictable storage |
-| Documents, map tile packs | **Filesystem** (`expo-file-system`) | Large binaries; per-file size accounting and deletion |
-| Tokens (optional account) | **`expo-secure-store`** | Keychain / Android Keystore. **Never MMKV or AsyncStorage** |
+| Need                                                              | Store                                        | Why                                                                                                                                                                                    |
+| ----------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Query cache, preferences, small state                             | **MMKV** (`react-native-mmkv`)               | Synchronous, ~30× faster than AsyncStorage, JSI-based (no bridge). Synchronous read is what allows scope and cache rehydration before first paint, holding the 1.2 s cold-start budget |
+| Saved items, bundles, offline packs, search index, queued reports | **SQLite** (`expo-sqlite` + **Drizzle ORM**) | Needs querying, joins, ordering, FTS5 for offline search, and durable non-evictable storage                                                                                            |
+| Documents, map tile packs                                         | **Filesystem** (`expo-file-system`)          | Large binaries; per-file size accounting and deletion                                                                                                                                  |
+| Tokens (optional account)                                         | **`expo-secure-store`**                      | Keychain / Android Keystore. **Never MMKV or AsyncStorage**                                                                                                                            |
 
 ## Alternatives considered
 

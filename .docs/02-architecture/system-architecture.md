@@ -47,16 +47,16 @@
 
 ## Service boundaries
 
-| Service | Responsibility | Stack | Talks to |
-|---|---|---|---|
-| **ingestion-workers** | Pull/scrape/receive raw source artifacts; store immutably; enqueue parse jobs | Python, Playwright, requests | Sources, Object store, Queue |
-| **etl-workers** | Parse (incl. PDF/OCR), validate, normalize, dedupe, load to Postgres with provenance | Python, DuckDB, pandas, Tesseract/Camelot | Object store, Postgres, Queue |
-| **analytics-service** | Compute variance, ratios, cost/km, comparisons, inflation adjustment | Python, pandas, DuckDB | Postgres (read), writes analytics tables |
-| **anomaly-risk-service** | Flag inconsistencies, compute 0–100 risk scores | Python | Postgres |
-| **api-gateway** | Public REST API; auth; rate limiting; caching; serves only vetted views | Node.js, Express, TypeScript | Postgres (read), Redis, AI layer |
-| **ai-service** | RAG summaries & Q&A under guardrails | Python/Node, LLM | Postgres (read), Vector index |
-| **web-frontend** | Public dashboards | Next.js, TypeScript, Tailwind, Mapbox | api-gateway |
-| **scheduler** | Cron for periodic ingestion/recompute | BullMQ repeatable jobs | Queue |
+| Service                  | Responsibility                                                                       | Stack                                     | Talks to                                 |
+| ------------------------ | ------------------------------------------------------------------------------------ | ----------------------------------------- | ---------------------------------------- |
+| **ingestion-workers**    | Pull/scrape/receive raw source artifacts; store immutably; enqueue parse jobs        | Python, Playwright, requests              | Sources, Object store, Queue             |
+| **etl-workers**          | Parse (incl. PDF/OCR), validate, normalize, dedupe, load to Postgres with provenance | Python, DuckDB, pandas, Tesseract/Camelot | Object store, Postgres, Queue            |
+| **analytics-service**    | Compute variance, ratios, cost/km, comparisons, inflation adjustment                 | Python, pandas, DuckDB                    | Postgres (read), writes analytics tables |
+| **anomaly-risk-service** | Flag inconsistencies, compute 0–100 risk scores                                      | Python                                    | Postgres                                 |
+| **api-gateway**          | Public REST API; auth; rate limiting; caching; serves only vetted views              | Node.js, Express, TypeScript              | Postgres (read), Redis, AI layer         |
+| **ai-service**           | RAG summaries & Q&A under guardrails                                                 | Python/Node, LLM                          | Postgres (read), Vector index            |
+| **web-frontend**         | Public dashboards                                                                    | Next.js, TypeScript, Tailwind, Mapbox     | api-gateway                              |
+| **scheduler**            | Cron for periodic ingestion/recompute                                                | BullMQ repeatable jobs                    | Queue                                    |
 
 Services are independently deployable containers ([12](./tech-stack.md)). The **only** write path to the canonical ledger is via ETL workers; everything downstream is read-only against it.
 
@@ -126,12 +126,12 @@ Full detail in [03 — Data Collection Architecture](../04-data-engineering/data
 
 ## Caching strategy
 
-| Layer | Mechanism | Invalidation |
-|---|---|---|
-| CDN / edge | Next.js ISR + CDN | On dataset version bump (webhook revalidate) |
-| API responses | Redis read-through, tagged by `dataset_version` | Version bump after ETL publish |
-| Heavy aggregates | Materialized views in Postgres | Refreshed by analytics cron |
-| Map tiles | Pre-generated vector tiles / cached GeoJSON | On geometry change |
+| Layer            | Mechanism                                       | Invalidation                                 |
+| ---------------- | ----------------------------------------------- | -------------------------------------------- |
+| CDN / edge       | Next.js ISR + CDN                               | On dataset version bump (webhook revalidate) |
+| API responses    | Redis read-through, tagged by `dataset_version` | Version bump after ETL publish               |
+| Heavy aggregates | Materialized views in Postgres                  | Refreshed by analytics cron                  |
+| Map tiles        | Pre-generated vector tiles / cached GeoJSON     | On geometry change                           |
 
 ## Observability & ops
 

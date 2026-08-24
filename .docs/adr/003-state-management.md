@@ -20,7 +20,7 @@ Everything else stays where it belongs: server data in TanStack Query, filters a
 
 **Jotai / Recoil (atomic).** Reasonable fit, genuinely good ergonomics. Rejected on the margin: our state is a handful of coarse, coherent objects (a scope, a settings blob) rather than many fine-grained independent atoms. Zustand's store-with-selectors matches that shape more directly, and its persistence and testing story is simpler.
 
-**TanStack Query alone, with scope in query keys.** Rejected: scope is *user intent*, not fetched data. Putting it in the query cache confuses two lifetimes (a cache may be evicted; a user's chosen district may not) and makes persistence awkward.
+**TanStack Query alone, with scope in query keys.** Rejected: scope is _user intent_, not fetched data. Putting it in the query cache confuses two lifetimes (a cache may be evicted; a user's chosen district may not) and makes persistence awkward.
 
 **MobX.** Rejected: observable/proxy mutation model is a different paradigm from the rest of the codebase; larger runtime.
 

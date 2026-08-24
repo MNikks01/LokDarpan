@@ -132,7 +132,7 @@ Size is stated **before** any download. Updates are deltas (1.2 MB), never a re-
 └──────────────────────────────────────────────┘
 ```
 
-## S-63 · Collections   ·   S-65 · Watch settings
+## S-63 · Collections · S-65 · Watch settings
 
 ```text
 S-63                                S-65 (sheet)

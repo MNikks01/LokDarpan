@@ -1,0 +1,75 @@
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { randomUUID } from "node:crypto";
+import type { DependencyContainer } from "tsyringe";
+import { CONFIG, type Config } from "../config/index.js";
+import { LOGGER, type Logger } from "../logging/logger.js";
+import { toEnvelope, AppError } from "../errors/index.js";
+import { ProjectService } from "../modules/projects/project.service.js";
+
+/**
+ * A plain node:http server. No framework: the surface is a handful of read-only
+ * routes, and Express/Fastify would be a dependency without a job today.
+ * Revisit when routing, middleware ordering, or body parsing become real needs.
+ */
+export function createApiServer(container: DependencyContainer): Server {
+  const config = container.resolve<Config>(CONFIG);
+  const logger = container.resolve<Logger>(LOGGER);
+
+  return createServer((req: IncomingMessage, res: ServerResponse) => {
+    // Correlation id: client-supplied if present, else minted. Echoed on every
+    // response so a user report maps to a log line with no user identity.
+    const requestId = req.headers["x-request-id"]?.toString() ?? randomUUID();
+    const log = logger.child({ requestId, method: req.method ?? "GET" });
+    const started = Date.now();
+
+    const send = (status: number, body: unknown): void => {
+      res.writeHead(status, {
+        "content-type": "application/json; charset=utf-8",
+        "x-request-id": requestId,
+        "cache-control": status === 200 ? "public, max-age=300" : "no-store",
+      });
+      res.end(JSON.stringify(body));
+      log.info("request.completed", { status, ms: Date.now() - started });
+    };
+
+    const fail = (err: unknown): void => {
+      const { status, body, internal } = toEnvelope(err, requestId);
+      // Internal detail goes to the log, never to the client.
+      if (status >= 500) log.error("request.failed", { status, internal });
+      else log.info("request.rejected", { status, code: body.error.code });
+      send(status, body);
+    };
+
+    void handle(req, container, config).then((body) => {
+      send(200, body);
+    }, fail);
+  });
+}
+
+async function handle(
+  req: IncomingMessage,
+  container: DependencyContainer,
+  config: Config,
+): Promise<unknown> {
+  const url = new URL(req.url ?? "/", "http://localhost");
+  const path = url.pathname;
+
+  if (req.method !== "GET") throw AppError.badRequest("Only GET is supported.");
+
+  // Liveness: is the process up. Readiness: can it serve traffic.
+  if (path === "/livez") return { status: "ok" };
+  if (path === "/readyz") {
+    return { status: "ok", datasetVersion: config.datasetVersion };
+  }
+
+  const project = /^\/api\/v1\/projects\/([^/]+)$/.exec(path);
+  if (project?.[1] !== undefined) {
+    const data = await container.resolve(ProjectService).getProject(project[1]);
+    return {
+      data,
+      meta: { datasetVersion: config.datasetVersion, asOf: new Date().toISOString() },
+    };
+  }
+
+  throw AppError.notFound("This route");
+}

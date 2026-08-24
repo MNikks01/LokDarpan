@@ -4,12 +4,12 @@
 >
 > Verified 21 August 2026. Every URL fetched; none written from memory.
 
-| Source | URL | Status | Relevance | Page title (as fetched) |
-|---|---|---|---|---|
-| **India Budget Portal (Union Budget)** | `https://www.indiabudget.gov.in/` | ✅ VERIFIED | CRITICAL | India Budget | Ministry of Finance | Government of India |
-| **Finance Department, Maharashtra** | `https://finance.maharashtra.gov.in` | ✅ VERIFIED | CRITICAL | Homepage | वित्त विभाग | भारत |
-| **BEAMS — Budget Estimation, Allocation and Monitoring System, Maharashtra** | `https://beams.mahakosh.gov.in` | ✅ VERIFIED | CRITICAL | BEAMS :: Budget Estimation, Allocation & Monitoring System |
-| **Planning Department, Maharashtra** | `https://plan.maharashtra.gov.in` | ✅ VERIFIED | HIGH | मुख्यपृष्ठ | नियोजन विभाग, महाराष्ट्र शासन | भारत |
+| Source                                                                       | URL                                  | Status      | Relevance | Page title (as fetched)                                    |
+| ---------------------------------------------------------------------------- | ------------------------------------ | ----------- | --------- | ---------------------------------------------------------- |
+| **India Budget Portal (Union Budget)**                                       | `https://www.indiabudget.gov.in/`    | ✅ VERIFIED | CRITICAL  | India Budget                                               | Ministry of Finance           | Government of India |
+| **Finance Department, Maharashtra**                                          | `https://finance.maharashtra.gov.in` | ✅ VERIFIED | CRITICAL  | Homepage                                                   | वित्त विभाग                   | भारत                |
+| **BEAMS — Budget Estimation, Allocation and Monitoring System, Maharashtra** | `https://beams.mahakosh.gov.in`      | ✅ VERIFIED | CRITICAL  | BEAMS :: Budget Estimation, Allocation & Monitoring System |
+| **Planning Department, Maharashtra**                                         | `https://plan.maharashtra.gov.in`    | ✅ VERIFIED | HIGH      | मुख्यपृष्ठ                                                 | नियोजन विभाग, महाराष्ट्र शासन | भारत                |
 
 ## What a budget source must supply
 

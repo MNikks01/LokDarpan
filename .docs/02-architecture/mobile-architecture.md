@@ -1,6 +1,6 @@
 # 05 — Mobile Architecture
 
-## Principles applied (and where they are *not* applied)
+## Principles applied (and where they are _not_ applied)
 
 The brief asks for SOLID, separation of concerns, dependency inversion, and testability — and explicitly warns against Clean Architecture as ceremony. The resolution used throughout:
 
@@ -147,15 +147,15 @@ apps/mobile/
 // domain/money — no floating point anywhere in the app
 export class Money {
   private constructor(private readonly paise: bigint) {}
-  static fromApi(decimalString: string): Money   // "900000000.00" → 90000000000n
-  static zero(): Money
-  plus(o: Money): Money
-  minus(o: Money): Money                          // the ONLY subtraction the app may do:
-                                                  // presentational only; variances arrive computed
-  compare(o: Money): -1 | 0 | 1
-  isZero(): boolean
-  format(locale: Locale, style: 'crore-lakh' | 'full' | 'compact'): string
-  toAccessibleString(locale: Locale): string      // "nine crore rupees"
+  static fromApi(decimalString: string): Money; // "900000000.00" → 90000000000n
+  static zero(): Money;
+  plus(o: Money): Money;
+  minus(o: Money): Money; // the ONLY subtraction the app may do:
+  // presentational only; variances arrive computed
+  compare(o: Money): -1 | 0 | 1;
+  isZero(): boolean;
+  format(locale: Locale, style: "crore-lakh" | "full" | "compact"): string;
+  toAccessibleString(locale: Locale): string; // "nine crore rupees"
 }
 ```
 
@@ -167,8 +167,8 @@ Why: `.docs/05-data-model/database-design.md` stores `NUMERIC(20,2)`; a national
 // features/shared/Figure.tsx
 type FigureProps = {
   value: Money | number | null;
-  provenance: Provenance;          // required — not optional, no default
-  missingReason?: string;          // required (type-level) when value is null
+  provenance: Provenance; // required — not optional, no default
+  missingReason?: string; // required (type-level) when value is null
   confidence: ExtractionConfidence;
   asOf: IsoDate;
   label: string;
@@ -182,11 +182,11 @@ There is no code path that renders a monetary or derived figure without a source
 ```ts
 // domain/neutrality
 declare const brand: unique symbol;
-export type ServerText = string & { readonly [brand]: 'server-authored' };
-export const asServerText = (s: string, source: 'api'): ServerText => s as ServerText;
+export type ServerText = string & { readonly [brand]: "server-authored" };
+export const asServerText = (s: string, source: "api"): ServerText => s as ServerText;
 
 // features/shared/Observation.tsx
-type ObservationProps = { text: ServerText; /* … */ };   // a string literal will not type-check
+type ObservationProps = { text: ServerText /* … */ }; // a string literal will not type-check
 ```
 
 An observation, a variance explanation, or an anomaly description may only come from the server, where it is generated from vetted templates and passed the neutrality checker (`.docs/17-legal/legal-ethical-rules.md` §Enforcement). A developer cannot write `<Observation text="This contractor overcharged" />` — it fails compilation. Combined with the `scripts/neutrality-lint` CI gate over `i18n/*.json` (all locales), this makes `.docs/17-legal/legal-ethical-rules.md` structurally enforced rather than reviewed.
@@ -205,11 +205,11 @@ export interface ProjectRepository {
 
 Three real implementations exist, so the abstraction is not ceremony:
 
-| Implementation | Used by |
-|---|---|
-| `HttpProjectRepository` | production |
-| `FixtureProjectRepository` | UI development before the API exists, Storybook-equivalent screens, deterministic component tests |
-| `OfflineFirstProjectRepository` | wraps HTTP + SQLite; the composition used in the app shell |
+| Implementation                  | Used by                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `HttpProjectRepository`         | production                                                                                        |
+| `FixtureProjectRepository`      | UI development before the API exists, Storybook-equivalent screens, deterministic component tests |
+| `OfflineFirstProjectRepository` | wraps HTTP + SQLite; the composition used in the app shell                                        |
 
 **Mock discipline** (brief §37, non-negotiable): fixtures live only in `data/fixtures/`, are imported only by `__tests__/` and by a `EXPO_PUBLIC_DATA_SOURCE=fixture` dev build, are stripped from production bundles by a build-time guard test, and every fixture money value is an obviously synthetic round number carrying `sourceName: "FIXTURE — not a government source"`. A fixture figure must never be mistakable for a real government figure in a screenshot.
 
@@ -217,16 +217,16 @@ Three real implementations exist, so the abstraction is not ceremony:
 
 ## State ownership
 
-| State | Where | Persisted | Why not elsewhere |
-|---|---|---|---|
-| Server data | TanStack Query | MMKV | Caching, dedup, background refresh, offline — hand-rolling this is the classic mistake |
-| Scope (unit + FY) | Zustand `scopeStore` | ✅ | Global, cross-tab, read by nearly every query key. Query cache is the wrong home for user intent |
-| Settings, locale, theme | Zustand `settingsStore` | ✅ | |
-| Map camera, layer, metric | Zustand `mapStore` | session only | Restoring a stale camera on cold start disorients |
-| Offline pack progress | Zustand `offlineStore` + SQLite | ✅ | |
-| Saved items | SQLite (source of truth) + a Query wrapper for reactivity | ✅ | Needs querying and joins; MMKV cannot |
-| Filters, sort, tab | Route params | in-stack | Makes a filtered view shareable and restorable |
-| Sheet open/closed, input text | Local `useState` | ❌ | Transient |
+| State                         | Where                                                     | Persisted    | Why not elsewhere                                                                                |
+| ----------------------------- | --------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------ |
+| Server data                   | TanStack Query                                            | MMKV         | Caching, dedup, background refresh, offline — hand-rolling this is the classic mistake           |
+| Scope (unit + FY)             | Zustand `scopeStore`                                      | ✅           | Global, cross-tab, read by nearly every query key. Query cache is the wrong home for user intent |
+| Settings, locale, theme       | Zustand `settingsStore`                                   | ✅           |                                                                                                  |
+| Map camera, layer, metric     | Zustand `mapStore`                                        | session only | Restoring a stale camera on cold start disorients                                                |
+| Offline pack progress         | Zustand `offlineStore` + SQLite                           | ✅           |                                                                                                  |
+| Saved items                   | SQLite (source of truth) + a Query wrapper for reactivity | ✅           | Needs querying and joins; MMKV cannot                                                            |
+| Filters, sort, tab            | Route params                                              | in-stack     | Makes a filtered view shareable and restorable                                                   |
+| Sheet open/closed, input text | Local `useState`                                          | ❌           | Transient                                                                                        |
 
 **No Redux.** There is no complex cross-cutting client state: the server owns the data, TanStack Query owns its cache, and the remaining client state is four small slices. Redux (or Redux Toolkit) would add a store, middleware, action/selector boilerplate, and a mental model, for state that fits in ~150 lines of Zustand. `adr/003-state-management.md`.
 
@@ -264,14 +264,14 @@ A screen file that exceeds ~150 lines or a hook that owns more than one concern 
 
 `.docs/15-scalability/scalability-plan.md` takes this from Maharashtra roads to every ministry, state, district, and village. What in this architecture absorbs that:
 
-| Scale pressure | Absorbed by |
-|---|---|
-| New domains (health, education, water) | The Unit screen is level- and domain-agnostic; a domain adds an **asset section renderer** + a **cost-per-unit metric descriptor**, registered in a table. No new screens |
-| New hierarchy levels | `admin_unit.level` is data. The UI orders levels from a config array; a new level is a config entry and a label |
-| Asset types (facility, utility, transport) | One `AssetSection` interface, one registry, one renderer per type |
-| More screens | Feature-per-folder + enforced boundaries keep build and blast radius local |
-| Bundle growth | Map, document viewer, charts, and Ask are lazy route segments — the initial bundle never carries them (`.docs/02-architecture/performance.md`) |
-| More languages | ICU message files; the neutrality lint runs on every locale |
-| More data per screen | Cursor pagination + `FlashList` + section-level fetching are already the default |
+| Scale pressure                             | Absorbed by                                                                                                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New domains (health, education, water)     | The Unit screen is level- and domain-agnostic; a domain adds an **asset section renderer** + a **cost-per-unit metric descriptor**, registered in a table. No new screens |
+| New hierarchy levels                       | `admin_unit.level` is data. The UI orders levels from a config array; a new level is a config entry and a label                                                           |
+| Asset types (facility, utility, transport) | One `AssetSection` interface, one registry, one renderer per type                                                                                                         |
+| More screens                               | Feature-per-folder + enforced boundaries keep build and blast radius local                                                                                                |
+| Bundle growth                              | Map, document viewer, charts, and Ask are lazy route segments — the initial bundle never carries them (`.docs/02-architecture/performance.md`)                            |
+| More languages                             | ICU message files; the neutrality lint runs on every locale                                                                                                               |
+| More data per screen                       | Cursor pagination + `FlashList` + section-level fetching are already the default                                                                                          |
 
 **The thing that would break it** is per-level or per-domain screens — a `DistrictScreen`, a `VillageScreen`, a `HealthProjectScreen`. `.docs/01-product/dashboard-design-legacy.md` already found the general pattern ("money in / money out / what was built / consistency"); this architecture makes that pattern the only implementation, which is what keeps a 15-level, 12-domain national platform inside one app.
