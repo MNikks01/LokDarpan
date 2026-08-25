@@ -58,7 +58,7 @@ This **corrects** the entry in [`access-and-permissions.md`](./access-and-permis
 
 **The GePNIC landing page.** ~21 current tenders per portal, no CAPTCHA, no stated crawl restriction. Polling once daily accumulates the tender universe **forward from the date collection starts**. It does not backfill history and never yields awards, but it costs one request per portal per day and can begin immediately.
 
-**`data.gov.in`'s API — unresolved.** The catalogue endpoint answered with **no API key**: `status: ok`, 285,974 resources. The `q` parameter had no effect on results, so whether Maharashtra procurement datasets are published there is **not yet established** — neither confirmed nor excluded. This is the remaining route to award data that requires no correspondence with any department, and it is worth completing.
+**`data.gov.in`'s API — resolved 25 Aug.** The catalogue endpoint answers with **no API key** (285,974 resources). The correct filter syntax is `filters[title]=`; `q=` is silently ignored, which is what made the first attempt inconclusive. **No Maharashtra public-procurement dataset was identified**, closing this route for Phase 1 — though six other states do publish one. See [`datagovin-api-findings.md`](./datagovin-api-findings.md).
 
 ---
 
