@@ -1,0 +1,38 @@
+# Local development only. Not a deployment artefact.
+# Postgres carries PostGIS because admin_unit will hold boundary geometry
+# (never sent to the client inline — see .docs/11-api/client-api-contract.md).
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: lokdarpan-postgres
+    environment:
+      POSTGRES_USER: lokdarpan
+      POSTGRES_PASSWORD: lokdarpan_local_only
+      POSTGRES_DB: lokdarpan
+    # Host port is 5433, not 5432: developers commonly have another project's
+    # Postgres already bound to 5432, and a port collision should not require
+    # stopping unrelated work.
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lokdarpan -d lokdarpan"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: lokdarpan-redis
+    ports:
+      - "6380:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  postgres-data:
