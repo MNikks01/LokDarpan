@@ -42,7 +42,7 @@
 
 **New to the project** → `00-overview/platform-overview.md` → `01-product/prd.md` → `17-legal/legal-ethical-rules.md` → `decisions/web-first-pivot.md`
 
-**Building the website** → `decisions/web-first-pivot.md` → `02-architecture/web-architecture.md` → `01-product/roadmap-web.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
+**Building the website** → `01-product/sprint-plan.md` → `decisions/web-first-pivot.md` → `02-architecture/web-architecture.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
 
 **Working on data** → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md`
 
