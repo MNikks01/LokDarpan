@@ -190,3 +190,9 @@ Do not open a public issue for a security problem. See [`SECURITY.md`](./SECURIT
 ## Conduct
 
 Be straightforward and civil. This project touches public money and political subject matter; keep discussion on the data and the code. Partisan advocacy of any kind is out of scope — the platform's neutrality is its entire value, and that applies to how we talk about it as much as to what it publishes.
+
+## Licence
+
+This project is licensed under the **Apache License 2.0** ([`LICENSE`](./LICENSE), [`adr/015`](./.docs/adr/015-code-licence.md)). By submitting a pull request you agree that your contribution is licensed under the same terms, including the patent grant in §3. There is no separate CLA to sign.
+
+The licence covers the code. It grants no rights over the government records the platform ingests — see [`NOTICE`](./NOTICE).

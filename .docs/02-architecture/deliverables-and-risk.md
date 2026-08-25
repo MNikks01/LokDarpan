@@ -194,5 +194,4 @@ lokdarpan/
 - Exact portal URLs, dataset IDs, API keys, and licenses for each approved source (fill the `sources/` registry).
 - The official inflation/construction-cost index to use ([06 §6](../07-analytics/analytics-engine.md)).
 - Applicable IRC/SoR specifications and current unit rates for the road model ([08](../03-domain/road-infrastructure-intelligence.md)).
-- Final open-source license for the codebase.
 - Final product name (working title: **LokDarpan**).

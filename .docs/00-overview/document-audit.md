@@ -209,7 +209,7 @@ Every one of these is an assumption, not a finding. If any is wrong, the affecte
 4. **Reference low-end device:** Android 11, 4 GB RAM, Snapdragon 6-series-class, 720×1600. All performance budgets in `.docs/02-architecture/performance.md` are stated against this device, not a flagship.
 5. **Network baseline:** intermittent 4G with 3G fallback, 150–400 ms RTT, frequent complete loss. Metered data is the norm.
 6. **A domain is available for universal links** (A6).
-7. **The codebase license will permit app-store distribution.** `17` lists the license as an open item; AGPL has known friction with Apple's App Store terms. **This must be resolved before submission** — see `adr/001-mobile-framework.md` §Consequences.
+7. ~~**The codebase license will permit app-store distribution.**~~ **Resolved 25 Aug 2026:** Apache-2.0, which carries no app-store friction — see [`../adr/015-code-licence.md`](../adr/015-code-licence.md).
 8. **No PII is collected.** No account required, no contacts, no advertising identifiers, no third-party analytics SDKs.
 9. **Location is used, never stored.** Coordinates are sent for `nearby` queries and never persisted server-side or attached to an identifier.
 10. **The neutrality rules of `15` bind the mobile client identically**, including all localized strings and any client-composed text.

@@ -74,7 +74,7 @@ Choices favor a boring, well-supported, open-source stack — appropriate for a 
 - **pnpm** workspaces (JS/TS monorepo) + **uv/poetry** for Python services.
 - **Prisma or Kysely** optional typed query layer for the API (raw parameterized SQL acceptable; no ORM in analytics).
 - **Secrets** via a vault/manager; never in code.
-- **License:** open-source (e.g. AGPL/MIT to be decided) so the methodology itself is auditable — important for public trust.
+- **License:** **Apache-2.0** ([`../adr/015-code-licence.md`](../adr/015-code-licence.md)) so the methodology itself is auditable — important for public trust. Covers the code only, not the ingested government records.
 
 ## Why not X (brief)
 

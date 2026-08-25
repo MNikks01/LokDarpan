@@ -67,7 +67,9 @@ Security issues: [`SECURITY.md`](./SECURITY.md) — and note that **security tes
 
 ## Licence
 
-**Not yet decided** — see [`LICENSE`](./LICENSE). Recommendation on file: Apache-2.0 or MPL-2.0.
+**Apache-2.0** — see [`LICENSE`](./LICENSE) and [`NOTICE`](./NOTICE), decided in [`adr/015`](./.docs/adr/015-code-licence.md).
+
+The licence covers the **source code**. It confers no rights over the government records the platform ingests — those remain subject to their issuing authority's terms, recorded per source in [`.docs/06-government-sources/`](./.docs/06-government-sources/).
 
 ---
 

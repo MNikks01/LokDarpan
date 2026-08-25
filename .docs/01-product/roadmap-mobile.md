@@ -109,7 +109,7 @@ Accessibility sweep (200% scale, TalkBack, contrast, chart text equivalents) · 
 | MapLibre spike fails                                | Medium                | Week-1 gate; `MapAdapter` boundary; `@rnmapbox/maps` fallback documented                                                           |
 | Source documents lack `Range` support               | Medium — degrades J10 | Re-host artifacts in the platform object store (already immutable per `.docs/04-data-engineering/data-collection-architecture.md`) |
 | Local-body data too sparse to test S-23 at GP level | Medium                | Build against real sparse fixtures from day one; a GP with almost nothing is the _design case_, not the edge case                  |
-| Licence unresolved (`adr/001`)                      | **Blocks submission** | Decide before P4; recommendation: Apache-2.0 or MPL-2.0 for `apps/mobile`                                                          |
+| ~~Licence unresolved (`adr/001`)~~ **Resolved**     | ~~Blocks submission~~ | **Apache-2.0**, decided 25 Aug 2026 — [`../adr/015-code-licence.md`](../adr/015-code-licence.md). App-store friction avoided       |
 | Neutrality review finds systemic copy issues late   | High                  | The lint runs from week 3; legal review is scheduled at P12 **and** at P7 for the Money Trail and observation copy specifically    |
 | Reference-device performance misses budget          | Medium                | Benchmarks in CI from P1; a regression is a release blocker, not a backlog item                                                    |
 
