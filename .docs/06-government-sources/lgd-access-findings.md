@@ -1,6 +1,6 @@
 # LGD — the hierarchy is collectable; the bulk download is not
 
-**Date:** 2026-08-25 · **Host:** `lgdirectory.gov.in` · **Status:** PRODUCTION_READY for States/UTs
+**Date:** 2026-08-25 · **Host:** `lgdirectory.gov.in` · **Status:** PRODUCTION_READY for States/UTs · below that, blocked on a NAPIX API key
 
 Established while starting Sprint 1. The registry recorded LGD as VERIFIED but had never established **how the data is actually obtained** — which, after [`gepnic-access-findings.md`](./gepnic-access-findings.md), is a separate question from whether a site responds.
 
@@ -16,7 +16,43 @@ Established while starting Sprint 1. The registry recorded LGD as VERIFIED but h
 | **NAPIX API** (`dev.napix.gov.in/nic/lgd/`) | **Live, untested** | An official API developer portal. The sanctioned-channel route, and preferable to parsing HTML if it serves the same data — worth evaluating before the village-level ingest           |
 | ~~**`downloadDirectory.do`**~~              | **CAPTCHA-gated**  | Offers exactly what is wanted — All States / Districts / Sub-Districts / Villages of India — but `captchaAnswer` is a field **inside the download form**. Not usable, and not bypassed |
 
-The citizen views make the bulk download unnecessary for now. Should that change, NAPIX is the route to pursue, not the CAPTCHA.
+**The citizen views only get as far as States/UTs.** `globalviewdistrictforcitizen.do` is a form, not a listing: it posts to `globalviewdistrict.do` with `paramStateCode` **and `captchaAnswer`**. The district level and everything beneath it is behind a CAPTCHA on this route.
+
+That is a finding, not an obstacle to work around. NAPIX is the route below state level.
+
+---
+
+## NAPIX — the sanctioned route for the rest of the hierarchy
+
+`https://dev.napix.gov.in/nic/lgd/` is the National API Exchange developer portal for LGD. Documentation is readable without an account; calling an API requires a key obtained by self-service registration.
+
+It publishes the hierarchy as REST products:
+
+| Product                  | Path            |
+| ------------------------ | --------------- |
+| `STATE 1.0.0`            | `/product/427`  |
+| `DISTRICT 1.0.0`         | `/product/430`  |
+| `SUBDISTRICT 1.0.0`      | `/product/1514` |
+| `BLOCK 1.0.0`            | `/product/403`  |
+| `LOCALBODY 1.0.0`        | `/product/1061` |
+| `CANTONMENT BOARD 1.0.0` | `/product/406`  |
+| `CONSTITUENCY 1.0.0`     | `/product/1085` |
+| `LGD 1.0.0`              | `/product/1735` |
+
+The `DISTRICT` product documents `districtsByState` and **`districtsByStateByDuration`** — the latter takes `updatedFrom`/`updatedTo`, which makes **incremental sync** possible rather than re-fetching the whole hierarchy. That matters at village scale (677,367 rows) and is not available from the HTML views at all.
+
+### Why this supersedes HTML parsing below state level
+
+1. It is what the publisher built for programmatic access. Parsing a citizen-facing HTML view is a workaround; using the documented API is the intended path.
+2. It carries no CAPTCHA.
+3. Incremental sync by update date removes the need to re-retrieve unchanged data.
+4. A JSON contract is far less brittle than table-column positions.
+
+The State/UT connector already built against the citizen view stays useful — it works today, needs no key, and its parser tests encode two source properties (the local-name column and NFC normalisation) that will apply to the API responses too.
+
+### Blocked on
+
+**A NAPIX API key.** Registration is self-service at `/nic/lgd/user/register` and asks for account details, not a description of what is being built. Until a key exists, ingestion below State/UT level cannot proceed by any route this project is willing to use.
 
 ## What the State/UT listing contains
 
@@ -41,8 +77,8 @@ For an append-only audit store that is defensible — each artefact is a faithfu
 ## Standing-rule checklist
 
 - [x] `robots.txt` fetched — none served, no restriction stated
-- [x] Whether an official API exists — **yes, NAPIX**; preferred over parsing when evaluated
-- [x] CAPTCHA presence noted — on `downloadDirectory.do`, **never bypassed**
+- [x] Whether an official API exists — **yes, NAPIX**, evaluated 25 Aug and adopted as the route below state level
+- [x] CAPTCHA presence noted — on `downloadDirectory.do` **and on the district view**, never bypassed
 - [x] Identifiable user agent; collection is scheduled, never user-triggered
 - [ ] Terms of use located and read
 - [ ] **Licence captured** — still outstanding, and required before display
