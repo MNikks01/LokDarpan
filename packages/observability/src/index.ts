@@ -9,4 +9,5 @@ export {
 export type { ByteBucket, CountBucket, LatencyBucket } from "./buckets.js";
 export { routePattern } from "./route-pattern.js";
 export { METRICS, MetricsRegistry } from "./metrics.js";
+export { scrubSecrets, scrubValue } from "./scrub.js";
 export type { LabelValues } from "./metrics.js";
