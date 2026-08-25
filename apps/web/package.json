@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",
+    "@lokdarpan/database": "workspace:*",
+    "@lokdarpan/domain": "workspace:*",
+    "@lokdarpan/errors": "workspace:*",
     "@lokdarpan/money": "workspace:*",
     "@lokdarpan/neutrality": "workspace:*",
     "next": "^15.1.3",

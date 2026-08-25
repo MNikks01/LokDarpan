@@ -12,9 +12,15 @@
     "migrate": "tsx src/cli.ts"
   },
   "dependencies": {
+    "@lokdarpan/domain": "workspace:*",
+    "@lokdarpan/errors": "workspace:*",
     "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/pg": "^8.11.10"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./repository": "./src/admin-unit.repository.ts"
   }
 }

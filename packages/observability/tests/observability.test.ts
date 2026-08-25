@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { bucketBytes, bucketCount, bucketLatency } from "../src/buckets.js";
-import { MetricsRegistry } from "../src/metrics.js";
-import { routePattern } from "../src/route-pattern.js";
+import { bucketBytes, bucketCount, bucketLatency } from "../src/buckets";
+import { MetricsRegistry } from "../src/metrics";
+import { routePattern } from "../src/route-pattern";
 
 describe("bucketing", () => {
   it("buckets latency at the boundaries the spec names", () => {

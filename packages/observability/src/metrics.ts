@@ -1,5 +1,5 @@
-import { bucketLatency } from "./buckets.js";
-import { routePattern } from "./route-pattern.js";
+import { bucketLatency } from "./buckets";
+import { routePattern } from "./route-pattern";
 
 /**
  * A minimal counter registry exposed in Prometheus text format.
