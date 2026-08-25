@@ -48,7 +48,7 @@ Three questions decide the scope of everything after Sprint 1:
 | Sprints 3–4    | As written                                                                        | Re-weight toward procurement depth and unit-level finance                                                                                                       |
 | Honest framing | "Follow public money to the asset"                                                | "Follow public money as far as government publishes it — and show exactly where it stops"                                                                       |
 
-Branch B is **still a worthwhile product**. It is not a failure mode; it is a narrower true claim. What would be a failure is shipping Branch A's promises on Branch B's data.
+Branch B is **stronger than this plan first assumed**. Sprint 0 confirmed BEAMS exposes departmental, scheme-wise and DDO-wise actual expenditure publicly, monthly, for ten financial years. That is a genuine financial ledger with real analytical depth — not a consolation prize. It is a narrower true claim, not a failure mode. What would be a failure is shipping Branch A's promises on Branch B's data.
 
 ---
 
@@ -56,13 +56,13 @@ Branch B is **still a worthwhile product**. It is not a failure mode; it is a na
 
 **Goal:** answer Q1–Q3, decide the branch, and remove every blocker that would stall Sprint 1.
 
-| Track  | Work                                                                                                                                                                                                                                                                                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATA` | Q1/Q2/Q3 from an **Indian network vantage point** (the discovery pass could not reach several `.nic.in` hosts). Field-verify one GePNIC portal end to end: exactly which tender fields are public, CAPTCHA presence, archive depth, pagination                                                    |
-| `DATA` | **Done 25 Aug:** `robots.txt` surveyed across all 36 State/UT portals — [`access-and-permissions.md`](../06-government-sources/access-and-permissions.md). Still needed: terms of use, rate limits and **licence** for the P0 sources. Licence is required for display and was collected for none |
-| `API`  | Decide the search backend (Postgres FTS vs Meilisearch/Typesense) against a real transliteration test, not a preference                                                                                                                                                                           |
-| `OPS`  | Pick the hosting shape. Decide the licence (blocking an open-source release)                                                                                                                                                                                                                      |
-| `SEC`  | Threat-model the ingestion path: we execute parsers over files from ~1,000 third-party portals                                                                                                                                                                                                    |
+| Track  | Work                                                                                                                                                                                                                                                                                                                                                                  |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATA` | **Q1 answered NO, Q3 answered YES (25 Aug — [findings](../06-government-sources/sprint0-findings-q1-q3.md)). Q2 outstanding**, needs an **Indian network vantage point** (the discovery pass could not reach several `.nic.in` hosts). Field-verify one GePNIC portal end to end: exactly which tender fields are public, CAPTCHA presence, archive depth, pagination |
+| `DATA` | **Done 25 Aug:** `robots.txt` surveyed across all 36 State/UT portals — [`access-and-permissions.md`](../06-government-sources/access-and-permissions.md). Still needed: terms of use, rate limits and **licence** for the P0 sources. Licence is required for display and was collected for none                                                                     |
+| `API`  | Decide the search backend (Postgres FTS vs Meilisearch/Typesense) against a real transliteration test, not a preference                                                                                                                                                                                                                                               |
+| `OPS`  | Pick the hosting shape. Decide the licence (blocking an open-source release)                                                                                                                                                                                                                                                                                          |
+| `SEC`  | Threat-model the ingestion path: we execute parsers over files from ~1,000 third-party portals                                                                                                                                                                                                                                                                        |
 
 **Exit:** Q1–Q3 answered in writing; branch chosen and recorded as an ADR; licence decided; one portal's field set documented.
 
@@ -114,15 +114,15 @@ Branch B is **still a worthwhile product**. It is not a failure mode; it is a na
 
 **Goal:** budget and allocation — the side of the ledger that _is_ verified.
 
-| Track  | Work                                                                                                                                                                                              |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATA` | Budget document ingestion: PDF table extraction (Camelot/pdfplumber), **extraction confidence recorded per figure**, OCR path for scans. India Budget + Maharashtra Finance; BEAMS if Q3 positive |
-| `DATA` | `allocation` / `release` / `expenditure` tables with versioning — `record_version`, `superseded_by`, so budget revisions are preserved, never overwritten                                         |
-| `API`  | Unit finance rollups; **both variances**, never a bare `variance`; `insufficient_data` as a first-class status                                                                                    |
-| `WEB`  | Money Trail at **unit** level; `MissingData` wherever a stage is unpublished                                                                                                                      |
-| `OPS`  | Longer-running extraction jobs; artifact storage growth                                                                                                                                           |
-| `OBS`  | Extraction-confidence distribution; quarantine backlog; **alert when low-confidence share rises**                                                                                                 |
-| `SEC`  | Sandboxed PDF/OCR workers — resource-limited, no network, no filesystem escape. We parse untrusted files at scale                                                                                 |
+| Track  | Work                                                                                                                                                                                                                                                                       |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATA` | **BEAMS public MIS ingestion — confirmed available**: departmental/scheme/DDO expenditure, monthly, FY2017-18 onward, no authentication. Plus budget document extraction (Camelot/pdfplumber) with **extraction confidence recorded per figure** and an OCR path for scans |
+| `DATA` | `allocation` / `release` / `expenditure` tables with versioning — `record_version`, `superseded_by`, so budget revisions are preserved, never overwritten                                                                                                                  |
+| `API`  | Unit finance rollups; **both variances**, never a bare `variance`; `insufficient_data` as a first-class status                                                                                                                                                             |
+| `WEB`  | Money Trail at **unit** level; `MissingData` wherever a stage is unpublished                                                                                                                                                                                               |
+| `OPS`  | Longer-running extraction jobs; artifact storage growth                                                                                                                                                                                                                    |
+| `OBS`  | Extraction-confidence distribution; quarantine backlog; **alert when low-confidence share rises**                                                                                                                                                                          |
+| `SEC`  | Sandboxed PDF/OCR workers — resource-limited, no network, no filesystem escape. We parse untrusted files at scale                                                                                                                                                          |
 
 **Exit:** real allocation figures rendering with provenance to a document page, at unit level, with missing data shown honestly.
 
