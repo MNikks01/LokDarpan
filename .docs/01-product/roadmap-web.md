@@ -1,5 +1,11 @@
 # 28 — Web Implementation Roadmap
 
+> **Superseded 2026-08-25 by [`sprint-plan.md`](./sprint-plan.md).**
+> This document planned the frontend on the assumption that a backend existed. It does not.
+> The sprint plan is cross-functional (data, backend, frontend, DevOps, observability, security)
+> and sequences against the real critical path, which is data rather than UI. The phase content
+> below remains accurate as the _frontend_ view and is referenced by the sprint plan.
+
 **Status:** Accepted · 2026-08-24 · Supersedes `.docs/01-product/roadmap-mobile.md` as the active plan (25 is retained for the deferred mobile build)
 
 Replaces Month 3 of `.docs/01-product/roadmap-platform.md` with a fuller plan; Months 1, 2, 4, 5, 6 of `.docs/01-product/roadmap-platform.md` (backend, analytics, AI, anomaly/risk, hardening) stand, with the contract additions in `.docs/11-api/client-api-contract.md`.
@@ -98,13 +104,13 @@ Accessibility sweep (keyboard, screen reader, 200% zoom, 320px) · Core Web Vita
 
 ## Risks
 
-| Risk                                                    | Impact                                                                             | Mitigation                                                                                                                                                                                 |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Backend P0 slips**                                    | High                                                                               | Fixture-driven development; contract tests already written                                                                                                                                 |
-| **Execution-data gap** (`.docs/06-government-sources/`) | **High**                                                                           | Per-project expenditure and progress have no verified source. Plan the Money Trail to render `insufficient_data` honestly and lead with tender/award and budget data, which _are_ verified |
-| Licence still undecided                                 | Blocks nothing for web (no app store), but still needed for an open-source release | Decide during W1–W2                                                                                                                                                                        |
-| ISR revalidation storms at national scale               | Medium                                                                             | Scope-tagged revalidation from day one, not path-globbing                                                                                                                                  |
-| Second platform pivot                                   | High                                                                               | Treat this decision as settled through launch (`.docs/decisions/web-first-pivot.md`)                                                                                                       |
+| Risk                                                    | Impact                                               | Mitigation                                                                                                                                                                                 |
+| ------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Backend P0 slips**                                    | High                                                 | Fixture-driven development; contract tests already written                                                                                                                                 |
+| **Execution-data gap** (`.docs/06-government-sources/`) | **High**                                             | Per-project expenditure and progress have no verified source. Plan the Money Trail to render `insufficient_data` honestly and lead with tender/award and budget data, which _are_ verified |
+| ~~Licence still undecided~~ **Resolved: Apache-2.0**    | Was needed for an open-source release; now unblocked | Decided 25 Aug 2026 — [`../adr/015-code-licence.md`](../adr/015-code-licence.md)                                                                                                           |
+| ISR revalidation storms at national scale               | Medium                                               | Scope-tagged revalidation from day one, not path-globbing                                                                                                                                  |
+| Second platform pivot                                   | High                                                 | Treat this decision as settled through launch (`.docs/decisions/web-first-pivot.md`)                                                                                                       |
 
 ---
 

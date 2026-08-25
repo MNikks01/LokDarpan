@@ -39,6 +39,13 @@ Fields with no evidence are `null` or `"unknown"` — never guessed.
 
 ---
 
+## ⚠ Before writing any connector
+
+Read these two Sprint 0 findings first.
+
+- [`access-and-permissions.md`](./access-and-permissions.md) — what each source actually permits. Two of the thirty-six State/UT procurement portals disallow crawling outright: **Maharashtra** (the Phase-1 target) and **Karnataka**.
+- [`sprint0-findings-q1-q3.md`](./sprint0-findings-q1-q3.md) — **Q1 no** (no Maharashtra PWD works register), **Q3 yes** (BEAMS public MIS: departmental/scheme/DDO expenditure, ten years, no login).
+
 ## Documents
 
 ### Start here

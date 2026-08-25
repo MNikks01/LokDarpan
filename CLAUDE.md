@@ -14,7 +14,7 @@ pnpm dev                           # web client
 pnpm neutrality apps packages      # docs/15 language gate
 ```
 
-**The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The build order is in `.docs/01-product/roadmap-web.md`. This reversed an earlier mobile-only decision, so **treat everything under `.docs/10-mobile/` and `adr/001`–`010` as the deferred mobile specification, not the active plan**. `.docs/decisions/web-first-pivot.md` records what changed and, more usefully, what did not.
+**The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The build order is in `.docs/01-product/sprint-plan.md` (cross-functional; supersedes `roadmap-web.md`). This reversed an earlier mobile-only decision, so **treat everything under `.docs/10-mobile/` and `adr/001`–`010` as the deferred mobile specification, not the active plan**. `.docs/decisions/web-first-pivot.md` records what changed and, more usefully, what did not.
 
 `.agents/`, `.claude/` and `skills-lock.json` are local skill installations, untracked and unrelated to the project.
 
@@ -115,7 +115,6 @@ Fields with no evidence are `null` or `"unknown"` — never guessed. If you add 
 
 Do not treat these as settled; they are tracked in `.docs/README.md` and `.docs/06-government-sources/SOURCE-DISCOVERY-REPORT.md`.
 
-- **Code licence is undecided.** AGPL has known friction with App Store distribution. This blocks store submission. Recommendation on file: Apache-2.0 or MPL-2.0 for `apps/mobile`.
 - **The execution-data gap.** No public works register was located; no verified source for physical progress, financial progress, work orders, completion or per-project expenditure. `.docs/07-analytics/analytics-engine.md`'s central `Released − Utilized` variance therefore has **no verified source today**. The project-level Money Trail — the product's signature screen — depends on it. PMGSY's OMMAS is the highest-value unverified candidate.
 - **Backend P0 items** (`.docs/11-api/client-api-contract.md` §7, re-prioritised for web in `.docs/01-product/roadmap-web.md` §Backend dependencies): a search endpoint (absent entirely from `.docs/11-api/api-documentation.md`), money as decimal strings, both variances, three confidences, provenance page anchors, no inline geometry, and a CGNAT-safe rate tier — per-IP limits misfire on Indian carrier NAT, which affects web users too. The composite BFF dropped from P0 to P2: a server-rendered client can make parallel calls.
 - ~~Mobile-only removes the desktop workflow for researchers and journalists~~ — **resolved.** PR-1 was the reason for the web-first pivot; the researcher surfaces (tables, bulk export, API access) ship before launch in W9.

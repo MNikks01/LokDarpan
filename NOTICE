@@ -1,0 +1,26 @@
+LokDarpan (लोकदर्पण)
+Copyright 2026 The LokDarpan Contributors
+
+This product includes software developed by the LokDarpan project.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+SCOPE OF THIS LICENCE
+
+The Apache License 2.0 covers the SOURCE CODE of this repository only.
+
+It does NOT cover, and confers no rights over, the government records this
+platform ingests, normalizes and displays. Those records remain subject to the
+terms of their issuing authority. Each dataset carries its own licence or terms
+of use, which are recorded per source in .docs/06-government-sources/ and are
+displayed alongside the data they govern.
+
+Redistributing this software does not grant any right to redistribute the
+underlying government data. Anyone deploying LokDarpan is responsible for
+honouring each source's terms independently.

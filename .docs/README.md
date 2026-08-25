@@ -42,7 +42,7 @@
 
 **New to the project** → `00-overview/platform-overview.md` → `01-product/prd.md` → `17-legal/legal-ethical-rules.md` → `decisions/web-first-pivot.md`
 
-**Building the website** → `decisions/web-first-pivot.md` → `02-architecture/web-architecture.md` → `01-product/roadmap-web.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
+**Building the website** → `01-product/sprint-plan.md` → `decisions/web-first-pivot.md` → `02-architecture/web-architecture.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
 
 **Working on data** → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md`
 
@@ -72,13 +72,12 @@ Web-specific:
 
 ## Open items
 
-| #   | Item                                                                                               | Blocks                                      |
-| --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| 1   | **Licence undecided** — see `/LICENSE`. Recommend Apache-2.0 or MPL-2.0                            | Open-source release; store submission later |
-| 2   | Backend acceptance of the P0 contract items (`11-api/client-api-contract.md` §7)                   | W4, W5                                      |
-| 3   | **The execution-data gap** — per-project expenditure and physical progress have no verified source | What the Money Trail can show at launch     |
-| 4   | Q1: does Maharashtra PWD publish a works register? Q2: is OMMAS reachable?                         | Phase-1 scope                               |
-| 5   | Confirm self-hosted deployability is tested, not assumed (`adr/011`)                               | W1                                          |
+| #   | Item                                                                                                                                                              | Blocks                                  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 1   | Backend acceptance of the P0 contract items (`11-api/client-api-contract.md` §7)                                                                                  | W4, W5                                  |
+| 2   | **The execution-data gap** — per-project expenditure and physical progress have no verified source                                                                | What the Money Trail can show at launch |
+| 3   | **Q2: is OMMAS reachable?** (Q1 answered _no_, Q3 _yes_ — [`06-government-sources/sprint0-findings-q1-q3.md`](./06-government-sources/sprint0-findings-q1-q3.md)) | Phase-1 scope                           |
+| 4   | Confirm self-hosted deployability is tested, not assumed (`adr/011`)                                                                                              | W1                                      |
 
 ---
 
