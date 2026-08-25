@@ -56,13 +56,13 @@ Branch B is **still a worthwhile product**. It is not a failure mode; it is a na
 
 **Goal:** answer Q1–Q3, decide the branch, and remove every blocker that would stall Sprint 1.
 
-| Track  | Work                                                                                                                                                                                                                                           |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATA` | Q1/Q2/Q3 from an **Indian network vantage point** (the discovery pass could not reach several `.nic.in` hosts). Field-verify one GePNIC portal end to end: exactly which tender fields are public, CAPTCHA presence, archive depth, pagination |
-| `DATA` | Capture `robots.txt`, terms of use, rate limits and **licence** for the P0 sources. Licence is required for display and was collected for none                                                                                                 |
-| `API`  | Decide the search backend (Postgres FTS vs Meilisearch/Typesense) against a real transliteration test, not a preference                                                                                                                        |
-| `OPS`  | Pick the hosting shape. Decide the licence (blocking an open-source release)                                                                                                                                                                   |
-| `SEC`  | Threat-model the ingestion path: we execute parsers over files from ~1,000 third-party portals                                                                                                                                                 |
+| Track  | Work                                                                                                                                                                                                                                                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATA` | Q1/Q2/Q3 from an **Indian network vantage point** (the discovery pass could not reach several `.nic.in` hosts). Field-verify one GePNIC portal end to end: exactly which tender fields are public, CAPTCHA presence, archive depth, pagination                                                    |
+| `DATA` | **Done 25 Aug:** `robots.txt` surveyed across all 36 State/UT portals — [`access-and-permissions.md`](../06-government-sources/access-and-permissions.md). Still needed: terms of use, rate limits and **licence** for the P0 sources. Licence is required for display and was collected for none |
+| `API`  | Decide the search backend (Postgres FTS vs Meilisearch/Typesense) against a real transliteration test, not a preference                                                                                                                                                                           |
+| `OPS`  | Pick the hosting shape. Decide the licence (blocking an open-source release)                                                                                                                                                                                                                      |
+| `SEC`  | Threat-model the ingestion path: we execute parsers over files from ~1,000 third-party portals                                                                                                                                                                                                    |
 
 **Exit:** Q1–Q3 answered in writing; branch chosen and recorded as an ADR; licence decided; one portal's field set documented.
 
@@ -104,7 +104,7 @@ Branch B is **still a worthwhile product**. It is not a failure mode; it is a na
 | `OBS`  | Ingestion metrics: rows in, quarantined, parse failures, source reachability. **Alert on a source going quiet**                                     |
 | `SEC`  | Politeness enforced in code: `robots.txt` honoured, throttling, identifiable user agent, **no CAPTCHA bypass**, public non-authenticated pages only |
 
-**Exit:** Maharashtra tenders ingested on a schedule, source-linked, visible on the site. A second state added by config alone.
+**Exit:** one permitting state's tenders ingested on a schedule, source-linked, visible on the site. A second state added by config alone.
 
 **Risk:** the GePNIC field set may vary by deployment. Sprint 0's field verification de-risks this; budget a spike if a second state disagrees.
 
@@ -288,8 +288,9 @@ Stated plainly, so they are recognised early rather than absorbed silently:
 
 1. **Q1 and Q2 both negative** → Branch B. Sprints 3–4 re-weight; the product claim narrows. Not fatal.
 2. **GePNIC deployments differ materially per state** → the one-connector assumption fails and Sprint 2 multiplies. Sprint 0's field verification is the early warning.
-3. **Source licences forbid republication** → could restrict what is displayable. Sprint 0 captures licences precisely because this is unknown today.
-4. **Extraction quality is too poor to publish** → if OCR confidence on state budget documents is low across the board, figures may not meet the bar. Sprint 3 will reveal it.
-5. **The team is smaller than assumed** → calendar stretches proportionally. Do not compress sprints; extend them.
+3. **A source disallows collection.** Already realised: Maharashtra's and Karnataka's procurement portals both serve `Disallow: /`. Two of thirty-six — but one is the Phase-1 target. See [`access-and-permissions.md`](../06-government-sources/access-and-permissions.md).
+4. **Source licences forbid republication** → could restrict what is displayable. Sprint 0 captures licences precisely because this is unknown today.
+5. **Extraction quality is too poor to publish** → if OCR confidence on state budget documents is low across the board, figures may not meet the bar. Sprint 3 will reveal it.
+6. **The team is smaller than assumed** → calendar stretches proportionally. Do not compress sprints; extend them.
 
 A plan that cannot be invalidated is not a plan; it is a wish.
