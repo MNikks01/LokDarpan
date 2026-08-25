@@ -1,5 +1,5 @@
 import pg from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import {
   applyMigration,
@@ -43,6 +43,16 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")("schema (inte
        WHERE NOT EXISTS (SELECT 1 FROM dataset_version)`,
     );
   }, 60_000);
+
+  // Each test runs in a transaction that is rolled back, so a shared
+  // development database is left exactly as it was found.
+  beforeEach(async () => {
+    await db().query("BEGIN");
+  });
+
+  afterEach(async () => {
+    await db().query("ROLLBACK");
+  });
 
   afterAll(async () => {
     await client?.end();

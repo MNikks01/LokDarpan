@@ -1,5 +1,5 @@
 import pg from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import {
   applyMigration,
@@ -63,6 +63,17 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       }
       client = c;
     }, 60_000);
+
+    // Every test runs inside a transaction that is rolled back. Integration
+    // tests share a developer's database; rows left behind would mix dataset
+    // versions into real data and make the API refuse to serve it.
+    beforeEach(async () => {
+      await db().query("BEGIN");
+    });
+
+    afterEach(async () => {
+      await db().query("ROLLBACK");
+    });
 
     afterAll(async () => {
       await client?.end();

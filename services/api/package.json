@@ -14,8 +14,12 @@
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",
     "@lokdarpan/money": "workspace:*",
+    "pg": "^8.13.1",
     "reflect-metadata": "^0.2.2",
     "tsyringe": "^4.8.0",
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10"
   }
 }
