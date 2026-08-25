@@ -11,3 +11,6 @@ graphify-out/
 # the government host served. Real-world HTML is often malformed (LGD serves
 # `<meta charset=utf-8" />`), and reformatting it would defeat its purpose.
 services/ingestion/tests/fixtures/
+
+# dotenv sample — prettier has no parser for it
+.env.example

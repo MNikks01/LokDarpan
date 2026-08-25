@@ -132,6 +132,34 @@ export class PostgresAdminUnitRepository implements AdminUnitRepository {
     return result.rows.map(toUnit);
   }
 
+  /**
+   * Refuses to run against credentials that can write to the ledger.
+   *
+   * The read-only guarantee is enforced by the database role (migration 0002),
+   * but nothing stops an operator from handing this service the owner's
+   * connection string. Checking at startup turns that misconfiguration into a
+   * failed deploy instead of a service that quietly holds write access to the
+   * canonical record for months.
+   */
+  async assertReadOnly(): Promise<void> {
+    const result = await this.pool.query<{ writable: boolean }>(
+      `SELECT bool_or(p) AS writable FROM (
+         SELECT has_table_privilege(current_user, 'admin_unit', 'INSERT') AS p
+         UNION ALL SELECT has_table_privilege(current_user, 'admin_unit', 'UPDATE')
+         UNION ALL SELECT has_table_privilege(current_user, 'admin_unit', 'DELETE')
+         UNION ALL SELECT has_table_privilege(current_user, 'source_artifact', 'INSERT')
+       ) AS checks`,
+    );
+
+    if (result.rows[0]?.writable === true) {
+      throw new Error(
+        "The API's database user can write to the ledger. ETL is the only write path; " +
+          "point DATABASE_URL at a user granted lokdarpan_readonly (see migration 0002).",
+      );
+    }
+    this.logger.info("db.readonly_verified", {});
+  }
+
   async close(): Promise<void> {
     await this.pool.end();
   }

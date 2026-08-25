@@ -91,10 +91,17 @@ jobs:
         run: pnpm --filter @lokdarpan/database migrate
         env:
           DATABASE_URL: postgresql://lokdarpan:lokdarpan_ci_only@localhost:5432/lokdarpan
+      - name: Provision the API's read-only database user
+        run: |
+          PGPASSWORD=lokdarpan_ci_only psql -h localhost -U lokdarpan -d lokdarpan \
+            -v ON_ERROR_STOP=1 -f database/scripts/create-local-api-user.sql
       - name: Unit + integration tests
         run: pnpm test
         env:
           DATABASE_URL: postgresql://lokdarpan:lokdarpan_ci_only@localhost:5432/lokdarpan
+          # Asserts the API's role cannot write. A green suite without this set
+          # would silently skip the check that the ledger is protected.
+          DATABASE_URL_READONLY: postgresql://lokdarpan_api:lokdarpan_local_only@localhost:5432/lokdarpan
       - name: Coverage thresholds (domain + api)
         run: pnpm exec vitest run --coverage
 
