@@ -3,8 +3,12 @@ import { buildContainer } from "./container/index.js";
 import { createApiServer } from "./http/server.js";
 import { CONFIG, ConfigError, type Config } from "./config/index.js";
 import { LOGGER, type Logger } from "./logging/logger.js";
+import {
+  ADMIN_UNIT_REPOSITORY,
+  type PostgresAdminUnitRepository,
+} from "./modules/units/unit.repository.js";
 
-function main(): void {
+async function main(): Promise<void> {
   let container;
   try {
     container = buildContainer();
@@ -19,6 +23,20 @@ function main(): void {
 
   const config = container.resolve<Config>(CONFIG);
   const logger = container.resolve<Logger>(LOGGER);
+  // Before accepting a single request, prove this process cannot write to the
+  // ledger. A misconfiguration here is a failed start, not a running service
+  // holding unnoticed write access to the canonical record.
+  if (config.databaseUrl !== undefined) {
+    try {
+      await container.resolve<PostgresAdminUnitRepository>(ADMIN_UNIT_REPOSITORY).assertReadOnly();
+    } catch (err) {
+      logger.error("db.readonly_check_failed", {
+        reason: err instanceof Error ? err.message : String(err),
+      });
+      process.exit(78); // EX_CONFIG
+    }
+  }
+
   const server = createApiServer(container);
 
   server.listen(config.port, () => {
@@ -45,4 +63,4 @@ function main(): void {
   });
 }
 
-main();
+void main();
