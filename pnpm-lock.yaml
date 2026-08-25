@@ -115,6 +115,9 @@ importers:
       '@lokdarpan/money':
         specifier: workspace:*
         version: link:../../packages/money
+      pg:
+        specifier: ^8.13.1
+        version: 8.23.0
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -124,6 +127,10 @@ importers:
       zod:
         specifier: ^3.24.1
         version: 3.25.76
+    devDependencies:
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.23.1
 
   services/ingestion:
     dependencies:
