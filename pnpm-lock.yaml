@@ -107,6 +107,8 @@ importers:
 
   packages/neutrality: {}
 
+  packages/observability: {}
+
   services/api:
     dependencies:
       '@lokdarpan/contracts':
@@ -115,6 +117,9 @@ importers:
       '@lokdarpan/money':
         specifier: workspace:*
         version: link:../../packages/money
+      '@lokdarpan/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       pg:
         specifier: ^8.13.1
         version: 8.23.0
