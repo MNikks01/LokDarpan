@@ -58,8 +58,8 @@ describe("logger redaction is two-pass", () => {
 
   it("redacts by key name, as before", () => {
     const { lines, log } = capture();
-    log.info("x", { password: "hunter2", token: "abc" });
-    expect(lines[0]).not.toContain("hunter2");
+    log.info("x", { password: "PLACEHOLDER-PW", token: "PLACEHOLDER-TOKEN" });
+    expect(lines[0]).not.toContain("PLACEHOLDER-PW");
     expect(lines[0]).toContain("[redacted]");
   });
 
@@ -68,16 +68,16 @@ describe("logger redaction is two-pass", () => {
   it("scrubs a credential inside a value under an innocuous key", () => {
     const { lines, log } = capture();
     log.error("db.readonly_check_failed", {
-      reason: "connect ECONNREFUSED postgresql://lokdarpan:s3cr3t-prod-pw@db.internal:5432/db",
+      reason: "connect ECONNREFUSED postgresql://lokdarpan:PLACEHOLDER-PW@db.internal:5432/db",
     });
-    expect(lines[0]).not.toContain("s3cr3t-prod-pw");
+    expect(lines[0]).not.toContain("PLACEHOLDER-PW");
     expect(lines[0]).toContain("db.internal");
   });
 
   it("scrubs the message itself", () => {
     const { lines, log } = capture();
-    log.error("failed: password=hunter2");
-    expect(lines[0]).not.toContain("hunter2");
+    log.error("failed: password=PLACEHOLDER-PW");
+    expect(lines[0]).not.toContain("PLACEHOLDER-PW");
   });
 
   it("leaves ordinary context intact", () => {

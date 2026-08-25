@@ -7,9 +7,9 @@ describe("scrubSecrets", () => {
   // exception handler rather than by anyone choosing to log a secret.
   it("removes the password from a connection string in an error message", () => {
     const line =
-      "connect ECONNREFUSED postgresql://lokdarpan:s3cr3t-prod-pw@db.internal:5432/lokdarpan";
+      "connect ECONNREFUSED postgresql://lokdarpan:PLACEHOLDER-PW@db.internal:5432/lokdarpan";
     const scrubbed = scrubSecrets(line);
-    expect(scrubbed).not.toContain("s3cr3t-prod-pw");
+    expect(scrubbed).not.toContain("PLACEHOLDER-PW");
     expect(scrubbed).toContain("[redacted]");
   });
 
@@ -26,23 +26,27 @@ describe("scrubSecrets", () => {
     }
   });
 
+  // Placeholder values, deliberately low-entropy and unmistakably fake. The
+  // scrubber matches on the key, never the value's shape, so a realistic-looking
+  // credential would test nothing extra — and would trip the secret scanner,
+  // which is a gate worth keeping sharp rather than allowlisting around.
   it("removes inline key=value secrets from free text", () => {
     for (const line of [
-      "DATABASE_URL=postgres://u:hunter2@h/db failed",
-      "password=hunter2",
-      "password: hunter2",
-      'api_key="AIzaSyD1234567890"',
-      "token: abc.def.ghi",
-      "secret=shhh",
-      "AWS_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE",
+      "DATABASE_URL=postgres://u:PLACEHOLDER-PW@h/db failed",
+      "password=PLACEHOLDER-PW",
+      "password: PLACEHOLDER-PW",
+      'api_key="PLACEHOLDER-API-KEY"',
+      "token: PLACEHOLDER.TOKEN.VALUE",
+      "secret=PLACEHOLDER-SECRET",
+      "AWS_ACCESS_KEY=PLACEHOLDER-ACCESS-KEY",
     ]) {
       const scrubbed = scrubSecrets(line);
       for (const leak of [
-        "hunter2",
-        "AIzaSyD1234567890",
-        "abc.def.ghi",
-        "shhh",
-        "AKIAIOSFODNN7EXAMPLE",
+        "PLACEHOLDER-PW",
+        "PLACEHOLDER-API-KEY",
+        "PLACEHOLDER.TOKEN.VALUE",
+        "PLACEHOLDER-SECRET",
+        "PLACEHOLDER-ACCESS-KEY",
       ]) {
         expect(scrubbed, `"${line}" must not leak "${leak}"`).not.toContain(leak);
       }
@@ -50,11 +54,11 @@ describe("scrubSecrets", () => {
   });
 
   it("removes bearer and basic credentials", () => {
-    expect(scrubSecrets("Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.abcdefghij")).not.toContain(
-      "eyJhbGciOiJIUzI1NiJ9",
+    expect(scrubSecrets("Authorization: Bearer PLACEHOLDER-BEARER-TOKEN")).not.toContain(
+      "PLACEHOLDER-BEARER-TOKEN",
     );
-    expect(scrubSecrets("authorization: Basic dXNlcjpwYXNzd29yZA==")).not.toContain(
-      "dXNlcjpwYXNzd29yZA",
+    expect(scrubSecrets("authorization: Basic PLACEHOLDER-BASIC-CREDS")).not.toContain(
+      "PLACEHOLDER-BASIC-CREDS",
     );
   });
 
@@ -71,14 +75,14 @@ describe("scrubSecrets", () => {
   });
 
   it("is idempotent", () => {
-    const once = scrubSecrets("password=hunter2");
+    const once = scrubSecrets("password=PLACEHOLDER-PW");
     expect(scrubSecrets(once)).toBe(once);
   });
 });
 
 describe("scrubValue", () => {
   it("scrubs strings and passes other values through untouched", () => {
-    expect(scrubValue("password=hunter2")).not.toContain("hunter2");
+    expect(scrubValue("password=PLACEHOLDER-PW")).not.toContain("PLACEHOLDER-PW");
     expect(scrubValue(42)).toBe(42);
     expect(scrubValue(true)).toBe(true);
     expect(scrubValue(null)).toBeNull();

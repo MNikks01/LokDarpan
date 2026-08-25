@@ -34,7 +34,7 @@ Redaction by key name — `password`, `token`, `authorization` — protects a va
 
 ```text
 db.readonly_check_failed  reason: connect ECONNREFUSED
-  postgresql://lokdarpan:s3cr3t-prod-pw@db.internal:5432/lokdarpan
+  postgresql://lokdarpan:PLACEHOLDER-PW-prod-pw@db.internal:5432/lokdarpan
 ```
 
 That line is written by an exception handler passing `err.message` through, not by anyone choosing to log a credential. This repository contained exactly that line, and it was verified leaking before the fix.
