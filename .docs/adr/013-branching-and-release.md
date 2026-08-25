@@ -1,6 +1,6 @@
 # ADR-013 — Branching: `feature/*` → `development` → `main`
 
-**Status:** Accepted · 2026-08-24
+**Status:** Accepted · 2026-08-24 · **Amended 2026-08-25** — the approving-review requirement in §Decision is relaxed to zero while the project has one maintainer; see [`016-review-requirement.md`](./016-review-requirement.md). Every other protection stands.
 
 ## Context
 
@@ -17,7 +17,7 @@ hotfix/*   ──PR──>  main  ──back-merge──>  development
 - `feature/*` branches from `development`; one focused change per PR.
 - `development` accumulates tested work; promotion to `main` is a release PR.
 - `hotfix/*` branches from `main` for production defects, and **must be merged back into `development`** so the fix is not lost in the next release.
-- Required CI checks and at least one approving review before merge.
+- Required CI checks and at least one approving review before merge. _(Amended by [`016`](./016-review-requirement.md): the review count is 0 while there is a single maintainer. The CI requirement is unchanged.)_
 
 ## Alternatives considered
 
