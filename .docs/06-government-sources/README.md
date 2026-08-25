@@ -39,6 +39,10 @@ Fields with no evidence are `null` or `"unknown"` — never guessed.
 
 ---
 
+## ⚠ Before writing any connector
+
+Read **[`access-and-permissions.md`](./access-and-permissions.md)** — it records what each source actually permits. Two of thirty-six State/UT procurement portals disallow crawling outright, and one of them is Maharashtra, the Phase-1 target.
+
 ## Documents
 
 ### Start here
