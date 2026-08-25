@@ -44,6 +44,7 @@ Fields with no evidence are `null` or `"unknown"` — never guessed.
 Read these two Sprint 0 findings first.
 
 - [`access-and-permissions.md`](./access-and-permissions.md) — what each source actually permits. Two of the thirty-six State/UT procurement portals disallow crawling outright: **Maharashtra** (the Phase-1 target) and **Karnataka**.
+- [`gepnic-access-findings.md`](./gepnic-access-findings.md) — **award data is CAPTCHA-gated on every GePNIC portal tested**, and on CPPP. Changing state does not obtain it; Phase 1 stays Maharashtra.
 - [`sprint0-findings-q1-q3.md`](./sprint0-findings-q1-q3.md) — **Q1 no** (no Maharashtra PWD works register), **Q3 yes** (BEAMS public MIS: departmental/scheme/DDO expenditure, ten years, no login).
 
 ## Documents
