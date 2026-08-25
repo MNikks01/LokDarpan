@@ -1,5 +1,11 @@
 # 28 — Web Implementation Roadmap
 
+> **Superseded 2026-08-25 by [`sprint-plan.md`](./sprint-plan.md).**
+> This document planned the frontend on the assumption that a backend existed. It does not.
+> The sprint plan is cross-functional (data, backend, frontend, DevOps, observability, security)
+> and sequences against the real critical path, which is data rather than UI. The phase content
+> below remains accurate as the _frontend_ view and is referenced by the sprint plan.
+
 **Status:** Accepted · 2026-08-24 · Supersedes `.docs/01-product/roadmap-mobile.md` as the active plan (25 is retained for the deferred mobile build)
 
 Replaces Month 3 of `.docs/01-product/roadmap-platform.md` with a fuller plan; Months 1, 2, 4, 5, 6 of `.docs/01-product/roadmap-platform.md` (backend, analytics, AI, anomaly/risk, hardening) stand, with the contract additions in `.docs/11-api/client-api-contract.md`.

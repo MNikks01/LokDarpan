@@ -14,7 +14,7 @@ pnpm dev                           # web client
 pnpm neutrality apps packages      # docs/15 language gate
 ```
 
-**The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The build order is in `.docs/01-product/roadmap-web.md`. This reversed an earlier mobile-only decision, so **treat everything under `.docs/10-mobile/` and `adr/001`–`010` as the deferred mobile specification, not the active plan**. `.docs/decisions/web-first-pivot.md` records what changed and, more usefully, what did not.
+**The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The build order is in `.docs/01-product/sprint-plan.md` (cross-functional; supersedes `roadmap-web.md`). This reversed an earlier mobile-only decision, so **treat everything under `.docs/10-mobile/` and `adr/001`–`010` as the deferred mobile specification, not the active plan**. `.docs/decisions/web-first-pivot.md` records what changed and, more usefully, what did not.
 
 `.agents/`, `.claude/` and `skills-lock.json` are local skill installations, untracked and unrelated to the project.
 
