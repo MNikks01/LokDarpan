@@ -4,6 +4,8 @@ import type { DependencyContainer } from "tsyringe";
 import { CONFIG, type Config } from "../config/index.js";
 import { LOGGER, type Logger } from "../logging/logger.js";
 import { toEnvelope, AppError } from "../errors/index.js";
+import { UnitService } from "../modules/units/unit.service.js";
+import { METRICS, routePattern, type MetricsRegistry } from "@lokdarpan/observability";
 import { ProjectService } from "../modules/projects/project.service.js";
 
 /**
@@ -14,6 +16,7 @@ import { ProjectService } from "../modules/projects/project.service.js";
 export function createApiServer(container: DependencyContainer): Server {
   const config = container.resolve<Config>(CONFIG);
   const logger = container.resolve<Logger>(LOGGER);
+  const metrics = container.resolve<MetricsRegistry>(METRICS);
 
   return createServer((req: IncomingMessage, res: ServerResponse) => {
     // Correlation id: client-supplied if present, else minted. Echoed on every
@@ -22,14 +25,35 @@ export function createApiServer(container: DependencyContainer): Server {
     const log = logger.child({ requestId, method: req.method ?? "GET" });
     const started = Date.now();
 
+    // The route *pattern*, never the path: `/api/v1/units/:id`, not
+    // `/api/v1/units/20`. Recording which unit was viewed would rebuild the
+    // dataset .docs/13-observability/observability.md refuses to create.
+    const route = routePattern(new URL(req.url ?? "/", "http://localhost").pathname);
+
     const send = (status: number, body: unknown): void => {
+      const elapsed = Date.now() - started;
+
+      // Prometheus scrapes text, not JSON.
+      const asMetrics =
+        typeof body === "object" && body !== null && "metrics" in body
+          ? (body as { metrics: string }).metrics
+          : null;
+
       res.writeHead(status, {
-        "content-type": "application/json; charset=utf-8",
+        "content-type":
+          asMetrics === null ? "application/json; charset=utf-8" : "text/plain; version=0.0.4",
         "x-request-id": requestId,
-        "cache-control": status === 200 ? "public, max-age=300" : "no-store",
+        // Metrics are a point-in-time reading; caching one would serve a stale
+        // count to the next scrape.
+        "cache-control": asMetrics !== null || status !== 200 ? "no-store" : "public, max-age=300",
       });
-      res.end(JSON.stringify(body));
-      log.info("request.completed", { status, ms: Date.now() - started });
+      res.end(asMetrics ?? JSON.stringify(body));
+
+      metrics.recordRequest(route, status, elapsed);
+      // The correlated log keeps the exact duration: it is keyed by request id,
+      // which identifies a request and never a person. Only the aggregate,
+      // exportable series is bucketed.
+      log.info("request.completed", { status, route, ms: elapsed });
     };
 
     const fail = (err: unknown): void => {
@@ -68,6 +92,33 @@ async function handle(
     return {
       data,
       meta: { datasetVersion: config.datasetVersion, asOf: new Date().toISOString() },
+    };
+  }
+
+  // Plain text, not JSON: Prometheus scrapes this format. It carries no
+  // identifier, no query text and no timestamp finer than the scrape itself.
+  if (path === "/metrics") {
+    return { metrics: container.resolve<MetricsRegistry>(METRICS).render() };
+  }
+
+  const unit = /^\/api\/v1\/units\/([^/]+)$/u.exec(path);
+  if (unit?.[1] !== undefined) {
+    const data = await container.resolve(UnitService).getUnit(unit[1]);
+    // The dataset version comes from the data, not from configuration: the
+    // envelope must state the vintage of what it actually contains.
+    return {
+      data,
+      meta: { datasetVersion: data.datasetVersion, asOf: new Date().toISOString() },
+    };
+  }
+
+  if (path === "/api/v1/units") {
+    const level = url.searchParams.get("level");
+    if (level === null) throw AppError.badRequest("A level is required, e.g. ?level=state.");
+    const data = await container.resolve(UnitService).listByLevel(level);
+    return {
+      data,
+      meta: { datasetVersion: data.datasetVersion, asOf: new Date().toISOString() },
     };
   }
 

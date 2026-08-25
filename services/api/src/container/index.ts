@@ -6,6 +6,12 @@ import {
   InMemoryProjectRepository,
 } from "../modules/projects/project.repository.js";
 import { ProjectService } from "../modules/projects/project.service.js";
+import {
+  ADMIN_UNIT_REPOSITORY,
+  PostgresAdminUnitRepository,
+} from "../modules/units/unit.repository.js";
+import { UnitService } from "../modules/units/unit.service.js";
+import { METRICS, MetricsRegistry } from "@lokdarpan/observability";
 
 /**
  * Composition root — the single place that knows which concrete implementation
@@ -20,5 +26,9 @@ export function buildContainer(config: Config = loadConfig()): DependencyContain
   c.registerInstance<Logger>(LOGGER, StructuredLogger.fromConfig(config));
   c.register(PROJECT_REPOSITORY, { useClass: InMemoryProjectRepository });
   c.register(ProjectService, { useClass: ProjectService });
+  // Units are served from Postgres. The one-line swap the port existed for.
+  c.register(ADMIN_UNIT_REPOSITORY, { useClass: PostgresAdminUnitRepository });
+  c.register(UnitService, { useClass: UnitService });
+  c.registerInstance<MetricsRegistry>(METRICS, new MetricsRegistry());
   return c;
 }

@@ -12,7 +12,14 @@ export default defineConfig({
       provider: "v8",
       // Correctness-critical logic is gated hard; UI is not.
       thresholds: { branches: 90, functions: 85, statements: 85 },
-      include: ["packages/money/src/**", "packages/neutrality/src/**", "services/api/src/**"],
+      include: [
+        "packages/money/src/**",
+        "packages/neutrality/src/**",
+        "packages/database/src/**",
+        "packages/observability/src/**",
+        "services/api/src/**",
+        "services/ingestion/src/**",
+      ],
       exclude: [
         "**/fixtures/**",
         // Process entrypoints: top-level side effects, signal handlers and
@@ -20,8 +27,13 @@ export default defineConfig({
         // being contorted into unit tests.
         "services/api/src/index.ts",
         "packages/neutrality/src/cli.ts",
+        "packages/database/src/cli.ts",
+        "services/ingestion/src/cli.ts",
         // Pure re-export barrels.
         "packages/contracts/src/index.ts",
+        "packages/database/src/index.ts",
+        "packages/observability/src/index.ts",
+        "services/ingestion/src/index.ts",
       ],
     },
   },

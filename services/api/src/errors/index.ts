@@ -44,6 +44,13 @@ export class AppError extends Error {
   static badRequest(why: string): AppError {
     return new AppError("BAD_REQUEST", why);
   }
+  /**
+   * `publicMessage` must stay free of internals; put the diagnostic detail in
+   * `cause`, which reaches the log and never the response.
+   */
+  static internal(publicMessage: string, cause?: unknown): AppError {
+    return new AppError("INTERNAL", publicMessage, { cause });
+  }
 }
 
 export interface ErrorEnvelope {

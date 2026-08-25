@@ -63,6 +63,22 @@ jobs:
   test:
     name: Unit + Integration
     runs-on: ubuntu-latest
+    # PostGIS, not plain Postgres: migration 0001 creates the extension, and a
+    # schema that only ever ran on a developer's laptop is not verified.
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: lokdarpan
+          POSTGRES_PASSWORD: lokdarpan_ci_only
+          POSTGRES_DB: lokdarpan
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lokdarpan -d lokdarpan"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     needs: quality
     steps:
       - uses: actions/checkout@v4
@@ -71,8 +87,21 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
       - run: pnpm install --frozen-lockfile
+      - name: Migrations apply to a real PostGIS database
+        run: pnpm --filter @lokdarpan/database migrate
+        env:
+          DATABASE_URL: postgresql://lokdarpan:lokdarpan_ci_only@localhost:5432/lokdarpan
+      - name: Provision the API's read-only database user
+        run: |
+          PGPASSWORD=lokdarpan_ci_only psql -h localhost -U lokdarpan -d lokdarpan \
+            -v ON_ERROR_STOP=1 -f database/scripts/create-local-api-user.sql
       - name: Unit + integration tests
         run: pnpm test
+        env:
+          DATABASE_URL: postgresql://lokdarpan:lokdarpan_ci_only@localhost:5432/lokdarpan
+          # Asserts the API's role cannot write. A green suite without this set
+          # would silently skip the check that the ledger is protected.
+          DATABASE_URL_READONLY: postgresql://lokdarpan_api:lokdarpan_local_only@localhost:5432/lokdarpan
       - name: Coverage thresholds (domain + api)
         run: pnpm exec vitest run --coverage
 
