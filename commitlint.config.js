@@ -11,6 +11,7 @@ export default {
         "neutrality",
         "contracts",
         "database",
+        "observability",
         "ingestion",
         "docs",
         "ci",

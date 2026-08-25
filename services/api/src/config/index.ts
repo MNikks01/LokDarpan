@@ -11,6 +11,8 @@ const ConfigSchema = z.object({
   // socket-activated deployments. Rejecting it would be wrong, not strict.
   port: z.coerce.number().int().min(0).max(65535),
   logLevel: z.enum(["debug", "info", "warn", "error"]),
+  /** Build identifier, echoed on every log line so a line maps to a deploy. */
+  serviceVersion: z.string().min(1),
   databaseUrl: z.string().url().optional(),
   /** Dataset version pinning; surfaced on every response for reproducibility. */
   datasetVersion: z.coerce.number().int().nonnegative(),
@@ -27,6 +29,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     nodeEnv: env["NODE_ENV"] ?? "development",
     port: env["PORT"] ?? 4000,
     logLevel: env["LOG_LEVEL"] ?? "info",
+    serviceVersion: env["SERVICE_VERSION"] ?? "dev",
     databaseUrl: env["DATABASE_URL"],
     datasetVersion: env["DATASET_VERSION"] ?? 0,
   });
