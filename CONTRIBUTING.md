@@ -23,7 +23,9 @@ feature/*  ──PR──>  development  ──release PR──>  main
 hotfix/*   ──PR──>  main  ──back-merge──>  development
 ```
 
-Both `main` and `development` are protected: no direct pushes, CI must pass, and a review is required.
+Both `main` and `development` are protected: **no direct pushes**, and **all six CI checks must pass** before a merge is possible. A branch must also be current with its base, and review conversations must be resolved.
+
+There is **no required approving review** while the project has a single maintainer — a solo maintainer cannot approve their own PR, and the requirement could only ever be met by bypassing every protection at once ([`adr/016`](./.docs/adr/016-review-requirement.md)). It returns to one the moment a second maintainer can approve. Everything else about the pull request is unchanged: it is still where CI runs and where the reasoning is recorded.
 
 ```bash
 git checkout development && git pull
