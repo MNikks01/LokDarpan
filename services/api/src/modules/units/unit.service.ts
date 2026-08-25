@@ -1,5 +1,7 @@
 import { inject, injectable } from "tsyringe";
 
+import { METRICS, type MetricsRegistry } from "@lokdarpan/observability";
+
 import { AppError } from "../../errors/index.js";
 import {
   ADMIN_UNIT_REPOSITORY,
@@ -43,9 +45,16 @@ export function parseLevel(raw: string): AdminUnitLevel {
  * current. That is a traceability defect, so it is refused rather than served
  * with a caveat (.docs/adr/012-web-api-strategy.md).
  */
-export function singleDatasetVersion(units: readonly AdminUnit[]): number {
+export function singleDatasetVersion(
+  units: readonly AdminUnit[],
+  onViolation?: () => void,
+): number {
   const versions = new Set(units.map((u) => u.provenance.datasetVersion));
   if (versions.size > 1) {
+    // An integrity alarm, not a usage number: every occurrence is a
+    // traceability breach in the making
+    // (.docs/13-observability/observability.md §Guardrail telemetry).
+    onViolation?.();
     throw AppError.internal(
       "This response could not be assembled from a single dataset version.",
       `Payload mixes dataset versions ${[...versions].sort((a, b) => a - b).join(", ")}.`,
@@ -63,7 +72,14 @@ export function singleDatasetVersion(units: readonly AdminUnit[]): number {
 
 @injectable()
 export class UnitService {
-  constructor(@inject(ADMIN_UNIT_REPOSITORY) private readonly units: AdminUnitRepository) {}
+  constructor(
+    @inject(ADMIN_UNIT_REPOSITORY) private readonly units: AdminUnitRepository,
+    @inject(METRICS) private readonly metrics: MetricsRegistry,
+  ) {}
+
+  private readonly onMixedVersions = (): void => {
+    this.metrics.recordContractViolation("mixed_dataset_version");
+  };
 
   async getUnit(rawId: string): Promise<UnitView> {
     if (!/^\d+$/u.test(rawId)) {
@@ -74,7 +90,7 @@ export class UnitService {
     return {
       unit,
       children,
-      datasetVersion: singleDatasetVersion([unit, ...children]),
+      datasetVersion: singleDatasetVersion([unit, ...children], this.onMixedVersions),
     };
   }
 
@@ -83,6 +99,6 @@ export class UnitService {
     readonly datasetVersion: number;
   }> {
     const units = await this.units.listByLevel(parseLevel(rawLevel));
-    return { units, datasetVersion: singleDatasetVersion(units) };
+    return { units, datasetVersion: singleDatasetVersion(units, this.onMixedVersions) };
   }
 }

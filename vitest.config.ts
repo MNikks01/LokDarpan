@@ -16,6 +16,7 @@ export default defineConfig({
         "packages/money/src/**",
         "packages/neutrality/src/**",
         "packages/database/src/**",
+        "packages/observability/src/**",
         "services/api/src/**",
         "services/ingestion/src/**",
       ],
@@ -31,6 +32,7 @@ export default defineConfig({
         // Pure re-export barrels.
         "packages/contracts/src/index.ts",
         "packages/database/src/index.ts",
+        "packages/observability/src/index.ts",
         "services/ingestion/src/index.ts",
       ],
     },

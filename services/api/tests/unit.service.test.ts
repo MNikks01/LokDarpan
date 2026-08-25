@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { describe, expect, it } from "vitest";
 
+import { MetricsRegistry } from "@lokdarpan/observability";
+
 import { AppError } from "../src/errors/index.js";
 import type {
   AdminUnit,
@@ -105,7 +107,10 @@ describe("UnitService", () => {
   const mh = unit(20, 101, { nameEn: "Maharashtra", nameLocal: "महाराष्ट्र", lgdCode: "27" });
 
   it("returns a unit with its children and one dataset version", async () => {
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]));
+    const service = new UnitService(
+      new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]),
+      new MetricsRegistry(),
+    );
     const view = await service.getUnit("20");
     expect(view.unit.nameEn).toBe("Maharashtra");
     expect(view.unit.nameLocal).toBe("महाराष्ट्र");
@@ -114,23 +119,44 @@ describe("UnitService", () => {
   });
 
   it("refuses a unit whose children came from another ingest", async () => {
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]));
+    const service = new UnitService(
+      new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]),
+      new MetricsRegistry(),
+    );
     await expect(service.getUnit("20")).rejects.toThrow(/single dataset version/i);
   });
 
+  // The refusal is also an integrity alarm: it must be visible on /metrics,
+  // not only in a stack trace nobody is watching.
+  it("raises a contract-violation alarm when versions are mixed", async () => {
+    const metrics = new MetricsRegistry();
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]), metrics);
+    await expect(service.getUnit("20")).rejects.toThrow();
+    expect(metrics.render()).toContain(
+      'lokdarpan_contract_violation_total{kind="mixed_dataset_version"} 1',
+    );
+  });
+
+  it("raises no alarm when the payload is consistent", async () => {
+    const metrics = new MetricsRegistry();
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]), metrics);
+    await service.getUnit("20");
+    expect(metrics.render()).not.toContain("contract_violation");
+  });
+
   it("rejects a non-numeric id before touching the database", async () => {
-    const service = new UnitService(new FakeRepo(new Map()));
+    const service = new UnitService(new FakeRepo(new Map()), new MetricsRegistry());
     await expect(service.getUnit("../../etc/passwd")).rejects.toThrow(/positive integer/i);
     await expect(service.getUnit("-1")).rejects.toThrow(/positive integer/i);
   });
 
   it("propagates not-found", async () => {
-    const service = new UnitService(new FakeRepo(new Map()));
+    const service = new UnitService(new FakeRepo(new Map()), new MetricsRegistry());
     await expect(service.getUnit("404")).rejects.toThrow(AppError);
   });
 
   it("lists by level with a single dataset version", async () => {
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]])));
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]])), new MetricsRegistry());
     const result = await service.listByLevel("state");
     expect(result.units).toHaveLength(1);
     expect(result.datasetVersion).toBe(101);
