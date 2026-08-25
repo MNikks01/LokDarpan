@@ -17,6 +17,7 @@ export default defineConfig({
         "packages/neutrality/src/**",
         "packages/database/src/**",
         "services/api/src/**",
+        "services/ingestion/src/**",
       ],
       exclude: [
         "**/fixtures/**",
@@ -26,9 +27,11 @@ export default defineConfig({
         "services/api/src/index.ts",
         "packages/neutrality/src/cli.ts",
         "packages/database/src/cli.ts",
+        "services/ingestion/src/cli.ts",
         // Pure re-export barrels.
         "packages/contracts/src/index.ts",
         "packages/database/src/index.ts",
+        "services/ingestion/src/index.ts",
       ],
     },
   },

@@ -1,0 +1,2916 @@
+<!DOCTYPE html>
+
+<html lang="en-US" class="dyn detail-main-page dir-ltr contents fp-enabled" dir="ltr" style="overflow: visible; height: initial;">
+
+
+
+
+
+<head>
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LGD - Local Government Directory, Government of India</title>
+     <link rel="icon" href="resource/homebody-resource/images/favicon/lgdTitle1.ico" type="image/x-icon" />
+     <link rel="manifest" href="resource/homebody-resource/images/favicon/manifest.json"> 
+      
+     <!--Favicon-->
+
+    
+
+     
+    <meta content="Local Government Directory, Government of India" name="description">
+    
+    <meta content="" name="keywords">
+	
+	<!DOCTYPE html >
+<html >
+<!-- content="text/html; -->
+<meta  charset=utf-8" />
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/resource/common-resource/bootstrap-v5.3.7/bootstrap.min.css">
+<script type="text/javascript" src="/resource/common-resource/jquery.min.js"></script>  
+<script type="text/javascript" src="/resource/common-resource/jquery.cookie.js"></script> 
+
+<link rel="stylesheet" href="/resource/dashboard-resource/dist/css/skins/_all-skins.min.css">
+
+<link rel="stylesheet" href="/resource/common-resource/upgrade/css/jquery-ui.min.css">
+<link href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900"rel="stylesheet">
+<script type="text/javascript" src='/dwr/engine.js'> </script>
+<script type='text/javascript' src='/dwr/util.js'> </script>
+
+
+
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/bootstrap.bundle.min.js"></script>
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/bootstrap.min.js"></script>
+
+
+
+
+<script type="text/javascript" src="/resource/common-resource/jquery.validate.min.js"></script>   
+
+
+<script src="/resource/common-resource/jquery.blockUI.js"></script> 
+
+ 
+
+
+
+
+ <script src="/resource/common-resource/upgrade/js/jquery-ui.min.js"></script>
+ <script src="/resource/common-resource/jquery.format.js"></script> 
+
+ <script src="resource/dashboard-resource/plugins/fastclick/fastclick.min.js"></script>
+ <script src="resource/dashboard-resource/plugins/select2/select2.full.min.js"></script>
+
+<script src="/resource/common-resource/upgrade/js/jquery-migrate.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script defer src="https://egramswaraj.gov.in/pes_analytics/script.js" data-website-id="b6131538-6618-481e-bb6a-e6d4eccd1c80" data-performance="true"></script> <script defer src="https://egramswaraj.gov.in/pes_analytics/recorder.js" data-website-id="b6131538-6618-481e-bb6a-e6d4eccd1c80" data-sample-rate="0.15" data-mask-level="moderate" data-max-duration="300000"></script>
+
+<script>
+
+	dwr.engine.setErrorHandler(function(message,exception){
+		var form = document.getElementById("ajaxErrorFrom");			
+		form.submit();
+	});
+	window.onerror = noError;
+	
+	function noError() {
+		return true;
+	}
+
+	displayLoadingImage = function() {
+		  $.blockUI({ 
+				theme:true,
+				/* title: 'Loading...', */
+				message: "<div style='text-align: center'><img  src='/resource/dashboard-resource/dist/img/loader-lgd.gif'/></div>"
+		    });  
+		
+	};
+	
+	showLoadingImage = function() {
+		
+		//alert("mk");
+		// $("#dwrloaderModal").show();
+		
+		 $.blockUI({ 
+			theme:true,
+			/* title: 'Loading...', */
+			message: "<div style='text-align: center'><img  src='/resource/dashboard-resource/dist/img/loader-lgd.gif'/></div>"
+	    });  
+	};
+	
+	hideLoadingImage = function(){
+		  $.unblockUI();  
+		
+		// $("#dwrloaderModal").hide();
+		//$("#dwrloaderModal").hide();
+		
+	};
+	
+	 dwr.engine.setPreHook(showLoadingImage);
+	 dwr.engine.setPostHook(hideLoadingImage); 
+	
+	
+	 customAlert = function(message){
+			//alert(message);
+			$("#bsalertbody").text(message);
+			$('#cAlert').modal('show');	
+		};
+	
+	/* $(document).ready(function() {
+		$('#printable').dataTable({
+		});
+	}); */
+	
+	/* Added by Ripunj on 12-01-2015 for Draft alert message */
+	draftModeAlert = function(){
+		alert("Already Draft");
+	}
+	
+	/** 
+	 * The {@code isEmptyObject} used to check object / element  
+	 * is empty or undefined.
+	 */
+	var isEmptyObject = function(obj) {
+		if (jQuery.type(obj) === "undefined" || (obj == null || $.trim(obj).length == 0)) {
+			return true;
+		}
+		return false;
+	};
+	
+	var isParseJson=function(obj){
+		var temp=null;
+		try{
+			temp=$.parseJSON(obj);
+		}catch(err) {
+			temp=null;
+		}
+		return temp;
+	}
+
+	
+	</script>
+	<!-- <div id="cAlert"></div> -->
+		<div class="modal fade" id="cAlert" tabindex="-1" role="dialog" >
+						<div class="modal-dialog" >
+								<div class="modal-content">
+					  				<div class="modal-header">
+					  				<h4 class="modal-title">Alert</h4>
+					   					   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					  				</div>
+					  				<div class="modal-body" id="bsalertbody">
+					        
+					  				</div>
+					     			 
+							</div>
+						</div>
+					</div>
+<!-- Added by Sushil on 17-11-2014 -->
+
+ <link href="/resource/common-resource/bootstrap-v5.3.7/datatable/dataTables.bootstrap5.css" rel="stylesheet"> 
+ 
+ 
+ 
+ 
+
+<!-- DataTables CSS -->
+
+<!-- DataTables JS -->
+
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/datatable/dataTables.js"></script>
+
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/datatable/dataTables.bootstrap5.js"></script>
+
+
+
+
+
+
+    <!--  CSS -->
+    
+    <link href="/resource/common-resource/meeteiMayek.css" rel="stylesheet">
+    <link href="/resource/homebody-resource/css/lgd.css" rel="stylesheet">
+	<script src='/dwr/interface/lgdDwrInitialService.js'></script>
+
+
+
+
+    <script>
+        (function(d) {
+            d.className = "dyn" + d.className.substring(6, d.className.length);
+        })(document.documentElement);
+    </script>
+    <script>
+        window.isRTL = false;
+    </script>
+
+   
+   
+    <!-- <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="images/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff"> -->
+    <!--FontAwesome CSS-->
+ 	<link rel="stylesheet" href="/resource/homebody-resource/font-awesome-4.7.0/css/font-awesome.min.css">
+    
+    <!--JQuery-->
+   <!--  <script src="resource/homebody-resource/js/jquery.min.js"></script> -->
+    
+	<style>
+	.modal-open .modal {
+	    overflow-x: auto !important;
+	   
+	}
+	</style>
+</head>
+<body ng-app="app" block-ui="main" class="ng-scope block-ui block-ui-anim-fade fp-viewing-intro" aria-busy="false" style="overflow: visible; height: initial;">
+
+	<!-- Back To Top  -->
+    <div class="totop" ></div>
+   
+      
+  
+  
+
+		
+ <script type="text/javascript" src="/js/bhashiniScript.js"></script> 
+
+		<script type="text/javascript" src="/js/captcha.js"></script>
+
+   <script>var _JS_IS_LocalEnvironment =('' === 'true');</script>
+   <script>
+   $(function() {
+	   $('.font_resize').on('click', function() {
+	     $(this).text(function(i, text) {
+	       if (text === "A+"){
+	    	   $('body').removeClass("smallfont");
+	    	   $('body').toggleClass("bigfont");
+	       }else if(text === "A-"){
+	    	   $('body').removeClass("bigfont");
+	    	   $('body').toggleClass("smallfont");
+	       }else if(text === "A"){
+	    	   $('body').removeClass("bigfont smallfont");
+	       }
+	      
+	     })
+	     
+	   });
+	 });
+   </script>
+   <button class="navbar-toggler navbar-toggler-right text-white d-block d-lg-none float-right" type="button" data-toggle="collapse" 
+              data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+			Menu <i class="fa fa-bars"></i></button>
+    <section class="wrapper section-header-wrapper">
+        <div class="container-fluid container-header">
+            <div class="row">
+                <div class="col-2 col-lg-1 text-center"><img class="m-1 mt-lg-0 logo" src="/resource/homebody-resource/images/logo.png" alt="emblem" title="Home" class="img-fluid header-logo"></div>
+                <div class="col-10 col-lg-6">
+                	<div class="row">
+                		<div class="col-lg-10">
+                		 <p class="mb-1" title="LGD-03">
+                		 <span class="upperlogo box-upper-config d-flex">
+                		 <a href="welcome.do">Government of India</a>&nbsp;|&nbsp;<span class="orangefont"> <a href="welcome.do"> Ministry of Panchayati Raj</a></span> </span>
+                		 <span class="logo">Local Government Directory</span>
+                		<div class="box-base-config">
+                		<span class="lowerlogo  d-flex ">Facilitating Data Standardization, Data Sharing & Interoperability Among eGov Applications</span>
+                		</div> 
+                		
+                		 
+                		
+                		 </p>
+                		  
+                		</div>
+                		
+                		
+                	</div>
+                   
+                </div>
+                
+                
+                 <div class="col-12 col-lg-5 text-left">
+              
+                 <div class="collapse navbar-collapse  d-lg-block" id="navbarResponsive">
+               
+                 
+	                  
+                 
+                 <ul class="navbar-nav navbar-expand-lg mr-auto home_button ">
+                 
+                 
+                 
+                 			
+                              
+                                
+	                                
+									
+	                                 
+	                                 	<li class="nav-item btn px-1">
+	                                 		<a href="#" onclick="javascript:location.href='welcome.do?OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1';"
+	                                 		
+	                                 		 class="nav-link  px-1 ">
+	            										<i class="fa fa-2x fa-home" aria-hidden="true"></i>
+	                                 		</a>
+	                                 	</li>
+	                                 
+									
+								
+								
+								
+								
+
+                        </ul>
+                        </div>
+                 </div>   
+            </div>
+        </div>
+         <!-- BEGIN # MODAL LOGIN -->
+         <div class="modal" id="loginModal" style="z-index: 99999;">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content" id="login-content">
+				</div>
+			</div>
+		</div>
+        
+			
+            <!-- END # MODAL LOGIN -->
+
+    </section>
+    <!-- ///////////////////////////////////////////////Header Section //////////////////////////////////////////////////////////////////////-->
+  <Script type="text/javascript">
+            var viewLoginPopup = function() {
+            	
+            	$.ajax({
+  				  type: "GET",
+  				  url: "loginLdap.htm",
+  				  success: function(data){
+  					    //alert(data);
+  					$("#login-content").html(data);
+					$("#loginModal").modal('show');	
+  	  			  }
+  				});
+            	
+				/* $('#loginPopupFrame').attr('src', "login.htm?x=nonpopup");
+				$('#login-modal').modal('show')	 */
+        	};
+        	
+        	function closeIndexModal(){
+				$('#loginModal').modal('hide');
+			}
+         </Script>
+  
+  
+  
+  
+  
+  
+          <!-- accessibility panel -->
+           <link href="https://fonts.cdnfonts.com/css/open-dyslexic" rel="stylesheet"> 
+           <div   class="uwaw uw-light-theme gradient-head uwaw-initial paid_widget"   id="uw-main"   >    
+           <div class="relative second-panel">       
+	          <h3>Accessibility options by UX4G</h3>       
+	          <div class="uwaw-close" onclick="closeMain()"></div>    
+           </div> 
+           <div class="uwaw-body"> 
+                <div class="h-scroll">          
+             <div class="uwaw-features">             
+               <div class="uwaw-features__item reset-feature" id="featureItem_sp">  
+	                <button id="speak" class="uwaw-features__item__i"  data-uw-reader-content="Enable the UserWay screen reader"   
+	                aria-label="Enable the UserWay screen reader"    aria-pressed="false" > 
+ 		                <span class="uwaw-features__item__icon"><span class="ux4g-icon icon-speaker"> </span> </span>                
+ 		                <span class="uwaw-features__item__name">Text To Speech</span>                
+ 		                <span  class="tick-active uwaw-features__item__enabled reset-tick" id="tickIcon_sp" style="display: none"> </span>  
+ 	                </button>             
+                 </div>             
+                 <div class="uwaw-features__item reset-feature" id="featureItem"> 
+                 <button   id="btn-s9"  class="uwaw-features__item__i"  data-uw-reader-content="Enable the UserWay screen reader"   
+                 aria-label="Enable the UserWay screen reader" aria-pressed="false">  
+                 <span class="uwaw-features__item__icon">                   
+                 	<span class="ux4g-icon icon-bigger-text"> </span>  
+                 </span>   
+ 				<span class="uwaw-features__item__name">Bigger Text</span> 
+ 				<div  class="uwaw-features__item__steps reset-steps"     id="featureSteps"  >  
+				 Steps span tags will be dynamically added here 
+ 				</div>                  
+ 				 <span  class="tick-active uwaw-features__item__enabled reset-tick"  id="tickIcon"  style="display: none" ></span>   
+ 			</button>            </div>            <div class="uwaw-features__item reset-feature" id="featureItem-st">               <button                  id="btn-small-text"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >                  <span class="uwaw-features__item__icon">                  <span class="ux4g-icon icon-small-text"> </span> </span                     ><span class="uwaw-features__item__name">Small Text</span>                  <div                     class="uwaw-features__item__steps reset-steps"                     id="featureSteps-st"                     >                     Steps span tags will be dynamically added here                  </div>                  <span                     class="tick-active uwaw-features__item__enabled reset-tick"                     id="tickIcon-st"                     style="display: none"                     >                  </span>               </button>            </div>            <div class="uwaw-features__item reset-feature" id="featureItem-lh">               <button                  id="btn-s12"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >                  <span class="uwaw-features__item__icon">                  <span class="ux4g-icon icon-line-hight"> </span>                  </span>                  <span class="uwaw-features__item__name">Line Height</span>                  <div                     class="uwaw-features__item__steps reset-steps"                     id="featureSteps-lh"                     >                     Steps span tags will be dynamically added here                  </div>                  <span                     class="tick-active uwaw-features__item__enabled reset-tick"                     id="tickIcon-lh"                     style="display: none"                     >                  </span>               </button>            </div>            <div class="uwaw-features__item reset-feature" id="featureItem-ht">               <button                  id="btn-s10"                  onclick="highlightLinks()"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >               <span class="uwaw-features__item__icon">               <span class="ux4g-icon icon-highlight-links"> </span>               </span>               <span class="uwaw-features__item__name">Highlight Links</span>               <span                  class="tick-active uwaw-features__item__enabled reset-tick"                  id="tickIcon-ht"                  style="display: none"                  >               </span>               </button>            </div>            <div class="uwaw-features__item reset-feature" id="featureItem-ts">               <button                  id="btn-s13"                  onclick="increaseAndReset()"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >                  <span class="uwaw-features__item__icon">                  <span class="ux4g-icon icon-text-spacing"> </span>                  </span>                  <span class="uwaw-features__item__name">Text Spacing</span>                  <div                     class="uwaw-features__item__steps reset-steps"                     id="featureSteps-ts"                     >                     Steps span tags will be dynamically added here                  </div>                  <span                     class="tick-active uwaw-features__item__enabled reset-tick"                     id="tickIcon-ts"                     style="display: none"                     >                  </span>               </button>            </div>            <div class="uwaw-features__item reset-feature" id="featureItem-df">               <button                  id="btn-df"                  onclick="toggleFontFeature()"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >               <span class="uwaw-features__item__icon">               <span class="ux4g-icon icon-dyslexia-font"> </span>               </span>               <span class="uwaw-features__item__name">Dyslexia Friendly</span>               <span                  class="tick-active uwaw-features__item__enabled reset-tick"                  id="tickIcon-df"                  style="display: none"                  >               </span>               </button>            </div>            <div class="uwaw-features__item reset-feature" id="featureItem-hi">               <button                  id="btn-s11"                  onclick="toggleImages()"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >               <span class="uwaw-features__item__icon">               <span class="ux4g-icon icon-hide-images"> </span>               </span>               <span class="uwaw-features__item__name">Hide Images</span>               <span                  class="tick-active uwaw-features__item__enabled reset-tick"                  id="tickIcon-hi"                  style="display: none"                  >               </span>               </button>            </div>            <div               class="uwaw-features__item reset-feature"               id="featureItem-Cursor"               >               <button                  id="btn-cursor"                  onclick="toggleCursorFeature()"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >               <span class="uwaw-features__item__icon">               <span class="ux4g-icon icon-cursor"> </span>               </span>               <span class="uwaw-features__item__name">Cursor</span>               <span                  class="tick-active uwaw-features__item__enabled reset-tick"                  id="tickIcon-cursor"                  style="display: none"                  >               </span>               </button>            </div>            <div               class="uwaw-features__item reset-feature"               id="featureItem-ht-dark"               >               <button                  id="dark-btn"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >                  <span class="uwaw-features__item__name">                     <span class="light_dark_icon">                        <input                           type="checkbox"                           class="light_mode uwaw-featugres__item__i"                           id="checkbox"                           />                        <label for="checkbox" class="checkbox-label">                           <i class="fas fa-moon-stars">                           <span class="ux4g-icon icon-moon"></span>                           </i>                           <i class="fas fa-sun">                           <span class="ux4g-icon icon-sun"></span>                           </i>                           <span class="ball"></span>                        </label>                     </span>                     <span class="uwaw-features__item__name">Light-Dark</span>                  </span>                  <span                     class="tick-active uwaw-features__item__enabled reset-tick"                     id="tickIcon-ht-dark"                     style="display: none; pointer-events: none"                     >                  </span>               </button>            </div>    <div class="uwaw-features__item reset-feature" id="featureItem-ic">               <button                  id="btn-invert"                  class="uwaw-features__item__i"                  data-uw-reader-content="Enable the UserWay screen reader"                  aria-label="Enable the UserWay screen reader"                  aria-pressed="false"                  >               <span class="uwaw-features__item__icon">               <span class="ux4g-icon icon-invert"> </span>               </span>               <span class="uwaw-features__item__name">Invert Colors</span>               <span                  class="tick-active uwaw-features__item__enabled reset-tick"                  id="tickIcon-ic"                  style="display: none"                  >               </span>               </button>            </div>         </div>      </div>      Reset Button   </div>   <div class="reset-panel">      copyright accessibility bar      <div class="copyrights-accessibility">         <button class="btn-reset-all" id="reset-all" onclick="resetAll()">         <span class="reset-icon"> </span>         <span class="reset-btn-text">Reset All Settings</span>         </button>         <a href="https://www.ux4g.gov.in" target="_blank" class="copyright-text" contenteditable="false" style="cursor: pointer;">         <span class="uwaw-features__item__name ux4g-copy ux4g-copyright">Created by</span>         <img src="https://www.ux4g.gov.in/assets/img/logo/ux4g-logo.svg" alt="logo" loading="lazy">         </a>      </div>   </div></div><button   id="uw-widget-custom-trigger"   class="uw-widget-custom-trigger"   aria-label="Accessibility Widget"   data-uw-trigger="true"   aria-haspopup="dialog"><img src="data:image/svg+xml,%0A%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_1_1506)'%3E%3Cpath d='M16 7C15.3078 7 14.6311 6.79473 14.0555 6.41015C13.4799 6.02556 13.0313 5.47894 12.7664 4.83939C12.5015 4.19985 12.4322 3.49612 12.5673 2.81719C12.7023 2.13825 13.0356 1.51461 13.5251 1.02513C14.0146 0.535644 14.6383 0.202301 15.3172 0.0672531C15.9961 -0.0677952 16.6999 0.00151652 17.3394 0.266423C17.9789 0.53133 18.5256 0.979934 18.9101 1.55551C19.2947 2.13108 19.5 2.80777 19.5 3.5C19.499 4.42796 19.1299 5.31762 18.4738 5.97378C17.8176 6.62994 16.928 6.99901 16 7Z' fill='white'/%3E%3Cpath d='M27 7.05L26.9719 7.0575L26.9456 7.06563C26.8831 7.08313 26.8206 7.10188 26.7581 7.12125C25.595 7.4625 19.95 9.05375 15.9731 9.05375C12.2775 9.05375 7.14313 7.67875 5.50063 7.21188C5.33716 7.14867 5.17022 7.09483 5.00063 7.05063C3.81313 6.73813 3.00063 7.94438 3.00063 9.04688C3.00063 10.1388 3.98188 10.6588 4.9725 11.0319V11.0494L10.9238 12.9081C11.5319 13.1413 11.6944 13.3794 11.7738 13.5856C12.0319 14.2475 11.8256 15.5581 11.7525 16.0156L11.39 18.8281L9.37813 29.84C9.37188 29.87 9.36625 29.9006 9.36125 29.9319L9.34688 30.0112C9.20188 31.0206 9.94313 32 11.3469 32C12.5719 32 13.1125 31.1544 13.3469 30.0037C13.5813 28.8531 15.0969 20.1556 15.9719 20.1556C16.8469 20.1556 18.6494 30.0037 18.6494 30.0037C18.8838 31.1544 19.4244 32 20.6494 32C22.0569 32 22.7981 31.0162 22.6494 30.0037C22.6363 29.9175 22.6206 29.8325 22.6019 29.75L20.5625 18.8294L20.2006 16.0169C19.9387 14.3788 20.1494 13.8375 20.2206 13.7106C20.2225 13.7076 20.2242 13.7045 20.2256 13.7013C20.2931 13.5763 20.6006 13.2963 21.3181 13.0269L26.8981 11.0763C26.9324 11.0671 26.9662 11.0563 26.9994 11.0438C27.9994 10.6688 28.9994 10.15 28.9994 9.04813C28.9994 7.94625 28.1875 6.73813 27 7.05Z' fill='white'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_1_1506'%3E%3Crect width='32' height='32' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A"><span>Accessibility Options</span></button><!-- accessibility panel end -->
+			
+			
+			<script src="/resource//common-resource/UX4G/weights-v1.js"></script> 
+
+ 			<script>    document.getElementById('uw-widget-custom-trigger2').addEventListener('click', function() {    openMain();  });</script> 
+			
+ 			<link rel="stylesheet" href="/resource/common-resource/UX4G/accesibility-style-v2.1.css"> 
+			<!-- end of accessibility panel -->
+			
+			
+			
+<script>
+  const dropdownToggle = document.getElementById("navbarDropdown");
+  const dropdownMenu = dropdownToggle.nextElementSibling;
+
+  dropdownToggle.addEventListener("click", function (e) {
+    e.preventDefault();
+    dropdownMenu.classList.toggle("show");
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+      dropdownMenu.classList.remove("show");
+    }
+  });
+</script>
+    
+<link href="/resource/common-resource/upgrade/css/bootstrap-datepicker.css" rel="stylesheet"  />
+<script src="/resource/common-resource/upgrade/js/bootstrap-datepicker.min.js"></script>
+<!DOCTYPE html >
+<html >
+<!-- content="text/html; -->
+<meta  charset=utf-8" />
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/resource/common-resource/bootstrap-v5.3.7/bootstrap.min.css">
+<script type="text/javascript" src="/resource/common-resource/jquery.min.js"></script>  
+<script type="text/javascript" src="/resource/common-resource/jquery.cookie.js"></script> 
+
+<link rel="stylesheet" href="/resource/dashboard-resource/dist/css/skins/_all-skins.min.css">
+
+<link rel="stylesheet" href="/resource/common-resource/upgrade/css/jquery-ui.min.css">
+<link href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900"rel="stylesheet">
+<script type="text/javascript" src='/dwr/engine.js'> </script>
+<script type='text/javascript' src='/dwr/util.js'> </script>
+
+
+
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/bootstrap.bundle.min.js"></script>
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/bootstrap.min.js"></script>
+
+
+
+
+<script type="text/javascript" src="/resource/common-resource/jquery.validate.min.js"></script>   
+
+
+<script src="/resource/common-resource/jquery.blockUI.js"></script> 
+
+ 
+
+
+
+
+ <script src="/resource/common-resource/upgrade/js/jquery-ui.min.js"></script>
+ <script src="/resource/common-resource/jquery.format.js"></script> 
+
+ <script src="resource/dashboard-resource/plugins/fastclick/fastclick.min.js"></script>
+ <script src="resource/dashboard-resource/plugins/select2/select2.full.min.js"></script>
+
+<script src="/resource/common-resource/upgrade/js/jquery-migrate.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script defer src="https://egramswaraj.gov.in/pes_analytics/script.js" data-website-id="b6131538-6618-481e-bb6a-e6d4eccd1c80" data-performance="true"></script> <script defer src="https://egramswaraj.gov.in/pes_analytics/recorder.js" data-website-id="b6131538-6618-481e-bb6a-e6d4eccd1c80" data-sample-rate="0.15" data-mask-level="moderate" data-max-duration="300000"></script>
+
+<script>
+
+	dwr.engine.setErrorHandler(function(message,exception){
+		var form = document.getElementById("ajaxErrorFrom");			
+		form.submit();
+	});
+	window.onerror = noError;
+	
+	function noError() {
+		return true;
+	}
+
+	displayLoadingImage = function() {
+		  $.blockUI({ 
+				theme:true,
+				/* title: 'Loading...', */
+				message: "<div style='text-align: center'><img  src='/resource/dashboard-resource/dist/img/loader-lgd.gif'/></div>"
+		    });  
+		
+	};
+	
+	showLoadingImage = function() {
+		
+		//alert("mk");
+		// $("#dwrloaderModal").show();
+		
+		 $.blockUI({ 
+			theme:true,
+			/* title: 'Loading...', */
+			message: "<div style='text-align: center'><img  src='/resource/dashboard-resource/dist/img/loader-lgd.gif'/></div>"
+	    });  
+	};
+	
+	hideLoadingImage = function(){
+		  $.unblockUI();  
+		
+		// $("#dwrloaderModal").hide();
+		//$("#dwrloaderModal").hide();
+		
+	};
+	
+	 dwr.engine.setPreHook(showLoadingImage);
+	 dwr.engine.setPostHook(hideLoadingImage); 
+	
+	
+	 customAlert = function(message){
+			//alert(message);
+			$("#bsalertbody").text(message);
+			$('#cAlert').modal('show');	
+		};
+	
+	/* $(document).ready(function() {
+		$('#printable').dataTable({
+		});
+	}); */
+	
+	/* Added by Ripunj on 12-01-2015 for Draft alert message */
+	draftModeAlert = function(){
+		alert("Already Draft");
+	}
+	
+	/** 
+	 * The {@code isEmptyObject} used to check object / element  
+	 * is empty or undefined.
+	 */
+	var isEmptyObject = function(obj) {
+		if (jQuery.type(obj) === "undefined" || (obj == null || $.trim(obj).length == 0)) {
+			return true;
+		}
+		return false;
+	};
+	
+	var isParseJson=function(obj){
+		var temp=null;
+		try{
+			temp=$.parseJSON(obj);
+		}catch(err) {
+			temp=null;
+		}
+		return temp;
+	}
+
+	
+	</script>
+	<!-- <div id="cAlert"></div> -->
+		<div class="modal fade" id="cAlert" tabindex="-1" role="dialog" >
+						<div class="modal-dialog" >
+								<div class="modal-content">
+					  				<div class="modal-header">
+					  				<h4 class="modal-title">Alert</h4>
+					   					   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					  				</div>
+					  				<div class="modal-body" id="bsalertbody">
+					        
+					  				</div>
+					     			 
+							</div>
+						</div>
+					</div>
+<!-- Added by Sushil on 17-11-2014 -->
+
+ <link href="/resource/common-resource/bootstrap-v5.3.7/datatable/dataTables.bootstrap5.css" rel="stylesheet"> 
+ 
+ 
+ 
+ 
+
+<!-- DataTables CSS -->
+
+<!-- DataTables JS -->
+
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/datatable/dataTables.js"></script>
+
+
+<script src="/resource/common-resource/bootstrap-v5.3.7/datatable/dataTables.bootstrap5.js"></script>
+
+
+
+
+
+
+ <script type="text/javascript" src="/dwr/interface/lgdDwrStateService.js"></script>
+<script type="text/javascript" src="/dwr/interface/lgdDwrDistrictService.js"></script>
+<script type="text/javascript" src="/dwr/interface/lgdDwrSubDistrictService.js"></script>
+<script type="text/javascript" src="/dwr/interface/lgdDwrBlockService.js"></script>
+<script type="text/javascript" src="/dwr/interface/dwrReportService.js"></script>
+<script type="text/javascript" src="/dwr/interface/dwrRestructuredLocalBodyService.js"></script>
+<script type="text/javascript" src="/dwr/interface/lgdDwrStateService.js"></script>
+<script type="text/javascript" src="/dwr/interface/dwrReportService.js"></script>
+
+<script type='text/javascript'>
+$(document).ready(function() {
+
+	 $('#dialogBX').draggable({
+		    handle: ".modal-header"
+		});
+	
+	/* $('#example').dataTable({
+	        "lengthMenu": [[ 50,100, -1], [ 50,100, "All"]],
+	         "scrollX": true
+	    });  */
+	jQuery.validator.addMethod("customMandate", function(value, element) {
+		var status = true;
+		var radioVal = $('input:radio[name="searchCriteriaType"]').filter(":checked").val();
+		if(radioVal == "N"){
+			var entityCode = $('#entityCode').val(), entityName = $('#entityName').val();
+			if(isEmptyObject(entityCode) && isEmptyObject(entityName)){
+				status = false;
+			}
+		} 
+		return status;
+	});
+	jQuery.validator.addMethod("customMandateState", function(value, element) {
+		var status = true;
+		var radioVal=""
+		if($('input:radio[name="searchCriteriaType"]').length>0){
+			radioVal= $('input:radio[name="searchCriteriaType"]').filter(":checked").val();
+		}else{
+			radioVal="P";
+		}
+		if(radioVal == "P"){
+			if(isEmptyObject($('#ddSourceState').val())){
+				status = false;
+			}
+		} 
+		return status;
+	});
+	jQuery.validator.addMethod("customMandateDist", function(value, element) {
+		var status = true;
+		var radioVal=""
+			if($('input:radio[name="searchCriteriaType"]').length>0){
+				radioVal= $('input:radio[name="searchCriteriaType"]').filter(":checked").val();
+			}else{
+				radioVal="P";
+			}
+		if(radioVal == "P"){
+			if(isEmptyObject($('#ddSourceDistrict').val())){
+				status = false;
+			}
+		} 
+		return status;
+	});
+	jQuery.validator.addMethod("customMandateSubDist", function(value, element) {
+		var status = true;
+		var radioVal=""
+			if($('input:radio[name="searchCriteriaType"]').length>0){
+				radioVal= $('input:radio[name="searchCriteriaType"]').filter(":checked").val();
+			}else{
+				radioVal="P";
+			}
+		if(radioVal == "P"){
+			if(isEmptyObject($('#ddSourceSubDistrict').val())){
+				status = false;
+			}
+		} 
+		return status;
+	});
+	
+	jQuery.validator.addMethod("customMandateBlock", function(value, element) {
+		var status = true;
+		var radioVal=""
+			if($('input:radio[name="searchCriteriaType"]').length>0){
+				radioVal= $('input:radio[name="searchCriteriaType"]').filter(":checked").val();
+			}else{
+				radioVal="P";
+			}
+		if(radioVal == "P"){
+			if(isEmptyObject($('#ddSourceBlock').val())){
+				status = false;
+			}
+		} 
+		return status;
+	});
+	
+	 
+	 $('form').each(function(){
+        if($(this).attr('id') == "genericReportingEntity"){
+        	$("#genericReportingEntity").validate({
+                ignoreTitle: true ,
+                submitHandler: function (form) {
+                	form.submit();
+                } 
+            }); 
+    		validationForm(); 
+    	}
+    });
+	
+	$("#entityCode").numeric({ decimal: false, negative: false }, function() {
+		this.value = ""; this.focus(); 
+	});
+});
+	
+	
+ var viewEntityDetailsInPopup = function (entityCode, cusurl, paramName)	{
+	if( isEmptyObject(entityCode) ){
+		/* customAlert("No Record(s) found."); */
+		$('#customAlertbody').text("No Record(s) found.");
+		$('#customAlert').modal('show');
+		return false;
+	}
+	/* $("#myIframe").contents().find("body").html('');
+	$("#dialogBX").dialog({
+		dialogClass: 'noTitleStuff',
+	    modal: true,
+	    width:950,
+	    height: 700,
+	    resizable:false ,
+	    "open": function(){
+	    	showLoadingImage();
+	    	 $('#myIframe').attr('src', cusurl + "?" + paramName + "=" + entityCode + "&OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1");  
+             $("#myIframe").load(function(){
+            	 hideLoadingImage(); 
+		    });  
+    	},
+    });	
+	$(".ui-dialog-titlebar").removeClass('ui-widget-header'); */
+	//$("#dialogBXTitle").text('GIS Map View ( Local Body Code : ' + localBodyCode + ' , Local Body Name : ' + localBodyName + ' )');
+	$("#dialogBXTitle").text("View Details");
+	 $('#myIframe').attr('src',  cusurl + "?" + paramName + "=" + entityCode + "&OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1");
+	 /*  $("#myIframe").load(function(){
+		  hideLoadingImage(); 
+   });  */
+	$('#dialogBX').modal('show'); 
+}; 
+
+
+
+var viewLandRegionGISMapInPopup = function (lvCode, inParam, localGovBodyType,entityType)	{
+	
+	dwrReportService.getEntitywiseParentDetails(entityType, parseInt(inParam), {
+  	 	callback: function( obj ) {
+  	 		$("#dialogBXTitle").text(obj);
+  	 		$('#myIframe').attr('src',  "showGisView.do" + "?lvCode=" + lvCode +"&inParam=" + inParam + "&localGovBodyType=" + entityType + "&OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1");
+  	 		$("#dialogBXFooter").text("Map data source: Bharat Maps. The data is for reference purposes only.");
+  	 		$('#dialogBX').modal('show'); 
+  	 	
+  	 	},
+  	 	errorHandler : function(exception) { customAlert(exception); },
+		async : true
+		});
+	
+	
+	
+}; 
+
+
+ var displayMap = function (inputCode, mapLevel, lrlb, vpFlag, vpStateCode) {
+	var sharedObject = {};
+	sharedObject.inputparam = inputCode;
+	sharedObject.levelCode = mapLevel;
+	sharedObject.localGovBodyType = lrlb;
+	sharedObject.vpFlag = vpFlag;
+	sharedObject.stateCode = vpStateCode;
+	var sOptions = "dialogWidth:940px; dialogHeight:660px; dialogLeft: 300; dialogTop: 350; scroll:no; center:yes; resizable: no; status:no; edge:sunken;unadorned :yes";
+	
+	if(window.showModalDialog){
+		showModalDialog("gisMapViewInModal.do", sharedObject, sOptions);
+	} else {
+		var modal=window.open("gisMapViewInModal.do", null, sOptions);
+		 modal.dialogArguments = sharedObject;
+		 
+	}
+}; 
+
+var retrieveFile1 = function (entityCode, entityType) {
+	lgdDwrStateService.getGovtOrderByEntityCode( parseInt(entityCode), entityType, {
+  	 	callback: function( result ) {
+  	 		
+  	 		if(result == null){
+  	 			/* customAlert("No Government Order found."); */
+  	 			$('#customAlertbody').text('No Government Order found');
+  	 			$('#customAlert').modal('show');
+  	 		} else {
+  	 			var filePath = result[0].filelocation;
+  				lgdDwrStateService.openFile(filePath, {
+  				  	callback: function( innerResult ) {
+  				  		if(innerResult == null ) {
+  						 	/* customAlert("File has been moved or deleted."); */
+  				  		$('#customAlertbody').innerHtml='File has been moved or deleted';
+  				  	    $('#customAlert').modal('show');
+  						} else {
+  							if(innerResult.length > 5)	{
+  								var message = innerResult.substring(0,5);
+  								if(message == "ERROR") {
+  									/* customAlert( innerResult ); */
+  									$('#customAlertbody').text(innerResult);
+  					  	 			$('#customAlert').modal('show');
+  									
+  								}else{
+  									var filename= innerResult.split('/').pop();
+  									$(window).attr("location","downloadReportGO.do?filename="+ filename +"&OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1");
+  								}
+  				 			}
+  						}
+  				  	},	
+  					errorHandler : function(exception) {
+  						/* customAlert(exception); */
+  						$('#customAlertbody').text(exception);
+			  	 			$('#customAlert').modal('show');
+  					
+  					},
+  					async : true  
+  			  	});
+  	 		}
+  	 	},
+  	 	errorHandler : function(exception) { customAlert(exception); },
+		async : true
+		});
+}
+
+
+var buildDistrict = function(stateCode){
+	lgdDwrDistrictService.getDistrictList(parseInt(stateCode), {
+		callback : function( result ) {
+			var options = $("#ddSourceDistrict"); 
+			jQuery.each(result, function(index, obj) {
+				var option = $("<option />");
+				option.val(obj.districtCode).text(obj.districtNameEnglish);
+				options.append(option);
+			});
+		},
+		errorHandler : function(errorString, exception) { alert(errorString + " Vinay"); alert(exception); },
+		async : true
+	});
+};
+
+var buildSubDistrict = function(districtCode){
+	lgdDwrSubDistrictService.getSubDistrictList(parseInt(districtCode), {
+		callback : function( result ) {
+			var options = $("#ddSourceSubDistrict"); 
+			jQuery.each(result, function(index, obj) {
+				var option = $("<option />");
+				option.val(obj.subdistrictCode).text(obj.subdistrictNameEnglish);
+				options.append(option);
+			});
+		},
+		errorHandler : function(errorString, exception) { alert(errorString + " Bauwa"); alert(exception); },
+		async : true
+	});
+};
+
+var buildBlock = function(districtCode){
+	lgdDwrBlockService.getBlockListbyDistrict(parseInt(districtCode), {
+		callback : function( result ) {
+			var options = $("#ddSourceBlock"); 
+			jQuery.each(result, function(index, obj) {
+				var option = $("<option />");
+				option.val(obj.blockCode).text(obj.blockNameEnglish);
+				options.append(option);
+			});
+		},
+		errorHandler : function(errorString, exception) { alert(errorString + " Bauwa"); alert(exception); },
+		async : true
+	});
+}; 
+
+
+var _JS_STATE_CODE;
+
+removeAllOptions=function(id){
+	dwr.util.removeAllOptions(id);
+};
+
+var buildLocalbodyHierarchy = function(stateCode){
+    _JS_STATE_CODE = stateCode;
+    removeAllOptions('lbTypeHierarchy');
+    dwrRestructuredLocalBodyService.getLBTypeHierarchyStateWiseDetials(parseInt(stateCode), {
+        callback: function(result) {
+            var options = $("#lbTypeHierarchy");
+            
+            // Filter the result to find items with hierarchyType 'P'
+            var filteredResults = result.filter(function(obj) {
+                return obj.hierarchyType === 'P';
+            });
+            
+            if (filteredResults.length === 1) {
+                // If there's only one item with hierarchyType 'P', load it directly
+                var obj = filteredResults[0];
+                var _obj_value = obj.localBodySetupCode + "," + obj.localBodySetupVersion + "," + obj.hierarchyType;
+                options.append($("<option />").val(_obj_value).text(obj.localBodyTypeHierarchy));
+                options.val(_obj_value); // Automatically select this option
+                selLocalBody();
+            } else {
+                // If there are multiple items, or none, show the select option
+                var option = $("<option/>");
+                $(option).val("").text("----------Select----------");
+                options.append(option);
+                
+                jQuery.each(result, function(index, obj) {
+                    if (obj.hierarchyType === 'P') {
+                        var option = $("<option />");
+                        var _obj_value = obj.localBodySetupCode + "," + obj.localBodySetupVersion + "," + obj.hierarchyType;
+                        option.val(_obj_value).text(obj.localBodyTypeHierarchy);
+                        options.append(option);
+                    }
+                });
+            }
+        },
+        errorHandler: function(errorString, exception) {
+            alert(errorString + " dwr");
+            alert(exception);
+        },
+        async: true
+    });
+};
+
+
+
+/**
+ * The {@code registerCallLocalBodyType} function to call dwr event
+ * to retrieve List of Local Body Types.
+ * @param setupCode
+ * @param setupVersion
+ */
+var registerCallLocalBodyType = function() {
+	$('#localBodyType option[value != ""]').remove();
+	var _lb_type_value = $('#lbTypeHierarchy option:selected').val();
+	if (!$_checkEmptyObject(_lb_type_value)) {
+		var optVaues = _lb_type_value.split(',');
+		var setupCode = optVaues[0]; // local body setup code
+		var setupVersion = optVaues[1]; // local body setup version
+		dwrReportService.buildLocalBodyHierarchyWithCategorywithCantonmentRPT(parseInt(setupCode), parseInt(setupVersion), {
+			callback : populateLBType,
+			errorHandler : errorLbTypeProcess,
+			async : true
+		});
+	}
+};
+
+/**
+ * The {@code populateLBType} used for build drop-down box with 
+ * Local Body Type Values. 
+ */
+var populateLBType = function(result) {
+	var options = $("#localBodyType");
+	jQuery.each(result, function(index, obj) {
+		var option = $("<option />");
+		var setOptValue = obj.localBodyTypeCode + "_" + obj.tierSetupCode + "_" + obj.parentTierSetupCode + "_" + obj.lbLevel+"_"+obj.lbCategory;
+		option.val(setOptValue).text(obj.name);
+		if (obj.lbLevel === "D" || obj.lbLevel === "I") {
+            option.hide();
+        }
+		/* if (_JS_LOCAL_BODY_CREATION_TYPE != obj.lbType) {
+			option.attr("disabled", true);
+		} */
+		options.append(option);
+	});
+};
+
+
+/**
+ * The {@code errorLbTypeProcess} called when error 
+ * occured while DWR call {@link buildLocalBodyHierarchy}.
+ */
+var errorLbTypeProcess = function() {
+	$("#errorLocalBodyType").html("Invalid Local Body Type");
+};
+
+
+/**
+ * The {@code registerCallDynamicHierarchy} function to call dwr event
+ * to build dynamic hierarchy based on local body type.
+ */
+ var lastEntityId="";
+ var registerCallDynamicHierarchy = function(obj) {
+ 	 $("#divCreateDynamicHierarchy").empty();
+ 	 var divTemplate = $("#divCreateDynamicHierarchy");
+ 	 var isDWRCallRequired = true;
+ 	 var localBodyTypeElement = $('#localBodyType option[value != ""]');
+ 	 
+ 	 $(localBodyTypeElement).each(function(index){
+ 		 var localbodyTypeArray = $(this).val().split("_");
+ 		 var localbodyTypeCode = localbodyTypeArray[0];
+ 		 var tiersetupCode = localbodyTypeArray[1];
+ 		 var parentTiersetupCode = localbodyTypeArray[2];
+ 		 var category= localbodyTypeArray[4];
+ 		 if((obj.selectedIndex > index) && (obj.value != localbodyTypeCode ) && (category!="U") ){
+ 			 
+ 		    var localbodyTypeName = $(this).text();
+ 		    
+ 		    var templateUL = $("<div/>");
+ 		    templateUL.addClass("form-group row ");
+ 		    
+ 		   
+ 			
+ 		    // Added Label Elements
+ 			var templateLabel = $("<label/>");
+ 			templateLabel.html("Select " + localbodyTypeName + " <span class='mandatory'>*</span>");
+ 			templateLabel.addClass('col-sm-4 control-label text-right');
+ 			
+ 			 // Added Li Elements for UL
+ 			var templateLI = $("<div/>");
+ 			 templateLI.addClass("col-sm-6");
+ 			
+ 			
+ 			// Added Html Select Elements
+ 			var templateSelect = $("<select/>");
+ 			templateSelect.attr("id", "localBodyLevelCodes_" + tiersetupCode + "_" + parentTiersetupCode);
+ 			templateSelect.attr("name", "localBodyLevelCodes");
+ 			
+ 			templateSelect.addClass("form-control");
+ 			 
+ 			$(templateSelect).change(function() {
+ 				$( this ).removeClass("error");
+ 				$( '#error' + $( this ).attr('id') ).text("");
+ 				if(index != (obj.selectedIndex - 1)){
+ 					configureLocalBodyTypeHierarchy(this);	
+ 				}
+ 			});
+ 			lastEntityId="localBodyLevelCodes_" + tiersetupCode + "_" + parentTiersetupCode;
+ 			var options = $(templateSelect);
+ 			options.append($("<option />").val("").text("Select"));
+ 			if(isDWRCallRequired){
+ 				isDWRCallRequired = false;
+ 				buildDistrictPanchayatOptions(options, localbodyTypeCode);
+ 			}
+ 			
+ 			var templateError = $("<span/>");
+ 			templateError.attr("id", "error" + $(templateSelect).attr('id'));
+ 			templateError.attr("class", "mandatory");
+ 			
+ 			// Adding Dynamic Elements to Template Div.
+ 			templateUL.append(templateLabel);
+ 			templateUL.append(templateLI);
+ 			templateLI.append(templateSelect);
+ 			templateLI.append(templateError);
+ 			
+ 			divTemplate.append(templateUL);
+ 		 } else {
+ 		 }
+ 	});
+ 	 
+ 	 var localbodyTypeArray = $("#localBodyType").val().split("_");
+ 	 var localbodyTypeCode = localbodyTypeArray[0];
+ 	 var category= localbodyTypeArray[4];
+ 	 if(category=="U"){
+
+ 		 var localbodyTypeName = $('#localBodyType').find(":selected").text();
+ 		    
+ 		    var templateUL = $("<div/>");
+ 		    templateUL.addClass("form-group row");
+ 		    
+ 		   
+ 			
+ 		    // Added Label Elements
+ 			var templateLabel = $("<label/>");
+ 			templateLabel.html("Select " + localbodyTypeName + " <span class='mandatory'>*</span>");
+ 			templateLabel.addClass('col-sm-4 control-label text-right');
+ 			
+ 			 // Added Li Elements for UL
+ 			var templateLI = $("<div/>");
+ 			 templateLI.addClass("col-sm-6");
+ 			
+ 			
+ 			// Added Html Select Elements
+ 			var templateSelect = $("<select/>");
+ 			templateSelect.attr("id", "localBodyUrbanLevelCodes");
+ 			templateSelect.attr("name", "localBodyLevelCodes");
+ 			templateSelect.addClass("form-control");
+ 			lastEntityId="localBodyUrbanLevelCodes";
+ 			var options = $(templateSelect);
+ 			options.append($("<option />").val("").text("Select"));
+ 			if(isDWRCallRequired){
+ 				isDWRCallRequired = false;
+ 				buildDistrictPanchayatOptions(options, localbodyTypeCode);
+ 			}
+ 			var templateError = $("<span/>");
+ 			templateError.attr("id", "error" + $(templateSelect).attr('id'));
+ 			templateError.attr("class", "mandatory");
+ 			
+ 			// Adding Dynamic Elements to Template Div.
+ 			templateUL.append(templateLabel);
+ 			templateUL.append(templateLI);
+ 			templateLI.append(templateSelect);
+ 			templateLI.append(templateError);
+ 			
+ 			divTemplate.append(templateUL);
+ 	 }
+ };
+
+
+
+/**
+ * The {@code $_checkEmptyObject} used to check object / element  
+ * is empty or undefined.
+ */
+var $_checkEmptyObject = function(obj) {
+	if (jQuery.type(obj) === "undefined" || (obj == null || $.trim(obj).length == 0)) {
+		return true;
+	}
+	return false;
+};
+
+/**
+ * The {@code buildDistrictPanchayatOptions} used create select box options at 
+ * District Panchayat Level. 
+ * @param elementTemplate (Element Template for given select box instance)
+ * @param localbodyTypeCode
+ */
+var buildDistrictPanchayatOptions = function(elementTemplate, localbodyTypeCode) {
+	
+		dwrRestructuredLocalBodyService.getDistrictPanchayatListRPT(parseInt(localbodyTypeCode), parseInt(_JS_STATE_CODE), null, null,{
+			callback : callbackHandlerForDPOptions,
+			callbackArg : elementTemplate,
+			async : true,
+			errorHandler : handleDistrictErrorExtend
+		});	
+	
+};
+
+function handleDistrictErrorExtend() {
+	alert("data not found!");
+
+}
+
+/**
+ * The {@code callbackHandlerForDPOptions} used create select box options at 
+ * Local Body Level using selected local body code for district and state users. 
+ * @param result Object Array returns from call back
+ * @param elementTemplate (Element Template for given select box instance)
+ */
+var callbackHandlerForDPOptions = function (result, elementTemplate){
+	jQuery.each(result, function(index, obj) {
+		var optionText = obj.localBodyNameEnglish;
+		var option = $("<option />");
+		/* if (obj.isDisturbed) {
+			option.attr("disabled", true);
+			optionText = optionText.concat(" (Local Body is Disturbed)");
+		}
+		if (obj.isUsed) {
+			option.attr("disabled", true);
+			optionText = optionText.concat(" (Local Body is being used as Drafted)");
+		} */
+		option.val(obj.localBodyCode).text(optionText);
+		elementTemplate.append(option);
+	});
+};
+
+
+/**
+ * The {@code configureLocalBodyTypeHierarchy} function used to configue 
+ * child nodes local bodies based on Parent LB code.
+ */
+var configureLocalBodyTypeHierarchy = function(object){
+	var localBodyCode = $(object).val();
+	var elementIdArray =  $(object).attr('id').split("_");
+	var selectedElementId = elementIdArray[0]; 
+	var selectedElementTiersetupCode = elementIdArray[1];
+	var childNode = null;
+	var nextParent = selectedElementTiersetupCode;
+	
+	$('#localBodyType option[value != ""]').each(function(index){
+		
+		var localbodyTypeArray = $(this).val().split("_");
+		var tiersetupCode = localbodyTypeArray[1];
+		var parentTiersetupCode = localbodyTypeArray[2];
+		
+		//Used to remove child nodes of selected Local Body.
+		if(nextParent != tiersetupCode && selectedElementTiersetupCode != tiersetupCode){
+			$('#' + selectedElementId + "_" + tiersetupCode + "_" + nextParent +' option[value != ""]').remove();
+		}
+		nextParent = tiersetupCode;
+		
+		//Used for assign element Id to next child nodes of selected Local Body.
+		if(selectedElementTiersetupCode == parentTiersetupCode){
+			childNode  = selectedElementId + "_" + tiersetupCode + "_" + selectedElementTiersetupCode;
+		}
+	});
+	if(!$_checkEmptyObject(localBodyCode)){
+		buildParentwisePanchayatOptions(childNode, localBodyCode);
+	}
+};
+
+
+/**
+ * The {@code buildParentwisePanchayatOptions} used create select box options at 
+ * Local Body Level using selected local body code as parent. 
+ * @param elementNode (Element Template for given select box instance)
+ * @param localBodyCode
+ */
+var buildParentwisePanchayatOptions = function (elementNode , localBodyCode){
+	dwrRestructuredLocalBodyService.getParentwiseLocalBodyRPT(parseInt(localBodyCode), null, null, {
+		callback : function(result){
+			var options = $("#" + elementNode);
+			jQuery.each(result, function(index, obj) {
+				var optionText = obj.localBodyNameEnglish;
+				var option = $("<option />");
+				/* if (obj.isDisturbed) {
+					option.attr("disabled", true);
+					optionText = optionText.concat(" (Local Body is Disturbed)");
+					
+				}
+				if (obj.isUsed) {
+					option.attr("disabled", true);
+					optionText = optionText.concat(" (Local Body is being used as Drafted)");
+				} */
+				option.val(obj.localBodyCode).text(optionText);
+				options.append(option);
+			});
+		},
+		async : true
+	});	
+};
+
+
+function submitData(){
+	setLBLC($("#"+lastEntityId).val());
+	var stateId=$("#state");
+	if( $_checkEmptyObject($( stateId ).val()) ){
+		$(stateId).addClass("error");
+		$( '#errSelectState' ).text("Select State");
+		return false;
+	} else {
+		$( '#errSelectState' ).text("");
+	}
+	
+	var lbTypeHierarchylement = $( '#lbTypeHierarchy' );
+	if( $_checkEmptyObject($( lbTypeHierarchylement ).val()) ){
+		$(lbTypeHierarchylement).addClass("error");
+		$( '#errorLbTypeHierarchy' ).text("Please choose a Hierarchy");
+		return false;
+	} else {
+		$( '#errorLbTypeHierarchy' ).text("");
+	}
+	
+	var localBodyTypeElement = $( '#localBodyType' );
+	var selectedlocalBodyType = $( localBodyTypeElement ).val();
+	if( $_checkEmptyObject(selectedlocalBodyType) ){
+		$(localBodyTypeElement).addClass("error");
+		$( '#errorLocalBodyType' ).text("Please select the local body type");
+		return false;
+	} else {
+		$( '#errorLocalBodyType' ).text("");
+	}
+	
+	/* var element = $( '[name = localBodyLevelCodes]' );
+	var localBodyElement = $( element )[$( element ).length - 1];
+	if(!$_checkEmptyObject(localBodyElement) && !validateLBCode(localBodyElement)){
+		return false;
+	} */
+
+	var captchaAnswer=$("#captchaAnswer" );
+	if( $_checkEmptyObject(captchaAnswer.val()) ){
+		$(captchaAnswer).addClass("error");
+		$( '#errorCaptcha' ).text("Please Enter CAPTCHA in the textbox");
+		return false;
+	
+	} else {
+		$( '#errorCaptcha' ).text("");
+	}
+	
+	buildHierachyMessage();
+
+	
+}
+
+
+function setLBLC(id) {
+	// alert("lblc:"+id);
+	//remove_error(1);
+	 if (typeof id === 'undefined') {
+        id = null;
+    }
+	document.getElementById('localBody').value = id;
+	// alert(document.getElementById('lblc').value);
+	/* setButton(false); */
+}
+
+
+buildHierachyMessage=function(){
+	var obj=$("#localBodyType")[0];	
+	var stateName=$("#state").find('option:selected').text();
+	 var localBodyTypeElement = $('#localBodyType option[value != ""]');
+		 var msgElement=[];
+		 var elementIndex=-1;
+		 $(localBodyTypeElement).each(function(index){
+			 var localbodyTypeArray = $(this).val().split("_");
+			 var localbodyTypeCode = localbodyTypeArray[0];
+			 var tiersetupCode = localbodyTypeArray[1];
+			 var parentTiersetupCode = localbodyTypeArray[2];
+			 var category= localbodyTypeArray[4];
+			 if((obj.selectedIndex  > index)  && (category!="U") ){
+				 
+			    var localbodyTypeName = $(this).text();
+			    msgElement[++elementIndex]=localbodyTypeName;
+			    //alert(localbodyTypeName);
+			    if(obj.selectedIndex-1  > index){
+			    	
+			    	  var localbodyValue=$("#localBodyLevelCodes_"+tiersetupCode+"_"+parentTiersetupCode).find('option:selected').text();
+			    	  msgElement[++elementIndex]=localbodyValue;
+					    //alert(localbodyValue);
+			    } 
+			  
+			 }else if((category=="U") && (obj.selectedIndex -1 == index) ){
+				 var localbodyTypeName = $(this).text();
+				    msgElement[++elementIndex]=localbodyTypeName;
+			 }
+			 
+			 
+		 }); 
+			   //alert(msgElement.length);
+			   var msg="";
+			   if(parseInt(msgElement.length)==5){
+				  msg= msgElement[4]+" of "+msgElement[3]+"("+msgElement[2]+"),"+msgElement[1]+"("+msgElement[0]+"),"+stateName;
+			   }else if(parseInt(msgElement.length)==3){
+				   msg=msgElement[2]+" of "+msgElement[1]+"("+msgElement[0]+"),"+stateName;
+			   }else{
+				   msg=msgElement[0]+" of "+stateName;
+			   }
+			   $("#entitesForMsg").val(msg);
+	};
+	
+	
+	var element = $( '[name = localBodyLevelCodes]' );
+	var localBodyElement = $( element )[$( element ).length - 1];
+	var validateLBCode = function (localBodyElement){
+		var _error_flag=true;
+		 if($_checkEmptyObject($( localBodyElement ).val())){
+			 var elements = $( '[name = localBodyLevelCodes]' );
+		
+			 $(elements).each(function(index){
+				 
+				 if($_checkEmptyObject($( this ).val())){
+					$( this ).addClass("error");
+					$( '#error' + $( this ).attr('id') ).text("Please Select Local Body");	
+					_error_flag=false;
+				 } else {
+					 $( '#error' + $( this ).attr('id') ).text("");
+				 }
+			 });
+			 
+		}
+		
+		return _error_flag; 
+	};
+</script>
+<style>
+   #divCreateDynamicHierarchy {
+   width: 100%;
+   
+    }
+   
+</style>
+
+  <div class="modal fade" id="dialogBX" tabindex="-1" role="dialog" >
+									<div class="modal-dialog modal-lg" style="width:950px;height:600px">
+											<div class="modal-content">
+								  				<div class="modal-header">
+								  				<h3 class="modal-title" id="dialogBXTitle">View Details</h3>
+								   				   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+								    			  	
+								    			  	
+								  				</div>
+								  				<div class="modal-body" id="dialogBXbody">
+								        			<iframe id="myIframe" width="760" height="550"></iframe>
+								        			
+								     			 
+												</div>
+												<!-- Modal Footer -->
+										      <div class="modal-footer justify-content-between">
+										         <small class="text-muted">
+												         <div id="dialogBXFooter">
+												        
+												        </div>
+										         </small>
+										       
+										        
+										      </div>
+												
+									</div>
+								</div>
+							</div>
+
+
+
+
+
+
+<script type="text/javascript" src='/dwr/engine.js'> </script>
+<script type='text/javascript' src='/dwr/util.js'> </script>
+
+<!-- <style>
+
+body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    min-height: 100%;
+    font-family: 'Open Sans', sans-serif;
+    color: #4f5f6f;
+    overflow-x: visible; }
+
+</style> -->
+<link rel="stylesheet" href="js/pdf/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="js/pdf/css/buttons.dataTables.min.css"> 
+<script type="text/javascript" src="js/pdf/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="js/pdf/dataTables.buttons.min.js"></script> 
+<script type="text/javascript" src="js/pdf/buttons.flash.min.js"></script> 
+<script type="text/javascript" src="js/pdf/jszip.min.js"></script>
+<script type="text/javascript" src="js/pdf/pdfmake.min.js"></script>
+<script type="text/javascript" src="js/pdf/vfs_fonts.js"></script> 
+<script type="text/javascript" src="js/pdf/buttons.html5.min.js"></script>
+<script type="text/javascript" src="js/pdf/buttons.print.min.js"></script>  
+<script type="text/javascript" class="init">
+
+$(document).ready(function () {
+    $("#view_state_table").DataTable({
+        dom: 'Bfrtip',
+        pageLength: 100,
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                className: 'btn btn-success btn-sm',
+                text: '<i class="fas fa-file-excel"></i> Spreadsheet'
+            },
+            {
+                extend: 'pdfHtml5',
+                className: 'btn btn-danger btn-sm',
+                text: '<i class="fas fa-file-pdf"></i> Print',
+                title: "List of States",
+                footer: true,
+                orientation: 'landscape',
+                pageSize: 'A4'
+            }
+        ]
+    });
+
+    $('#actionFetchDetails').click(function () {
+        validationForm();
+        $("#entitesForMsg").val($("#ddSourceState option:selected").text());
+    });
+});
+
+	
+	var validationForm = function (){
+		$("#captchaAnswer" ).rules( "add", {
+			
+	 		  required : true, messages: {required : "<font color='red'>Please enter the text shown above.</font>"}
+		});
+	}
+</script>
+<style>
+.modal.fade.in{
+	opacity:1;
+}
+
+.btn-success:hover,
+.btn-danger:hover {
+    background-color: inherit !important;
+    color: inherit !important;
+    border-color: inherit !important;
+}
+
+</style>
+
+<section class="content">
+
+ <!-- Main row -->
+ <div class="row">
+     <!-- main col -->
+	<div class="container-fluid">
+	<section class="col-lg-12 prebox">
+     	<div class="card">
+            <div class="card-header with-border">
+              <h3 class="card-title">
+           
+           Local Government Directory (LGD) Codes of States/Union Territories (UTs)
+              </h3>
+              
+              <div class="float-end">
+              	<a class="hyperlink" href="citizenFeedback.do?OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1">
+              		<i class="fa fa-flag" aria-hidden="true"></i> Report Issue 
+              	</a>
+              </div>
+              
+            </div><!-- /.card-header -->
+                
+                <!-- form start -->
+                <form id="genericReportingEntity" class="form-horizontal" action="globalViewStateRepport.do" method="POST">
+				<input type="hidden" name="OWASP_CSRFTOKEN"	value="BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1" />
+					<input id="entitesForMsg" name="entitesForMessage" type="hidden" value=""/>
+					<!-- <div id="dialogBX" style="display: none;">
+						<iframe id="myIframe" width="910" height="650"></iframe>
+					</div> -->
+					
+					
+					 	 
+					  
+							
+				                  <table><tr>
+		                              <th><font color="red">*</font> Note : UT-Union Territory</th>
+		                                  </tr>
+		
+		                                  </table>
+				                  <div class="table-responsive ">
+				                   <table class="table table-striped table-bordered border" id="view_state_table">
+										<thead>
+											<tr>
+												<th >S No</th>
+												<th >
+												State LGD Code
+												</th>
+												<th >State Name (In English)</th>
+												<th >State Name (In Local language)</th>
+												 <th >State or UT</th> 
+												<th >Census 2001 Code</th>
+												<th >Census2011 Code</th>
+												<th >View Details</th>
+												<th >View History</th>		
+												<th >View Government Order</th>
+												<th >View Map</th>
+											</tr>
+										</thead>
+										
+										<tbody>
+										 	
+												<tr >
+													<td width="6%">1</td>
+													<td>35</td>
+													<td align="left">Andaman And Nicobar Islands</td>
+													<td align="left" class="bhashini-skip-translation">ANDAMAN AND NICOBAR ISLANDS</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">35</td>
+													<td align="left">35</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('35', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('35', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'35','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">2</td>
+													<td>28</td>
+													<td align="left">Andhra Pradesh</td>
+													<td align="left" class="bhashini-skip-translation">ANDHRA PRADESH</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">28</td>
+													<td align="left">28</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('28', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('28', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'28','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">3</td>
+													<td>12</td>
+													<td align="left">Arunachal Pradesh</td>
+													<td align="left" class="bhashini-skip-translation">ARUNACHAL PRADESH</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">12</td>
+													<td align="left">12</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('12', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('12', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'12','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">4</td>
+													<td>18</td>
+													<td align="left">Assam</td>
+													<td align="left" class="bhashini-skip-translation">ASSAM</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">18</td>
+													<td align="left">18</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('18', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('18', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'18','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">5</td>
+													<td>10</td>
+													<td align="left">Bihar</td>
+													<td align="left" class="bhashini-skip-translation">BIHAR</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">10</td>
+													<td align="left">10</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('10', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('10', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'10','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">6</td>
+													<td>4</td>
+													<td align="left">Chandigarh</td>
+													<td align="left" class="bhashini-skip-translation">CHANDIGARH</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">04</td>
+													<td align="left">04</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('4', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('4', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+														  <a href="#"  onclick="javascript:retrieveFile1('4', 'S');"><i class="fa fa-file-text-o" aria-hidden="true"></i></a>
+													    
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'4','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">7</td>
+													<td>22</td>
+													<td align="left">Chhattisgarh</td>
+													<td align="left" class="bhashini-skip-translation">छत्तीसगढ़</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">22</td>
+													<td align="left">22</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('22', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('22', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'22','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">8</td>
+													<td>7</td>
+													<td align="left">Delhi</td>
+													<td align="left" class="bhashini-skip-translation">DELHI</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">07</td>
+													<td align="left">07</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('7', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('7', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'7','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">9</td>
+													<td>30</td>
+													<td align="left">Goa</td>
+													<td align="left" class="bhashini-skip-translation">GOA</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">30</td>
+													<td align="left">30</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('30', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('30', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'30','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">10</td>
+													<td>24</td>
+													<td align="left">Gujarat</td>
+													<td align="left" class="bhashini-skip-translation">GUJARAT</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">24</td>
+													<td align="left">24</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('24', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('24', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'24','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">11</td>
+													<td>6</td>
+													<td align="left">Haryana</td>
+													<td align="left" class="bhashini-skip-translation">HARYANA</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">06</td>
+													<td align="left">06</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('6', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('6', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'6','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">12</td>
+													<td>2</td>
+													<td align="left">Himachal Pradesh</td>
+													<td align="left" class="bhashini-skip-translation">HIMACHAL PRADESH</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">02</td>
+													<td align="left">02</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('2', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('2', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'2','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">13</td>
+													<td>1</td>
+													<td align="left">Jammu And Kashmir</td>
+													<td align="left" class="bhashini-skip-translation">JAMMU AND KASHMIR</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">01</td>
+													<td align="left">01</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('1', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('1', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+														  <a href="#"  onclick="javascript:retrieveFile1('1', 'S');"><i class="fa fa-file-text-o" aria-hidden="true"></i></a>
+													    
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'1','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">14</td>
+													<td>20</td>
+													<td align="left">Jharkhand</td>
+													<td align="left" class="bhashini-skip-translation">झारखंड</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">20</td>
+													<td align="left">20</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('20', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('20', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'20','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">15</td>
+													<td>29</td>
+													<td align="left">Karnataka</td>
+													<td align="left" class="bhashini-skip-translation">ಕರ್ನಾಟಕ</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">29</td>
+													<td align="left">29</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('29', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('29', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'29','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">16</td>
+													<td>32</td>
+													<td align="left">Kerala</td>
+													<td align="left" class="bhashini-skip-translation">KERALA</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">32</td>
+													<td align="left">32</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('32', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('32', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'32','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">17</td>
+													<td>37</td>
+													<td align="left">Ladakh</td>
+													<td align="left" class="bhashini-skip-translation">Ladakh</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left"></td>
+													<td align="left">00</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('37', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('37', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+														  <a href="#"  onclick="javascript:retrieveFile1('37', 'S');"><i class="fa fa-file-text-o" aria-hidden="true"></i></a>
+													    
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'37','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">18</td>
+													<td>31</td>
+													<td align="left">Lakshadweep</td>
+													<td align="left" class="bhashini-skip-translation">LAKSHADWEEP</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">31</td>
+													<td align="left">31</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('31', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('31', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'31','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">19</td>
+													<td>23</td>
+													<td align="left">Madhya Pradesh</td>
+													<td align="left" class="bhashini-skip-translation">MADHYA PRADESH</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">23</td>
+													<td align="left">23</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('23', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('23', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'23','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">20</td>
+													<td>27</td>
+													<td align="left">Maharashtra</td>
+													<td align="left" class="bhashini-skip-translation">महाराष्ट्र</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">27</td>
+													<td align="left">27</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('27', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('27', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'27','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">21</td>
+													<td>14</td>
+													<td align="left">Manipur</td>
+													<td align="left" class="bhashini-skip-translation">MANIPUR</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">14</td>
+													<td align="left">14</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('14', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('14', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'14','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">22</td>
+													<td>17</td>
+													<td align="left">Meghalaya</td>
+													<td align="left" class="bhashini-skip-translation">MEGHALAYA</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">17</td>
+													<td align="left">17</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('17', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('17', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'17','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">23</td>
+													<td>15</td>
+													<td align="left">Mizoram</td>
+													<td align="left" class="bhashini-skip-translation">MIZORAM</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">15</td>
+													<td align="left">15</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('15', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('15', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'15','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">24</td>
+													<td>13</td>
+													<td align="left">Nagaland</td>
+													<td align="left" class="bhashini-skip-translation">NAGALAND</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">13</td>
+													<td align="left">13</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('13', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('13', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'13','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">25</td>
+													<td>21</td>
+													<td align="left">Odisha</td>
+													<td align="left" class="bhashini-skip-translation">ଓଡ଼ିଶା</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">21</td>
+													<td align="left">21</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('21', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('21', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'21','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">26</td>
+													<td>34</td>
+													<td align="left">Puducherry</td>
+													<td align="left" class="bhashini-skip-translation">PUDUCHERRY</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">34</td>
+													<td align="left">34</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('34', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('34', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'34','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">27</td>
+													<td>3</td>
+													<td align="left">Punjab</td>
+													<td align="left" class="bhashini-skip-translation">PUNJAB</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">03</td>
+													<td align="left">03</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('3', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('3', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'3','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">28</td>
+													<td>8</td>
+													<td align="left">Rajasthan</td>
+													<td align="left" class="bhashini-skip-translation">RAJASTHAN</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">08</td>
+													<td align="left">08</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('8', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('8', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'8','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">29</td>
+													<td>11</td>
+													<td align="left">Sikkim</td>
+													<td align="left" class="bhashini-skip-translation">SIKKIM</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">11</td>
+													<td align="left">11</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('11', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('11', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'11','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">30</td>
+													<td>33</td>
+													<td align="left">Tamil Nadu</td>
+													<td align="left" class="bhashini-skip-translation">TAMIL NADU</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">33</td>
+													<td align="left">33</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('33', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('33', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'33','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">31</td>
+													<td>36</td>
+													<td align="left">Telangana</td>
+													<td align="left" class="bhashini-skip-translation">తెలంగాణ</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left"></td>
+													<td align="left">00</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('36', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('36', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+														  <a href="#"  onclick="javascript:retrieveFile1('36', 'S');"><i class="fa fa-file-text-o" aria-hidden="true"></i></a>
+													    
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'36','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">32</td>
+													<td>38</td>
+													<td align="left">The Dadra And Nagar Haveli And Daman And Diu</td>
+													<td align="left" class="bhashini-skip-translation">THE DADRA AND NAGAR HAVELI AND DAMAN AND DIU</td>
+													
+                                                     
+                                                      
+                                                       
+                                                       <td align="left">UT</td> 
+                                                       
+                                                       
+                                                                                                         
+													<td align="left"></td>
+													<td align="left"></td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('38', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('38', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+														  <a href="#"  onclick="javascript:retrieveFile1('38', 'S');"><i class="fa fa-file-text-o" aria-hidden="true"></i></a>
+													    
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'38','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">33</td>
+													<td>16</td>
+													<td align="left">Tripura</td>
+													<td align="left" class="bhashini-skip-translation">ত্রিপুরা</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">16</td>
+													<td align="left">16</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('16', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('16', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'16','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">34</td>
+													<td>5</td>
+													<td align="left">Uttarakhand</td>
+													<td align="left" class="bhashini-skip-translation">UTTARAKHAND</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">05</td>
+													<td align="left">05</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('5', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('5', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'5','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">35</td>
+													<td>9</td>
+													<td align="left">Uttar Pradesh</td>
+													<td align="left" class="bhashini-skip-translation">UTTAR PRADESH</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">09</td>
+													<td align="left">09</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('9', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('9', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'9','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+												<tr >
+													<td width="6%">36</td>
+													<td>19</td>
+													<td align="left">West Bengal</td>
+													<td align="left" class="bhashini-skip-translation">WEST BENGAL</td>
+													
+                                                     
+                                                      
+                                                       <td align="left">State</td> 
+                                                       
+                                                       
+                                                       
+                                                                                                         
+													<td align="left">19</td>
+													<td align="left">19</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('19', 'globalviewStateDetail.do', 'globalstateId');"><i class="fa fa-eye" aria-hidden="true"></i>
+												    </a>
+													</td>
+													<td width="8%" align="center"><a href="#" onclick="javascript:viewEntityDetailsInPopup('19', 'viewStateHistoryReport.do', 'globalstateId');"><i class="fa fa-history" aria-hidden="true"></i></a>
+														
+													</td>
+													<td width="10%" align="center">
+														
+												    </td>
+											   		<td width="3%" align="center">
+												   		<a href="#" onclick="javascript:viewLandRegionGISMapInPopup(1,'19','L','S');"><i class="fa fa-map-marker" aria-hidden="true"></i></a>
+												   		
+											   		</td>
+												</tr>
+											
+										</tbody>
+									</table>
+				              	</div>
+				              	
+						 
+						<div style="text-align:center; list-style:none;"> <!-- Inline style only for Print purpose -->
+							<label>URL http://lgdirectory.gov.in </label>
+							</br><label>Report Generated on25/08/2026 11:19:13 AM</label>
+							</br><label>Local Government Directory</label>
+						</div>
+					
+				            </div>
+				
+				<!-- Button for Page after POST method @Ashish 18 aUG -->	
+					  
+				 <div class="card-footer d-flex justify-content-end" id="showbutton">
+					  <button type="button" class="btn btn-primary me-2" onclick="location.href='welcome.do?OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1';">
+					    <i class="fa fa-arrow-left"></i> Back
+					  </button>
+					  <button type="button" class="btn btn-danger" onclick="location.href='welcome.do?OWASP_CSRFTOKEN=BBLL-ZL1H-UQYD-VI7C-Q7NN-WHGN-DCB5-B4T1';">
+					    <i class="fa fa-times-circle"></i> Close
+					  </button>
+					</div>
+
+					  
+					 	 
+					  
+				  </form>
+			</div>
+			 <div class="modal fade" id="customAlert" role="dialog">
+			    <div class="modal-dialog">
+			    
+			      <!-- Modal content-->
+			      <div class="modal-content">
+			        <div class="modal-header">
+			        <h4 class="modal-title">Alert Massage</h4>
+			          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			        </div>
+			        <div class="modal-body" id="customAlertbody">
+			         
+			        </div>
+			        <div class="modal-footer">
+			          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ok</button>
+
+			        </div>
+			      </div>
+			      
+			    </div>
+			  </div>	
+		</section>
+		</div>
+	</div>
+</section>
+
+
+
+
+
+	
+    
+            <footer class="scroll fp-auto-height footer-mainpage fp-section fp-table" id="footer-main" data-anchor="footer">             
+               <style>
+				  .socialAnchor {
+				    width: 40px;
+				    height: 40px;
+				  }
+             </style>
+                <div class="container">
+                    <div class="row title">
+
+                        <div class="col-12 mx-auto text-center">
+                            <a href="https://panchayat.gov.in/" title="Panchayat Raj( External Site that opens in a new window)" target="_blank">
+                             <img src="/resource/homebody-resource/images/panchayati-raj.png" class="img-fluid center-block" alt="panchayat Raj Logo" title="panchayat Raj Logo">
+                            </a>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="row title">
+                        <div class="col-12 mx-auto ad_images">
+                            <ul>
+
+                                <li>
+                                    <a href="https://www.digitalindia.gov.in/" title="Digital India( External Site that opens in a new window)" target="_blank"> <img src="/resource/homebody-resource/images/digital-india-logo.png" width="115" height="39" alt="Digital India Logo" title="Digital India Logo"></a>
+                                </li>
+                                <li>
+                                    <a href="https://data.gov.in/" title="Data Portal (External Site that opens in a new window)" target="_blank"><img src="/resource/homebody-resource/images/data-gov-logo.png" width="140" height="40" alt="Data.gov.in Logo" title="Data.gov.in Logo"></a>
+                                </li>
+                                <li>
+                                    <a href="https://india.gov.in/" title="NPI (External Site that opens in a new window)" target="_blank"><img src="/resource/homebody-resource/images/india-gov-logo.png" width="61" height="40" alt="India.gov.in Logo" title="India.gov.in Logo"></a>
+                                </li>
+                                <li>
+                                    <a href="https://meity.gov.in/" title="MeitY (External Site that opens in a new window)" target="_blank"><img src="/resource/homebody-resource/images/meity.png" alt="MeitY Logo" title="MeitY Logo"></a>
+                                </li>
+                                <li>
+                                    <a href="https://pmindia.gov.in/" title="PM INDIA (External Site that opens in a new window)" target="_blank"><img src="/resource/homebody-resource/images/pm-india-logo.png" alt="PM India Logo" title="PM India Logo"></a>
+                                </li>
+                                 <li>
+                                    <a href="https://www.nic.in/" title="NIC (External Site that opens in a new window)" target="_blank"><img src="/resource/homebody-resource/images/Nic_new.png" alt="NIC Logo" title="NIC Logo"></a>
+                                </li>
+                                
+                            </ul>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="row title text-center">
+                        <div class="col-lg-12 col-md-12 col-sm-12 text-center">
+                            <p class="whitefont">
+                                Site is designed, hosted and maintained by National Informatics Centre. Contents on this website is owned, updated and managed by the Panchayats and State Panchayati Raj Department as a part of e-Panchayat MMP of Ministry of Panchayati Raj.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                       <!--  <div class="col-12 col-sm-12 col-md-12 col-lg-12 text-center">
+                            <div class="copyright">Designed and Developed by National Informatics Centre. </div>
+                        </div> -->
+
+                    </div>
+<div class="row justify-content-center">
+  <div class="col-auto">
+    <ul class="footer_links text-center extlink p-0 pt-1 mb-1 list-group list-group-horizontal justify-content-center">
+      <li class="p-0 m-0 mb-1 list-group-item">
+        <a class="socialAnchor" href="https://www.facebook.com/ministryofpanchayatiraj" target="_blank">
+          <img title="Facebook Icon" alt="Facebook Icon" src="/resource/homebody-resource/images/social-media/icon_facebook.png">
+        </a>
+      </li>
+      <li class="p-0 m-0 mb-1 list-group-item">
+        <a class="socialAnchor" href="https://twitter.com/mopr_goi" target="_blank">
+          <img title="Twitter Icon" alt="Twitter Icon" src="/resource/homebody-resource/images/social-media/icon_twitter.png">
+        </a>
+      </li>
+      <li class="p-0 m-0 mb-1 list-group-item">
+        <a class="socialAnchor" href="https://www.youtube.com/channel/UCZpNLrx-YCGg9ixfuUrQ_dw" title="Channel 1" target="_blank">
+          <img title="Youtube Channel 1 Icon" alt="Youtube Channel 1 Icon" src="/resource/homebody-resource/images/social-media/icon_youtube_red.png">
+        </a>
+      </li>
+      <li class="p-0 m-0 mb-1 list-group-item">
+        <a class="socialAnchor" href="https://www.youtube.com/channel/UCEVBqQXipAuDqZsinwto4nA/videos" title="Channel 2" target="_blank">
+          <img title="Youtube Channel 2 Icon" alt="Youtube Channel 2 Icon" src="/resource/homebody-resource/images/social-media/icon_youtube_black.png">
+        </a>
+      </li>
+      <li class="p-0 m-0 mb-1 list-group-item">
+        <a class="socialAnchor" href="https://instagram.com/ministryofpanchayatiraj?utm_medium=copy_link" title="MoPR Instagram" target="_blank">
+          <img title="Instagram Icon" alt="Instagram Icon" src="/resource/homebody-resource/images/social-media/instagram.png">
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+                </div>
+
+            </footer>
+            
+            
+            
+            
+
+    
+    
+    
+    
+    <!-- Supporting document Modal ends -->
+	
+	
+              <script type="text/javascript" defer="">
+            setTimeout(function() {
+                var a = document.createElement("script");
+                var b = document.getElementsByTagName("script")[0];
+                //a.src = document.location.protocol + "//script.crazyegg.com/pages/scripts/0039/8964.js?" + Math.floor(new Date().getTime() / 3600000);
+                a.defer = true;
+                a.type = "text/javascript";
+                b.parentNode.insertBefore(a, b)
+            }, 1);
+        </script>
+
+        <!-- counter-->
+        <script>
+            $('.count').each(function() {
+                $(this).prop('Counter', 0).animate({
+                    Counter: $(this).text()
+                }, {
+                    duration: 4000,
+                    easing: 'swing',
+                    step: function(now) {
+                        $(this).text(Math.ceil(now));
+                    }
+                });
+            });
+        </script>
+
+    <!-- #####################################################################
+   For Modal Login
+   ##################################################################### -->
+        <script>
+            $(function() {
+
+                var $formLogin = $('#login-form');
+                var $formLost = $('#lost-form');
+                var $divForms = $('#div-forms');
+                var $modalAnimateTime = 300;
+                var $msgAnimateTime = 150;
+                var $msgShowTime = 2000;
+
+                
+
+                $('#login_lost_btn').click(function() {
+                    modalAnimate($formLogin, $formLost);
+                });
+                $('#lost_login_btn').click(function() {
+                    modalAnimate($formLost, $formLogin);
+                });
+
+                function modalAnimate($oldForm, $newForm) {
+                    var $oldH = $oldForm.height();
+                    var $newH = $newForm.height();
+                    $divForms.css("height", $oldH);
+                    $oldForm.fadeToggle($modalAnimateTime, function() {
+                        $divForms.animate({
+                            height: $newH
+                        }, $modalAnimateTime, function() {
+                            $newForm.fadeToggle($modalAnimateTime);
+                        });
+                    });
+                }
+
+                function msgFade($msgId, $msgText) {
+                    $msgId.fadeOut($msgAnimateTime, function() {
+                        $(this).text($msgText).fadeIn($msgAnimateTime);
+                    });
+                }
+
+                function msgChange($divTag, $iconTag, $textTag, $divClass, $iconClass, $msgText) {
+                    var $msgOld = $divTag.text();
+                    msgFade($textTag, $msgText);
+                    $divTag.addClass($divClass);
+                    $iconTag.removeClass("glyphicon-chevron-right");
+                    $iconTag.addClass($iconClass + " " + $divClass);
+                    setTimeout(function() {
+                        msgFade($textTag, $msgOld);
+                        $divTag.removeClass($divClass);
+                        $iconTag.addClass("glyphicon-chevron-right");
+                        $iconTag.removeClass($iconClass + " " + $divClass);
+                    }, $msgShowTime);
+                }
+            });
+        </script>
+		 <!--    For Top scrolling button              -->
+    <script type="text/javascript">        
+		$(function () {
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 300) {
+            $('.totop').fadeIn();
+        } else {
+            $('.totop').fadeOut();
+        }
+    });
+
+    // scroll body to 0px on click
+    $('.totop').click(function () {
+        $('body,html').animate({
+            scrollTop: 0
+        }, 1600);
+        return false;
+    });
+});
+    </script>
+    </body>

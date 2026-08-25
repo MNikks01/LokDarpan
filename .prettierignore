@@ -6,3 +6,8 @@ pnpm-lock.yaml
 graphify-out/
 .docs/06-government-sources/*.csv
 .docs/06-government-sources/data/
+
+# Captured source fixtures are evidence: they must stay byte-identical to what
+# the government host served. Real-world HTML is often malformed (LGD serves
+# `<meta charset=utf-8" />`), and reformatting it would defeat its purpose.
+services/ingestion/tests/fixtures/
