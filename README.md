@@ -42,12 +42,27 @@ infrastructure/ docker · kubernetes · terraform · monitoring
 
 ```bash
 pnpm install
-pnpm test                 # 38 tests: money, neutrality, contracts, palette
+pnpm test                 # 75 tests: money, neutrality, contracts, palette, database
 pnpm dev                  # web client at http://localhost:3000
 pnpm neutrality apps packages   # docs/15 language gate — a hit blocks release
 ```
 
 Requires Node ≥20 and pnpm 9.
+
+### With a database
+
+Needed for the schema tests and anything touching the ledger. Without it those tests **skip** rather than fail, so this is optional until you work on data.
+
+```bash
+cp .env.example .env.local
+docker compose up -d                          # Postgres+PostGIS on 5433, Redis on 6380
+pnpm --filter @lokdarpan/database migrate      # apply database/migrations/*.sql
+DATABASE_URL=postgresql://lokdarpan:lokdarpan_local_only@localhost:5433/lokdarpan pnpm test
+```
+
+Host ports are **5433 and 6380**, not the defaults, so LokDarpan runs alongside another project's Postgres or Redis without a collision.
+
+Migrations are plain SQL applied in filename order, and **an applied migration is immutable** — the runner refuses to run if a file's checksum no longer matches what was applied ([`adr/017`](./.docs/adr/017-database-migrations.md)). Add a new migration instead of editing one.
 
 ## Two invariants worth knowing before you write code
 
