@@ -65,11 +65,11 @@ Conversion to the canonical `bigint` paise is therefore **× 100,000** (thousand
 
 ## Public Works Department
 
-**`DEPT = H`.** Not stated in the export, so this is inferred and must be confirmed before display: of H's 992 rows for 2024-25, **413 are road, bridge or building schemes**, and its demands run H-02 to H-11.
+**`DEPT = H`.** Confirmed by the source on 2026-08-26: FY2024 rows carry `Plan Type = Gen_PWD`. The earlier inference is corroborated — of H's 992 rows for 2024-25, **413 are road, bridge or building schemes**, and its demands run H-02 to H-11.
 
 H also carries buildings for other departments — Ayurveda, Forensic Science, Home Guards — which is consistent rather than contradictory: PWD constructs for the whole state government.
 
-### Coverage, verified
+### Row counts, verified
 
 `DepartmentExcelDownload_relasedFD.jsp?year=YYYY&dept=H`:
 
@@ -82,9 +82,36 @@ H also carries buildings for other departments — Ayurveda, Forensic Science, H
 
 **Ten financial years, ~9,500 rows for PWD alone**, one HTTP request per year.
 
+## The expenditure column is not populated before FY2021 — do not display it
+
+Established by ingesting all ten years (2026-08-26). Rows whose `EXPENDITURE` is zero:
+
+| FY   |    zero | non-zero |     | FY   | zero | non-zero |
+| ---- | ------: | -------: | --- | ---- | ---: | -------: |
+| 2017 |     978 |       23 |     | 2022 |  321 |      623 |
+| 2018 |     931 |       46 |     | 2023 |  313 |      658 |
+| 2019 |     785 |       41 |     | 2024 |  351 |      641 |
+| 2020 | **826** |   **13** |     | 2025 |  349 |      647 |
+| 2021 |     246 |      594 |     | 2026 |  529 |      454 |
+
+The change at FY2021 is a step, not a trend. Before it, the column is ~98% zero; after, ~65% of rows carry a figure.
+
+Totalled, FY2020 reads **₹19,638 crore allocated against ₹24 crore spent**. Maharashtra's Public Works Department did not spend ₹24 crore in a year. The column is not recording expenditure in those years.
+
+**The source publishes `0`, not an empty cell.** So the ledger stores zero — faithfully, and correctly, because rewriting a published figure would be editing a government record. But a zero here does not mean "nothing was spent", and a page rendering _"₹19,638 cr allocated, ₹24 cr spent"_ would make a false and damaging implication about a department.
+
+**Consequence:** pre-FY2021 expenditure, and both variances derived from it, must not be displayed until this is resolved. This is a presentation gate, not a data fix. Candidate resolutions, in order of preference:
+
+1. Establish from Maharashtra Finance what the column meant before FY2021 — it may be a system that only went live for expenditure capture in 2020-21.
+2. Record per-source, per-year, per-field **coverage**, so the presentation layer can withhold a figure the source does not actually populate. This generalises: every source will have fields it publishes only for some years.
+3. Corroborate against a second source (Finance Accounts, CAG) before showing any pre-FY2021 expenditure figure.
+
+The observation is recorded here rather than patched away because "the source published a zero it did not mean" is exactly the class of defect this registry exists to catch, and the next source will have its own version of it.
+
 ## Open items
 
 - **Department code → name mapping is not in the export.** `DepartmentExp111.jsp` returns an empty body to a GET; it may require a POST or different parameters. Until resolved, `H = Public Works` is an inference, and a department name must not be displayed on that basis.
+- **Coverage of `EXPENDITURE` before FY2021** — see above. Blocks display of those years.
 - **Licence and terms of use** — not yet located. Required before display, and still outstanding for every source in this registry.
 - Whether `S1`/`S2`/`S3` are quarterly instalments or something else. They are zero in most sampled rows.
 - Whether the monthly export gives a within-year time series worth ingesting, or only a year-to-date cut.
