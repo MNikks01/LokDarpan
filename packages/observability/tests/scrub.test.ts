@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { scrubSecrets, scrubValue } from "../src/scrub.js";
+import { scrubSecrets, scrubValue } from "../src/scrub";
 
 describe("scrubSecrets", () => {
   // The case that motivated this: a driver error message, written by an

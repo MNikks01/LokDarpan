@@ -1,19 +1,8 @@
-import "reflect-metadata";
 import { describe, expect, it } from "vitest";
 
-import { MetricsRegistry } from "@lokdarpan/observability";
-
-import { AppError } from "../src/errors/index.js";
-import type {
-  AdminUnit,
-  AdminUnitLevel,
-  AdminUnitRepository,
-} from "../src/modules/units/unit.repository.js";
-import {
-  UnitService,
-  parseLevel,
-  singleDatasetVersion,
-} from "../src/modules/units/unit.service.js";
+import { AppError } from "@lokdarpan/errors";
+import type { AdminUnit, AdminUnitLevel, AdminUnitRepository } from "../src/admin-unit";
+import { UnitService, parseLevel, singleDatasetVersion } from "../src/unit.service";
 
 const unit = (id: number, datasetVersion: number, over: Partial<AdminUnit> = {}): AdminUnit => ({
   id,
@@ -107,10 +96,7 @@ describe("UnitService", () => {
   const mh = unit(20, 101, { nameEn: "Maharashtra", nameLocal: "महाराष्ट्र", lgdCode: "27" });
 
   it("returns a unit with its children and one dataset version", async () => {
-    const service = new UnitService(
-      new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]),
-      new MetricsRegistry(),
-    );
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]));
     const view = await service.getUnit("20");
     expect(view.unit.nameEn).toBe("Maharashtra");
     expect(view.unit.nameLocal).toBe("महाराष्ट्र");
@@ -119,44 +105,45 @@ describe("UnitService", () => {
   });
 
   it("refuses a unit whose children came from another ingest", async () => {
-    const service = new UnitService(
-      new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]),
-      new MetricsRegistry(),
-    );
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]));
     await expect(service.getUnit("20")).rejects.toThrow(/single dataset version/i);
   });
 
-  // The refusal is also an integrity alarm: it must be visible on /metrics,
-  // not only in a stack trace nobody is watching.
-  it("raises a contract-violation alarm when versions are mixed", async () => {
-    const metrics = new MetricsRegistry();
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]), metrics);
+  // The refusal is also an integrity alarm. The service reports it through a
+  // callback rather than owning a metrics registry, so one implementation
+  // serves both the DI-wired server and the serverless handlers — each
+  // counting the violation in whatever way its runtime can.
+  it("reports a contract violation when versions are mixed", async () => {
+    const seen: string[] = [];
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]), (kind) => {
+      seen.push(kind);
+    });
     await expect(service.getUnit("20")).rejects.toThrow();
-    expect(metrics.render()).toContain(
-      'lokdarpan_contract_violation_total{kind="mixed_dataset_version"} 1',
-    );
+    expect(seen).toEqual(["mixed_dataset_version"]);
   });
 
-  it("raises no alarm when the payload is consistent", async () => {
-    const metrics = new MetricsRegistry();
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]), metrics);
+  it("reports nothing when the payload is consistent", async () => {
+    const seen: string[] = [];
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]), (kind) => {
+      seen.push(kind);
+    });
     await service.getUnit("20");
-    expect(metrics.render()).not.toContain("contract_violation");
+    expect(seen).toEqual([]);
   });
 
   it("rejects a non-numeric id before touching the database", async () => {
-    const service = new UnitService(new FakeRepo(new Map()), new MetricsRegistry());
+    const service = new UnitService(new FakeRepo(new Map()));
     await expect(service.getUnit("../../etc/passwd")).rejects.toThrow(/positive integer/i);
     await expect(service.getUnit("-1")).rejects.toThrow(/positive integer/i);
   });
 
   it("propagates not-found", async () => {
-    const service = new UnitService(new FakeRepo(new Map()), new MetricsRegistry());
+    const service = new UnitService(new FakeRepo(new Map()));
     await expect(service.getUnit("404")).rejects.toThrow(AppError);
   });
 
   it("lists by level with a single dataset version", async () => {
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]])), new MetricsRegistry());
+    const service = new UnitService(new FakeRepo(new Map([[20, mh]])));
     const result = await service.listByLevel("state");
     expect(result.units).toHaveLength(1);
     expect(result.datasetVersion).toBe(101);

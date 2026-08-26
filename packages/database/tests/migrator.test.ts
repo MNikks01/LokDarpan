@@ -11,7 +11,7 @@ import {
   type AppliedMigration,
   type Migration,
   type SqlClient,
-} from "../src/migrator.js";
+} from "../src/migrator";
 
 async function dirWith(files: Record<string, string>): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "lokdarpan-mig-"));

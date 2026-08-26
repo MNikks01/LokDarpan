@@ -5,5 +5,7 @@ export {
   loadMigrations,
   pendingMigrations,
   readApplied,
-} from "./migrator.js";
-export type { AppliedMigration, Migration, SqlClient } from "./migrator.js";
+} from "./migrator";
+export type { AppliedMigration, Migration, SqlClient } from "./migrator";
+export { PostgresAdminUnitRepository } from "./admin-unit.repository";
+export type { RepositoryOptions } from "./admin-unit.repository";

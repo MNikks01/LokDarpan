@@ -1,7 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import type { Logger } from "../../logging/logger.js";
 import { LOGGER } from "../../logging/logger.js";
-import { AppError } from "../../errors/index.js";
+import { AppError } from "@lokdarpan/errors";
 
 /** The shape the API returns. Mirrors @lokdarpan/contracts. */
 export interface ProjectSummary {
