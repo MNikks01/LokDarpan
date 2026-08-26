@@ -177,6 +177,9 @@ importers:
       '@lokdarpan/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@lokdarpan/money':
+        specifier: workspace:*
+        version: link:../../packages/money
       node-html-parser:
         specifier: ^6.1.13
         version: 6.1.13
