@@ -5,7 +5,14 @@ import "server-only";
  * browser: no API host, no fetch waterfall on the client, and the page ships
  * effectively no JavaScript for its content (.docs/02-architecture/web-architecture.md).
  */
-const API_BASE = process.env["API_BASE_URL"] ?? "http://localhost:4319";
+/**
+ * Empty by default: the API is served by this same deployment's Route Handlers,
+ * so a relative fetch stays in-process and needs no origin, no CORS and no
+ * second host. Set API_BASE_URL only to point at a separately hosted
+ * `services/api` — the self-hosted shape `.docs/adr/011-web-framework.md`
+ * requires to remain possible.
+ */
+const API_BASE = process.env["API_BASE_URL"] ?? "";
 
 export interface Provenance {
   readonly sourceSha256: string;
@@ -43,7 +50,17 @@ export class ApiError extends Error {
 }
 
 async function get(path: string): Promise<{ data: unknown; datasetVersion: number }> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  // A relative URL is not valid in a server-side fetch, so an absolute origin
+  // is needed even when the handler lives in this deployment. VERCEL_URL is set
+  // per deployment; localhost covers `next dev`.
+  const origin =
+    API_BASE !== ""
+      ? API_BASE
+      : process.env["VERCEL_URL"] !== undefined
+        ? `https://${process.env["VERCEL_URL"]}`
+        : `http://localhost:${process.env["PORT"] ?? "3000"}`;
+
+  const response = await fetch(`${origin}${path}`, {
     headers: { accept: "application/json" },
     // Revalidated by datasetVersion cache tag, never by a timer.
     next: { tags: ["dataset"], revalidate: false },

@@ -7,7 +7,7 @@ import {
   loadMigrations,
   pendingMigrations,
   readApplied,
-} from "../src/migrator.js";
+} from "../src/migrator";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
 const MIGRATIONS_DIR = new URL("../../../database/migrations", import.meta.url).pathname;

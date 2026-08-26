@@ -1,14 +1,11 @@
-import { inject, injectable } from "tsyringe";
+import { AppError } from "@lokdarpan/errors";
 
-import { METRICS, type MetricsRegistry } from "@lokdarpan/observability";
-
-import { AppError } from "../../errors/index.js";
 import {
-  ADMIN_UNIT_REPOSITORY,
+  ADMIN_UNIT_LEVELS,
   type AdminUnit,
   type AdminUnitLevel,
   type AdminUnitRepository,
-} from "./unit.repository.js";
+} from "./admin-unit";
 
 export interface UnitView {
   readonly unit: AdminUnit;
@@ -17,20 +14,8 @@ export interface UnitView {
   readonly datasetVersion: number;
 }
 
-const LEVELS: readonly AdminUnitLevel[] = [
-  "country",
-  "state",
-  "district",
-  "sub_district",
-  "block",
-  "village",
-  "urban_local_body",
-  "ward",
-  "gram_panchayat",
-];
-
 export function parseLevel(raw: string): AdminUnitLevel {
-  const level = LEVELS.find((l) => l === raw);
+  const level = ADMIN_UNIT_LEVELS.find((l) => l === raw);
   if (level === undefined) {
     throw AppError.badRequest(`Unknown administrative level "${raw}".`);
   }
@@ -51,8 +36,7 @@ export function singleDatasetVersion(
 ): number {
   const versions = new Set(units.map((u) => u.provenance.datasetVersion));
   if (versions.size > 1) {
-    // An integrity alarm, not a usage number: every occurrence is a
-    // traceability breach in the making
+    // An integrity alarm, not a usage number
     // (.docs/13-observability/observability.md §Guardrail telemetry).
     onViolation?.();
     throw AppError.internal(
@@ -70,15 +54,17 @@ export function singleDatasetVersion(
   return only;
 }
 
-@injectable()
+/** Raised when a payload mixes provenance vintages, for the caller to count. */
+export type ViolationSink = (kind: "mixed_dataset_version") => void;
+
 export class UnitService {
   constructor(
-    @inject(ADMIN_UNIT_REPOSITORY) private readonly units: AdminUnitRepository,
-    @inject(METRICS) private readonly metrics: MetricsRegistry,
+    private readonly units: AdminUnitRepository,
+    private readonly onViolation: ViolationSink = () => undefined,
   ) {}
 
-  private readonly onMixedVersions = (): void => {
-    this.metrics.recordContractViolation("mixed_dataset_version");
+  private readonly mixed = (): void => {
+    this.onViolation("mixed_dataset_version");
   };
 
   async getUnit(rawId: string): Promise<UnitView> {
@@ -90,7 +76,7 @@ export class UnitService {
     return {
       unit,
       children,
-      datasetVersion: singleDatasetVersion([unit, ...children], this.onMixedVersions),
+      datasetVersion: singleDatasetVersion([unit, ...children], this.mixed),
     };
   }
 
@@ -99,6 +85,6 @@ export class UnitService {
     readonly datasetVersion: number;
   }> {
     const units = await this.units.listByLevel(parseLevel(rawLevel));
-    return { units, datasetVersion: singleDatasetVersion(units, this.onMixedVersions) };
+    return { units, datasetVersion: singleDatasetVersion(units, this.mixed) };
   }
 }

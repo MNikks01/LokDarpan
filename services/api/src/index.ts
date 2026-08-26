@@ -5,10 +5,8 @@ import { CONFIG, ConfigError, type Config } from "./config/index.js";
 import { scrubSecrets } from "@lokdarpan/observability";
 
 import { LOGGER, type Logger } from "./logging/logger.js";
-import {
-  ADMIN_UNIT_REPOSITORY,
-  type PostgresAdminUnitRepository,
-} from "./modules/units/unit.repository.js";
+import type { PostgresAdminUnitRepository } from "@lokdarpan/database";
+import { ADMIN_UNIT_REPOSITORY } from "./modules/units/unit.module.js";
 
 async function main(): Promise<void> {
   let container;
