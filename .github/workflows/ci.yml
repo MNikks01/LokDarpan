@@ -104,6 +104,12 @@ jobs:
           DATABASE_URL_READONLY: postgresql://lokdarpan_api:lokdarpan_local_only@localhost:5432/lokdarpan
       - name: Coverage thresholds (domain + api)
         run: pnpm exec vitest run --coverage
+        env:
+          # The coverage run needs the database too. Without it the integration
+          # suites skip, the loaders read as uncovered, and the threshold fails
+          # for a reason that has nothing to do with the code.
+          DATABASE_URL: postgresql://lokdarpan:lokdarpan_ci_only@localhost:5432/lokdarpan
+          DATABASE_URL_READONLY: postgresql://lokdarpan_api:lokdarpan_local_only@localhost:5432/lokdarpan
 
   e2e:
     name: E2E

@@ -21,6 +21,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./repository": "./src/admin-unit.repository.ts"
+    "./repository": "./src/admin-unit.repository.ts",
+    "./department-finance": "./src/department-finance.repository.ts"
   }
 }

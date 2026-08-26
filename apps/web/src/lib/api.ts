@@ -85,3 +85,11 @@ export async function listUnitsByLevel(
   const { data, datasetVersion } = await get(`/api/v1/units?level=${encodeURIComponent(level)}`);
   return { data: data as { units: readonly AdminUnit[] }, datasetVersion };
 }
+
+/**
+ * Raw read for routes without a named helper. The caller asserts the shape at
+ * its own boundary, matching `getUnit` and `listUnitsByLevel`.
+ */
+export async function getJson(path: string): Promise<{ data: unknown; datasetVersion: number }> {
+  return get(path);
+}

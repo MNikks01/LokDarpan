@@ -65,11 +65,11 @@ Conversion to the canonical `bigint` paise is therefore **× 100,000** (thousand
 
 ## Public Works Department
 
-**`DEPT = H`.** Not stated in the export, so this is inferred and must be confirmed before display: of H's 992 rows for 2024-25, **413 are road, bridge or building schemes**, and its demands run H-02 to H-11.
+**`DEPT = H`.** Confirmed by the source on 2026-08-26: FY2024 rows carry `Plan Type = Gen_PWD`. The earlier inference is corroborated — of H's 992 rows for 2024-25, **413 are road, bridge or building schemes**, and its demands run H-02 to H-11.
 
 H also carries buildings for other departments — Ayurveda, Forensic Science, Home Guards — which is consistent rather than contradictory: PWD constructs for the whole state government.
 
-### Coverage, verified
+### Row counts, verified
 
 `DepartmentExcelDownload_relasedFD.jsp?year=YYYY&dept=H`:
 
@@ -82,9 +82,98 @@ H also carries buildings for other departments — Ayurveda, Forensic Science, H
 
 **Ten financial years, ~9,500 rows for PWD alone**, one HTTP request per year.
 
+## Correction (2026-08-26): a second BEAMS report contradicts the first
+
+The section below was written from the department-wise export alone. A later
+session opened `DeptExpAct.jsp` — "Department Expenditure Actuals" — and it
+tells a different story.
+
+`DeptExpAct1.jsp?fmonth=4&tmonth=3&year=YYYY-YYYY&type=0` returns a
+department-level report with columns:
+
+```
+Department | Budgeted | Released | % | Received | BEAMS Expenditure | Actual Expenditure in Treasury | %
+H -Public Works | 51567.706 | 36986.262 | 71.723 | 685.043 | 36049.269 | ...
+```
+
+Three things follow.
+
+**Department names are published after all.** `H -Public Works`, `A -Gen. Admin`,
+`B -Home`, `C -Revenue and Forest`. The open code-to-name item is resolved, and
+the ledger's `department.name_en` can be populated from a source rather than
+left null.
+
+**The ingested figures are independently corroborated for recent years.** For
+FY2024-25 this report gives Released `36986.262` and BEAMS Expenditure
+`36049.269`; the ledger holds ₹36,986.26 crore and ₹36,049.26 crore from the
+other endpoint. Exact agreement, which also confirms the ×100,000 conversion
+from thousands.
+
+**The two reports disagree sharply before FY2021-22.**
+
+| FY2020-21                         | Released   | Expenditure    |
+| --------------------------------- | ---------- | -------------- |
+| department-wise export (ingested) | ₹3,824 cr  | **₹24 cr**     |
+| `DeptExpAct1.jsp`                 | ₹16,818 cr | **₹15,842 cr** |
+
+FY2019-20 shows the same pattern. FY2021-22 matches exactly across both.
+
+So the earlier conclusion — "the treasury system did not capture expenditure
+before FY2021" — is **wrong**. Expenditure exists for those years; the
+department-wise export does not carry it correctly.
+
+**The display gate stays**, because the ledger currently holds the unreliable
+figures. What changes is the remedy: not a coverage flag, but ingesting
+`DeptExpAct1.jsp` as the department-level series and treating the scheme-level
+export as authoritative only from FY2021-22.
+
+Also worth carrying forward: this report distinguishes **BEAMS Expenditure**
+from **Actual Expenditure in Treasury**. Those are two different measures of
+spending and should not be collapsed.
+
+### A methodological note
+
+Three separate times in this session an empty BEAMS response was nearly read as
+"no data for that year". It never was — each time the session or request rate
+was the cause, and a fresh session returned figures. The registry rule already
+says an unreachable host is not a disproven one; the same applies to an empty
+body from a reachable one. **An empty response is evidence about the request,
+not about the data.**
+
+---
+
+## Superseded: the expenditure column is not populated before FY2021
+
+Established by ingesting all ten years (2026-08-26). Rows whose `EXPENDITURE` is zero:
+
+| FY   |    zero | non-zero |     | FY   | zero | non-zero |
+| ---- | ------: | -------: | --- | ---- | ---: | -------: |
+| 2017 |     978 |       23 |     | 2022 |  321 |      623 |
+| 2018 |     931 |       46 |     | 2023 |  313 |      658 |
+| 2019 |     785 |       41 |     | 2024 |  351 |      641 |
+| 2020 | **826** |   **13** |     | 2025 |  349 |      647 |
+| 2021 |     246 |      594 |     | 2026 |  529 |      454 |
+
+The change at FY2021 is a step, not a trend. Before it, the column is ~98% zero; after, ~65% of rows carry a figure.
+
+Totalled, FY2020 reads **₹19,638 crore allocated against ₹24 crore spent**. Maharashtra's Public Works Department did not spend ₹24 crore in a year. The column is not recording expenditure in those years.
+
+**The source publishes `0`, not an empty cell.** So the ledger stores zero — faithfully, and correctly, because rewriting a published figure would be editing a government record. But a zero here does not mean "nothing was spent", and a page rendering _"₹19,638 cr allocated, ₹24 cr spent"_ would make a false and damaging implication about a department.
+
+**Consequence:** pre-FY2021 expenditure, and both variances derived from it, must not be displayed until this is resolved. This is a presentation gate, not a data fix. Candidate resolutions, in order of preference:
+
+1. Establish from Maharashtra Finance what the column meant before FY2021 — it may be a system that only went live for expenditure capture in 2020-21.
+2. Record per-source, per-year, per-field **coverage**, so the presentation layer can withhold a figure the source does not actually populate. This generalises: every source will have fields it publishes only for some years.
+3. Corroborate against a second source (Finance Accounts, CAG) before showing any pre-FY2021 expenditure figure.
+
+The observation is recorded here rather than patched away because "the source published a zero it did not mean" is exactly the class of defect this registry exists to catch, and the next source will have its own version of it.
+
 ## Open items
 
 - **Department code → name mapping is not in the export.** `DepartmentExp111.jsp` returns an empty body to a GET; it may require a POST or different parameters. Until resolved, `H = Public Works` is an inference, and a department name must not be displayed on that basis.
+- **Ingest `DeptExpAct1.jsp`** as the department-level series; it carries credible expenditure for years the department-wise export does not. Until then the display gate stands.
+- **Populate `department.name_en`** from `DeptExpAct1.jsp`, which publishes them.
+- Establish the difference between **BEAMS Expenditure** and **Actual Expenditure in Treasury**.
 - **Licence and terms of use** — not yet located. Required before display, and still outstanding for every source in this registry.
 - Whether `S1`/`S2`/`S3` are quarterly instalments or something else. They are zero in most sampled rows.
 - Whether the monthly export gives a within-year time series worth ingesting, or only a year-to-date cut.

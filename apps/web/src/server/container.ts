@@ -4,6 +4,7 @@ import "server-only";
 // runner, which reads the filesystem. A route handler has no business pulling
 // that in, and a serverless bundle has no business carrying it.
 import { PostgresAdminUnitRepository } from "@lokdarpan/database/repository";
+import pg from "pg";
 import { UnitService } from "@lokdarpan/domain";
 
 /**
@@ -20,6 +21,7 @@ import { UnitService } from "@lokdarpan/domain";
  * exhaust a free-tier Postgres in minutes.
  */
 let repository: PostgresAdminUnitRepository | undefined;
+let sharedPool: pg.Pool | undefined;
 
 function databaseUrl(): string {
   const url = process.env["DATABASE_URL"];
@@ -27,6 +29,19 @@ function databaseUrl(): string {
     throw new Error("DATABASE_URL is not set.");
   }
   return url;
+}
+
+/**
+ * One pool per isolate, not per request. A pool built on every invocation opens
+ * a new connection each time and exhausts a free-tier Postgres in minutes.
+ */
+export function pool(): pg.Pool {
+  sharedPool ??= new pg.Pool({
+    connectionString: databaseUrl(),
+    max: 1,
+    idleTimeoutMillis: 5_000,
+  });
+  return sharedPool;
 }
 
 export function unitService(): UnitService {

@@ -1,0 +1,1453 @@
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+
+
+</head>
+<body>
+
+ <table id="table" width="50%" border="1" align="center" cellpadding="0" cellspacing = "0" style="top:10px;">
+ <tr ><th align="center" colspan="18">Financial year :2024-2025</th></tr>
+   <tr><th align="right" colspan="19">Amounts In Thousands</th></tr>
+   <tr>
+     
+	<th>DEPT</th>
+	<th>DEMAND_NO</th>
+	<th>SCHEME_CODE</th>
+	<th>SCHEME_NM</th>
+	 <th>BUDBOOK_SCHEMENM_ENGLISH</th>
+	 <th>BUDBOOK_SCHEMENM_MARATHI</th>
+	<th>SCHEME_COMITTED</th>
+	<th>CHARGED_VOTED</th>
+	<th>OBJECT_CODE</th>
+	<th>BUDGET</th>
+	
+	<th>S1</th>
+	<th>S2</th>
+	<th>S3</th>
+	
+	<th>RELEASED FD</th>
+	<th>RELEASED Dept</th>
+	 <th>EXPENDITURE</th>
+	 <th> REAPP</th>
+        
+	    <th>Source of fund</th>
+		<th>Plan Type</th>
+       
+	</tr>
+	  
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">42100023</td>
+			 
+				<td align="center">    ESTABLISHMENT CHARGES</td>
+				<td align="center">Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">208500.000</td>
+				<td align="center">353062.000</td>
+				
+				<td align="center">36475.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">208500.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">22100066</td>
+			 
+				<td align="center">  DIRECTOR OF AYURVEDA</td>
+				<td align="center">Director of Ayurveda.</td>
+				<td align="center">आयुर्वेद संचालक</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">15000.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">10500.000</td>
+				
+				<td align="center">10500.000</td>
+				
+				<td align="center">10500.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20591648</td>
+			 
+				<td align="center"> 8-(I)-B-DIRECT.FORENSICSCI.LAB.& CHEM.GOVT</td>
+				<td align="center">Director of Forensic Science Laboratory and Chemical Analyser to Government.</td>
+				<td align="center">संचालक, न्यायसहायक वैज्ञानिक प्रयोगशाळा आणि रासायनिक विश्लेषक, महाराष्ट्र शासन</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">897.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">538.200</td>
+				
+				<td align="center">538.000</td>
+				
+				<td align="center">296.845</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20591657</td>
+			 
+				<td align="center"> 8-(I)-C-COMMANDAND GEN.OF HOME GUARDS</td>
+				<td align="center">Commandant General of Home Guards.</td>
+				<td align="center">महासमादेशक, होमगार्ड</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">100.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">60.000</td>
+				
+				<td align="center">60.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20591639</td>
+			 
+				<td align="center"> 8-(I)-COMMISSIONER OF  POLICE MUMBAI.</td>
+				<td align="center">Commissioner of police, Mumbai.</td>
+				<td align="center">पोलीस आयुक्त, मुंबई</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">4220.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">2532.000</td>
+				
+				<td align="center">2532.000</td>
+				
+				<td align="center">2397.533</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20591621</td>
+			 
+				<td align="center"> 8-(I)-MINOR WORKS FINANFROM DISCR. GRAN.I. G.P</td>
+				<td align="center">Director General of Police.</td>
+				<td align="center">पोलीस महासंचालक</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">16988.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">11721.720</td>
+				
+				<td align="center">11586.000</td>
+				
+				<td align="center">10308.132</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20592045</td>
+			 
+				<td align="center">(02)(01) -REPAIRS TO    BUILDINGS</td>
+				<td align="center">Repairs to Buildings.</td>
+				<td align="center">इमारतींची दुरुस्ती</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">2559418.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">1.000</td>
+				 <td align="center">2559418.000</td>
+				
+				<td align="center">3059418.000</td>
+				
+				<td align="center">3049361.643</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20592724</td>
+			 
+				<td align="center">(02)(02)REPAIRS TO ANIMAL HUS.BUILDINGS.</td>
+				<td align="center">Repairs to Animal Husbandry Buildings.</td>
+				<td align="center">पशुसंवर्धन इमारतींची दुरुस्ती</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">29203.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">18105.860</td>
+				
+				<td align="center">17772.000</td>
+				
+				<td align="center">17772.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20592733</td>
+			 
+				<td align="center">(02)(03)REPAIRS TO FISH.BUILDINGS.</td>
+				<td align="center">Repairs to Fisheries Buildings.</td>
+				<td align="center">मत्स्यव्यवसाय इमारतींची दुरुस्ती</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">4442.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">1332.600</td>
+				
+				<td align="center">1332.000</td>
+				
+				<td align="center">616.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20592054</td>
+			 
+				<td align="center">(02)(04)-MUNCIPAL TAXES  </td>
+				<td align="center">Municipal Taxes.</td>
+				<td align="center">नगरपालिका कर</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">14</td>
+				<td align="center">19413.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">109853.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">94113.040</td>
+				
+				<td align="center">93462.200</td>
+				
+				<td align="center">84218.234</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">20592081</td>
+			 
+				<td align="center">(02)(07) -G.I.A FOR MAINTENANCE OF UNIVERSITY GARDENS OF RAJABHAI CLOCK TOWER MUMBAI</td>
+				<td align="center">Grant-in-aid for maintenance of University Gardens and Rajabai Clock Tower,Mumbai.</td>
+				<td align="center">मुंबई येथील विद्यापीठ उद्यान व राजाबाई घड्याळ मनोऱ्याच्या परिरक्षणासाठी सहायक अनुदान</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">31</td>
+				<td align="center">15.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">0</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-07</td>
+				<td align="center">42160306</td>
+			 
+				<td align="center">(I)-B-ESTABLISMENT CHARGES</td>
+				<td align="center">Establishment Charges.</td>
+				<td align="center">आस्थापना खर्च.</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">122320.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">122320.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-07</td>
+				<td align="center">42160315</td>
+			 
+				<td align="center">(I)-C-TOOLS AND PLANT CHARGES</td>
+				<td align="center">Tools and Plant Charges.</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च.</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">9680.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">9680.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">22030416</td>
+			 
+				<td align="center">(I)-DIRECTOR OF TRCHNIC-AL EDUCATION</td>
+				<td align="center">Director of Technical Education.</td>
+				<td align="center">संचालक, तंत्रशिक्षण</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">20000.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">14000.000</td>
+				
+				<td align="center">14000.000</td>
+				
+				<td align="center">12819.673</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-06</td>
+				<td align="center">22030425</td>
+			 
+				<td align="center">(II)-DIRECTOR OF VOCATI-ONAL EDUCATIONAL AND TRAINING</td>
+				<td align="center">Director of Vocational Education and Training.</td>
+				<td align="center">संचालक, व्यवसाय शिक्षण व प्रशिक्षण</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">27</td>
+				<td align="center">20000.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">14000.000</td>
+				
+				<td align="center">14000.000</td>
+				
+				<td align="center">13927.097</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-07</td>
+				<td align="center">50540115</td>
+			 
+				<td align="center">(II)-ESTABLISHMENT       CHARGES</td>
+				<td align="center">Establishment Charges </td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">6801330.000</td>
+				<td align="center">423044.000</td>
+				
+				<td align="center">604348.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">6801330.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">42502411</td>
+			 
+				<td align="center">(Upgradation of Old Industrial Training Institutes.)Establishment Charges</td>
+				<td align="center">Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">18552.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">18552.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">42502431</td>
+			 
+				<td align="center">(Upgradation of Old Industrial Training Institutes.)Tools and Plant Charges</td>
+				<td align="center">Tools and Plant Charges</td>
+				<td align="center">हत्यारे व संयत्रे खर्च </td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">1468.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">1468.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-05</td>
+				<td align="center">30540532</td>
+			 
+				<td align="center">004-RESEARCH  AND DEVELOPMENT SCHEMES IN THE FIVE YEAR PLAN</td>
+				<td align="center">Schemes in the Five Year plan.</td>
+				<td align="center"> पंचवार्षिक योजनांतर्गत योजना</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">50</td>
+				<td align="center">20000.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">4800.000</td>
+				
+				<td align="center">4720.000</td>
+				
+				<td align="center">3232.409</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590654</td>
+			 
+				<td align="center">01/101/(02)(02) ESTABLISHMENT CHARGES</td>
+				<td align="center">Establishment Charges </td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Charged</td>
+				<td align="center">63</td>
+				<td align="center">24174.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">24174.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590663</td>
+			 
+				<td align="center">01/101/(02)(03) TOOLS </td>
+				<td align="center">Tools and Plant Charges</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Charged</td>
+				<td align="center">63</td>
+				<td align="center">1913.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">1913.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590681</td>
+			 
+				<td align="center">01/101/(03)(02) ESTABLISHMENT CHARGES</td>
+				<td align="center"> 
+Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">647740.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">647740.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590692</td>
+			 
+				<td align="center">01/101/(03)(03) TOOLS </td>
+				<td align="center">Tools and Plant Charges</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">51260.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">51260.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590743</td>
+			 
+				<td align="center">01/101/(05)(02) ESTABLISHMENT CHARGES (SALES TAX)</td>
+				<td align="center">Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">14854.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">7929.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">14854.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590752</td>
+			 
+				<td align="center">01/101/(05)(03) TOOLS AND PLANTS CHARGES (SALES TAX)</td>
+				<td align="center">Tools and Plants Charges</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Comitted </td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">1175.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">627.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">1175.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">null</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590799</td>
+			 
+				<td align="center">01/101/(07)(01) MAJOR WORK ( DISTRICT ADMINISTRATION)</td>
+				<td align="center">Major Works - DISTRICT ADMINISTRATION</td>
+				<td align="center">मोठी बांधकामे - जिल्हा प्रशासन</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">53</td>
+				<td align="center">1043478.000</td>
+				<td align="center">821679.000</td>
+				
+				<td align="center">1209130.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">3074287.000</td>
+				
+				<td align="center">3054273.001</td>
+				
+				<td align="center">3054272.999</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590805</td>
+			 
+				<td align="center">01/101/(07)(02) ESTABLISHMENT CHARGES ( DISTRICT ADMINISTRATION)</td>
+				<td align="center">Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">145044.000</td>
+				<td align="center">114212.000</td>
+				
+				<td align="center">168070.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">145044.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590814</td>
+			 
+				<td align="center">01/101/(07)(03) TOOLS AND PLANTS CHARGES ( DISTRICT ADMINISTRATION)</td>
+				<td align="center">Tools and Plant Charges</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">11478.000</td>
+				<td align="center">9037.000</td>
+				
+				<td align="center">13300.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">11478.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590823</td>
+			 
+				<td align="center">01/101/(08)(01) MAJOR WORK (TRANSPORT)</td>
+				<td align="center">Major Works - TRANSPORT</td>
+				<td align="center">मोठी बांधकामे - परिवहन</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">53</td>
+				<td align="center">686955.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">1.000</td>
+				 <td align="center">419042.550</td>
+				
+				<td align="center">412424.000</td>
+				
+				<td align="center">342193.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590832</td>
+			 
+				<td align="center">01/101/(08)(02) ESTABLISHMENT CHARGES (TRANSPORT)</td>
+				<td align="center">Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">95487.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">95487.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590841</td>
+			 
+				<td align="center">01/101/(08)(03) TOOLS AND PLANTS CHARGES (TRANSPORT)</td>
+				<td align="center">Tools and Plant Charges</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">7556.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">7556.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590861</td>
+			 
+				<td align="center">01/101/(09)(02) ESTABLISHMENT CHARGES (ACCOUNT AND TREASURY ADMINISTRATION)</td>
+				<td align="center">Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">3626.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">3626.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590879</td>
+			 
+				<td align="center">01/101/(09)(03) TOOLS AND PLANTS CHARGES (ACCOUNT AND TREASURY ADMINISTRATION)</td>
+				<td align="center">Tools and Plant Charges </td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">287.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">287.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590921</td>
+			 
+				<td align="center">01/101/(11)(02) ESTABLISHMENT CHARGES (JAIL)</td>
+				<td align="center">Establishment Charges </td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">49883.000</td>
+				<td align="center">19262.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">49883.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590932</td>
+			 
+				<td align="center">01/101/(11)(03) TOOLS AND PLANTS CHARGES (JAIL)</td>
+				<td align="center">Tools and Plant Charges</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">3947.000</td>
+				<td align="center">1524.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">3947.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">Gen_PWD</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590959</td>
+			 
+				<td align="center">01/101/(12)(02) ESTABLISHMENT CHARGES ( INSPECTION BUNGALOWS, REST HOUSS ETC.)</td>
+				<td align="center">Establishment Charges</td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">241739.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">241739.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590968</td>
+			 
+				<td align="center">01/101/(12)(03) TOOLS AND PLANTS CHARGES ( INSPECTION BUNGALOWS, REST HOUSS ETC.)</td>
+				<td align="center">Tools and Plant Charges </td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">19131.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">19131.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590977</td>
+			 
+				<td align="center">01/101/(13)(01) MAJOR WORK (OFFICE BUILDING)</td>
+				<td align="center">Major Works - OFFICE BUILDING</td>
+				<td align="center">मोठी बांधकामे - कार्यालयीन इमारती</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">53</td>
+				<td align="center">6669565.000</td>
+				<td align="center">1.000</td>
+				
+				<td align="center">1.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">6402783.400</td>
+				
+				<td align="center">6366676.001</td>
+				
+				<td align="center">5557725.990</td>
+				<td align="center">-611800.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590986</td>
+			 
+				<td align="center">01/101/(13)(02) ESTABLISHMENT CHARGES (OFFICE BUILDING)</td>
+				<td align="center">Establishment Charges </td>
+				<td align="center">आस्थापना खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">927070.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">927070.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  <tr>
+				<td align="center">H </td>
+				<td align="center">H-08</td>
+				<td align="center">40590995</td>
+			 
+				<td align="center">01/101/(13)(03) TOOLS AND PLANTS CHARGES (OFFICE BUILDING)</td>
+				<td align="center">Tools and Plant charges</td>
+				<td align="center">हत्यारे व संयंत्रे खर्च</td>
+				<td align="center">Scheme</td>
+				<td align="center">Voted </td>
+				<td align="center">63</td>
+				<td align="center">73365.000</td>
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				 <td align="center">73365.000</td>
+				
+				<td align="center">0.000</td>
+				
+				<td align="center">0.000</td>
+				<td align="center">0.000</td>
+				
+				
+				
+				
+			<td align="center">--</td>
+			
+			
+		 <td align="center">General</td>
+		
+		 
+		 
+		 
+				  
+</table></body></html>
