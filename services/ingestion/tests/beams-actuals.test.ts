@@ -87,3 +87,37 @@ describe("parseDepartmentActuals — refusals", () => {
     expect(() => parseDepartmentActuals(noBudget, 2024)).toThrow(/missing an expected column/i);
   });
 });
+
+describe("parseDepartmentActuals — structural refusals", () => {
+  const unit = "<tr><td>Amount in Crores</td></tr>";
+  const year = "<tr><td>Financial year :2024-2025</td></tr>";
+
+  it("refuses a report with no Department column", () => {
+    expect(() =>
+      parseDepartmentActuals(`<table>${year}${unit}<tr><td>X</td></tr></table>`, 2024),
+    ).toThrow(/no Department column/i);
+  });
+
+  it("refuses a report that lists one department twice", () => {
+    const header =
+      "<tr><td>Department</td><td>Budgeted</td><td>Released</td><td>BEAMS Expenditure</td></tr>";
+    const row = "<tr><td>H -Public Works</td><td>1.000</td><td>1.000</td><td>1.000</td></tr>";
+    expect(() =>
+      parseDepartmentActuals(`<table>${year}${unit}${header}${row}${row}</table>`, 2024),
+    ).toThrow(/appears twice/i);
+  });
+
+  it("stops at the first Total row, ignoring the repeated second table", () => {
+    const header =
+      "<tr><td>Department</td><td>Budgeted</td><td>Released</td><td>BEAMS Expenditure</td></tr>";
+    const first = "<tr><td>H -Public Works</td><td>1.000</td><td>1.000</td><td>1.000</td></tr>";
+    const total = "<tr><td>Total</td><td>1.000</td><td>1.000</td><td>1.000</td></tr>";
+    const second = "<tr><td>H -Public Works</td><td>9.000</td><td>9.000</td><td>9.000</td></tr>";
+    const parsedTwice = parseDepartmentActuals(
+      `<table>${year}${unit}${header}${first}${total}${header}${second}</table>`,
+      2024,
+    );
+    expect(parsedTwice.rows).toHaveLength(1);
+    expect(parsedTwice.rows[0]?.budgetedInr).toBe("10000000.00");
+  });
+});
