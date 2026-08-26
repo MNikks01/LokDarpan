@@ -34,6 +34,7 @@ export default defineConfig({
         "services/ingestion/src/beams/cli.ts",
         "services/ingestion/src/beams/actuals-cli.ts",
         "services/ingestion/src/cag/cli.ts",
+        "services/ingestion/src/cag/facts-cli.ts",
         // Pure re-export barrels.
         "packages/contracts/src/index.ts",
         "packages/database/src/index.ts",
