@@ -1,3 +1,5 @@
+import { scrubValue } from "@lokdarpan/observability";
+
 import type { Config } from "../config/index.js";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -41,10 +43,19 @@ const REDACTED = new Set([
   "email",
 ]);
 
+/**
+ * Two passes, because they catch different failures.
+ *
+ * Redacting by key name protects a value someone deliberately put under a known
+ * key. It does nothing for an error message that happens to contain a
+ * connection string because the driver put it there — and that is the line an
+ * exception handler writes, not one anybody chose. Scrubbing the value catches
+ * the second case.
+ */
 function redact(context: LogContext): Record<string, LogValue> {
   const out: Record<string, LogValue> = {};
   for (const [k, v] of Object.entries(context)) {
-    out[k] = REDACTED.has(k.toLowerCase()) ? "[redacted]" : v;
+    out[k] = REDACTED.has(k.toLowerCase()) ? "[redacted]" : scrubValue(v);
   }
   return out;
 }
@@ -56,8 +67,16 @@ export class StructuredLogger implements Logger {
     private readonly sink: (line: string) => void = (l) => process.stdout.write(l + "\n"),
   ) {}
 
+  /**
+   * Identity fields a log shipper needs to route and filter without parsing the
+   * message: which service, which build, which environment.
+   */
   static fromConfig(config: Config): StructuredLogger {
-    return new StructuredLogger(config.logLevel, { env: config.nodeEnv });
+    return new StructuredLogger(config.logLevel, {
+      service: "api",
+      version: config.serviceVersion,
+      env: config.nodeEnv,
+    });
   }
 
   child(context: LogContext): Logger {
@@ -82,7 +101,9 @@ export class StructuredLogger implements Logger {
     this.sink(
       JSON.stringify({
         level,
-        message,
+        // The message is a stable event key, never interpolated free text, so
+        // it is safe to index and group on. Detail belongs in the context.
+        message: scrubValue(message),
         time: new Date().toISOString(),
         ...redact(this.base),
         ...(context ? redact(context) : {}),

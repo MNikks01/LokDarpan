@@ -8,7 +8,7 @@ import {
   loadMigrations,
   pendingMigrations,
   readApplied,
-} from "./migrator.js";
+} from "./migrator";
 
 const MIGRATIONS_DIR = resolve(
   dirname(fileURLToPath(import.meta.url)),

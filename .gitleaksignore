@@ -1,0 +1,10 @@
+# Fingerprints gitleaks should not report. Currently none.
+#
+# Policy, if an entry is ever needed: pin the full fingerprint — commit, file,
+# rule and line — so it can only ever silence the one occurrence named. Never
+# add a rule-wide or path-wide exclusion; that turns a security gate into
+# decoration, and nobody notices until it matters.
+#
+# A finding is a reason to fix the code first. The last entry here existed only
+# because a superseded commit still sat in an unmerged branch's history, and it
+# was removed the moment that branch was squash-merged.

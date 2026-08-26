@@ -5,8 +5,9 @@ export {
   bucketBytes,
   bucketCount,
   bucketLatency,
-} from "./buckets.js";
-export type { ByteBucket, CountBucket, LatencyBucket } from "./buckets.js";
-export { routePattern } from "./route-pattern.js";
-export { METRICS, MetricsRegistry } from "./metrics.js";
-export type { LabelValues } from "./metrics.js";
+} from "./buckets";
+export type { ByteBucket, CountBucket, LatencyBucket } from "./buckets";
+export { routePattern } from "./route-pattern";
+export { METRICS, MetricsRegistry } from "./metrics";
+export { scrubSecrets, scrubValue } from "./scrub";
+export type { LabelValues } from "./metrics";

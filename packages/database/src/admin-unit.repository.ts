@@ -1,52 +1,6 @@
+import type { AdminUnit, AdminUnitLevel, AdminUnitRepository, Provenance } from "@lokdarpan/domain";
+import { AppError } from "@lokdarpan/errors";
 import pg from "pg";
-import { inject, injectable } from "tsyringe";
-
-import { CONFIG, type Config } from "../../config/index.js";
-import { AppError } from "../../errors/index.js";
-import { LOGGER, type Logger } from "../../logging/logger.js";
-
-/**
- * Provenance travels with the fact, never beside it. A unit that cannot name
- * the artefact its values came from is not returned.
- */
-export interface Provenance {
-  readonly sourceSha256: string;
-  readonly sourceUrl: string;
-  readonly retrievedAt: string;
-  readonly extractionConfidence: number;
-  readonly datasetVersion: number;
-}
-
-export type AdminUnitLevel =
-  | "country"
-  | "state"
-  | "district"
-  | "sub_district"
-  | "block"
-  | "village"
-  | "urban_local_body"
-  | "ward"
-  | "gram_panchayat";
-
-export interface AdminUnit {
-  readonly id: number;
-  readonly lgdCode: string;
-  readonly level: AdminUnitLevel;
-  readonly nameEn: string;
-  /** `null` when the source publishes no local-language name. Never a placeholder. */
-  readonly nameLocal: string | null;
-  readonly parentId: number | null;
-  readonly provenance: Provenance;
-}
-
-/** The port. Callers depend on this, never on a driver. */
-export interface AdminUnitRepository {
-  findById(id: number): Promise<AdminUnit>;
-  listByLevel(level: AdminUnitLevel): Promise<AdminUnit[]>;
-  listChildren(parentId: number): Promise<AdminUnit[]>;
-}
-
-export const ADMIN_UNIT_REPOSITORY = Symbol.for("AdminUnitRepository");
 
 interface UnitRow {
   readonly id: string;
@@ -71,6 +25,13 @@ const SELECT = `
 `;
 
 function toUnit(row: UnitRow): AdminUnit {
+  const provenance: Provenance = {
+    sourceSha256: row.source_sha256,
+    sourceUrl: row.source_url,
+    retrievedAt: row.retrieved_at.toISOString(),
+    extractionConfidence: Number(row.extraction_confidence),
+    datasetVersion: Number(row.dataset_version_id),
+  };
   return {
     id: Number(row.id),
     lgdCode: row.lgd_code,
@@ -78,39 +39,47 @@ function toUnit(row: UnitRow): AdminUnit {
     nameEn: row.name_en,
     nameLocal: row.name_local,
     parentId: row.parent_id === null ? null : Number(row.parent_id),
-    provenance: {
-      sourceSha256: row.source_sha256,
-      sourceUrl: row.source_url,
-      retrievedAt: row.retrieved_at.toISOString(),
-      extractionConfidence: Number(row.extraction_confidence),
-      datasetVersion: Number(row.dataset_version_id),
-    },
+    provenance,
   };
 }
 
 /**
- * Postgres adapter. The API's database role is read-only — ETL is the only
- * write path to the ledger — so this class contains no statement that writes.
+ * Pool size differs by runtime, and getting it wrong is how a serverless
+ * deployment exhausts a database.
+ *
+ * A long-lived server multiplexes many requests over a few connections. A
+ * serverless invocation is one request; several may run concurrently, each in
+ * its own isolate with its own pool. Ten connections per isolate against a free
+ * Postgres tier's connection cap is an outage, so serverless keeps one and
+ * relies on the provider's pooled endpoint to fan in.
  */
-@injectable()
+export interface RepositoryOptions {
+  readonly connectionString: string;
+  /** `"serverless"` caps the pool at one connection per isolate. */
+  readonly runtime?: "server" | "serverless";
+  readonly onNotFound?: (id: number) => void;
+}
+
 export class PostgresAdminUnitRepository implements AdminUnitRepository {
   private readonly pool: pg.Pool;
+  private readonly onNotFound: (id: number) => void;
 
-  constructor(
-    @inject(CONFIG) config: Config,
-    @inject(LOGGER) private readonly logger: Logger,
-  ) {
-    if (config.databaseUrl === undefined) {
-      throw new Error("DATABASE_URL is required to serve administrative units.");
-    }
-    this.pool = new pg.Pool({ connectionString: config.databaseUrl, max: 10 });
+  constructor(options: RepositoryOptions) {
+    this.pool = new pg.Pool({
+      connectionString: options.connectionString,
+      max: options.runtime === "serverless" ? 1 : 10,
+      // A serverless isolate is frozen between invocations; a connection held
+      // open across that gap is usually dead by the next one.
+      idleTimeoutMillis: options.runtime === "serverless" ? 5_000 : 30_000,
+    });
+    this.onNotFound = options.onNotFound ?? ((): void => undefined);
   }
 
   async findById(id: number): Promise<AdminUnit> {
     const result = await this.pool.query<UnitRow>(`${SELECT} WHERE a.id = $1`, [id]);
     const row = result.rows[0];
     if (row === undefined) {
-      this.logger.info("unit.not_found", { unitId: id });
+      this.onNotFound(id);
       throw AppError.notFound("This administrative unit");
     }
     return toUnit(row);
@@ -133,13 +102,12 @@ export class PostgresAdminUnitRepository implements AdminUnitRepository {
   }
 
   /**
-   * Refuses to run against credentials that can write to the ledger.
+   * Refuses to serve from credentials that can write to the ledger.
    *
-   * The read-only guarantee is enforced by the database role (migration 0002),
-   * but nothing stops an operator from handing this service the owner's
-   * connection string. Checking at startup turns that misconfiguration into a
-   * failed deploy instead of a service that quietly holds write access to the
-   * canonical record for months.
+   * Migration 0002 makes the database enforce read-only, but nothing stops an
+   * operator handing this a connection string for the owner. Checking turns
+   * that misconfiguration into a visible failure rather than a service quietly
+   * holding write access to the canonical record.
    */
   async assertReadOnly(): Promise<void> {
     const result = await this.pool.query<{ writable: boolean }>(
@@ -150,14 +118,12 @@ export class PostgresAdminUnitRepository implements AdminUnitRepository {
          UNION ALL SELECT has_table_privilege(current_user, 'source_artifact', 'INSERT')
        ) AS checks`,
     );
-
     if (result.rows[0]?.writable === true) {
       throw new Error(
         "The API's database user can write to the ledger. ETL is the only write path; " +
           "point DATABASE_URL at a user granted lokdarpan_readonly (see migration 0002).",
       );
     }
-    this.logger.info("db.readonly_verified", {});
   }
 
   async close(): Promise<void> {

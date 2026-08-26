@@ -1,7 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import type { ProjectRepository, ProjectSummary } from "./project.repository.js";
 import { PROJECT_REPOSITORY } from "./project.repository.js";
-import { AppError } from "../../errors/index.js";
+import { AppError } from "@lokdarpan/errors";
 
 /** Business logic. Depends on the port, not on any concrete data source. */
 @injectable()

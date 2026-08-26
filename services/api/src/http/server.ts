@@ -3,8 +3,9 @@ import { randomUUID } from "node:crypto";
 import type { DependencyContainer } from "tsyringe";
 import { CONFIG, type Config } from "../config/index.js";
 import { LOGGER, type Logger } from "../logging/logger.js";
-import { toEnvelope, AppError } from "../errors/index.js";
-import { UnitService } from "../modules/units/unit.service.js";
+import { toEnvelope, AppError } from "@lokdarpan/errors";
+import type { UnitService } from "@lokdarpan/domain";
+import { UNIT_SERVICE } from "../modules/units/unit.module.js";
 import { METRICS, routePattern, type MetricsRegistry } from "@lokdarpan/observability";
 import { ProjectService } from "../modules/projects/project.service.js";
 
@@ -103,7 +104,7 @@ async function handle(
 
   const unit = /^\/api\/v1\/units\/([^/]+)$/u.exec(path);
   if (unit?.[1] !== undefined) {
-    const data = await container.resolve(UnitService).getUnit(unit[1]);
+    const data = await container.resolve<UnitService>(UNIT_SERVICE).getUnit(unit[1]);
     // The dataset version comes from the data, not from configuration: the
     // envelope must state the vintage of what it actually contains.
     return {
@@ -115,7 +116,7 @@ async function handle(
   if (path === "/api/v1/units") {
     const level = url.searchParams.get("level");
     if (level === null) throw AppError.badRequest("A level is required, e.g. ?level=state.");
-    const data = await container.resolve(UnitService).listByLevel(level);
+    const data = await container.resolve<UnitService>(UNIT_SERVICE).listByLevel(level);
     return {
       data,
       meta: { datasetVersion: data.datasetVersion, asOf: new Date().toISOString() },

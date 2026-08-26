@@ -2,11 +2,11 @@ import "reflect-metadata";
 import { buildContainer } from "./container/index.js";
 import { createApiServer } from "./http/server.js";
 import { CONFIG, ConfigError, type Config } from "./config/index.js";
+import { scrubSecrets } from "@lokdarpan/observability";
+
 import { LOGGER, type Logger } from "./logging/logger.js";
-import {
-  ADMIN_UNIT_REPOSITORY,
-  type PostgresAdminUnitRepository,
-} from "./modules/units/unit.repository.js";
+import type { PostgresAdminUnitRepository } from "@lokdarpan/database";
+import { ADMIN_UNIT_REPOSITORY } from "./modules/units/unit.module.js";
 
 async function main(): Promise<void> {
   let container;
@@ -15,7 +15,10 @@ async function main(): Promise<void> {
   } catch (err) {
     // Fail fast and loudly: a misconfigured process must not start.
     if (err instanceof ConfigError) {
-      process.stderr.write(`${err.message}\n`);
+      // Scrubbed even here: this runs before the logger exists, and a
+      // validation message naming a malformed DATABASE_URL would otherwise
+      // print the credential to stderr — which the platform also ships.
+      process.stderr.write(`${scrubSecrets(err.message)}\n`);
       process.exit(78); // EX_CONFIG
     }
     throw err;
