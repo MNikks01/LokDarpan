@@ -16,6 +16,18 @@ export interface DepartmentYearFinance {
   readonly fiscalYear: number;
   /** Rupees as decimal strings. `null` means no figure, never zero. */
   readonly allocatedInr: string | null;
+  /**
+   * The same year's allocation as published by the *other* BEAMS report.
+   *
+   * Two government reports disagree about this figure — for FY2024 Public
+   * Works, ₹51,567 crore against ₹35,833 crore — and the residual changes sign
+   * across years, so it is not a units error or a missing column. Neither is
+   * silently preferred: both are published, and the disagreement is itself a
+   * fact the reader is entitled to (§40 of the product brief).
+   *
+   * `null` where the other report does not cover the year.
+   */
+  readonly allocatedInrAlternate: string | null;
   readonly releasedFdInr: string | null;
   readonly releasedInr: string | null;
   readonly utilizedInr: string | null;

@@ -34,6 +34,23 @@ function Figure({
   );
 }
 
+/**
+ * Two published figures for the same quantity differ by more than rounding.
+ *
+ * Compared as exact decimals rather than floats: these are government figures
+ * in the hundreds of billions of paise, where a float comparison would start
+ * inventing differences of its own.
+ */
+function conflicting(a: string | null, b: string | null): boolean {
+  if (a === null || b === null) return false;
+  const paise = (v: string): bigint => {
+    const [whole = "0", frac = ""] = v.split(".");
+    return BigInt(whole + frac.padEnd(2, "0").slice(0, 2));
+  };
+  const diff = paise(a) - paise(b);
+  return (diff < 0n ? -diff : diff) > 100n;
+}
+
 function YearRow({ year }: { readonly year: DepartmentYearFinance }): React.JSX.Element {
   const withheld = year.status === "not_published_for_period";
   const cell: React.CSSProperties = {
@@ -50,6 +67,17 @@ function YearRow({ year }: { readonly year: DepartmentYearFinance }): React.JSX.
       </th>
       <td style={cell}>
         <Figure inr={year.allocatedInr} absent="not published" />
+        {conflicting(year.allocatedInr, year.allocatedInrAlternate) && (
+          <>
+            {" "}
+            <abbr
+              title="A second government report publishes a different figure for this year. See the note below the table."
+              style={{ color: color.text.tertiary, textDecoration: "none", cursor: "help" }}
+            >
+              †
+            </abbr>
+          </>
+        )}
       </td>
       <td style={cell}>
         <Figure inr={year.releasedInr} absent="not published" />
@@ -107,6 +135,7 @@ export default async function DepartmentPage({
   if (view === null) notFound();
 
   const withheldYears = view.years.filter((y) => y.status === "not_published_for_period");
+  const conflicts = view.years.filter((y) => conflicting(y.allocatedInr, y.allocatedInrAlternate));
   const head: React.CSSProperties = {
     padding: `${String(space[2])}px ${String(space[3])}px`,
     borderBottom: `2px solid ${color.border.strong}`,
@@ -208,6 +237,41 @@ export default async function DepartmentPage({
           it publishes do not describe what was spent. Allocation and release are shown as
           published; expenditure and the two variances are withheld rather than presented as a
           comparison that would not be accurate.
+        </aside>
+      )}
+
+      {conflicts.length > 0 && (
+        // The brief's rule: do not silently choose one. Both figures are
+        // published by the same government; the disagreement is a fact the
+        // reader is entitled to, not a defect to hide behind one number.
+        <aside
+          style={{
+            marginTop: space[5],
+            padding: space[4],
+            borderRadius: radius.md,
+            background: color.band.high.bg,
+            color: color.band.high.fg,
+            fontSize: 13,
+          }}
+        >
+          <strong>† Two government reports publish different allocation figures.</strong> For{" "}
+          {conflicts.length === 1
+            ? `FY ${String(conflicts[0]?.fiscalYear)}`
+            : `${String(conflicts.length)} of these years`}
+          , the departmental actuals report and the scheme-wise budget export do not agree. The
+          figure shown is from the actuals report; the scheme-wise export gives{" "}
+          {conflicts
+            .slice(0, 3)
+            .map((y) =>
+              y.allocatedInrAlternate === null
+                ? ""
+                : `${Money.fromDecimalString(y.allocatedInrAlternate).format()} for FY ${String(y.fiscalYear)}`,
+            )
+            .filter((t) => t !== "")
+            .join(", ")}
+          . Released and spent agree exactly between the two reports; only the allocation differs,
+          and which definition each uses has not been established. The{" "}
+          <em>allocated minus spent</em> column inherits this uncertainty.
         </aside>
       )}
 

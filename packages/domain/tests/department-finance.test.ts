@@ -9,6 +9,7 @@ import {
 const year = (over: Partial<DepartmentYearFinance> = {}): DepartmentYearFinance => ({
   fiscalYear: 2024,
   allocatedInr: "100.00",
+  allocatedInrAlternate: "90.00",
   releasedFdInr: "95.00",
   releasedInr: "90.00",
   utilizedInr: "80.00",

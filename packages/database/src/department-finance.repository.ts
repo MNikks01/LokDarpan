@@ -10,6 +10,7 @@ import type pg from "pg";
 interface YearRow {
   readonly fiscal_year: number;
   readonly allocated_inr: string | null;
+  readonly allocated_alternate_inr: string | null;
   readonly released_fd_inr: string | null;
   readonly released_inr: string | null;
   readonly utilized_inr: string | null;
@@ -41,6 +42,11 @@ interface YearRow {
 const YEARS = `
   SELECT f.fiscal_year,
          f.budgeted_inr             AS allocated_inr,
+         (SELECT sum(sf.allocated_inr)
+            FROM scheme_finance sf
+            JOIN budget_scheme bs ON bs.id = sf.budget_scheme_id
+           WHERE bs.department_id = f.department_id
+             AND sf.fiscal_year = f.fiscal_year)  AS allocated_alternate_inr,
          NULL::numeric              AS released_fd_inr,
          f.released_inr             AS released_inr,
          f.beams_expenditure_inr    AS utilized_inr,
@@ -109,6 +115,7 @@ export class PostgresDepartmentFinanceRepository implements DepartmentFinanceRep
       return {
         fiscalYear: r.fiscal_year,
         allocatedInr: r.allocated_inr,
+        allocatedInrAlternate: r.allocated_alternate_inr,
         releasedFdInr: r.released_fd_inr,
         releasedInr: r.released_inr,
         utilizedInr: r.utilized_inr,
