@@ -16,19 +16,36 @@ const THOUSANDS = /^(-?)(\d+)(?:\.(\d+))?$/u;
 /** Values BEAMS uses for "no figure here". None of them is zero. */
 const ABSENT = new Set(["", "-", "--", "---", "NA", "N/A", "null"]);
 
-const PAISE_SHIFT = 5;
+/**
+ * Decimal places to shift to reach paise, per published unit.
+ *
+ * BEAMS uses **different units in different reports** — the scheme-wise export
+ * declares "Amounts In Thousands", the departmental actuals report declares
+ * "Amount in Crores". Same system, same department, figures four orders of
+ * magnitude apart. Neither is ever assumed: each parser asserts the declaration
+ * it finds before reading a single number.
+ */
+export const PAISE_SHIFT = {
+  /** thousands → rupees (10³) → paise (10²). */
+  thousands: 5,
+  /** crores → rupees (10⁷) → paise (10²). */
+  crores: 9,
+} as const;
+
+export type PublishedUnit = keyof typeof PAISE_SHIFT;
 
 export class AmountFormatError extends Error {
   public override readonly name = "AmountFormatError";
 }
 
 /**
- * Converts a BEAMS amount in thousands to exact paise.
+ * Converts a BEAMS amount to exact paise, given the unit the report declares.
  *
  * Returns `null` where the source published no figure — never zero. A zero is a
  * government asserting an amount; an absence is the lack of an assertion.
  */
-export function thousandsToPaise(raw: string): bigint | null {
+export function scaledToPaise(raw: string, unit: PublishedUnit): bigint | null {
+  const shift = PAISE_SHIFT[unit];
   const trimmed = raw.trim().replace(/,/gu, "");
   if (ABSENT.has(trimmed) || ABSENT.has(trimmed.toUpperCase())) return null;
 
@@ -44,14 +61,25 @@ export function thousandsToPaise(raw: string): bigint | null {
   // More than five decimal places in a thousands figure would express less than
   // one paisa. Rounding it would silently invent precision the source does not
   // have, so it is refused instead.
-  if (fraction.length > PAISE_SHIFT) {
+  if (fraction.length > shift) {
     throw new AmountFormatError(
-      `"${raw}" carries sub-paise precision (${String(fraction.length)} decimals). ` +
-        `Rounding would invent precision the source does not claim.`,
+      `"${raw}" carries sub-paise precision for a figure in ${unit} ` +
+        `(${String(fraction.length)} decimals). Rounding would invent precision ` +
+        `the source does not claim.`,
     );
   }
 
   const digits = `${whole ?? "0"}${fraction}`;
-  const paise = BigInt(digits) * 10n ** BigInt(PAISE_SHIFT - fraction.length);
+  const paise = BigInt(digits) * 10n ** BigInt(shift - fraction.length);
   return sign === "-" ? -paise : paise;
+}
+
+/** The scheme-wise export declares "Amounts In Thousands". */
+export function thousandsToPaise(raw: string): bigint | null {
+  return scaledToPaise(raw, "thousands");
+}
+
+/** The departmental actuals report declares "Amount in Crores". */
+export function croresToPaise(raw: string): bigint | null {
+  return scaledToPaise(raw, "crores");
 }

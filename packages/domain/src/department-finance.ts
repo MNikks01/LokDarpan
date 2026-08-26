@@ -38,16 +38,19 @@ export interface DepartmentFinanceView {
 }
 
 /**
- * The first year BEAMS actually populates its expenditure column.
+ * The first year the **scheme-wise export** carries credible expenditure.
  *
- * Before this, 978 of 1,001 rows carry a published zero — FY2020 totals ₹19,638
- * crore allocated against ₹24 crore spent, which is not what happened. The
- * source asserts a zero it does not mean
- * (.docs/06-government-sources/beams-discovery.md).
+ * Before this it reports ₹24 crore of spending against ₹19,638 crore allocated
+ * for FY2020, while BEAMS' own departmental actuals report gives ₹15,842 crore
+ * for the same department and year. The two agree to the rupee from FY2021-22
+ * onward (.docs/06-government-sources/beams-discovery.md §Correction).
  *
- * The stored figures stay exactly as published, because rewriting a government
- * record is not ours to do. What is withheld is the *display*: showing that
- * comparison would make a false and damaging claim about a department.
+ * The departmental series now reads the actuals report, so this gate no longer
+ * applies to a department page. It remains for **scheme-level** views, which
+ * still derive from the export and are still wrong for those years.
+ *
+ * Stored figures are untouched either way. Rewriting a government record is not
+ * ours to do; choosing which of two published records to display is.
  */
 export const BEAMS_EXPENDITURE_FIRST_YEAR = 2021;
 

@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
     "ingest:lgd": "tsx src/cli.ts",
-    "ingest:beams": "tsx src/beams/cli.ts"
+    "ingest:beams": "tsx src/beams/cli.ts",
+    "ingest:beams-actuals": "tsx src/beams/actuals-cli.ts"
   },
   "dependencies": {
     "@lokdarpan/database": "workspace:*",
