@@ -44,6 +44,7 @@ Fields with no evidence are `null` or `"unknown"` — never guessed.
 Read these two Sprint 0 findings first.
 
 - [`access-and-permissions.md`](./access-and-permissions.md) — what each source actually permits. Two of the thirty-six State/UT procurement portals disallow crawling outright: **Maharashtra** (the Phase-1 target) and **Karnataka**.
+- [`beams-discovery.md`](./beams-discovery.md) — **the Maharashtra expenditure chain**: `BUDGET → RELEASED → EXPENDITURE` per scheme and object, ten years, one request per department-year. **Amounts are in thousands** — × 100,000 for paise.
 - [`lgd-access-findings.md`](./lgd-access-findings.md) — **the hierarchy is collectable** via the citizen views (no CAPTCHA); the bulk download is CAPTCHA-gated. Two data traps: the local-name column is mostly uppercase English, and Indic text arrives decomposed.
 - [`datagovin-api-findings.md`](./datagovin-api-findings.md) — the **catalogue API needs no key** (285,974 resources). Maharashtra publishes **no** procurement data; six other states do. Note the ignored-parameter trap.
 - [`gepnic-access-findings.md`](./gepnic-access-findings.md) — **award data is CAPTCHA-gated on every GePNIC portal tested**, and on CPPP. Changing state does not obtain it; Phase 1 stays Maharashtra.
