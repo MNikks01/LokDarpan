@@ -51,11 +51,34 @@ export class BeamsClient {
     };
   }
 
-  async openSession(): Promise<void> {
-    const parent = await this.request(`${this.baseUrl}/DepartmentExp1.jsp`);
-    if (parent.status !== 200) {
-      throw new Error(`BEAMS parent report returned HTTP ${String(parent.status)}.`);
+  async openSession(parent = "DepartmentExp1.jsp"): Promise<void> {
+    const home = await this.request(`${this.baseUrl}/${parent}`);
+    if (home.status !== 200) {
+      throw new Error(`BEAMS parent report returned HTTP ${String(home.status)}.`);
     }
+  }
+
+  /**
+   * Every department's actuals for one financial year, April to March.
+   *
+   * A different report from the scheme-wise export, in a different unit
+   * ("Amount in Crores"), carrying figures the export does not have for
+   * earlier years.
+   */
+  async fetchDepartmentActuals(year: number): Promise<FetchedExport> {
+    const fy = `${String(year)}-${String(year + 1)}`;
+    const url = `${this.baseUrl}/DeptExpAct1.jsp?fmonth=4&tmonth=3&year=${fy}&type=0`;
+    const page = await this.request(url, `${this.baseUrl}/DeptExpAct.jsp`);
+    if (page.status !== 200) {
+      throw new Error(`BEAMS actuals report returned HTTP ${String(page.status)} for ${fy}.`);
+    }
+    if (page.body.byteLength === 0) {
+      throw new Error(
+        `BEAMS returned an empty body for the ${fy} actuals report. That usually means the ` +
+          `session or request rate was rejected — it does not mean there is no data.`,
+      );
+    }
+    return page;
   }
 
   /** One department's budget, release and expenditure for one financial year. */

@@ -84,6 +84,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       // would satisfy or break them for reasons unrelated to the code. Emptying
       // here is safer than scoping every query, because a query that forgets the
       // scope fails open.
+      await db().query("DELETE FROM department_finance");
       await db().query("DELETE FROM scheme_finance");
       await db().query("DELETE FROM budget_scheme");
       await db().query("DELETE FROM department");

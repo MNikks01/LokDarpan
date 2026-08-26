@@ -13,3 +13,8 @@ export { parseBeamsExport } from "./beams/parse";
 export type { BeamsExport, BeamsRow } from "./beams/parse";
 export { loadBeamsRows } from "./beams/load";
 export type { FinanceLoadContext, FinanceLoadResult } from "./beams/load";
+export { croresToPaise, scaledToPaise } from "./beams/amount";
+export { parseDepartmentActuals } from "./beams/actuals-parse";
+export type { DepartmentActuals, DepartmentActualsRow } from "./beams/actuals-parse";
+export { loadDepartmentActuals } from "./beams/actuals-load";
+export type { ActualsLoadContext, ActualsLoadResult } from "./beams/actuals-load";
