@@ -4,6 +4,7 @@ import "server-only";
 // runner, which reads the filesystem. A route handler has no business pulling
 // that in, and a serverless bundle has no business carrying it.
 import { PostgresAdminUnitRepository } from "@lokdarpan/database/repository";
+import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-fact";
 import pg from "pg";
 import { UnitService } from "@lokdarpan/domain";
 
@@ -21,6 +22,7 @@ import { UnitService } from "@lokdarpan/domain";
  * exhaust a free-tier Postgres in minutes.
  */
 let repository: PostgresAdminUnitRepository | undefined;
+let facts: PostgresPublishedFactRepository | undefined;
 let sharedPool: pg.Pool | undefined;
 
 function databaseUrl(): string {
@@ -65,4 +67,13 @@ export function unitService(): UnitService {
       })}\n`,
     );
   });
+}
+
+/**
+ * Reads only the `published_fact` view, so nothing unreviewed can be served.
+ * Shares the isolate's pool for the same reason the unit repository does.
+ */
+export function publishedFactRepository(): PostgresPublishedFactRepository {
+  facts ??= new PostgresPublishedFactRepository(pool());
+  return facts;
 }

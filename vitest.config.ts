@@ -1,6 +1,19 @@
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  // apps/web sets `jsx: "preserve"` so Next can compile it; the test runner has
+  // no Next pipeline and must transform JSX itself, or a .test.tsx fails to
+  // parse and silently reports "no tests" rather than failing.
+  esbuild: { jsx: "automatic" },
+  // `@/` is apps/web's own alias, declared in its tsconfig. The test runner
+  // resolves from the repository root and needs it spelled out here too.
+  resolve: {
+    alias: {
+      "@/": fileURLToPath(new URL("./apps/web/src/", import.meta.url)),
+    },
+  },
   test: {
     include: [
       "packages/**/*.test.ts",
