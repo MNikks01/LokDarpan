@@ -35,3 +35,15 @@ export {
 export type { FactCandidate, FactKind, PageInput } from "./cag/facts";
 export { loadFactCandidates } from "./cag/facts-load";
 export type { FactLoadResult } from "./cag/facts-load";
+export { pendingReview, reviewProgress } from "./review/queue";
+export type { QueueFilter, ReviewProgress } from "./review/queue";
+export { ReviewError, assertReviewer, recordDecision } from "./review/decide";
+export type { Decision, ReviewInput } from "./review/decide";
+export {
+  PROMPT,
+  describeCitation,
+  describeConfidence,
+  describeValue,
+  presentCandidate,
+} from "./review/present";
+export type { ReviewCandidate } from "./review/present";

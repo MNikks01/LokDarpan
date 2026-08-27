@@ -95,6 +95,10 @@ jobs:
         run: |
           PGPASSWORD=lokdarpan_ci_only psql -h localhost -U lokdarpan -d lokdarpan \
             -v ON_ERROR_STOP=1 -f database/scripts/create-local-api-user.sql
+      - name: Provision the reviewer's database user
+        run: |
+          PGPASSWORD=lokdarpan_ci_only psql -h localhost -U lokdarpan -d lokdarpan \
+            -v ON_ERROR_STOP=1 -f database/scripts/create-local-reviewer-user.sql
       - name: Unit + integration tests
         run: pnpm test
         env:
@@ -102,6 +106,9 @@ jobs:
           # Asserts the API's role cannot write. A green suite without this set
           # would silently skip the check that the ledger is protected.
           DATABASE_URL_READONLY: postgresql://lokdarpan_api:lokdarpan_local_only@localhost:5432/lokdarpan
+          # Asserts the reviewer can record a decision but cannot rewrite what
+          # the parser read. Unset, that boundary check silently skips.
+          DATABASE_URL_REVIEWER: postgresql://lokdarpan_review:lokdarpan_local_only@localhost:5432/lokdarpan
       - name: Coverage thresholds (domain + api)
         run: pnpm exec vitest run --coverage
         env:
@@ -110,6 +117,7 @@ jobs:
           # for a reason that has nothing to do with the code.
           DATABASE_URL: postgresql://lokdarpan:lokdarpan_ci_only@localhost:5432/lokdarpan
           DATABASE_URL_READONLY: postgresql://lokdarpan_api:lokdarpan_local_only@localhost:5432/lokdarpan
+          DATABASE_URL_REVIEWER: postgresql://lokdarpan_review:lokdarpan_local_only@localhost:5432/lokdarpan
 
   e2e:
     name: E2E

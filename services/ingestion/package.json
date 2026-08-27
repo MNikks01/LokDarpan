@@ -13,7 +13,8 @@
     "ingest:beams": "tsx src/beams/cli.ts",
     "ingest:beams-actuals": "tsx src/beams/actuals-cli.ts",
     "ingest:cag": "tsx src/cag/cli.ts",
-    "extract:cag-facts": "tsx src/cag/facts-cli.ts"
+    "extract:cag-facts": "tsx src/cag/facts-cli.ts",
+    "review": "tsx src/review/cli.ts"
   },
   "dependencies": {
     "@lokdarpan/database": "workspace:*",
