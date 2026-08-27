@@ -118,6 +118,30 @@ describe("extractFacts", () => {
     expect(extractFacts([{ pageNumber: 1, content: null }])).toEqual([]);
   });
 
+  // The "M/s." marker is not by itself proof that a name follows it.
+  it("drops a firm marker whose capture trims away to nothing", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "Paid to M/s. And the work was abandoned." },
+    ]);
+    expect(found.filter((f) => f.kind === "contractor_reference")).toEqual([]);
+  });
+
+  it("records a designation with no office stated, rather than inventing one", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "The Executive Engineer stated that the work was complete." },
+    ]);
+    expect(found.map((f) => f.normalisedValue)).toContain("Executive Engineer");
+  });
+
+  // Missing is never zero, and a figure read wrongly is worse than one not
+  // read: the candidate is kept for review with no value attached.
+  it("keeps a figure it cannot normalise, with a null value rather than a guess", () => {
+    const found = extractFacts([{ pageNumber: 1, content: "A sum of ₹ 0.123456 was noted." }]);
+    const amounts = found.filter((f) => f.kind === "monetary_amount");
+    expect(amounts).toHaveLength(1);
+    expect(amounts[0]?.normalisedValue).toBeNull();
+  });
+
   it("finds nothing in prose that states no figure or party", () => {
     expect(
       extractFacts([{ pageNumber: 1, content: "The Department accepted the audit observation." }]),

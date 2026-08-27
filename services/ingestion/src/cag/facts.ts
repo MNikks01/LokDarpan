@@ -1,4 +1,4 @@
-import { thousandsToPaise } from "../beams/amount";
+import { AmountFormatError, thousandsToPaise } from "../beams/amount";
 
 /**
  * Pattern extraction over audit prose.
@@ -92,8 +92,18 @@ export function sentencesOf(page: string): string[] {
 export function amountToPaise(digits: string, unit: string | undefined): bigint | null {
   const multiplier = SCALE[(unit ?? "thousand").toLowerCase()];
   if (multiplier === undefined) return null;
-  const paise = thousandsToPaise(digits);
-  return paise === null ? null : paise * BigInt(multiplier);
+  try {
+    const paise = thousandsToPaise(digits);
+    return paise === null ? null : paise * BigInt(multiplier);
+  } catch (error) {
+    // `thousandsToPaise` throws rather than round, which is right for a BEAMS
+    // cell: a figure the parser cannot represent exactly is a defect in a
+    // structured export. Prose is different — an odd figure is expected, and
+    // aborting would lose every other candidate in a 337-page report. The
+    // candidate survives with no value, for a person to read and supply.
+    if (error instanceof AmountFormatError) return null;
+    throw error;
+  }
 }
 
 /**
