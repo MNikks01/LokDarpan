@@ -11,13 +11,16 @@
     "build": "tsc -p tsconfig.build.json",
     "ingest:lgd": "tsx src/cli.ts",
     "ingest:beams": "tsx src/beams/cli.ts",
-    "ingest:beams-actuals": "tsx src/beams/actuals-cli.ts"
+    "ingest:beams-actuals": "tsx src/beams/actuals-cli.ts",
+    "ingest:cag": "tsx src/cag/cli.ts",
+    "extract:cag-facts": "tsx src/cag/facts-cli.ts"
   },
   "dependencies": {
     "@lokdarpan/database": "workspace:*",
     "@lokdarpan/money": "workspace:*",
     "node-html-parser": "^6.1.13",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "unpdf": "^1.8.1"
   },
   "devDependencies": {
     "@types/pg": "^8.11.10"

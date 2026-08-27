@@ -18,3 +18,20 @@ export { parseDepartmentActuals } from "./beams/actuals-parse";
 export type { DepartmentActuals, DepartmentActualsRow } from "./beams/actuals-parse";
 export { loadDepartmentActuals } from "./beams/actuals-load";
 export type { ActualsLoadContext, ActualsLoadResult } from "./beams/actuals-load";
+export { CagClient, MAHARASHTRA_STATE_ID, titleFromUrl } from "./cag/client";
+export type { FetchedDocument, ReportLink } from "./cag/client";
+export { extractDocument, scriptOf } from "./cag/extract";
+export type { ExtractedDocument, ExtractedPage, PageScript } from "./cag/extract";
+export { loadDocument } from "./cag/load";
+export type { DocumentLoadContext, DocumentLoadResult, DocumentMeta } from "./cag/load";
+export {
+  PARSER_VERSION,
+  amountToPaise,
+  contextAround,
+  extractFacts,
+  sentencesOf,
+  trimToName,
+} from "./cag/facts";
+export type { FactCandidate, FactKind, PageInput } from "./cag/facts";
+export { loadFactCandidates } from "./cag/facts-load";
+export type { FactLoadResult } from "./cag/facts-load";
