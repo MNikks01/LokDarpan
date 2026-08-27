@@ -116,6 +116,9 @@ importers:
       '@lokdarpan/errors':
         specifier: workspace:*
         version: link:../errors
+      '@lokdarpan/money':
+        specifier: workspace:*
+        version: link:../money
       pg:
         specifier: ^8.13.1
         version: 8.23.0

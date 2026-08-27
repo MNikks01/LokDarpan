@@ -16,6 +16,7 @@ import { color } from "@/ui/tokens";
 const PUBLISHERS: readonly { readonly host: string; readonly name: string }[] = [
   { host: "lgdirectory.gov.in", name: "Local Government Directory, Ministry of Panchayati Raj" },
   { host: "mahakosh.gov.in", name: "Finance Department, Government of Maharashtra (BEAMS)" },
+  { host: "cag.gov.in", name: "Comptroller and Auditor General of India" },
 ];
 
 function publisherOf(sourceUrl: string): string {
