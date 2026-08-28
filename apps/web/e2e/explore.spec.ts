@@ -30,9 +30,11 @@ test.describe("explore", () => {
 
     if (await geometryInstalled(page)) {
       await expect(page.getByTestId("map-canvas")).toBeVisible();
-      // Every boundary drawn is attributed. This is the claim the product rests
-      // on, and it must not depend on a database being reachable.
-      await expect(page.getByText(/OpenStreetMap/)).toBeVisible();
+      // Every layer drawn is attributed, separately. Both are ODbL, which
+      // permits redistribution only with attribution — so these two lines are
+      // the condition on which the map may be shown at all, not decoration.
+      await expect(page.getByText(/Base map © OpenStreetMap/)).toBeVisible();
+      await expect(page.getByText(/State outlines: © OpenStreetMap/)).toBeVisible();
       return;
     }
 

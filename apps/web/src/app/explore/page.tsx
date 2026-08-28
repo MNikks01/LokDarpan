@@ -1,6 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { GeometryNotInstalledError, listStateOptions } from "@/data/geography";
+import { GeometryNotInstalledError, listStateOptions, stateOutlineSource } from "@/data/geography";
 import { ExploreShell } from "@/components/explore/ExploreShell";
 import { parseExplorerState, toSearchParams } from "@/state/explorer-url";
 import { color } from "@/ui/tokens";
@@ -26,8 +26,10 @@ export default async function ExplorePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<React.JSX.Element> {
   let states;
+  let outlineSource;
   try {
     states = await listStateOptions();
+    outlineSource = await stateOutlineSource();
   } catch (error: unknown) {
     if (error instanceof GeometryNotInstalledError) return <GeometryMissing error={error} />;
     throw error;
@@ -37,7 +39,7 @@ export default async function ExplorePage({
   // server-side as the place it names rather than being corrected on the client.
   const initialState = parseExplorerState(toSearchParams(await searchParams));
 
-  return <ExploreShell states={states} initialState={initialState} />;
+  return <ExploreShell states={states} initialState={initialState} outlineSource={outlineSource} />;
 }
 
 /**

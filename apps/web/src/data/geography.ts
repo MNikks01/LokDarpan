@@ -60,6 +60,22 @@ function spanOf(box: BBox): number {
   return (east - west) * (north - south);
 }
 
+/**
+ * Who to credit for the outlines the country view draws.
+ *
+ * ODbL permits redistribution and requires attribution, so this is not a nicety
+ * — it is the condition on which the geometry may be shown at all, and it comes
+ * from the manifest so it cannot drift from what was actually written.
+ */
+export async function stateOutlineSource(): Promise<{
+  readonly name: string;
+  readonly attribution: string;
+  readonly licence: string;
+}> {
+  const manifest = await loadBoundaryManifest();
+  return manifest.sources.states;
+}
+
 export async function listStates(): Promise<readonly StateSummary[]> {
   const manifest = await loadBoundaryManifest();
   return manifest.states.map((s) => ({
