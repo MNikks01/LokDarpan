@@ -72,6 +72,23 @@ const LICENCES: readonly SourceLicence[] = [
       "beams.mahakosh.gov.in, which states no terms of its own. Reading the department's " +
       "policy as governing a department system is an inference, not a verified fact.",
   },
+  {
+    // The most restrictive terms of any source examined. NRIDA's notice
+    // forbids republication outright and confines even downloading to "one
+    // copy on a single computer for your personal, non-commercial internal
+    // use" - so this is blocked twice over for a public-interest site.
+    sourceId: "pmgsy",
+    republication: "permission_required",
+    attribution:
+      "National Rural Infrastructure Development Agency (NRIDA), Ministry of Rural Development",
+    termsUrl: "https://pmgsy.dord.gov.in/Home/HomeLegalNotice/",
+    verifiedOn: "2026-08-28",
+    caveat:
+      "Terms are explicit rather than inferred: the Materials 'may not be copied, reproduced, " +
+      "modified, published, republished, uploaded, downloaded, posted, transmitted, or " +
+      "distributed in any way, without NRIDA's prior written permission'. Unlike BEAMS, this " +
+      "restricts collection as well as display.",
+  },
 ];
 
 export function licenceFor(sourceId: string): SourceLicence | null {
