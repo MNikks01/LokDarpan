@@ -123,6 +123,26 @@ describe.skipIf(REVIEWER_URL === undefined || REVIEWER_URL === "")(
       await refuses("document", `UPDATE document SET title = 'Retitled'`);
     });
 
+    // The point of writing history from a SECURITY DEFINER trigger. A reviewer
+    // who can author, edit or delete their own audit trail does not have one.
+    it("can read the record of superseded decisions", async () => {
+      const r = await db().query(`SELECT count(*) FROM document_fact_review_history`);
+      expect(r.rows).toHaveLength(1);
+    });
+
+    it("cannot write, alter or erase the record of superseded decisions", async () => {
+      await refuses(
+        "insert history",
+        `INSERT INTO document_fact_review_history (document_fact_id, verification_status)
+         VALUES (1, 'verified')`,
+      );
+      await refuses(
+        "update history",
+        `UPDATE document_fact_review_history SET verified_by = 'someone else'`,
+      );
+      await refuses("delete history", `DELETE FROM document_fact_review_history`);
+    });
+
     it("is not a superuser and cannot create databases or roles", async () => {
       const r = await db().query<{
         rolsuper: boolean;

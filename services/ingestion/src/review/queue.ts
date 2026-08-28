@@ -1,5 +1,7 @@
 import type { SqlClient } from "@lokdarpan/database";
 
+import { displayTitle } from "@lokdarpan/domain";
+
 import type { FactKind } from "../cag/facts";
 import type { ReviewCandidate } from "./present";
 
@@ -76,7 +78,7 @@ export async function pendingReview(
     normalisedValue: r.normalised_value,
     extractionConfidence: Number(r.extraction_confidence),
     parserVersion: r.parser_version,
-    documentTitle: r.document_title,
+    documentTitle: displayTitle(r.document_title),
     sourceUrl: r.source_url,
   }));
 }
@@ -103,5 +105,38 @@ export async function reviewProgress(client: SqlClient): Promise<ReviewProgress>
     verified: counts["verified"] ?? 0,
     rejected: counts["rejected"] ?? 0,
     corrected: counts["corrected"] ?? 0,
+  };
+}
+
+/**
+ * One decided fact, for revision.
+ *
+ * Only a decided one: revision must not become a way to make a first decision
+ * outside the queue, where the ordering and the count of what remains are what
+ * keep a reviewer honest about how much they have actually looked at.
+ */
+export async function factById(client: SqlClient, factId: number): Promise<ReviewCandidate | null> {
+  const result = await client.query(
+    `SELECT f.id, f.page_number, f.kind, f.raw_text, f.normalised_value,
+            f.extraction_confidence, f.parser_version,
+            d.title AS document_title, s.source_url
+       FROM document_fact f
+       JOIN document d        ON d.id = f.document_id
+       JOIN source_artifact s ON s.sha256 = d.source_sha256
+      WHERE f.id = $1 AND f.verification_status <> 'unverified'`,
+    [factId],
+  );
+  const row = (result.rows as Row[])[0];
+  if (row === undefined) return null;
+  return {
+    id: Number(row.id),
+    pageNumber: row.page_number,
+    kind: row.kind,
+    rawText: row.raw_text,
+    normalisedValue: row.normalised_value,
+    extractionConfidence: Number(row.extraction_confidence),
+    parserVersion: row.parser_version,
+    documentTitle: displayTitle(row.document_title),
+    sourceUrl: row.source_url,
   };
 }
