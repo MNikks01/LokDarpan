@@ -50,6 +50,7 @@ export default defineConfig({
         "services/ingestion/src/cag/facts-cli.ts",
         "services/ingestion/src/review/cli.ts",
         "services/ingestion/src/review/triage-cli.ts",
+        "services/ingestion/src/osm/cli.ts",
         // Pure re-export barrels.
         "packages/contracts/src/index.ts",
         "packages/database/src/index.ts",
