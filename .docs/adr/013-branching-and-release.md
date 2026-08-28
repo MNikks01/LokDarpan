@@ -1,6 +1,6 @@
 # ADR-013 — Branching: `feature/*` → `development` → `main`
 
-**Status:** Accepted · 2026-08-24 · **Amended 2026-08-25** — the approving-review requirement in §Decision is relaxed to zero while the project has one maintainer; see [`016-review-requirement.md`](./016-review-requirement.md). Every other protection stands.
+**Status:** Accepted · 2026-08-24 · **Amended 2026-08-25** — the approving-review requirement in §Decision is relaxed to zero while the project has one maintainer; see [`016-review-requirement.md`](./016-review-requirement.md). Every other protection stands. · **Amended 2026-08-28** — `development` is retired and `feature/*` now targets `main`; see [`023-features-target-main.md`](./023-features-target-main.md). The protections on `main` are unchanged.
 
 ## Context
 
@@ -12,6 +12,12 @@ Until now, work was committed directly to `main`. That was acceptable for a docu
 feature/*  ──PR──>  development  ──release PR──>  main
 hotfix/*   ──PR──>  main  ──back-merge──>  development
 ```
+
+> **Superseded by [`023`](./023-features-target-main.md) (2026-08-28).** The flow is now
+> `feature/* ──PR──> main`; `development` is retired and the `hotfix/*` class dissolves with it.
+> The trunk-based alternative below was rejected "until continuous deployment exists" — [`020`](./020-vercel-deployment.md)
+> supplied it, so `023` is the revisit this ADR asked for rather than a reversal of it.
+> Everything in this section about protection still holds, for `main`.
 
 - **Never push directly** to `main` or `development`. Both are branch-protected.
 - `feature/*` branches from `development`; one focused change per PR.

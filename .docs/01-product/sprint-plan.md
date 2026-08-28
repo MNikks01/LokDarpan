@@ -249,7 +249,7 @@ Not sprint-specific, not optional, not a later sprint:
 - Input validated at the boundary; least privilege; no secrets committed
 - Migrations version-controlled; no manual schema changes
 - Docs or an ADR updated **in the same PR**
-- `feature/*` → `development` → `main`; CI green before merge
+- `feature/*` → `main`; CI green before merge ([`adr/023`](../adr/023-features-target-main.md))
 
 ---
 
