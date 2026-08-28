@@ -9,7 +9,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "geo:fetch": "tsx scripts/fetch-boundaries.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",
@@ -18,6 +19,7 @@
     "@lokdarpan/errors": "workspace:*",
     "@lokdarpan/money": "workspace:*",
     "@lokdarpan/neutrality": "workspace:*",
+    "maplibre-gl": "^5.24.0",
     "next": "^15.1.3",
     "pg": "^8.13.1",
     "react": "^19.0.0",
@@ -25,6 +27,12 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
+    "@turf/bbox": "^7.4.0",
+    "@turf/dissolve": "^7.4.0",
+    "@turf/flatten": "^7.4.0",
+    "@turf/helpers": "^7.4.0",
+    "@turf/simplify": "^7.4.0",
+    "@types/geojson": "^7946.0.16",
     "@types/pg": "^8.11.10",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2"

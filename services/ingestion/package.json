@@ -12,14 +12,18 @@
     "ingest:lgd": "tsx src/cli.ts",
     "ingest:beams": "tsx src/beams/cli.ts",
     "ingest:beams-actuals": "tsx src/beams/actuals-cli.ts",
-    "ingest:cag": "tsx src/cag/cli.ts"
+    "ingest:cag": "tsx src/cag/cli.ts",
+    "extract:cag-facts": "tsx src/cag/facts-cli.ts",
+    "review": "tsx src/review/cli.ts",
+    "review:triage": "tsx src/review/triage-cli.ts"
   },
   "dependencies": {
     "@lokdarpan/database": "workspace:*",
     "@lokdarpan/money": "workspace:*",
     "node-html-parser": "^6.1.13",
     "pg": "^8.13.1",
-    "unpdf": "^1.8.1"
+    "unpdf": "^1.8.1",
+    "@lokdarpan/domain": "workspace:*"
   },
   "devDependencies": {
     "@types/pg": "^8.11.10"

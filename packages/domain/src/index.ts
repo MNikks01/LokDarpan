@@ -9,3 +9,15 @@ export type {
   DepartmentYearFinance,
   FigureStatus,
 } from "./department-finance";
+export { byPage, displayTitle, isReviewComplete } from "./published-fact";
+export type {
+  DocumentFactsView,
+  DocumentProvenance,
+  DocumentSummary,
+  FactOrigin,
+  PublishedFact,
+  PublishedFactKind,
+  PublishedFactRepository,
+} from "./published-fact";
+export { attributionFor, awaitingPermission, licenceFor, mayRepublish } from "./source-licence";
+export type { Republication, SourceLicence } from "./source-licence";

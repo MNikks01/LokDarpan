@@ -24,3 +24,26 @@ export { extractDocument, scriptOf } from "./cag/extract";
 export type { ExtractedDocument, ExtractedPage, PageScript } from "./cag/extract";
 export { loadDocument } from "./cag/load";
 export type { DocumentLoadContext, DocumentLoadResult, DocumentMeta } from "./cag/load";
+export {
+  PARSER_VERSION,
+  amountToPaise,
+  contextAround,
+  extractFacts,
+  sentencesOf,
+  trimToName,
+} from "./cag/facts";
+export type { FactCandidate, FactKind, PageInput } from "./cag/facts";
+export { loadFactCandidates } from "./cag/facts-load";
+export type { FactLoadResult } from "./cag/facts-load";
+export { pendingReview, reviewProgress } from "./review/queue";
+export type { QueueFilter, ReviewProgress } from "./review/queue";
+export { ReviewError, assertReviewer, recordDecision } from "./review/decide";
+export type { Decision, ReviewInput } from "./review/decide";
+export {
+  PROMPT,
+  describeCitation,
+  describeConfidence,
+  describeValue,
+  presentCandidate,
+} from "./review/present";
+export type { ReviewCandidate } from "./review/present";

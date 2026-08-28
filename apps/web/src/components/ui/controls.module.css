@@ -1,0 +1,207 @@
+/* Shared control chrome. Focus rings are non-negotiable here: the explorer is
+   navigable by keyboard alone, and a map interaction is never the only route to
+   a record. */
+
+.field {
+  display: block;
+}
+
+.label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ld-text-secondary);
+  margin-bottom: 5px;
+}
+
+.hint {
+  display: block;
+  font-size: 11px;
+  color: var(--ld-text-tertiary);
+  margin-top: 4px;
+}
+
+.select {
+  appearance: none;
+  width: 100%;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ld-text);
+  background: var(--ld-surface);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ld-text-secondary) 50%),
+    linear-gradient(135deg, var(--ld-text-secondary) 50%, transparent 50%);
+  background-position:
+    right 14px top 52%,
+    right 9px top 52%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  border: 1px solid var(--ld-border-strong);
+  border-radius: 8px;
+  padding: 7px 30px 7px 10px;
+  cursor: pointer;
+}
+
+.select:disabled {
+  cursor: not-allowed;
+  color: var(--ld-text-tertiary);
+  background-color: var(--ld-raised);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--ld-text);
+  background: var(--ld-surface);
+  border: 1px solid var(--ld-border-strong);
+  border-radius: 8px;
+  padding: 6px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.button:hover {
+  background: var(--ld-raised);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  color: var(--ld-text-tertiary);
+}
+
+.buttonQuiet {
+  border-color: transparent;
+  background: transparent;
+}
+
+.buttonQuiet:hover {
+  background: var(--ld-raised);
+}
+
+.buttonAccent {
+  color: var(--ld-accent-fg);
+  background: var(--ld-accent-soft);
+  border-color: color-mix(in srgb, var(--ld-accent) 30%, transparent);
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stack .iconButton {
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+
+.stack .iconButton:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.stack .iconButton:last-child {
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 2px 9px 2px 7px;
+  white-space: nowrap;
+}
+
+.checkRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  padding: 4px 2px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.checkRow:hover {
+  background: var(--ld-raised);
+}
+
+.checkRow input {
+  margin: 2px 0 0;
+  accent-color: var(--ld-accent);
+  flex: none;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--ld-accent);
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.emptyState {
+  padding: 20px 14px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--ld-text-secondary);
+}
+
+.emptyState ul {
+  margin: 8px 0 12px;
+  padding-left: 18px;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--ld-raised) 25%,
+    var(--ld-sunken) 37%,
+    var(--ld-raised) 63%
+  );
+  background-size: 400% 100%;
+  border-radius: 6px;
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
