@@ -1,8 +1,7 @@
 "use client";
 
 import type React from "react";
-import type { DistrictSummary, LocalBody, StateSummary } from "@/domain/geography";
-import { LOCAL_BODY_TYPE_LABEL } from "@/domain/geography";
+import type { DistrictSummary, StateSummary } from "@/domain/geography";
 import { controlStyles } from "@/components/ui";
 import { cx } from "@/ui/cx";
 
@@ -17,12 +16,10 @@ import { cx } from "@/ui/cx";
 export function Breadcrumb({
   state,
   district,
-  localBody,
   onSelectLevel,
 }: {
   readonly state: StateSummary | null;
   readonly district: DistrictSummary | null;
-  readonly localBody: LocalBody | null;
   readonly onSelectLevel: (level: "country" | "state" | "district") => void;
 }): React.JSX.Element {
   const crumbs: readonly {
@@ -49,16 +46,6 @@ export function Breadcrumb({
             key: "district",
             label: district.name,
             detail: null,
-            level: localBody === null ? null : ("district" as const),
-          },
-        ]),
-    ...(localBody === null
-      ? []
-      : [
-          {
-            key: "body",
-            label: localBody.name,
-            detail: LOCAL_BODY_TYPE_LABEL[localBody.type],
             level: null,
           },
         ]),

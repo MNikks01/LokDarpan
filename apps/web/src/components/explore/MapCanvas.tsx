@@ -6,10 +6,9 @@ import { Map as MapLibreMap } from "maplibre-gl";
 import type { GeoJSONSource, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
 import type React from "react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import type { DistrictSummary, LocalBody, StateSummary } from "@/domain/geography";
+import type { DistrictSummary, StateSummary } from "@/domain/geography";
 import { INDIA_BBOX } from "@/domain/geography";
-import type { ProjectSummary } from "@/domain/project";
-import { CAMERA_MS, bboxOfPositions, extentPolygon, fitTo, framePadding } from "@/map/camera";
+import { CAMERA_MS, fitTo, framePadding } from "@/map/camera";
 import {
   EMPTY_COLLECTION,
   GeometryUnavailableError,
@@ -18,12 +17,10 @@ import {
 } from "@/map/geometry-source";
 import { LAYER, SOURCE, buildStyle } from "@/map/style";
 import { createPlaceLabelLayer, type PlaceLabel, type PlaceLabelLayer } from "@/map/place-labels";
-import type { LOCAL_BODY_TYPE_LABEL } from "@/domain/geography";
-import { PROJECT_STATUS_ORDER } from "@/ui/status";
 import type { GeoSelection } from "@/state/useExplorerState";
 import type { LayerVisibility } from "./layer-visibility";
 import { MapOverlays, MapUnavailable } from "./MapOverlays";
-import type { HoverTarget } from "./RoadTooltip";
+import type { HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
 import type { FeatureCollection } from "geojson";
 
@@ -38,39 +35,15 @@ export interface MapCanvasProps {
   readonly geo: GeoSelection;
   readonly state: StateSummary | null;
   readonly district: DistrictSummary | null;
-  readonly localBody: LocalBody | null;
   /** Everything nameable at the current level, for the label layer. */
   readonly states: readonly StateSummary[];
   readonly districts: readonly DistrictSummary[];
-  readonly localBodies: readonly LocalBody[];
-  readonly projects: readonly ProjectSummary[];
-  readonly selectedProjectId: string | null;
   readonly layers: LayerVisibility;
   readonly insets: { readonly left: number; readonly right: number };
   readonly compact: boolean;
   readonly handleRef: React.RefObject<MapHandle | null>;
   readonly onSelectState: (stateCode: string) => void;
   readonly onSelectDistrict: (districtId: string) => void;
-  readonly onSelectProject: (projectId: string) => void;
-}
-
-const ROAD_LAYERS = PROJECT_STATUS_ORDER.map((status) => LAYER.roadByStatus(status));
-
-function roadCollection(projects: readonly ProjectSummary[]): FeatureCollection {
-  return {
-    type: "FeatureCollection",
-    features: projects.map((project) => ({
-      type: "Feature",
-      id: project.id,
-      properties: {
-        id: project.id,
-        name: project.name,
-        status: project.status,
-        externalId: project.externalId,
-      },
-      geometry: project.geometry.geometry,
-    })),
-  };
 }
 
 function setSourceData(
@@ -111,19 +84,14 @@ export function MapCanvas({
   geo,
   state,
   district,
-  localBody,
   states,
   districts,
-  localBodies,
-  projects,
-  selectedProjectId,
   layers,
   insets,
   compact,
   handleRef,
   onSelectState,
   onSelectDistrict,
-  onSelectProject,
 }: MapCanvasProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -133,8 +101,8 @@ export function MapCanvas({
 
   // Callbacks are read through a ref inside long-lived MapLibre handlers, so a
   // re-render never forces the map to tear its listeners down and rebind them.
-  const callbacks = useRef({ onSelectState, onSelectDistrict, onSelectProject });
-  callbacks.current = { onSelectState, onSelectDistrict, onSelectProject };
+  const callbacks = useRef({ onSelectState, onSelectDistrict });
+  callbacks.current = { onSelectState, onSelectDistrict };
 
   const framing = useRef({ insets, compact });
   framing.current = { insets, compact };
@@ -235,7 +203,7 @@ export function MapCanvas({
      * explicit: the smallest thing under the cursor is the thing you meant.
      */
     const topmost = (point: MapMouseEvent["point"]): MapGeoJSONFeature | null => {
-      for (const layers of [[LAYER.roadHit], [LAYER.districtFill], [LAYER.stateFill]]) {
+      for (const layers of [[LAYER.districtFill], [LAYER.stateFill]]) {
         const present = layers.filter((id) => map.getLayer(id) !== undefined);
         if (present.length === 0) continue;
         const [hit] = map.queryRenderedFeatures(point, { layers: present });
@@ -254,10 +222,6 @@ export function MapCanvas({
       canvas.style.cursor = "pointer";
       const { x, y } = event.point;
 
-      if (typeof feature.properties["status"] === "string") {
-        setHover({ kind: "project", projectId: String(feature.properties["id"]), x, y });
-        return;
-      }
       const districtName: unknown = feature.properties["districtName"];
       setHover({
         kind: "area",
@@ -278,10 +242,6 @@ export function MapCanvas({
       if (feature === null) return;
       const properties = feature.properties;
 
-      if (typeof properties["status"] === "string") {
-        callbacks.current.onSelectProject(String(properties["id"]));
-        return;
-      }
       const districtCode: unknown = properties["districtCode"];
       if (typeof districtCode === "string") {
         callbacks.current.onSelectDistrict(`${String(properties["stateCode"])}-${districtCode}`);
@@ -345,31 +305,7 @@ export function MapCanvas({
       ["get", "districtCode"],
       district?.code ?? "__none__",
     ]);
-    map.setFilter(LAYER.roadSelected, ["==", ["get", "id"], selectedProjectId ?? "__none__"]);
-    map.setFilter(LAYER.roadHover, [
-      "==",
-      ["get", "id"],
-      hover?.kind === "project" ? hover.projectId : "__none__",
-    ]);
-  }, [district, geo.stateCode, hover, ready, selectedProjectId]);
-
-  /* ---------------------------------------------------------------- works */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    setSourceData(map, SOURCE.roads, roadCollection(projects));
-  }, [projects, ready]);
-
-  /* ------------------------------------------------------- local body extent */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    setSourceData(
-      map,
-      SOURCE.extent,
-      localBody === null ? EMPTY_COLLECTION : extentPolygon(localBody.focusBbox),
-    );
-  }, [localBody, ready]);
+  }, [district, geo.stateCode, ready]);
 
   /* ------------------------------------------------------ layer visibility */
   useEffect(() => {
@@ -384,12 +320,6 @@ export function MapCanvas({
     show(LAYER.stateFill, layers.states);
     show(LAYER.districtLine, layers.districts);
     show(LAYER.districtFill, layers.districts);
-    show(LAYER.extentLine, layers.localBodies);
-    show(LAYER.roadHit, layers.works);
-    show(LAYER.roadCasing, layers.works);
-    show(LAYER.roadSelected, layers.works);
-    show(LAYER.roadHover, layers.works);
-    for (const layer of ROAD_LAYERS) show(layer, layers.works);
   }, [layers, ready]);
 
   /* --------------------------------------------------------------- labels */
@@ -407,8 +337,8 @@ export function MapCanvas({
   }, [ready]);
 
   const labels = useMemo(
-    () => labelsFor({ geo, states, districts, localBodies, district }),
-    [district, districts, geo, localBodies, states],
+    () => labelsFor({ geo, states, districts, district }),
+    [district, districts, geo, states],
   );
 
   useEffect(() => {
@@ -425,10 +355,6 @@ export function MapCanvas({
     if (map === null) return;
     const padding = framePadding(framing.current.insets, framing.current.compact);
 
-    if (localBody !== null) {
-      fitTo(map, localBody.focusBbox, { duration: CAMERA_MS.localBody, padding, maxZoom: 13 });
-      return;
-    }
     if (district !== null) {
       fitTo(map, district.bbox, { duration: CAMERA_MS.district, padding, maxZoom: 11 });
       return;
@@ -438,7 +364,7 @@ export function MapCanvas({
       return;
     }
     fitTo(map, INDIA_BBOX, { duration: CAMERA_MS.country, padding, maxZoom: 6 });
-  }, [district, localBody, state]);
+  }, [district, state]);
 
   useEffect(() => {
     if (ready) frame();
@@ -469,23 +395,6 @@ export function MapCanvas({
     };
   }, [frame, ready]);
 
-  // Selecting a work frames the work itself. Without this the reader clicks a
-  // line in a list and nothing on the map moves, which breaks the link between
-  // the record and the place it describes.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready || selectedProjectId === null) return;
-    const project = projects.find((p) => p.id === selectedProjectId);
-    if (project === undefined) return;
-    const box = bboxOfPositions(project.geometry.geometry.coordinates);
-    if (box === null) return;
-    fitTo(map, box, {
-      duration: CAMERA_MS.feature,
-      padding: framePadding(framing.current.insets, framing.current.compact),
-      maxZoom: 14,
-    });
-  }, [projects, ready, selectedProjectId]);
-
   useImperativeHandle(
     handleRef,
     () => ({
@@ -501,14 +410,7 @@ export function MapCanvas({
   return (
     <>
       <div ref={containerRef} className={styles.map} data-testid="map-canvas" />
-      <MapOverlays
-        hover={hover}
-        projects={projects}
-        state={state}
-        district={district}
-        localBody={localBody}
-        loading={!ready}
-      />
+      <MapOverlays hover={hover} state={state} district={district} loading={!ready} />
     </>
   );
 }
@@ -528,10 +430,9 @@ function labelsFor(scope: {
   readonly geo: GeoSelection;
   readonly states: readonly StateSummary[];
   readonly districts: readonly DistrictSummary[];
-  readonly localBodies: readonly LocalBody[];
   readonly district: DistrictSummary | null;
 }): readonly PlaceLabel[] {
-  const { geo, states, districts, localBodies, district } = scope;
+  const { geo, states, districts, district } = scope;
 
   if (geo.stateCode === null) {
     return states.map((s) => ({
@@ -553,41 +454,17 @@ function labelsFor(scope: {
     }));
   }
 
-  // Inside a district: name the district itself, then the towns and villages
-  // the records hold for it.
-  const bodies: PlaceLabel[] = localBodies.map((body) => ({
-    id: `body-${body.id}`,
-    text: body.name,
-    lngLat: centreOfBbox(body.focusBbox),
-    priority: LOCAL_BODY_RANK[body.type],
-    tone: "primary" as const,
-  }));
-
+  // Inside a district: name the district itself. Nothing is recorded below
+  // state level, so there are no settlements to place.
   return district === null
-    ? bodies
+    ? []
     : [
         {
           id: `district-${district.id}`,
           text: `${district.name} district`,
           lngLat: district.labelPoint,
-          priority: 0,
+          priority: district.labelWeight,
           tone: "secondary" as const,
         },
-        ...bodies,
       ];
-}
-
-/** Denser bodies win a collision; the ranking is the local-government tier. */
-const LOCAL_BODY_RANK: Readonly<Record<keyof typeof LOCAL_BODY_TYPE_LABEL, number>> = {
-  municipal_corporation: 60,
-  municipal_council: 50,
-  cantonment_board: 40,
-  nagar_panchayat: 30,
-  zilla_parishad: 20,
-  gram_panchayat: 10,
-};
-
-function centreOfBbox(box: GeoJSON.BBox): readonly [number, number] {
-  const [west, south, east, north] = box;
-  return [(west + east) / 2, (south + north) / 2];
 }

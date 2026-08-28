@@ -43,6 +43,37 @@ function say(line: string): void {
   process.stdout.write(`${line}\n`);
 }
 
+interface QueueOptions {
+  readonly kind: FactKind | undefined;
+  readonly limit: string | undefined;
+  /**
+   * The partition is applied in this process, so the database limit has to come
+   * off first: limiting to 500 and then filtering showed "1 of 104" when 511
+   * candidates matched, which understates the work and hides the rest of it
+   * behind a number that looks complete.
+   */
+  readonly only: SelfCheck | undefined;
+  /**
+   * A reviewer works through one report in a sitting: it has one publisher, one
+   * period and one set of conventions. Offering candidates from three reports
+   * interleaved makes every answer a context switch.
+   */
+  readonly documentId: number | undefined;
+}
+
+/** Parsed queue filters, or null when `--document` is not a document id. */
+function queueOptions(): QueueOptions | null {
+  const documentArg = arg("document");
+  const documentId = documentArg === undefined ? undefined : Number(documentArg);
+  if (documentId !== undefined && !Number.isInteger(documentId)) return null;
+  return {
+    kind: arg("kind") as FactKind | undefined,
+    limit: arg("limit"),
+    only: arg("check") as SelfCheck | undefined,
+    documentId,
+  };
+}
+
 function summarise(p: ReviewProgress): string {
   return (
     `${String(p.unverified)} awaiting review - ${String(p.verified)} verified, ` +
@@ -207,6 +238,37 @@ async function applyRevision(
   }
 }
 
+/**
+ * The candidates to offer, in order.
+ *
+ * Working one partition at a time is most of the speed-up. "Does this sentence
+ * state this amount?" and "what unit did the source mean?" are different
+ * questions, and answering them alternately is what makes a thousand candidates
+ * feel unreviewable.
+ */
+async function buildQueue(
+  client: pg.Client,
+  { kind, limit, only, documentId }: QueueOptions,
+): Promise<ReviewCandidate[]> {
+  const all = await pendingReview(client, {
+    ...(kind === undefined ? {} : { kind }),
+    ...(documentId === undefined ? {} : { documentId }),
+    ...(only === undefined && limit === undefined
+      ? {}
+      : { limit: only === undefined ? Number(limit) : 100_000 }),
+  });
+
+  const matching =
+    only === undefined
+      ? all
+      : all.filter(
+          (c) =>
+            selfCheck({ id: c.id, rawText: c.rawText, normalisedValue: c.normalisedValue })
+              .check === only,
+        );
+  return limit === undefined ? matching : matching.slice(0, Number(limit));
+}
+
 async function main(): Promise<void> {
   const { connectionString, reviewer } = requireConfig();
 
@@ -221,33 +283,12 @@ async function main(): Promise<void> {
       return;
     }
 
-    const kind = arg("kind") as FactKind | undefined;
-    const limit = arg("limit");
-    // The partition is applied in this process, so the database limit has to
-    // come off first: limiting to 500 and then filtering showed "1 of 104"
-    // when 511 candidates matched, which understates the work and hides the
-    // rest of it behind a number that looks complete.
-    const only = arg("check") as SelfCheck | undefined;
-    const all = await pendingReview(client, {
-      ...(kind === undefined ? {} : { kind }),
-      ...(only === undefined && limit === undefined
-        ? {}
-        : { limit: only === undefined ? Number(limit) : 100_000 }),
-    });
-
-    // Working one partition at a time is most of the speed-up. "Does this
-    // sentence state this amount?" and "what unit did the source mean?" are
-    // different questions, and answering them alternately is what makes a
-    // thousand candidates feel unreviewable.
-    const matching =
-      only === undefined
-        ? all
-        : all.filter(
-            (c) =>
-              selfCheck({ id: c.id, rawText: c.rawText, normalisedValue: c.normalisedValue })
-                .check === only,
-          );
-    const queue = limit === undefined ? matching : matching.slice(0, Number(limit));
+    const options = queueOptions();
+    if (options === null) {
+      say("--document must be a document id.");
+      return;
+    }
+    const queue = await buildQueue(client, options);
 
     say(`\n${summarise(await reviewProgress(client))}`);
     if (queue.length === 0) {

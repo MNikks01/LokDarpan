@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { GeometryNotInstalledError, demoRepositories } from "@/data/demo-repository";
-import { DEMO_DATASET_VERSION } from "@/data/demo/sources";
+import { GeometryNotInstalledError, listDistricts } from "@/data/geography";
 
 export async function GET(request: Request): Promise<NextResponse> {
   const stateCode = new URL(request.url).searchParams.get("state");
@@ -11,11 +10,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     );
   }
   try {
-    const districts = await demoRepositories.geography.listDistricts(stateCode);
-    return NextResponse.json({
-      data: { districts },
-      meta: { datasetVersion: DEMO_DATASET_VERSION, asOf: new Date().toISOString() },
-    });
+    const districts = await listDistricts(stateCode);
+    return NextResponse.json({ data: { districts } });
   } catch (error: unknown) {
     if (error instanceof GeometryNotInstalledError) {
       return NextResponse.json(

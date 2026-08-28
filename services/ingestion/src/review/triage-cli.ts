@@ -5,12 +5,24 @@ import { selfCheck, triage, type CheckInput } from "./triage";
 /**
  * Reports how the money candidates divide, and lists the ones worth a person's
  * attention first. Reads only; decides nothing.
+ *
+ * `--document=<id>` scopes the report to one report. A reviewer works through a
+ * single audit report in a sitting — it has one publisher, one period and one
+ * set of conventions — and a partition spanning every document held answers a
+ * question nobody is asking.
  */
 async function main(): Promise<void> {
   const connectionString = process.env["DATABASE_URL_REVIEWER"] ?? process.env["DATABASE_URL"];
   if (connectionString === undefined || connectionString === "") {
     process.stderr.write("DATABASE_URL_REVIEWER is not set.\n");
     process.exit(78);
+  }
+
+  const documentArg = process.argv.find((a) => a.startsWith("--document="))?.split("=")[1];
+  const documentId = documentArg === undefined ? null : Number(documentArg);
+  if (documentId !== null && !Number.isInteger(documentId)) {
+    process.stderr.write("--document must be a document id.\n");
+    process.exit(64);
   }
 
   const db = new pg.Client({ connectionString });
@@ -23,7 +35,9 @@ async function main(): Promise<void> {
     }>(
       `SELECT id, raw_text, normalised_value FROM document_fact
         WHERE kind = 'monetary_amount' AND verification_status = 'unverified'
+          AND ($1::bigint IS NULL OR document_id = $1)
         ORDER BY id`,
+      [documentId],
     );
     const inputs: CheckInput[] = result.rows.map((r) => ({
       id: Number(r.id),
@@ -33,7 +47,11 @@ async function main(): Promise<void> {
 
     const counts = triage(inputs);
     process.stdout.write(
-      `\n${String(inputs.length)} money candidates awaiting review\n\n` +
+      `\n${String(inputs.length)} money candidates awaiting review` +
+        (documentId === null
+          ? " across every document held"
+          : ` in document ${String(documentId)}`) +
+        "\n\n" +
         `  ${String(counts.mismatch)}\tmismatch   - the stored value appears nowhere in its own evidence\n` +
         `  ${String(counts.noValue)}\tno value   - the source stated no unit; a person must supply the scale\n` +
         `  ${String(counts.ambiguous)}\tambiguous  - the evidence states several amounts, including this one\n` +

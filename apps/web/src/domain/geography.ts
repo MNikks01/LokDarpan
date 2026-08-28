@@ -9,30 +9,7 @@
  */
 import type { Feature, MultiPolygon, Polygon, BBox } from "geojson";
 
-export type AdminLevel = "country" | "state" | "district" | "local_body";
-
-/**
- * India's local government is not "cities". A municipal corporation, a nagar
- * panchayat and a gram panchayat differ in powers, budget and in which register
- * publishes their works — so the type is carried on the record rather than
- * being flattened into a single label.
- */
-export type LocalBodyType =
-  | "municipal_corporation"
-  | "municipal_council"
-  | "nagar_panchayat"
-  | "cantonment_board"
-  | "gram_panchayat"
-  | "zilla_parishad";
-
-export const LOCAL_BODY_TYPE_LABEL: Readonly<Record<LocalBodyType, string>> = {
-  municipal_corporation: "Municipal Corporation",
-  municipal_council: "Municipal Council",
-  nagar_panchayat: "Nagar Panchayat",
-  cantonment_board: "Cantonment Board",
-  gram_panchayat: "Gram Panchayat",
-  zilla_parishad: "Zilla Parishad",
-};
+export type AdminLevel = "country" | "state" | "district";
 
 /** Where a place's name is drawn. See `scripts/fetch-boundaries.ts`. */
 export type LabelPoint = readonly [number, number];
@@ -59,24 +36,6 @@ export interface DistrictSummary {
   readonly bbox: BBox;
   readonly labelPoint: LabelPoint;
   readonly labelWeight: number;
-}
-
-export interface LocalBody {
-  readonly id: string;
-  readonly districtId: string;
-  readonly stateCode: string;
-  readonly name: string;
-  readonly slug: string;
-  readonly type: LocalBodyType;
-  /**
-   * Where the map should sit when this body is selected. A bounding box is not
-   * a boundary: `boundaryAvailable` says whether an actual polygon exists, and
-   * the map must not draw an outline that no register published.
-   */
-  readonly focusBbox: BBox;
-  readonly boundaryAvailable: boolean;
-  /** Named so a missing boundary can say which register would carry it. */
-  readonly boundarySource: string;
 }
 
 export type AreaFeature = Feature<Polygon | MultiPolygon, Record<string, unknown>>;

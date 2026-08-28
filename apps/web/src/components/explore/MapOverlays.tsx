@@ -1,10 +1,9 @@
 "use client";
 
 import type React from "react";
-import type { DistrictSummary, LocalBody, StateSummary } from "@/domain/geography";
-import type { ProjectSummary } from "@/domain/project";
+import type { DistrictSummary, StateSummary } from "@/domain/geography";
 import { basemapStyleUrl } from "@/map/style";
-import { RoadTooltip, type HoverTarget } from "./RoadTooltip";
+import { AreaTooltip, type HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
 
 /**
@@ -18,25 +17,20 @@ import styles from "./explorer.module.css";
  */
 export function MapOverlays({
   hover,
-  projects,
   state,
   district,
-  localBody,
   loading,
 }: {
   readonly hover: HoverTarget | null;
-  readonly projects: readonly ProjectSummary[];
   readonly state: StateSummary | null;
   readonly district: DistrictSummary | null;
-  readonly localBody: LocalBody | null;
   readonly loading: boolean;
 }): React.JSX.Element {
-  const hovered = hoveredProject(hover, projects);
-  const place = placeName({ state, district, localBody });
+  const place = placeName({ state, district });
 
   return (
     <>
-      {hover !== null && <RoadTooltip target={hover} project={hovered} />}
+      {hover !== null && <AreaTooltip target={hover} />}
       <p className={styles.attribution}>
         Boundaries: Census 2011 administrative units ·{" "}
         {basemapStyleUrl() === null ? "no basemap" : "configured basemap"} · MapLibre GL
@@ -47,29 +41,18 @@ export function MapOverlays({
         </p>
       )}
       <span className="sr-only" aria-live="polite">
-        {place === null
-          ? "Showing India"
-          : `Showing ${place}. ${String(projects.length)} works on the map.`}
+        {place === null ? "Showing India" : `Showing ${place}.`}
       </span>
     </>
   );
-}
-
-function hoveredProject(
-  hover: HoverTarget | null,
-  projects: readonly ProjectSummary[],
-): ProjectSummary | null {
-  if (hover?.kind !== "project") return null;
-  return projects.find((p) => p.id === hover.projectId) ?? null;
 }
 
 /** The narrowest place currently selected, or null at the national view. */
 function placeName(scope: {
   readonly state: StateSummary | null;
   readonly district: DistrictSummary | null;
-  readonly localBody: LocalBody | null;
 }): string | null {
-  return scope.localBody?.name ?? scope.district?.name ?? scope.state?.name ?? null;
+  return scope.district?.name ?? scope.state?.name ?? null;
 }
 
 export function MapUnavailable({ reason }: { readonly reason: string }): React.JSX.Element {

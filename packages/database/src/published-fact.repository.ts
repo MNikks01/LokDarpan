@@ -113,21 +113,41 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
   }
 
   async listDocuments(): Promise<readonly DocumentSummary[]> {
+    return this.queryDocuments(null);
+  }
+
+  async listDocumentsForUnit(lgdCode: string): Promise<readonly DocumentSummary[]> {
+    return this.queryDocuments(lgdCode);
+  }
+
+  /**
+   * One query for both listings, scoped by LGD code when one is given.
+   *
+   * The unit is joined through `document.admin_unit_id` — the link the
+   * ingestion recorded — and never inferred from the title.
+   */
+  private async queryDocuments(lgdCode: string | null): Promise<readonly DocumentSummary[]> {
     const result = await this.db.query<{
       id: string;
       title: string;
       issuing_authority: string;
       published_facts: string;
       awaiting_review: string;
+      unit_name: string | null;
+      unit_level: string | null;
     }>(
       `SELECT d.id, d.title, d.issuing_authority,
+              u.name_en AS unit_name, u.level::text AS unit_level,
               (SELECT count(*) FROM published_fact p WHERE p.document_id = d.id
               ) AS published_facts,
               (SELECT count(*) FROM document_fact f
                 WHERE f.document_id = d.id AND f.verification_status = 'unverified'
               ) AS awaiting_review
          FROM document d
+         LEFT JOIN admin_unit u ON u.id = d.admin_unit_id
+        WHERE $1::text IS NULL OR u.lgd_code = $1
         ORDER BY d.title`,
+      [lgdCode],
     );
     return result.rows.map((r) => ({
       documentId: Number(r.id),
@@ -135,6 +155,8 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
       issuingAuthority: r.issuing_authority,
       publishedFacts: Number(r.published_facts),
       awaitingReview: Number(r.awaiting_review),
+      adminUnitName: r.unit_name,
+      adminUnitLevel: r.unit_level,
     }));
   }
 }

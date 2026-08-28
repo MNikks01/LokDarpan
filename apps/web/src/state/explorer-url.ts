@@ -12,85 +12,39 @@
  * `/lokdarpan/maharashtra/nagpur` path would give one entity two indexable URLs.
  * The explorer is a view over places, so its state belongs in its query string.
  */
-import type { InfrastructureType, ProjectStatus } from "@/domain/project";
-import { PROJECT_STATUS_ORDER } from "@/ui/status";
 
 export interface GeoSelection {
   readonly stateCode: string | null;
   readonly districtId: string | null;
-  readonly localBodyId: string | null;
-}
-
-export interface OrgFilters {
-  readonly departmentId: string | null;
-  readonly infrastructureType: InfrastructureType;
-  readonly statuses: readonly ProjectStatus[];
-  readonly contractorId: string | null;
 }
 
 export interface ExplorerState {
   readonly geo: GeoSelection;
-  readonly filters: OrgFilters;
-  readonly selectedProjectId: string | null;
+  /** The record open in the detail panel — a source document id. */
+  readonly selectedDocumentId: number | null;
 }
-
-export const ALL_STATUSES: readonly ProjectStatus[] = PROJECT_STATUS_ORDER;
 
 export const PARAM = {
   state: "state",
   district: "district",
-  body: "body",
-  department: "dept",
-  infrastructure: "type",
-  status: "status",
-  contractor: "firm",
-  project: "project",
+  document: "doc",
 } as const;
 
-function isInfrastructureType(value: string | null): value is InfrastructureType {
-  return (
-    value === "road" ||
-    value === "bridge" ||
-    value === "flyover" ||
-    value === "highway" ||
-    value === "other"
-  );
-}
-
-/** An unrecognised or empty status list means "show everything", never "show nothing". */
-function readStatuses(raw: string | null): readonly ProjectStatus[] {
-  if (raw === null || raw === "") return ALL_STATUSES;
-  const wanted = raw.split(",");
-  const picked = ALL_STATUSES.filter((s) => wanted.includes(s));
-  return picked.length === 0 ? ALL_STATUSES : picked;
-}
-
 export const EMPTY_EXPLORER_STATE: ExplorerState = {
-  geo: { stateCode: null, districtId: null, localBodyId: null },
-  filters: {
-    departmentId: null,
-    infrastructureType: "road",
-    statuses: ALL_STATUSES,
-    contractorId: null,
-  },
-  selectedProjectId: null,
+  geo: { stateCode: null, districtId: null },
+  selectedDocumentId: null,
 };
 
 export function parseExplorerState(params: URLSearchParams): ExplorerState {
-  const type = params.get(PARAM.infrastructure);
+  const document = params.get(PARAM.document);
+  const documentId = document === null ? null : Number(document);
   return {
     geo: {
       stateCode: params.get(PARAM.state),
       districtId: params.get(PARAM.district),
-      localBodyId: params.get(PARAM.body),
     },
-    filters: {
-      departmentId: params.get(PARAM.department),
-      infrastructureType: isInfrastructureType(type) ? type : "road",
-      statuses: readStatuses(params.get(PARAM.status)),
-      contractorId: params.get(PARAM.contractor),
-    },
-    selectedProjectId: params.get(PARAM.project),
+    selectedDocumentId:
+      documentId !== null && Number.isInteger(documentId) && documentId > 0 ? documentId : null,
   };
 }
 
@@ -102,16 +56,7 @@ export function toQueryString(state: ExplorerState): string {
   };
   set(PARAM.state, state.geo.stateCode);
   set(PARAM.district, state.geo.districtId);
-  set(PARAM.body, state.geo.localBodyId);
-  set(PARAM.department, state.filters.departmentId);
-  if (state.filters.infrastructureType !== "road") {
-    set(PARAM.infrastructure, state.filters.infrastructureType);
-  }
-  if (state.filters.statuses.length !== ALL_STATUSES.length) {
-    set(PARAM.status, state.filters.statuses.join(","));
-  }
-  set(PARAM.contractor, state.filters.contractorId);
-  set(PARAM.project, state.selectedProjectId);
+  set(PARAM.document, state.selectedDocumentId === null ? null : String(state.selectedDocumentId));
   return params.toString();
 }
 
