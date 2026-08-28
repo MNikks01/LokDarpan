@@ -3,24 +3,18 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { DistrictSummary, LocalBody, StateSummary } from "@/domain/geography";
-import type { Company, GovernmentDepartment } from "@/domain/organisation";
-import type { ProjectSummary } from "@/domain/project";
-import type { SearchResult } from "@/data/repositories";
-import { DEMO_DATA_NOTICE } from "@/data/demo/notice";
+import type { DistrictSummary, StateSummary } from "@/domain/geography";
 import { Button, controlStyles } from "@/components/ui";
-import { useExplorerState, type ExplorerState } from "@/state/useExplorerState";
 import { cx } from "@/ui/cx";
+import { useExplorerState, type ExplorerState } from "@/state/useExplorerState";
 import { Breadcrumb } from "./Breadcrumb";
 import { FilterPanel } from "./FilterPanel";
 import { MapCanvas, type MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
-import { MapLegend } from "./MapLegend";
-import { ProjectDrawer } from "./ProjectDrawer";
-import { ProjectList } from "./ProjectList";
-import { SearchDialog } from "./SearchDialog";
+import { RecordDrawer } from "./RecordDrawer";
+import { RecordsPanel } from "./RecordsPanel";
 import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
-import { useDistricts, useLocalBodies, useWorks } from "./use-explorer-data";
+import { useDistricts, useRecords } from "./use-explorer-data";
 import styles from "./explorer.module.css";
 
 const DRAWER_WIDTH = 428;
@@ -29,74 +23,32 @@ const RAIL_WIDTH = 320;
 
 export interface ExploreShellProps {
   readonly states: readonly StateSummary[];
-  readonly departments: readonly GovernmentDepartment[];
-  readonly companies: readonly Company[];
-  /** Districts and works are fetched per selection; nothing is preloaded. */
-  readonly initialProjects: readonly ProjectSummary[];
-  readonly initialMatchedCount: number;
-  /** Parsed from the request's query string on the server, so the SSR output and
-   *  the first client render agree. */
   readonly initialState: ExplorerState;
-}
-
-/** The narrowest place selected, as the works list titles itself. */
-function scopeLabelFor(
-  state: StateSummary | null,
-  district: DistrictSummary | null,
-  localBody: LocalBody | null,
-): string {
-  return localBody?.name ?? district?.name ?? state?.name ?? "India";
-}
-
-/**
- * A central body commissions works in every state, so it stays in scope when a
- * state is chosen. Filtering it out with the state filter would hide records
- * that genuinely belong to the place the reader is looking at.
- */
-function departmentsFor(
-  departments: readonly GovernmentDepartment[],
-  stateCode: string | null,
-): readonly GovernmentDepartment[] {
-  if (stateCode === null) return departments;
-  return departments.filter((d) => d.stateCode === null || d.stateCode === stateCode);
 }
 
 /**
  * The explorer.
  *
- * State is split three ways and lives in three places on purpose: geography and
- * filters in the URL-backed `useExplorerState`, transient interface state here,
- * and map camera state inside MapLibre where it belongs. Hoisting the viewport
- * into React would re-render the tree on every frame of a pan.
+ * Everything on this surface is a real record or a real boundary. There is no
+ * works layer, because no register of works has been located for any area — the
+ * map shows administrative geography, and the panel shows the documents the
+ * ledger holds for the selected unit, with the absence of works stated rather
+ * than left as an empty map to interpret.
  */
-export function ExploreShell({
-  states,
-  departments,
-  companies,
-  initialProjects,
-  initialMatchedCount,
-  initialState,
-}: ExploreShellProps): React.JSX.Element {
-  const { geo, filters, selectedProjectId, actions } = useExplorerState(initialState);
+export function ExploreShell({ states, initialState }: ExploreShellProps): React.JSX.Element {
+  const { geo, selectedDocumentId, actions } = useExplorerState(initialState);
 
   const { districts, loading: loadingDistricts } = useDistricts(geo.stateCode);
-  const localBodies = useLocalBodies(geo.districtId);
-  const works = useWorks(geo, filters, {
-    projects: initialProjects,
-    matchedCount: initialMatchedCount,
-    loading: false,
-  });
+  // The map's state codes ARE LGD codes, so the selection addresses the ledger
+  // directly with no name matching in between.
+  const records = useRecords(geo.stateCode);
 
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
   const [compact, setCompact] = useState(false);
   const mapHandle = useRef<MapHandle | null>(null);
 
-  // One media query drives two decisions — which layout to render, and whether
-  // the filter rail starts open. On a phone the rail covers the map, so it
-  // starts closed; on a desktop it costs nothing and starts open.
   useEffect(() => {
     const query = window.matchMedia("(max-width: 900px)");
     const apply = (): void => {
@@ -118,69 +70,33 @@ export function ExploreShell({
     () => districts.find((d) => d.id === geo.districtId) ?? null,
     [districts, geo.districtId],
   );
-  const localBody = useMemo(
-    () => localBodies.find((b) => b.id === geo.localBodyId) ?? null,
-    [geo.localBodyId, localBodies],
-  );
-  const selectedSummary = useMemo(
-    () => works.projects.find((p) => p.id === selectedProjectId) ?? null,
-    [selectedProjectId, works.projects],
-  );
-
-  const departmentsInScope = useMemo(
-    () => departmentsFor(departments, geo.stateCode),
-    [departments, geo.stateCode],
-  );
 
   const onSelectLevel = useCallback(
     (level: "country" | "state" | "district") => {
       if (level === "country") actions.selectState(null);
       else if (level === "state") actions.selectDistrict(null);
-      else actions.selectLocalBody(null);
     },
     [actions],
   );
 
-  const onSearchSelect = useCallback(
-    (result: SearchResult) => {
-      setSearchOpen(false);
-      if (result.target.type === "project") {
-        actions.selectProject(result.target.projectId);
-        return;
-      }
-      if (result.target.type === "place") {
-        actions.selectPlace(result.target.stateCode, result.target.districtId);
-        return;
-      }
-      window.location.href = result.target.href;
-    },
-    [actions],
-  );
-
-  const drawerInset = selectedProjectId !== null && !compact ? DRAWER_WIDTH : 0;
+  const drawerInset = selectedDocumentId !== null && !compact ? DRAWER_WIDTH : 0;
   const insets = useMemo(
     () => ({ left: compact ? 0 : RAIL_WIDTH, right: drawerInset }),
     [compact, drawerInset],
   );
-  const scopeLabel = scopeLabelFor(state, district, localBody);
+  const scopeLabel = district?.name ?? state?.name ?? "India";
 
   return (
     <div
       className={styles.shell}
       style={{ ["--ld-drawer-width" as string]: `${String(DRAWER_WIDTH)}px` }}
     >
-      <ExplorerHeader
-        state={state}
-        district={district}
-        localBody={localBody}
-        onSelectLevel={onSelectLevel}
-        onOpenSearch={() => {
-          setSearchOpen(true);
-        }}
-      />
+      <ExplorerHeader state={state} district={district} onSelectLevel={onSelectLevel} />
+
       <p className={styles.notice}>
-        <span aria-hidden="true">⚠</span>
-        {DEMO_DATA_NOTICE}
+        <span aria-hidden="true">◆</span>
+        Official records only. Every figure shown has been checked by a person against the page it
+        was read from.
       </p>
 
       <div className={styles.stage}>
@@ -188,19 +104,14 @@ export function ExploreShell({
           geo={geo}
           state={state}
           district={district}
-          localBody={localBody}
           states={states}
           districts={districts}
-          localBodies={localBodies}
-          projects={works.projects}
-          selectedProjectId={selectedProjectId}
           layers={layers}
           insets={insets}
           compact={compact}
           handleRef={mapHandle}
           onSelectState={actions.selectState}
           onSelectDistrict={actions.selectDistrict}
-          onSelectProject={actions.selectProject}
         />
 
         {compact && (
@@ -213,7 +124,7 @@ export function ExploreShell({
               ariaExpanded={railOpen}
               ariaControls="explorer-rail"
             >
-              <span aria-hidden="true">⚟</span> Filters &amp; works
+              <span aria-hidden="true">⚟</span> Places &amp; records
             </Button>
           </div>
         )}
@@ -225,22 +136,18 @@ export function ExploreShell({
           <FilterPanel
             states={states}
             districts={districts}
-            localBodies={localBodies}
-            departments={departmentsInScope}
-            companies={companies}
             geo={geo}
-            filters={filters}
             actions={actions}
             loadingDistricts={loadingDistricts}
           />
-          <ProjectList
-            projects={works.projects}
-            matchedCount={works.matchedCount}
-            selectedProjectId={selectedProjectId}
-            onSelect={actions.selectProject}
-            onResetFilters={actions.resetFilters}
-            loading={works.loading}
+          <RecordsPanel
             scopeLabel={scopeLabel}
+            documents={records.documents}
+            loading={records.loading}
+            failed={records.failed}
+            selectedDocumentId={selectedDocumentId}
+            onSelect={actions.selectDocument}
+            hasPlace={geo.stateCode !== null}
           />
         </div>
 
@@ -264,58 +171,32 @@ export function ExploreShell({
           />
         </div>
 
-        {!compact && <MapLegend shifted={drawerInset > 0} />}
-
-        {selectedProjectId !== null && (
-          <ProjectDrawer
-            key={selectedProjectId}
-            projectId={selectedProjectId}
-            summary={selectedSummary}
+        {selectedDocumentId !== null && (
+          <RecordDrawer
+            key={selectedDocumentId}
+            documentId={selectedDocumentId}
             onClose={() => {
-              actions.selectProject(null);
-            }}
-            onFilterByContractor={(companyId) => {
-              actions.selectProject(null);
-              actions.setContractor(companyId);
-            }}
-            onFilterByDepartment={(departmentId) => {
-              actions.selectProject(null);
-              actions.setDepartment(departmentId);
+              actions.selectDocument(null);
             }}
           />
         )}
-
-        <SearchDialog
-          open={searchOpen}
-          onClose={() => {
-            setSearchOpen(false);
-          }}
-          onSelect={onSearchSelect}
-        />
       </div>
     </div>
   );
 }
 
 /**
- * The application bar: identity, where you are, and the way into search.
- *
- * Split out because the shell's job is orchestration; a header that grows a
- * fourth control should not make the component that owns the map harder to
- * read.
+ * The application bar: identity, where you are, and the way out to the records
+ * index. Split out because the shell's job is orchestration.
  */
 function ExplorerHeader({
   state,
   district,
-  localBody,
   onSelectLevel,
-  onOpenSearch,
 }: {
   readonly state: StateSummary | null;
   readonly district: DistrictSummary | null;
-  readonly localBody: LocalBody | null;
   readonly onSelectLevel: (level: "country" | "state" | "district") => void;
-  readonly onOpenSearch: () => void;
 }): React.JSX.Element {
   return (
     <header className={styles.header}>
@@ -326,16 +207,11 @@ function ExplorerHeader({
         </span>
       </Link>
       <span className={styles.headerSpacer} />
-      <Breadcrumb
-        state={state}
-        district={district}
-        localBody={localBody}
-        onSelectLevel={onSelectLevel}
-      />
+      <Breadcrumb state={state} district={district} onSelectLevel={onSelectLevel} />
       <span className={styles.headerSpacer} />
-      <Button onClick={onOpenSearch}>
-        <span aria-hidden="true">⌕</span> Search
-      </Button>
+      <Link href="/documents" className={controlStyles.link} style={{ fontSize: 12.5 }}>
+        All records
+      </Link>
       <Link href="/about" className={controlStyles.link} style={{ fontSize: 12.5 }}>
         About
       </Link>

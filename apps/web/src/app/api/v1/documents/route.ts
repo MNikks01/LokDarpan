@@ -5,7 +5,13 @@ export const dynamic = "force-dynamic";
 
 export function GET(request: Request): Promise<Response> {
   return respond(request, async () => {
-    const documents = await publishedFactRepository().listDocuments();
+    // `?unit=<lgdCode>` scopes to the documents recorded against that unit.
+    const unit = new URL(request.url).searchParams.get("unit");
+    const repository = publishedFactRepository();
+    const documents =
+      unit === null || unit === ""
+        ? await repository.listDocuments()
+        : await repository.listDocumentsForUnit(unit);
     return { data: { documents }, datasetVersion: 0 };
   });
 }

@@ -108,6 +108,16 @@ export function displayTitle(rawTitle: string): string {
 export interface PublishedFactRepository {
   documentFacts(documentId: number): Promise<DocumentFactsView | null>;
   listDocuments(): Promise<readonly DocumentSummary[]>;
+  /**
+   * Documents whose `admin_unit_id` resolves to this LGD code.
+   *
+   * The join is on the recorded link, never on the title. Three of the reports
+   * held are named for the CAG office that issued them — "Nagpur Report No. 2"
+   * — while their recorded unit is Maharashtra. Reading a place out of a title
+   * would manufacture a district association no document states, which is the
+   * linkage-confidence failure the contract exists to prevent.
+   */
+  listDocumentsForUnit(lgdCode: string): Promise<readonly DocumentSummary[]>;
 }
 
 export interface DocumentSummary {
@@ -116,6 +126,9 @@ export interface DocumentSummary {
   readonly issuingAuthority: string;
   readonly publishedFacts: number;
   readonly awaitingReview: number;
+  /** The unit the document is recorded against, or null if none is recorded. */
+  readonly adminUnitName: string | null;
+  readonly adminUnitLevel: string | null;
 }
 
 /**

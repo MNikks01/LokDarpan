@@ -1,32 +1,23 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { InfrastructureType, ProjectStatus } from "@/domain/project";
-import {
-  ALL_STATUSES,
-  EMPTY_EXPLORER_STATE,
-  toQueryString,
-  type ExplorerState,
-} from "./explorer-url";
+import { EMPTY_EXPLORER_STATE, toQueryString, type ExplorerState } from "./explorer-url";
 
-export type { ExplorerState, GeoSelection, OrgFilters } from "./explorer-url";
-export { ALL_STATUSES, EMPTY_EXPLORER_STATE, parseExplorerState } from "./explorer-url";
+export type { ExplorerState, GeoSelection } from "./explorer-url";
+export { EMPTY_EXPLORER_STATE, parseExplorerState } from "./explorer-url";
 
 /**
- * Explorer state, split the way the product is: where you are, what you are
- * filtering for, and what the interface is doing. They change for different
- * reasons and at different rates, so they are three values rather than one
- * object — a status toggle must not invalidate anything that depends on place.
+ * Explorer state: where you are, and which record is open.
  *
  * The initial value is PARSED ON THE SERVER and passed in, never read from
- * `window` here. See `explorer-url.ts` for why.
+ * `window` here. A `typeof window` branch made the server render a deep link as
+ * a bare "India" breadcrumb while the client rendered the full trail, and React
+ * responded by discarding and regenerating the whole subtree.
  *
  * Updates are mirrored into the query string with `history.replaceState`, not
- * `router.replace`. The distinction matters: this page's content is already in
- * the browser, and a router navigation would send the whole selection back to
- * the server for a re-render that produces the same markup. Shallow updates keep
- * the drill-down at interaction speed and still leave a URL that can be copied
- * into a message.
+ * `router.replace`. The content is already in the browser, and a router
+ * navigation would send the selection back to the server for a re-render that
+ * produces the same markup.
  */
 function writeUrl(state: ExplorerState): void {
   if (typeof window === "undefined") return;
@@ -47,14 +38,7 @@ function writeUrl(state: ExplorerState): void {
 export interface ExplorerActions {
   readonly selectState: (stateCode: string | null) => void;
   readonly selectDistrict: (districtId: string | null) => void;
-  readonly selectLocalBody: (localBodyId: string | null) => void;
-  readonly selectPlace: (stateCode: string | null, districtId: string | null) => void;
-  readonly setDepartment: (departmentId: string | null) => void;
-  readonly setInfrastructureType: (type: InfrastructureType) => void;
-  readonly toggleStatus: (status: ProjectStatus) => void;
-  readonly setContractor: (contractorId: string | null) => void;
-  readonly selectProject: (projectId: string | null) => void;
-  readonly resetFilters: () => void;
+  readonly selectDocument: (documentId: number | null) => void;
   readonly resetAll: () => void;
 }
 
@@ -74,47 +58,9 @@ export function useExplorerState(
 
   const selectState = useCallback(
     (stateCode: string | null) => {
-      apply((previous) => ({
-        ...previous,
-        // Narrower selections cannot survive a change of state — a district id
-        // from Maharashtra is meaningless once the reader moves to Gujarat.
-        geo: { stateCode, districtId: null, localBodyId: null },
-        filters: { ...previous.filters, departmentId: null },
-        selectedProjectId: null,
-      }));
-    },
-    [apply],
-  );
-
-  const selectDistrict = useCallback(
-    (districtId: string | null) => {
-      apply((previous) => ({
-        ...previous,
-        geo: { ...previous.geo, districtId, localBodyId: null },
-        selectedProjectId: null,
-      }));
-    },
-    [apply],
-  );
-
-  const selectLocalBody = useCallback(
-    (localBodyId: string | null) => {
-      apply((previous) => ({
-        ...previous,
-        geo: { ...previous.geo, localBodyId },
-        selectedProjectId: null,
-      }));
-    },
-    [apply],
-  );
-
-  const selectPlace = useCallback(
-    (stateCode: string | null, districtId: string | null) => {
-      apply((previous) => ({
-        ...previous,
-        geo: { stateCode, districtId, localBodyId: null },
-        selectedProjectId: null,
-      }));
+      // A district id from Maharashtra is meaningless once the reader moves to
+      // Gujarat, and a record is recorded against a unit — both are dropped.
+      apply(() => ({ geo: { stateCode, districtId: null }, selectedDocumentId: null }));
     },
     [apply],
   );
@@ -122,54 +68,17 @@ export function useExplorerState(
   const actions = useMemo<ExplorerActions>(
     () => ({
       selectState,
-      selectDistrict,
-      selectLocalBody,
-      selectPlace,
-      setDepartment: (departmentId) => {
-        apply((previous) => ({ ...previous, filters: { ...previous.filters, departmentId } }));
+      selectDistrict: (districtId) => {
+        apply((previous) => ({ ...previous, geo: { ...previous.geo, districtId } }));
       },
-      setInfrastructureType: (infrastructureType) => {
-        apply((previous) => ({
-          ...previous,
-          filters: { ...previous.filters, infrastructureType },
-          selectedProjectId: null,
-        }));
-      },
-      toggleStatus: (status) => {
-        apply((previous) => {
-          const active = previous.filters.statuses.includes(status);
-          const next = active
-            ? previous.filters.statuses.filter((s) => s !== status)
-            : ALL_STATUSES.filter((s) => s === status || previous.filters.statuses.includes(s));
-          // Turning off the last status would show an empty map with no way
-          // back that reads as a bug; keep at least one on.
-          return next.length === 0
-            ? previous
-            : { ...previous, filters: { ...previous.filters, statuses: next } };
-        });
-      },
-      setContractor: (contractorId) => {
-        apply((previous) => ({ ...previous, filters: { ...previous.filters, contractorId } }));
-      },
-      selectProject: (selectedProjectId) => {
-        apply((previous) => ({ ...previous, selectedProjectId }));
-      },
-      resetFilters: () => {
-        apply((previous) => ({
-          ...previous,
-          filters: {
-            departmentId: null,
-            infrastructureType: "road",
-            statuses: ALL_STATUSES,
-            contractorId: null,
-          },
-        }));
+      selectDocument: (selectedDocumentId) => {
+        apply((previous) => ({ ...previous, selectedDocumentId }));
       },
       resetAll: () => {
         apply(() => EMPTY_EXPLORER_STATE);
       },
     }),
-    [apply, selectState, selectDistrict, selectLocalBody, selectPlace],
+    [apply, selectState],
   );
 
   return { ...state, actions };

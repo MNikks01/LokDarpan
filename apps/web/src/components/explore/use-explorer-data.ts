@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { DistrictSummary, LocalBody } from "@/domain/geography";
-import type { ProjectSummary } from "@/domain/project";
-import type { GeoSelection, OrgFilters } from "@/state/useExplorerState";
+import type { DocumentSummary } from "@lokdarpan/domain";
+import type { DistrictSummary } from "@/domain/geography";
 
 /**
  * The explorer's reads, one hook per resource.
  *
- * Each one aborts its in-flight request when its input changes, which is what
- * stops a reader clicking through four districts quickly from ending up with
- * the second district's works on the fourth district's map. Every hook fails
- * closed to an empty result rather than to stale data: showing the previous
- * area's records under a new heading is worse than showing none.
+ * Each aborts its in-flight request when its input changes, which is what stops
+ * a reader clicking through four places quickly from ending up with the second
+ * one's records under the fourth one's heading. Each fails closed to an empty
+ * result rather than to stale data: showing the previous area's records under a
+ * new heading is worse than showing none.
  */
 
 async function readJson<T>(url: string, signal: AbortSignal): Promise<T> {
@@ -60,81 +59,50 @@ export function useDistricts(stateCode: string | null): {
   return { districts, loading };
 }
 
-export function useLocalBodies(districtId: string | null): readonly LocalBody[] {
-  const [localBodies, setLocalBodies] = useState<readonly LocalBody[]>([]);
+export interface RecordsState {
+  readonly documents: readonly DocumentSummary[];
+  readonly loading: boolean;
+  readonly failed: boolean;
+}
+
+/**
+ * Documents recorded against a unit, by LGD code.
+ *
+ * The map's state codes are Census/LGD state codes — Maharashtra is `27` in
+ * both — so the map's selection addresses the ledger directly, with no name
+ * matching in between.
+ */
+export function useRecords(lgdCode: string | null): RecordsState {
+  const [state, setState] = useState<RecordsState>({
+    documents: [],
+    loading: false,
+    failed: false,
+  });
 
   useEffect(() => {
-    if (districtId === null) {
-      setLocalBodies([]);
+    if (lgdCode === null) {
+      setState({ documents: [], loading: false, failed: false });
       return;
     }
     const controller = new AbortController();
-    readJson<{ data: { localBodies: LocalBody[] } }>(
-      `/api/v1/places/local-bodies?district=${encodeURIComponent(districtId)}`,
+    setState({ documents: [], loading: true, failed: false });
+
+    readJson<{ data: { documents: DocumentSummary[] } }>(
+      `/api/v1/documents?unit=${encodeURIComponent(lgdCode)}`,
       controller.signal,
     )
       .then((body) => {
-        setLocalBodies(body.data.localBodies);
-      })
-      .catch((error: unknown) => {
-        if (!isAbort(error)) setLocalBodies([]);
-      });
-    return () => {
-      controller.abort();
-    };
-  }, [districtId]);
-
-  return localBodies;
-}
-
-export interface WorksState {
-  readonly projects: readonly ProjectSummary[];
-  readonly matchedCount: number;
-  readonly loading: boolean;
-}
-
-function worksQuery(geo: GeoSelection, filters: OrgFilters): string {
-  const params = new URLSearchParams();
-  const entries: readonly (readonly [string, string | null])[] = [
-    ["state", geo.stateCode],
-    ["district", geo.districtId],
-    ["body", geo.localBodyId],
-    ["dept", filters.departmentId],
-    ["firm", filters.contractorId],
-  ];
-  for (const [key, value] of entries) if (value !== null) params.set(key, value);
-  params.set("type", filters.infrastructureType);
-  params.set("status", filters.statuses.join(","));
-  return params.toString();
-}
-
-export function useWorks(geo: GeoSelection, filters: OrgFilters, initial: WorksState): WorksState {
-  const [works, setWorks] = useState<WorksState>(initial);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    setWorks((previous) => ({ ...previous, loading: true }));
-
-    readJson<{ data: { projects: ProjectSummary[]; matchedCount: number } }>(
-      `/api/v1/projects?${worksQuery(geo, filters)}`,
-      controller.signal,
-    )
-      .then((body) => {
-        setWorks({
-          projects: body.data.projects,
-          matchedCount: body.data.matchedCount,
-          loading: false,
-        });
+        setState({ documents: body.data.documents, loading: false, failed: false });
       })
       .catch((error: unknown) => {
         if (isAbort(error)) return;
-        setWorks({ projects: [], matchedCount: 0, loading: false });
+        setState({ documents: [], loading: false, failed: true });
       });
 
     return () => {
       controller.abort();
     };
-  }, [geo, filters]);
+  }, [lgdCode]);
 
-  return works;
+  return state;
 }
