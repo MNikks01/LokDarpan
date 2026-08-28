@@ -16,40 +16,35 @@ A variance is a number. The platform never claims it was caused by theft, fraud,
 
 ---
 
-## Branching — never push to `main` or `development`
+## Branching — never push to `main`
 
 ```text
-feature/*  ──PR──>  development  ──release PR──>  main
-hotfix/*   ──PR──>  main  ──back-merge──>  development
+feature/*  ──PR──>  main
 ```
 
-Both `main` and `development` are protected: **no direct pushes**, and **all six CI checks must pass** before a merge is possible. A branch must also be current with its base, and review conversations must be resolved.
+`main` is protected: **no direct pushes**, and **all six CI checks must pass** before a merge is possible. A branch must also be current with `main`, and review conversations must be resolved.
+
+`development` is **retired** ([`adr/023`](./.docs/adr/023-features-target-main.md)) — do not branch from it or target it. It was an integration branch that nothing integrated through: seven consecutive PRs went straight to `main` without anyone deciding to skip it. Vercel builds a preview deployment for every pull request, so each change is soaked on its own real deployment before it merges, which is what `development` was there to provide.
 
 There is **no required approving review** while the project has a single maintainer — a solo maintainer cannot approve their own PR, and the requirement could only ever be met by bypassing every protection at once ([`adr/016`](./.docs/adr/016-review-requirement.md)). It returns to one the moment a second maintainer can approve. Everything else about the pull request is unchanged: it is still where CI runs and where the reasoning is recorded.
 
 ```bash
-git checkout development && git pull
+git checkout main && git pull
 git checkout -b feature/short-description
 # … work, commit …
 git push -u origin feature/short-description
-gh pr create --base development
+gh pr create --base main
 ```
 
 ### Releasing
 
-Promotion from `development` to `main` is a deliberate human step, not automation:
+There is no release branch and no promotion step. `main` is what Vercel deploys, so **`main` must always be releasable** — which is the price of dropping the integration branch, and worth stating plainly rather than discovering.
 
-```bash
-gh pr create --base main --head development --title "release: <what is in it>"
-```
-
-This is intentionally _not_ a workflow. GitHub gates "Actions may create pull requests" behind the same setting as "Actions may approve pull requests" — enabling it to save this one command would let a workflow approve its own PR and bypass the review requirement. Least privilege wins over the convenience.
-
-**Hotfixes branch from `main`**, and the fix **must be merged back into `development`** afterwards — forgetting silently reintroduces the bug in the next release.
+There is deliberately **no workflow** that opens pull requests on your behalf. GitHub gates "Actions may create pull requests" behind the same setting as "Actions may approve pull requests"; enabling it would let a workflow approve its own PR and bypass the review requirement. Least privilege wins over the convenience.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/); `commitlint` enforces this on `commit-msg`. Scopes: `web`, `api`, `money`, `neutrality`, `contracts`, `ingestion`, `docs`, `ci`, `deps`, `repo`.
 
-Rationale: [`.docs/adr/013-branching-and-release.md`](./.docs/adr/013-branching-and-release.md).
+Rationale: [`.docs/adr/013-branching-and-release.md`](./.docs/adr/013-branching-and-release.md), as amended by [`.docs/adr/023-features-target-main.md`](./.docs/adr/023-features-target-main.md).
 
 ## Getting set up
 
