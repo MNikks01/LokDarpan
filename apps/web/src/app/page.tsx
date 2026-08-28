@@ -9,7 +9,12 @@ export default function Home(): React.JSX.Element {
         Foundation scaffold (W1). Official records, linked and checked for mathematical consistency
         — every number traceable to its source.
       </p>
-      <p style={{ marginTop: 24 }}>
+      <p style={{ marginTop: 24, fontSize: 17 }}>
+        <a href="/explore" style={{ color: color.accent.base, fontWeight: 600 }}>
+          Explore infrastructure on the map →
+        </a>
+      </p>
+      <p style={{ marginTop: 8 }}>
         <a href="/project/501" style={{ color: color.accent.base }}>
           Example project — fixture-backed →
         </a>
