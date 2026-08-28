@@ -21,7 +21,8 @@
     "@lokdarpan/money": "workspace:*",
     "node-html-parser": "^6.1.13",
     "pg": "^8.13.1",
-    "unpdf": "^1.8.1"
+    "unpdf": "^1.8.1",
+    "@lokdarpan/domain": "workspace:*"
   },
   "devDependencies": {
     "@types/pg": "^8.11.10"

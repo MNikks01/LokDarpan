@@ -9,7 +9,14 @@ import {
   readApplied,
 } from "@lokdarpan/database";
 
-import { ReviewError, assertReviewer, decisionForKey, recordDecision } from "../src/review/decide";
+import {
+  ReviewError,
+  assertReviewer,
+  decisionForKey,
+  priorDecisions,
+  recordDecision,
+  reviseDecision,
+} from "../src/review/decide";
 import { pendingReview, reviewProgress } from "../src/review/queue";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
@@ -253,6 +260,102 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       const after = await reviewProgress(db());
       expect(after.verified).toBe(before.verified + 1);
       expect(after.unverified).toBe(before.unverified - 1);
+    });
+
+    it("replaces a decision, keeping the one it replaced", async () => {
+      await recordDecision(db(), { factId, decision: "verified", reviewer: "first@example.org" });
+
+      const revised = await reviseDecision(db(), {
+        factId,
+        decision: "corrected",
+        reviewer: "second@example.org",
+        correctedValue: "1514000000",
+        note: "the page states lakh, not crore",
+      });
+
+      expect(revised).toBe(true);
+      expect(await statusOf()).toMatchObject({
+        verification_status: "corrected",
+        verified_by: "second@example.org",
+      });
+
+      const history = await priorDecisions(db(), factId);
+      expect(history).toHaveLength(1);
+      expect(history[0]).toMatchObject({
+        verificationStatus: "verified",
+        verifiedBy: "first@example.org",
+      });
+    });
+
+    // A published fact that changed must be able to say why, or the change is
+    // itself an unaccountable claim.
+    it("refuses a revision with no reason, and changes nothing", async () => {
+      await recordDecision(db(), { factId, decision: "verified", reviewer: "first@example.org" });
+      await expect(
+        reviseDecision(db(), {
+          factId,
+          decision: "rejected",
+          reviewer: "second@example.org",
+          note: "   ",
+        }),
+      ).rejects.toThrow(ReviewError);
+      expect((await statusOf())?.["verified_by"]).toBe("first@example.org");
+    });
+
+    // Revision must not become a way to make a first decision outside the
+    // queue, where the count of what remains keeps a reviewer honest.
+    it("refuses to revise a fact nobody has decided", async () => {
+      expect(
+        await reviseDecision(db(), {
+          factId,
+          decision: "verified",
+          reviewer: "someone@example.org",
+          note: "sneaking past the queue",
+        }),
+      ).toBe(false);
+      expect((await statusOf())?.["verification_status"]).toBe("unverified");
+    });
+
+    it("keeps every superseded decision, most recent first", async () => {
+      await recordDecision(db(), { factId, decision: "verified", reviewer: "first@example.org" });
+      await reviseDecision(db(), {
+        factId,
+        decision: "rejected",
+        reviewer: "second@example.org",
+        note: "wrong firm",
+      });
+      await reviseDecision(db(), {
+        factId,
+        decision: "verified",
+        reviewer: "third@example.org",
+        note: "the first reading was right after all",
+      });
+
+      const history = await priorDecisions(db(), factId);
+      expect(history.map((h) => h.verificationStatus)).toEqual(["rejected", "verified"]);
+    });
+
+    it("counts revisions on the published fact, so a reader can see it changed", async () => {
+      await recordDecision(db(), { factId, decision: "verified", reviewer: "first@example.org" });
+      await reviseDecision(db(), {
+        factId,
+        decision: "corrected",
+        reviewer: "second@example.org",
+        correctedValue: "1514000000",
+        note: "unit was misread",
+      });
+      const r = await db().query<{ revision_count: string }>(
+        `SELECT revision_count FROM published_fact WHERE id = $1`,
+        [factId],
+      );
+      expect(Number(r.rows[0]?.revision_count)).toBe(1);
+    });
+
+    // A first decision replaces nothing. Recording it would fill the table
+    // with rows saying "this used to be undecided".
+    it("writes no history for a first decision", async () => {
+      await recordDecision(db(), { factId, decision: "verified", reviewer: "first@example.org" });
+      expect(await priorDecisions(db(), factId)).toHaveLength(0);
     });
 
     it("offers a candidate with its evidence and citation, ready to judge", async () => {

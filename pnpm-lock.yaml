@@ -186,6 +186,9 @@ importers:
       '@lokdarpan/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@lokdarpan/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@lokdarpan/money':
         specifier: workspace:*
         version: link:../../packages/money
