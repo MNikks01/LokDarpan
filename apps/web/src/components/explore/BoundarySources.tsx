@@ -2,6 +2,7 @@
 
 import type React from "react";
 import type { BoundarySourceKind, GeoUnit } from "@lokdarpan/domain";
+import type { OutlineSource } from "./ExploreShell";
 import styles from "./explorer.module.css";
 
 /**
@@ -20,14 +21,16 @@ const KIND_LABEL: Readonly<Record<BoundarySourceKind, string>> = {
 
 export function BoundarySources({
   units,
-  active,
+  outlineSource,
 }: {
   readonly units: readonly GeoUnit[];
-  readonly active: GeoUnit | null;
+  readonly outlineSource: OutlineSource;
 }): React.JSX.Element | null {
   const drawn = units.filter((u) => u.boundary !== null);
   const withoutBoundary = units.length - drawn.length;
-  if (units.length === 0 && active === null) return null;
+  // No early return any more. The country outlines are drawn at every level, so
+  // their attribution has to be reachable at every level — including India,
+  // where no unit has been selected and there is nothing else to report.
 
   const byKind = new Map<BoundarySourceKind, { count: number; source: string; licence: string }>();
   for (const unit of drawn) {
@@ -72,6 +75,11 @@ export function BoundarySources({
             ))}
           </ul>
         )}
+
+        <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "10px 0 0" }}>
+          <span aria-hidden="true">▤ </span>
+          State outlines: {outlineSource.attribution} · {outlineSource.licence}
+        </p>
 
         {withoutBoundary > 0 && (
           <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "10px 0 0" }}>

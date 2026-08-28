@@ -43,11 +43,24 @@ export type AreaFeature = Feature<Polygon | MultiPolygon, Record<string, unknown
 /** The generated manifest written by `scripts/fetch-boundaries.ts`. */
 export interface BoundaryManifest {
   readonly generatedAt: string;
-  readonly source: {
-    readonly name: string;
-    readonly repository: string;
-    readonly commit: string;
-    readonly licence: string;
+  /**
+   * One entry per layer, because the layers do not share terms: state outlines
+   * are ODbL and may be redistributed with attribution, districts come from an
+   * extract that declares no licence at all.
+   */
+  readonly sources: {
+    readonly states: {
+      readonly name: string;
+      readonly attribution: string;
+      readonly licence: string;
+      readonly retrievedFrom: string;
+    };
+    readonly districts: {
+      readonly name: string;
+      readonly repository: string;
+      readonly commit: string;
+      readonly licence: string;
+    };
   };
   readonly note: string;
   readonly states: readonly {

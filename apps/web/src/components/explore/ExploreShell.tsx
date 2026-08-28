@@ -24,9 +24,17 @@ const DRAWER_WIDTH = 428;
 /** Matches `.rail` in explorer.module.css, plus its 12px gutters. */
 const RAIL_WIDTH = 320;
 
+export interface OutlineSource {
+  readonly name: string;
+  readonly attribution: string;
+  readonly licence: string;
+}
+
 export interface ExploreShellProps {
   readonly states: readonly StateOption[];
   readonly initialState: ExplorerState;
+  /** Credit for the country-view outlines. ODbL requires it be shown. */
+  readonly outlineSource: OutlineSource;
 }
 
 /**
@@ -42,7 +50,11 @@ export interface ExploreShellProps {
  * goes from `fetch` to a MapLibre source and is replaced wholesale on the next
  * selection.
  */
-export function ExploreShell({ states, initialState }: ExploreShellProps): React.JSX.Element {
+export function ExploreShell({
+  states,
+  initialState,
+  outlineSource,
+}: ExploreShellProps): React.JSX.Element {
   const { geo, selectedDocumentId, actions } = useExplorerState(initialState);
 
   const {
@@ -172,10 +184,10 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
           actions={actions}
           loadingChildren={loadingChildren}
           ancestors={ancestors}
-          activeUnit={activeUnit}
           records={records}
           scopeLabel={scopeLabel}
           selectedDocumentId={selectedDocumentId}
+          outlineSource={outlineSource}
         />
 
         <div className={cx(styles.controls, drawerInset > 0 && styles.controlsShifted)}>
@@ -272,10 +284,10 @@ function ExplorerRail({
   actions,
   loadingChildren,
   ancestors,
-  activeUnit,
   records,
   scopeLabel,
   selectedDocumentId,
+  outlineSource,
 }: {
   readonly hidden: boolean;
   readonly states: readonly StateOption[];
@@ -284,10 +296,10 @@ function ExplorerRail({
   readonly actions: ReturnType<typeof useExplorerState>["actions"];
   readonly loadingChildren: boolean;
   readonly ancestors: readonly GeoUnit[];
-  readonly activeUnit: GeoUnit | null;
   readonly records: RecordsState;
   readonly scopeLabel: string;
   readonly selectedDocumentId: number | null;
+  readonly outlineSource: OutlineSource;
 }): React.JSX.Element {
   return (
     <div id="explorer-rail" className={cx(styles.rail, hidden && styles.railCollapsed)}>
@@ -299,7 +311,7 @@ function ExplorerRail({
         loading={loadingChildren}
         ancestors={ancestors}
       />
-      <BoundarySources units={units} active={activeUnit} />
+      <BoundarySources units={units} outlineSource={outlineSource} />
       <RecordsPanel
         scopeLabel={scopeLabel}
         documents={records.documents}
