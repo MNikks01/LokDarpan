@@ -1,18 +1,30 @@
 /**
  * The map style, and the layer contract the explorer draws against.
  *
- * BASEMAP POLICY
- * The default style renders only geometry this deployment serves: administrative
- * boundaries. No tile provider, no API key, no third-party request
- * from a reader's browser — which matters for a civic site whose readers should
- * not be logged by a commercial map vendor to look at a public record.
+ * TWO LAYERS, KEPT APART
+ * Layer A is the geographic base — roads, buildings, water, railways, places —
+ * from an OpenStreetMap extract served as PMTiles from this deployment's own
+ * origin. Layer B is what LokDarpan knows: administrative boundaries now, and
+ * government works when a register for them exists. They are composed here and
+ * nowhere else, so the base map answers "what is here?" without knowing
+ * anything about the ledger, and the ledger's layers sit on top without
+ * knowing what a building is.
  *
- * A raster or vector basemap can be switched on with NEXT_PUBLIC_MAP_STYLE_URL.
- * When set, that style is fetched and our sources and layers are appended to it,
- * so the provider is a configuration choice rather than a code change.
+ * BASEMAP POLICY
+ * Self-hosted, so there is no API key, no per-load bill, and no request from a
+ * reader's browser to a commercial vendor — a civic site's readers should not be
+ * logged by a map company for looking at a public record. This is the same
+ * reasoning `.docs/adr/006-maps.md` used to reject Mapbox.
+ *
+ * The extract is fetched at setup and gitignored, like the boundary geometry.
+ * When it is absent the style still builds: the reader gets boundaries without
+ * a base map rather than an error, and the panel says which.
  */
+import { layers as basemapLayers, namedFlavor } from "@protomaps/basemaps";
 import { color } from "@/ui/tokens";
 import type { StyleSpecification, LayerSpecification, SourceSpecification } from "maplibre-gl";
+
+export const BASE_SOURCE = "protomaps";
 
 export const SOURCE = {
   states: "ld-states",
@@ -50,6 +62,14 @@ const EMPTY: SourceSpecification = {
 function overlayLayers(withBasemap: boolean): LayerSpecification[] {
   const layers: LayerSpecification[] = [];
 
+  // With a base map underneath, these fills exist to catch the pointer and to
+  // mark the selection — not to paint the map. An opaque administrative fill
+  // over a street map hides the streets, which is the whole reason the base map
+  // is there. Without one, they carry the map's legibility instead.
+  const opacity = withBasemap
+    ? { state: 0.02, stateActive: 0.18, child: 0.02, childHover: 0.22, active: 0.16 }
+    : { state: 0.9, stateActive: 1, child: 0.06, childHover: 0.55, active: 0.55 };
+
   if (!withBasemap) {
     layers.push({
       id: LAYER.background,
@@ -67,7 +87,12 @@ function overlayLayers(withBasemap: boolean): LayerSpecification[] {
         "fill-color": color.bg.surface,
         // Subdued once a state is chosen: the eye should go to the selection,
         // and dimming the rest does that without hiding the country.
-        "fill-opacity": ["case", ["boolean", ["feature-state", "dimmed"], false], 0.35, 0.9],
+        "fill-opacity": [
+          "case",
+          ["boolean", ["feature-state", "dimmed"], false],
+          opacity.state * 0.4,
+          opacity.state,
+        ],
       },
     },
     {
@@ -75,7 +100,7 @@ function overlayLayers(withBasemap: boolean): LayerSpecification[] {
       type: "fill",
       source: SOURCE.states,
       filter: ["==", ["get", "stateCode"], "__none__"],
-      paint: { "fill-color": color.accent.soft, "fill-opacity": 1 },
+      paint: { "fill-color": color.accent.soft, "fill-opacity": opacity.stateActive },
     },
     {
       id: LAYER.stateLine,
@@ -98,7 +123,7 @@ function overlayLayers(withBasemap: boolean): LayerSpecification[] {
       id: LAYER.activeFill,
       type: "fill",
       source: SOURCE.active,
-      paint: { "fill-color": color.accent.soft, "fill-opacity": 0.55 },
+      paint: { "fill-color": color.accent.soft, "fill-opacity": opacity.active },
     },
     {
       id: LAYER.childFill,
@@ -108,7 +133,12 @@ function overlayLayers(withBasemap: boolean): LayerSpecification[] {
         // Nearly transparent: the fill exists to catch the pointer and to lift
         // on hover, not to tint the map. The outline carries the shape.
         "fill-color": color.bg.surface,
-        "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.55, 0.06],
+        "fill-opacity": [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          opacity.childHover,
+          opacity.child,
+        ],
       },
     },
     {
@@ -138,33 +168,72 @@ function sources(): Record<string, SourceSpecification> {
   };
 }
 
-/** The configured basemap, or null for the self-hosted geometry-only style. */
-export function basemapStyleUrl(): string | null {
-  const configured = process.env["NEXT_PUBLIC_MAP_STYLE_URL"];
-  return configured !== undefined && configured !== "" ? configured : null;
+/**
+ * Where the self-hosted vector extract lives, relative to this origin.
+ *
+ * Configurable so a deployment can serve a different region — or a whole
+ * country — without a code change. `null` disables the base map entirely.
+ */
+export function basemapUrl(): string | null {
+  const configured = process.env["NEXT_PUBLIC_BASEMAP_URL"];
+  if (configured === "") return null;
+  return configured ?? "/basemap/nagpur.pmtiles";
 }
 
-export async function buildStyle(): Promise<StyleSpecification> {
-  const url = basemapStyleUrl();
-
-  if (url === null) {
-    return {
-      version: 8,
-      // No glyphs and no sprite: the default style has no symbol layer, and
-      // declaring a font endpoint we do not host would fail at first label.
-      sources: sources(),
-      layers: overlayLayers(false),
-    };
+/** Whether the extract is actually present, so the UI can say if it is not. */
+export async function basemapAvailable(url: string): Promise<boolean> {
+  try {
+    // A range request, not a HEAD: PMTiles is served as a static file and the
+    // first bytes are the header, so this also proves it is readable.
+    const response = await fetch(url, { headers: { range: "bytes=0-15" } });
+    return response.ok || response.status === 206;
+  } catch {
+    return false;
   }
+}
 
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`basemap style ${url} returned ${String(response.status)}`);
-  }
-  const base = (await response.json()) as StyleSpecification;
+/**
+ * The geographic base layer, or nothing when no extract is installed.
+ *
+ * `glyphs` and `sprite` are Protomaps' own hosted assets: fonts and icons, not
+ * map data, and without them every label and shield in the base map is missing.
+ * They are the one third-party fetch this style makes, and they carry no
+ * information about which place the reader is looking at.
+ */
+function baseLayers(sourceName: string): LayerSpecification[] {
+  return basemapLayers(sourceName, namedFlavor("light"), { lang: "en" });
+}
+
+export interface StyleOptions {
+  /** Set when the extract is present; the base map is omitted otherwise. */
+  readonly basemap: string | null;
+}
+
+export function buildStyle(options: StyleOptions): StyleSpecification {
+  const { basemap } = options;
+  const withBasemap = basemap !== null;
+
   return {
-    ...base,
-    sources: { ...base.sources, ...sources() },
-    layers: [...base.layers, ...overlayLayers(true)],
+    version: 8,
+    ...(withBasemap
+      ? {
+          glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
+          sprite: "https://protomaps.github.io/basemaps-assets/sprites/v4/light",
+        }
+      : {}),
+    sources: {
+      ...(withBasemap
+        ? {
+            [BASE_SOURCE]: {
+              type: "vector",
+              url: `pmtiles://${basemap}`,
+              attribution: "© OpenStreetMap contributors",
+            } satisfies SourceSpecification,
+          }
+        : {}),
+      ...sources(),
+    },
+    // Base first, then the ledger's own geometry on top of it.
+    layers: [...(withBasemap ? baseLayers(BASE_SOURCE) : []), ...overlayLayers(withBasemap)],
   };
 }

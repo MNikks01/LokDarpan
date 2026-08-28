@@ -2,7 +2,8 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { Map as MapLibreMap } from "maplibre-gl";
+import { Map as MapLibreMap, addProtocol } from "maplibre-gl";
+import { Protocol } from "pmtiles";
 import type { GeoJSONSource, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
 import type React from "react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
@@ -17,7 +18,7 @@ import {
   GeometryUnavailableError,
   fetchStateOutlines,
 } from "@/map/geometry-source";
-import { LAYER, SOURCE, buildStyle } from "@/map/style";
+import { LAYER, SOURCE, basemapAvailable, basemapUrl, buildStyle } from "@/map/style";
 import { createPlaceLabelLayer, type PlaceLabel, type PlaceLabelLayer } from "@/map/place-labels";
 import type { LayerVisibility } from "./layer-visibility";
 import { MapOverlays, MapUnavailable } from "./MapOverlays";
@@ -46,6 +47,20 @@ export interface MapCanvasProps {
 }
 
 const LOAD_TIMEOUT_MS = 15_000;
+
+/**
+ * Register the `pmtiles://` scheme with MapLibre, once.
+ *
+ * The protocol object is module-scoped rather than per-map: it owns a tile
+ * cache, and a fresh one per mount would re-download the archive header on
+ * every remount.
+ */
+let pmtilesRegistered = false;
+function registerPmtilesProtocol(): void {
+  if (pmtilesRegistered) return;
+  addProtocol("pmtiles", new Protocol().tile);
+  pmtilesRegistered = true;
+}
 
 /** A ledger level rendered for a reader, falling back to the raw value. */
 function levelLabel(level: string): string {
@@ -109,6 +124,7 @@ export function MapCanvas({
   const [ready, setReady] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [hover, setHover] = useState<HoverTarget | null>(null);
+  const [basemapPresent, setBasemapPresent] = useState(false);
 
   // Callbacks are read through a ref inside long-lived MapLibre handlers, so a
   // re-render never forces the map to tear its listeners down and rebind them.
@@ -131,8 +147,21 @@ export function MapCanvas({
     // quietly delete every bail-out below.
     const cancelled = (): boolean => holder.cancelled;
 
+    // Registered once per page, before any map is built: MapLibre resolves
+    // `pmtiles://` URLs through it, and a style referencing one without the
+    // protocol registered fails with an unhelpful network error.
+    registerPmtilesProtocol();
+
     const start = async (): Promise<void> => {
-      const style = await buildStyle();
+      // A style that names a missing extract renders nothing and says nothing,
+      // so presence is checked before it is referenced.
+      const configured = basemapUrl();
+      const basemap =
+        configured !== null && (await basemapAvailable(configured)) ? configured : null;
+      if (cancelled()) return;
+      setBasemapPresent(basemap !== null);
+
+      const style = buildStyle({ basemap });
       if (cancelled()) return;
 
       const map = new MapLibreMap({
@@ -410,6 +439,7 @@ export function MapCanvas({
     <>
       <div ref={containerRef} className={styles.map} data-testid="map-canvas" />
       <MapOverlays
+        basemapPresent={basemapPresent}
         hover={hover}
         placeName={activeUnit?.name ?? null}
         stateName={states.find((s) => s.code === stateCode)?.name ?? null}

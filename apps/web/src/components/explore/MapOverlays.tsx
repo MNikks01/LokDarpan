@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-import { basemapStyleUrl } from "@/map/style";
 import { AreaTooltip, type HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
 
@@ -15,11 +14,13 @@ import styles from "./explorer.module.css";
  * works are in view, which is the information a sighted reader gets for free.
  */
 export function MapOverlays({
+  basemapPresent,
   hover,
   placeName,
   stateName,
   loading,
 }: {
+  readonly basemapPresent: boolean;
   readonly hover: HoverTarget | null;
   readonly placeName: string | null;
   readonly stateName: string | null;
@@ -31,8 +32,10 @@ export function MapOverlays({
     <>
       {hover !== null && <AreaTooltip target={hover} />}
       <p className={styles.attribution}>
-        Boundaries: Census 2011 (states) · OpenStreetMap ODbL (below) ·{" "}
-        {basemapStyleUrl() === null ? "no basemap" : "configured basemap"} · MapLibre GL
+        {basemapPresent
+          ? "Base map © OpenStreetMap contributors (ODbL), self-hosted"
+          : "No base map installed"}{" "}
+        · Boundaries: Census 2011 (states), OpenStreetMap (below) · MapLibre GL
       </p>
       {loading && (
         <p className={styles.attribution} style={{ left: 12, right: "auto" }} role="status">
