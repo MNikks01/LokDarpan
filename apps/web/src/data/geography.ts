@@ -3,7 +3,8 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { BBox } from "geojson";
-import type { BoundaryManifest, DistrictSummary, StateSummary } from "@/domain/geography";
+import type { BoundaryManifest, StateSummary } from "@/domain/geography";
+import { geographyRepository } from "@/server/container";
 
 /**
  * Administrative geography, from the manifest `scripts/fetch-boundaries.ts`
@@ -73,19 +74,54 @@ export async function listStates(): Promise<readonly StateSummary[]> {
   }));
 }
 
-export async function listDistricts(stateCode: string): Promise<readonly DistrictSummary[]> {
-  const manifest = await loadBoundaryManifest();
-  const districts = manifest.districts[stateCode] ?? [];
-  return [...districts]
-    .map((d) => ({
-      id: districtId(stateCode, d.code),
-      code: d.code,
-      stateCode,
-      name: d.name,
-      slug: d.slug,
-      bbox: d.bbox,
-      labelPoint: d.labelPoint ?? centreOf(d.bbox),
-      labelWeight: d.labelWeight ?? spanOf(d.bbox),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+/**
+ * States, with their ledger identity attached.
+ *
+ * Two representations have to meet here, and the reason is honest rather than
+ * accidental: the ledger holds the 36 states the Local Government Directory
+ * publishes but no boundary for any of them, while the Census extract holds
+ * outlines with no ledger identity. They are joined on the LGD state code,
+ * which both carry and which OSM also tags as `ref:LGD:state` — so this is a
+ * join on a shared registry code, not on a name.
+ *
+ * A state the ledger does not know is still listed with its outline, and simply
+ * cannot be drilled into. That is the truthful state of affairs, and better
+ * than hiding a state because our hierarchy is incomplete.
+ */
+export interface StateOption extends StateSummary {
+  /** Ledger unit id, when the directory knows this state. Null otherwise. */
+  readonly unitId: number | null;
+}
+
+export async function listStateOptions(): Promise<readonly StateOption[]> {
+  const outlines = await listStates();
+  const units = await ledgerStates();
+  return outlines.map((state) => ({ ...state, unitId: units.get(state.code) ?? null }));
+}
+
+/**
+ * Ledger state ids, or none when the ledger cannot be reached.
+ *
+ * A map that cannot be drawn at all because the database is down is worse than
+ * a map of outlines that says nothing can be drilled into. The outlines come
+ * from a file and need no database, so an unreachable ledger degrades to
+ * browsing without descent rather than to a 500 — and the selector already says
+ * "not in the directory" for a state it has no unit for, which is exactly what
+ * is true in that case.
+ */
+async function ledgerStates(): Promise<ReadonlyMap<string, number>> {
+  try {
+    return await geographyRepository().statesByLgdCode();
+  } catch (error: unknown) {
+    process.stdout.write(
+      `${JSON.stringify({
+        level: "error",
+        message: "ledger_unavailable",
+        detail: error instanceof Error ? error.message : "unknown",
+        service: "web",
+        time: new Date().toISOString(),
+      })}\n`,
+    );
+    return new Map();
+  }
 }

@@ -2,20 +2,26 @@
  * The explorer's URL contract — pure, and owned by neither side.
  *
  * No `"use client"` here on purpose. The server parses the request's query
- * string with `parseExplorerState` and hands the result to the client island as
- * a prop; the client serialises back with `toQueryString`. Both sides therefore
- * run the same code, which is what keeps a deep link's server-rendered HTML and
- * its first client render identical.
+ * string and hands the result to the client island as a prop; the client
+ * serialises back. Both sides run the same code, which is what keeps a deep
+ * link's server-rendered HTML and its first client render identical.
  *
- * Entity URLs are NOT invented here. `/units/:id` stays the one canonical
- * address for a place (CLAUDE.md §"admin_unit is the one hierarchy"); a parallel
- * `/lokdarpan/maharashtra/nagpur` path would give one entity two indexable URLs.
- * The explorer is a view over places, so its state belongs in its query string.
+ * WHAT IS IN THE URL
+ * Navigational state only: where the reader is, and what they have open. The
+ * camera is not — a URL that changed on every pan would be unshareable, and the
+ * position is derived from the selection anyway.
+ *
+ * `unit` is a ledger id rather than a code, because a code is ambiguous: Nagpur
+ * is district 484 in the Local Government Directory and 505 in the Census
+ * extract. The ledger id names exactly one row.
  */
 
 export interface GeoSelection {
+  /** LGD state code, e.g. "27". States are addressed by code because the ledger
+   *  holds no boundary for them and the outline comes from a separate source. */
   readonly stateCode: string | null;
-  readonly districtId: string | null;
+  /** Ledger `admin_unit.id` for anything below state level. */
+  readonly unitId: number | null;
 }
 
 export interface ExplorerState {
@@ -26,25 +32,28 @@ export interface ExplorerState {
 
 export const PARAM = {
   state: "state",
-  district: "district",
+  unit: "unit",
   document: "doc",
 } as const;
 
 export const EMPTY_EXPLORER_STATE: ExplorerState = {
-  geo: { stateCode: null, districtId: null },
+  geo: { stateCode: null, unitId: null },
   selectedDocumentId: null,
 };
 
+function positiveInt(raw: string | null): number | null {
+  if (raw === null) return null;
+  const value = Number(raw);
+  return Number.isInteger(value) && value > 0 ? value : null;
+}
+
 export function parseExplorerState(params: URLSearchParams): ExplorerState {
-  const document = params.get(PARAM.document);
-  const documentId = document === null ? null : Number(document);
   return {
     geo: {
       stateCode: params.get(PARAM.state),
-      districtId: params.get(PARAM.district),
+      unitId: positiveInt(params.get(PARAM.unit)),
     },
-    selectedDocumentId:
-      documentId !== null && Number.isInteger(documentId) && documentId > 0 ? documentId : null,
+    selectedDocumentId: positiveInt(params.get(PARAM.document)),
   };
 }
 
@@ -55,7 +64,7 @@ export function toQueryString(state: ExplorerState): string {
     if (value !== null && value !== "") params.set(key, value);
   };
   set(PARAM.state, state.geo.stateCode);
-  set(PARAM.district, state.geo.districtId);
+  set(PARAM.unit, state.geo.unitId === null ? null : String(state.geo.unitId));
   set(PARAM.document, state.selectedDocumentId === null ? null : String(state.selectedDocumentId));
   return params.toString();
 }

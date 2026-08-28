@@ -21,3 +21,4 @@ export type {
 } from "./published-fact";
 export { attributionFor, awaitingPermission, licenceFor, mayRepublish } from "./source-licence";
 export type { Republication, SourceLicence } from "./source-licence";
+export * from "./geography";

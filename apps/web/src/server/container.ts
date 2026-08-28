@@ -4,6 +4,7 @@ import "server-only";
 // runner, which reads the filesystem. A route handler has no business pulling
 // that in, and a serverless bundle has no business carrying it.
 import { PostgresAdminUnitRepository } from "@lokdarpan/database/repository";
+import { PostgresGeographyRepository } from "@lokdarpan/database/geography";
 import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-fact";
 import pg from "pg";
 import { UnitService } from "@lokdarpan/domain";
@@ -23,6 +24,7 @@ import { UnitService } from "@lokdarpan/domain";
  */
 let repository: PostgresAdminUnitRepository | undefined;
 let facts: PostgresPublishedFactRepository | undefined;
+let geography: PostgresGeographyRepository | undefined;
 let sharedPool: pg.Pool | undefined;
 
 function databaseUrl(): string {
@@ -76,4 +78,13 @@ export function unitService(): UnitService {
 export function publishedFactRepository(): PostgresPublishedFactRepository {
   facts ??= new PostgresPublishedFactRepository(pool());
   return facts;
+}
+
+/**
+ * Administrative geography from PostGIS. Shares the isolate's pool for the same
+ * reason the others do: a pool per invocation exhausts a small Postgres.
+ */
+export function geographyRepository(): PostgresGeographyRepository {
+  geography ??= new PostgresGeographyRepository(pool());
+  return geography;
 }

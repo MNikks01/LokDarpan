@@ -3,7 +3,8 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { DistrictSummary, StateSummary } from "@/domain/geography";
+import type { GeoUnit, SearchResult } from "@lokdarpan/domain";
+import type { StateOption } from "@/data/geography";
 import { Button, controlStyles } from "@/components/ui";
 import { cx } from "@/ui/cx";
 import { useExplorerState, type ExplorerState } from "@/state/useExplorerState";
@@ -13,8 +14,10 @@ import { MapCanvas, type MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
+import { SearchDialog } from "./SearchDialog";
+import { BoundarySources } from "./BoundarySources";
 import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
-import { useDistricts, useRecords } from "./use-explorer-data";
+import { useExplorerGeography, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
 
 const DRAWER_WIDTH = 428;
@@ -22,29 +25,41 @@ const DRAWER_WIDTH = 428;
 const RAIL_WIDTH = 320;
 
 export interface ExploreShellProps {
-  readonly states: readonly StateSummary[];
+  readonly states: readonly StateOption[];
   readonly initialState: ExplorerState;
 }
 
 /**
  * The explorer.
  *
- * Everything on this surface is a real record or a real boundary. There is no
- * works layer, because no register of works has been located for any area — the
- * map shows administrative geography, and the panel shows the documents the
- * ledger holds for the selected unit, with the absence of works stated rather
- * than left as an empty map to interpret.
+ * Geography comes from the ledger below state level, so the drill-down is not a
+ * fixed sequence: the shell asks what is inside the current place and renders
+ * whatever levels come back. India → state uses the Census outlines, because the
+ * directory publishes no boundary for a state and an outline has to come from
+ * somewhere.
+ *
+ * Geometry never enters React state beyond the one collection being drawn. It
+ * goes from `fetch` to a MapLibre source and is replaced wholesale on the next
+ * selection.
  */
 export function ExploreShell({ states, initialState }: ExploreShellProps): React.JSX.Element {
   const { geo, selectedDocumentId, actions } = useExplorerState(initialState);
 
-  const { districts, loading: loadingDistricts } = useDistricts(geo.stateCode);
-  // The map's state codes ARE LGD codes, so the selection addresses the ledger
-  // directly with no name matching in between.
-  const records = useRecords(geo.stateCode);
+  const {
+    selectedState,
+    units,
+    loadingChildren,
+    childBoundaries,
+    activeUnit,
+    activeGeometry,
+    ancestors,
+    records,
+    scopeLabel,
+  } = useExplorerGeography(states, geo.stateCode, geo.unitId);
 
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
   const [compact, setCompact] = useState(false);
   const mapHandle = useRef<MapHandle | null>(null);
@@ -62,19 +77,33 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
     };
   }, []);
 
-  const state = useMemo(
-    () => states.find((s) => s.code === geo.stateCode) ?? null,
-    [geo.stateCode, states],
+  /**
+   * A search result becomes a geographic selection.
+   *
+   * Both the state and the unit are set together: a unit id alone would leave
+   * the state selector empty and the records panel scoped to nowhere, so the
+   * reader would arrive at the right place with the wrong context around it.
+   */
+  const onSelectPlace = useCallback(
+    (result: SearchResult) => {
+      setSearchOpen(false);
+      actions.selectPlace(result.stateCode, result.hasBoundary ? result.id : null);
+    },
+    [actions],
   );
-  const district = useMemo(
-    () => districts.find((d) => d.id === geo.districtId) ?? null,
-    [districts, geo.districtId],
+
+  const onSelectRecord = useCallback(
+    (documentId: number) => {
+      setSearchOpen(false);
+      actions.selectDocument(documentId);
+    },
+    [actions],
   );
 
   const onSelectLevel = useCallback(
-    (level: "country" | "state" | "district") => {
-      if (level === "country") actions.selectState(null);
-      else if (level === "state") actions.selectDistrict(null);
+    (unitId: number | null) => {
+      if (unitId === null) actions.selectState(null);
+      else actions.selectUnit(unitId);
     },
     [actions],
   );
@@ -84,15 +113,20 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
     () => ({ left: compact ? 0 : RAIL_WIDTH, right: drawerInset }),
     [compact, drawerInset],
   );
-  const scopeLabel = district?.name ?? state?.name ?? "India";
 
   return (
     <div
       className={styles.shell}
       style={{ ["--ld-drawer-width" as string]: `${String(DRAWER_WIDTH)}px` }}
     >
-      <ExplorerHeader state={state} district={district} onSelectLevel={onSelectLevel} />
-
+      <ExplorerHeader
+        stateName={selectedState?.name ?? null}
+        ancestors={ancestors}
+        onSelectLevel={onSelectLevel}
+        onOpenSearch={() => {
+          setSearchOpen(true);
+        }}
+      />
       <p className={styles.notice}>
         <span aria-hidden="true">◆</span>
         Official records only. Every figure shown has been checked by a person against the page it
@@ -101,17 +135,18 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
 
       <div className={styles.stage}>
         <MapCanvas
-          geo={geo}
-          state={state}
-          district={district}
+          stateCode={geo.stateCode}
+          stateBbox={selectedState?.bbox ?? null}
+          activeUnit={activeUnit}
+          activeGeometry={activeGeometry}
+          childBoundaries={childBoundaries}
           states={states}
-          districts={districts}
           layers={layers}
           insets={insets}
           compact={compact}
           handleRef={mapHandle}
           onSelectState={actions.selectState}
-          onSelectDistrict={actions.selectDistrict}
+          onSelectUnit={actions.selectUnit}
         />
 
         {compact && (
@@ -129,27 +164,19 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
           </div>
         )}
 
-        <div
-          id="explorer-rail"
-          className={cx(styles.rail, compact && !railOpen && styles.railCollapsed)}
-        >
-          <FilterPanel
-            states={states}
-            districts={districts}
-            geo={geo}
-            actions={actions}
-            loadingDistricts={loadingDistricts}
-          />
-          <RecordsPanel
-            scopeLabel={scopeLabel}
-            documents={records.documents}
-            loading={records.loading}
-            failed={records.failed}
-            selectedDocumentId={selectedDocumentId}
-            onSelect={actions.selectDocument}
-            hasPlace={geo.stateCode !== null}
-          />
-        </div>
+        <ExplorerRail
+          hidden={compact && !railOpen}
+          states={states}
+          units={units}
+          geo={geo}
+          actions={actions}
+          loadingChildren={loadingChildren}
+          ancestors={ancestors}
+          activeUnit={activeUnit}
+          records={records}
+          scopeLabel={scopeLabel}
+          selectedDocumentId={selectedDocumentId}
+        />
 
         <div className={cx(styles.controls, drawerInset > 0 && styles.controlsShifted)}>
           <MapControls
@@ -171,6 +198,15 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
           />
         </div>
 
+        <SearchDialog
+          open={searchOpen}
+          onClose={() => {
+            setSearchOpen(false);
+          }}
+          onSelectPlace={onSelectPlace}
+          onSelectRecord={onSelectRecord}
+        />
+
         {selectedDocumentId !== null && (
           <RecordDrawer
             key={selectedDocumentId}
@@ -185,18 +221,17 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
   );
 }
 
-/**
- * The application bar: identity, where you are, and the way out to the records
- * index. Split out because the shell's job is orchestration.
- */
+/** The application bar: identity, where you are, and the way to the records index. */
 function ExplorerHeader({
-  state,
-  district,
+  stateName,
+  ancestors,
   onSelectLevel,
+  onOpenSearch,
 }: {
-  readonly state: StateSummary | null;
-  readonly district: DistrictSummary | null;
-  readonly onSelectLevel: (level: "country" | "state" | "district") => void;
+  readonly stateName: string | null;
+  readonly ancestors: readonly GeoUnit[];
+  readonly onSelectLevel: (unitId: number | null) => void;
+  readonly onOpenSearch: () => void;
 }): React.JSX.Element {
   return (
     <header className={styles.header}>
@@ -207,8 +242,11 @@ function ExplorerHeader({
         </span>
       </Link>
       <span className={styles.headerSpacer} />
-      <Breadcrumb state={state} district={district} onSelectLevel={onSelectLevel} />
+      <Breadcrumb stateName={stateName} ancestors={ancestors} onSelectLevel={onSelectLevel} />
       <span className={styles.headerSpacer} />
+      <Button onClick={onOpenSearch}>
+        <span aria-hidden="true">⌕</span> Search
+      </Button>
       <Link href="/documents" className={controlStyles.link} style={{ fontSize: 12.5 }}>
         All records
       </Link>
@@ -216,5 +254,61 @@ function ExplorerHeader({
         About
       </Link>
     </header>
+  );
+}
+
+/**
+ * The left rail: where you are, where the boundaries came from, what is held.
+ *
+ * Split from the shell because the shell's job is orchestration — the map, the
+ * drawer and the URL — and a panel that grows a fourth section should not make
+ * the component that owns the map harder to read.
+ */
+function ExplorerRail({
+  hidden,
+  states,
+  units,
+  geo,
+  actions,
+  loadingChildren,
+  ancestors,
+  activeUnit,
+  records,
+  scopeLabel,
+  selectedDocumentId,
+}: {
+  readonly hidden: boolean;
+  readonly states: readonly StateOption[];
+  readonly units: readonly GeoUnit[];
+  readonly geo: ReturnType<typeof useExplorerState>["geo"];
+  readonly actions: ReturnType<typeof useExplorerState>["actions"];
+  readonly loadingChildren: boolean;
+  readonly ancestors: readonly GeoUnit[];
+  readonly activeUnit: GeoUnit | null;
+  readonly records: RecordsState;
+  readonly scopeLabel: string;
+  readonly selectedDocumentId: number | null;
+}): React.JSX.Element {
+  return (
+    <div id="explorer-rail" className={cx(styles.rail, hidden && styles.railCollapsed)}>
+      <FilterPanel
+        states={states}
+        units={units}
+        geo={geo}
+        actions={actions}
+        loading={loadingChildren}
+        ancestors={ancestors}
+      />
+      <BoundarySources units={units} active={activeUnit} />
+      <RecordsPanel
+        scopeLabel={scopeLabel}
+        documents={records.documents}
+        loading={records.loading}
+        failed={records.failed}
+        selectedDocumentId={selectedDocumentId}
+        onSelect={actions.selectDocument}
+        hasPlace={geo.stateCode !== null}
+      />
+    </div>
   );
 }

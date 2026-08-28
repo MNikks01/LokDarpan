@@ -42,3 +42,11 @@ playwright-report/
 # Not committed: the upstream dataset declares no licence, and .docs/17-legal
 # forbids republishing material whose terms we have not established.
 apps/web/public/geo/
+
+# Self-hosted vector base map, built at setup by `pnpm --filter @lokdarpan/web geo:basemap`.
+# Derived from an OpenStreetMap planet extract (ODbL); regenerating it is a command,
+# and committing tens of megabytes of derived tiles would bloat the history.
+apps/web/public/basemap/
+
+# The pinned pmtiles CLI, downloaded by that script.
+tools/

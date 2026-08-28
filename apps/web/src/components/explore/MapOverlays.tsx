@@ -1,8 +1,6 @@
 "use client";
 
 import type React from "react";
-import type { DistrictSummary, StateSummary } from "@/domain/geography";
-import { basemapStyleUrl } from "@/map/style";
 import { AreaTooltip, type HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
 
@@ -16,24 +14,28 @@ import styles from "./explorer.module.css";
  * works are in view, which is the information a sighted reader gets for free.
  */
 export function MapOverlays({
+  basemapPresent,
   hover,
-  state,
-  district,
+  placeName,
+  stateName,
   loading,
 }: {
+  readonly basemapPresent: boolean;
   readonly hover: HoverTarget | null;
-  readonly state: StateSummary | null;
-  readonly district: DistrictSummary | null;
+  readonly placeName: string | null;
+  readonly stateName: string | null;
   readonly loading: boolean;
 }): React.JSX.Element {
-  const place = placeName({ state, district });
+  const place = placeName ?? stateName;
 
   return (
     <>
       {hover !== null && <AreaTooltip target={hover} />}
       <p className={styles.attribution}>
-        Boundaries: Census 2011 administrative units ·{" "}
-        {basemapStyleUrl() === null ? "no basemap" : "configured basemap"} · MapLibre GL
+        {basemapPresent
+          ? "Base map © OpenStreetMap contributors (ODbL), self-hosted"
+          : "No base map installed"}{" "}
+        · Boundaries: Census 2011 (states), OpenStreetMap (below) · MapLibre GL
       </p>
       {loading && (
         <p className={styles.attribution} style={{ left: 12, right: "auto" }} role="status">
@@ -45,14 +47,6 @@ export function MapOverlays({
       </span>
     </>
   );
-}
-
-/** The narrowest place currently selected, or null at the national view. */
-function placeName(scope: {
-  readonly state: StateSummary | null;
-  readonly district: DistrictSummary | null;
-}): string | null {
-  return scope.district?.name ?? scope.state?.name ?? null;
 }
 
 export function MapUnavailable({ reason }: { readonly reason: string }): React.JSX.Element {

@@ -1,6 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { GeometryNotInstalledError, listStates } from "@/data/geography";
+import { GeometryNotInstalledError, listStateOptions } from "@/data/geography";
 import { ExploreShell } from "@/components/explore/ExploreShell";
 import { parseExplorerState, toSearchParams } from "@/state/explorer-url";
 import { color } from "@/ui/tokens";
@@ -27,7 +27,7 @@ export default async function ExplorePage({
 }): Promise<React.JSX.Element> {
   let states;
   try {
-    states = await listStates();
+    states = await listStateOptions();
   } catch (error: unknown) {
     if (error instanceof GeometryNotInstalledError) return <GeometryMissing error={error} />;
     throw error;
