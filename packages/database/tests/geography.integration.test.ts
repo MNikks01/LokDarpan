@@ -107,7 +107,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
       // The district encloses both children; "Far District" is elsewhere entirely.
       await boundary(ids.district, square(70.0, -20.0, 2), "open_dataset", null);
-      await boundary(ids.taluka, square(70.2, -19.8, 0.5), "open_dataset", null);
+      await boundary(ids.taluka, square(70.212345678, -19.812345678, 0.5), "open_dataset", null);
       await boundary(ids.body, square(71.0, -19.2, 0.3), "official_government", "Test Authority");
       await boundary(ids.outside, square(60.0, -30.0, 1), "derived", null);
     });
@@ -215,6 +215,28 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     it("returns geometry for a unit that has one, and nothing for one that does not", async () => {
       expect(await repository?.boundaryOf(ids.district)).not.toBeNull();
       expect(await repository?.boundaryOf(ids.state)).toBeNull();
+    });
+
+    it("serialises coordinates no finer than simplification preserved", async () => {
+      // PostGIS writes nine decimal places by default — 0.1mm — after the
+      // simplifier has already moved every vertex by hundreds of metres. The
+      // surplus digits are noise the reader pays to download, so the precision
+      // is pinned here: a default that creeps back is silent and costs bytes
+      // on every request.
+      const decimals = (json: string): number =>
+        Math.max(...(json.match(/\d+\.\d+/g) ?? []).map((n) => (n.split(".")[1] ?? "").length), 0);
+
+      // The stored geometry really does carry more precision than is served,
+      // so this asserts a truncation that happened rather than a fixture that
+      // was coarse to begin with.
+      const stored = await pool?.query<{ g: string }>(
+        `SELECT ST_AsGeoJSON(geometry) AS g FROM admin_unit_boundary WHERE admin_unit_id = $1`,
+        [ids.taluka],
+      );
+      expect(decimals(stored?.rows[0]?.g ?? "")).toBeGreaterThan(5);
+
+      const collection = await repository?.boundariesOfChildren(ids.district);
+      expect(decimals(JSON.stringify(collection?.features.map((f) => f.geometry)))).toBe(5);
     });
 
     it("searches places by name, preferring a prefix match", async () => {
