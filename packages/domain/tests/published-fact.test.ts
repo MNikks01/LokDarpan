@@ -32,6 +32,7 @@ const view = (over: Partial<DocumentFactsView> = {}): DocumentFactsView => ({
   facts: [],
   awaitingReview: 0,
   provenance: {
+    sourceId: "cag",
     sourceUrl: "https://cag.gov.in/x.pdf",
     retrievedAt: "2026-08-26T00:00:00.000Z",
     issuingAuthority: "Comptroller and Auditor General of India",
