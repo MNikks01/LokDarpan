@@ -17,7 +17,8 @@ import type pg from "pg";
  * done in the client: a containment test over a district's boundary is a few
  * milliseconds in the database and a frozen browser tab in JavaScript.
  *
- * Geometry is serialised with `ST_AsGeoJSON` and simplified on the way out.
+ * Geometry is simplified on the way out and serialised at a precision matched
+ * to that simplification, never at the default of nine decimal places.
  * The raw Maharashtra district set is tens of megabytes of coordinates; at the
  * zoom a reader sees a whole state, the extra precision is invisible and the
  * transfer is not.
@@ -32,6 +33,22 @@ import type pg from "pg";
  */
 const TOLERANCE_OVERVIEW = 0.005;
 const TOLERANCE_DETAIL = 0.0005;
+
+/**
+ * Decimal places to serialise coordinates at.
+ *
+ * Matched to what survives simplification rather than left at the PostGIS
+ * default of 9. Nine places is 0.1mm; the overview tolerance above has already
+ * moved every vertex by up to 0.005 degrees, which is around 550m. Writing the
+ * remaining digits describes a position to the millimetre that was rounded to
+ * the half-kilometre one function call earlier — and a reader on a metered
+ * connection pays for every one of them.
+ *
+ * Five places is roughly a metre: still some 500x finer than the overview
+ * tolerance and 50x finer than the detail tolerance, so nothing that survived
+ * simplification is lost.
+ */
+const COORDINATE_DIGITS = 5;
 
 interface UnitRow {
   readonly id: string;
@@ -203,13 +220,13 @@ export class PostgresGeographyRepository implements GeographyRepository {
                   'sourceKind', b.source_kind::text,
                   'sourceName', b.source_name
                 ),
-                'geometry', ST_AsGeoJSON(ST_SimplifyPreserveTopology(b.geometry, $2))::jsonb
+                'geometry', ST_AsGeoJSON(ST_SimplifyPreserveTopology(b.geometry, $2), $3)::jsonb
               ) AS feature
          FROM admin_unit u
          JOIN admin_unit_boundary b ON b.admin_unit_id = u.id
         WHERE u.parent_id = $1
         ORDER BY u.name_en`,
-      [parentId, TOLERANCE_OVERVIEW],
+      [parentId, TOLERANCE_OVERVIEW, COORDINATE_DIGITS],
     );
     return { type: "FeatureCollection", features: result.rows.map((r) => r.feature) };
   }
@@ -335,9 +352,9 @@ export class PostgresGeographyRepository implements GeographyRepository {
   /** Detailed geometry for one unit, for framing and highlighting it. */
   async boundaryOf(id: number): Promise<unknown> {
     const result = await this.db.query<{ geometry: unknown }>(
-      `SELECT ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, $2))::jsonb AS geometry
+      `SELECT ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, $2), $3)::jsonb AS geometry
          FROM admin_unit_boundary WHERE admin_unit_id = $1`,
-      [id, TOLERANCE_DETAIL],
+      [id, TOLERANCE_DETAIL, COORDINATE_DIGITS],
     );
     return result.rows[0]?.geometry ?? null;
   }
