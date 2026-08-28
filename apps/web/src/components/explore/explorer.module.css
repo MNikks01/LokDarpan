@@ -1,0 +1,346 @@
+/*
+ * Explorer layout.
+ *
+ * A CSS module rather than the inline styles used elsewhere in this app,
+ * because this surface needs hover, focus-visible, media queries and a reduced
+ * motion branch — none of which an inline style can express. Everything that is
+ * a static value still comes from `ui/tokens.ts` via the variables below, so
+ * there is one palette and the neutrality test still guards it.
+ */
+
+.shell {
+  /* Fixed rather than flowed: the document shell around this route constrains
+     width for reading, and a map application wants the whole viewport. */
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  background: var(--ld-canvas);
+  color: var(--ld-text);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ld-hair);
+  background: var(--ld-surface);
+  z-index: 4;
+}
+
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-decoration: none;
+  color: inherit;
+}
+
+.wordmarkName {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+}
+
+.wordmarkTag {
+  font-size: 10.5px;
+  color: var(--ld-text-tertiary);
+  letter-spacing: 0.02em;
+}
+
+.headerSpacer {
+  flex: 1;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 12px;
+  background: var(--ld-band-high-bg);
+  color: var(--ld-band-high-fg);
+  border-bottom: 1px solid var(--ld-hair);
+  z-index: 3;
+}
+
+.stage {
+  position: relative;
+  min-height: 0;
+}
+
+/*
+ * Explicit width/height, not just `inset: 0`.
+ *
+ * MapLibre stamps `.maplibregl-map` on this element, and its stylesheet sets
+ * `position: relative` at the same specificity as the rule below — so which one
+ * wins is decided by stylesheet ORDER, which differs between the dev and
+ * production bundles. When MapLibre won, `inset` stopped applying and the
+ * container collapsed to zero height: the canvas kept a stale size and
+ * `fitBounds` framed a degenerate box, leaving a blank map with no error.
+ * Sizing it explicitly is correct under either position value.
+ */
+.map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mapUnavailable {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  text-align: center;
+}
+
+/* ---- floating panels ---- */
+
+.rail {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 296px;
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 2;
+}
+
+.panel {
+  background: var(--ld-surface);
+  border: 1px solid var(--ld-hair);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 2px rgb(20 24 26 / 6%),
+    0 8px 24px rgb(20 24 26 / 5%);
+}
+
+.panelBody {
+  padding: 12px;
+}
+
+.panelTitle {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ld-text-tertiary);
+  margin: 0 0 8px;
+}
+
+.controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 2;
+  transition: transform 260ms ease;
+}
+
+.controlsShifted {
+  transform: translateX(calc(-1 * var(--ld-drawer-width)));
+}
+
+.legendShifted {
+  transform: translateX(calc(-1 * var(--ld-drawer-width)));
+}
+
+/* Bottom-right, not bottom-left: the left column is the filter rail and the
+   works list, and a legend floating over the list hid the very records the
+   reader came to pick from. */
+.legend {
+  position: absolute;
+  right: 12px;
+  bottom: 26px;
+  z-index: 2;
+  width: 236px;
+  transition: transform 260ms ease;
+}
+
+.attribution {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  font-size: 10.5px;
+  color: var(--ld-text-tertiary);
+  background: color-mix(in srgb, var(--ld-canvas) 82%, transparent);
+  padding: 2px 6px;
+  border-radius: 5px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---- detail drawer ---- */
+
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--ld-drawer-width);
+  background: var(--ld-surface);
+  border-left: 1px solid var(--ld-hair);
+  box-shadow: -12px 0 32px rgb(20 24 26 / 8%);
+  display: flex;
+  flex-direction: column;
+  z-index: 5;
+  transform: translateX(0);
+  transition: transform 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.drawerEntering {
+  transform: translateX(100%);
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--ld-hair);
+}
+
+.drawerScroll {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 16px 40px;
+}
+
+.section {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--ld-hair);
+}
+
+.section:last-child {
+  border-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ld-text-tertiary);
+  margin: 0 0 12px;
+}
+
+.pairs {
+  display: grid;
+  grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
+  gap: 7px 14px;
+  font-size: 13.5px;
+  margin: 0;
+}
+
+.pairs dt {
+  color: var(--ld-text-secondary);
+}
+
+.pairs dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ---- tooltip ---- */
+
+.tooltip {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  max-width: 264px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: var(--ld-text);
+  color: var(--ld-surface);
+  font-size: 12px;
+  line-height: 1.45;
+  box-shadow: 0 6px 20px rgb(20 24 26 / 22%);
+}
+
+.tooltipTitle {
+  font-weight: 600;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+
+.tooltipRow {
+  display: flex;
+  gap: 6px;
+  color: color-mix(in srgb, var(--ld-surface) 78%, transparent);
+}
+
+/* ---- mobile ---- */
+
+@media (max-width: 900px) {
+  .shell {
+    --ld-drawer-width: 100vw;
+  }
+
+  .rail {
+    inset: auto 12px 12px 12px;
+    width: auto;
+    max-height: 62%;
+    background: var(--ld-surface);
+    border: 1px solid var(--ld-hair);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 -6px 28px rgb(20 24 26 / 10%);
+  }
+
+  .railCollapsed {
+    display: none;
+  }
+
+  .panel {
+    box-shadow: none;
+    border: 0;
+    border-bottom: 1px solid var(--ld-hair);
+    border-radius: 0;
+  }
+
+  .legend {
+    display: none;
+  }
+
+  .controlsShifted {
+    transform: none;
+  }
+
+  /* The drawer becomes a bottom sheet: a full-height side panel on a phone
+     hides the map entirely, which breaks the link between a record and where
+     it is. The sheet keeps the top third of the map visible. */
+  .drawer {
+    top: auto;
+    left: 0;
+    height: 78%;
+    width: auto;
+    border-left: 0;
+    border-top: 1px solid var(--ld-hair);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 32px rgb(20 24 26 / 14%);
+  }
+
+  .drawerEntering {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer,
+  .controls,
+  .legend {
+    transition: none;
+  }
+}
