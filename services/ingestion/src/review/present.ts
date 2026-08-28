@@ -74,7 +74,26 @@ export function describeCitation(c: ReviewCandidate): string {
   return `${c.documentTitle}, page ${String(c.pageNumber)}\n${c.sourceUrl}`;
 }
 
-export function presentCandidate(c: ReviewCandidate, position: number, total: number): string {
+/**
+ * What the arithmetic already established, stated plainly.
+ *
+ * Deliberately not a recommendation. "confirmed" means the sentence contains
+ * this figure and no other - nothing about whether the government statement is
+ * true, or whether this figure belongs to the thing the reader will assume.
+ */
+const CHECK_NOTE: Readonly<Record<string, string>> = {
+  confirmed: "the sentence states this amount, and no other",
+  ambiguous: "the sentence states several amounts, including this one",
+  mismatch: "this amount is not derivable from the sentence - look closely",
+  no_value: "the source stated no unit; supply the scale with [c]",
+};
+
+export function presentCandidate(
+  c: ReviewCandidate,
+  position: number,
+  total: number,
+  check?: string,
+): string {
   const head =
     `${DIM}${String(position)} of ${String(total)}${RESET}` +
     `  ${BOLD}${KIND_LABEL[c.kind]}${RESET}`;
@@ -85,6 +104,7 @@ export function presentCandidate(c: ReviewCandidate, position: number, total: nu
     "",
     `  ${BOLD}parser read:${RESET} ${describeValue(c.kind, c.normalisedValue)}`,
     `  ${DIM}${describeConfidence(c.extractionConfidence)} - ${c.parserVersion}${RESET}`,
+    ...(check === undefined ? [] : [`  ${DIM}${CHECK_NOTE[check] ?? check}${RESET}`]),
     "",
     `  ${DIM}${describeCitation(c).replace("\n", "\n  ")}${RESET}`,
   ].join("\n");

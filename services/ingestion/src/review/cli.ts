@@ -15,6 +15,7 @@ import {
 } from "./decide";
 import { PROMPT, presentCandidate, type ReviewCandidate } from "./present";
 import { factById, pendingReview, reviewProgress, type ReviewProgress } from "./queue";
+import { selfCheck, type SelfCheck } from "./triage";
 
 /**
  * The review terminal.
@@ -89,7 +90,13 @@ async function reviewOne(
   const correctedValue =
     decision === "corrected" ? await ask(rl, "  corrected value: ") : undefined;
   if (correctedValue === null) return "quit";
-  const note = await ask(rl, "  note (optional): ");
+
+  // The note prompt costs a keystroke on every decision, and over a thousand
+  // candidates that is the difference between a review that happens and one
+  // that does not. It is asked where it carries weight - a correction has to
+  // say what was corrected - and offered elsewhere behind --notes.
+  const wantsNote = decision === "corrected" || process.argv.includes("--notes");
+  const note = wantsNote ? await ask(rl, "  note: ") : "";
   if (note === null) return "quit";
 
   return apply(client, { factId: candidate.id, decision, reviewer }, correctedValue, note);
@@ -216,10 +223,31 @@ async function main(): Promise<void> {
 
     const kind = arg("kind") as FactKind | undefined;
     const limit = arg("limit");
-    const queue = await pendingReview(client, {
+    // The partition is applied in this process, so the database limit has to
+    // come off first: limiting to 500 and then filtering showed "1 of 104"
+    // when 511 candidates matched, which understates the work and hides the
+    // rest of it behind a number that looks complete.
+    const only = arg("check") as SelfCheck | undefined;
+    const all = await pendingReview(client, {
       ...(kind === undefined ? {} : { kind }),
-      ...(limit === undefined ? {} : { limit: Number(limit) }),
+      ...(only === undefined && limit === undefined
+        ? {}
+        : { limit: only === undefined ? Number(limit) : 100_000 }),
     });
+
+    // Working one partition at a time is most of the speed-up. "Does this
+    // sentence state this amount?" and "what unit did the source mean?" are
+    // different questions, and answering them alternately is what makes a
+    // thousand candidates feel unreviewable.
+    const matching =
+      only === undefined
+        ? all
+        : all.filter(
+            (c) =>
+              selfCheck({ id: c.id, rawText: c.rawText, normalisedValue: c.normalisedValue })
+                .check === only,
+          );
+    const queue = limit === undefined ? matching : matching.slice(0, Number(limit));
 
     say(`\n${summarise(await reviewProgress(client))}`);
     if (queue.length === 0) {
@@ -230,7 +258,12 @@ async function main(): Promise<void> {
 
     let decided = 0;
     for (const [index, candidate] of queue.entries()) {
-      say(`\n${presentCandidate(candidate, index + 1, queue.length)}\n`);
+      const checked = selfCheck({
+        id: candidate.id,
+        rawText: candidate.rawText,
+        normalisedValue: candidate.normalisedValue,
+      });
+      say(`\n${presentCandidate(candidate, index + 1, queue.length, checked.check)}\n`);
       const outcome = await reviewOne(client, rl, candidate, reviewer);
       if (outcome === "quit") break;
       decided += outcome === "decided" ? 1 : 0;

@@ -17,8 +17,20 @@ describe("amountToPaise", () => {
     expect(amountToPaise("1,234", "thousand")).toBe(12_34_000_00n);
   });
 
-  it("treats an unqualified figure as the smallest reading", () => {
-    expect(amountToPaise("500", undefined)).toBe(amountToPaise("500", "thousand"));
+  // The bug this replaced: an unqualified figure was read as thousands, an
+  // assumption carried from BEAMS report headers. Audit prose states no such
+  // thing, and a bare "₹1,53,427" rent figure became ₹15.34 crore.
+  it("refuses to invent a unit the source did not state", () => {
+    expect(amountToPaise("500", undefined)).toBeNull();
+  });
+
+  // These reports are bilingual and the Marathi half states units in
+  // Devanagari. Matching only Latin words left every Marathi figure looking
+  // unqualified: "₹ 27,559.26 कोटी" was stored as ₹27,559.26.
+  it("reads the Devanagari unit words the Marathi half uses", () => {
+    expect(amountToPaise("15.14", "कोटी")).toBe(amountToPaise("15.14", "crore"));
+    expect(amountToPaise("113.47", "लाख")).toBe(amountToPaise("113.47", "lakh"));
+    expect(amountToPaise("500", "हजार")).toBe(amountToPaise("500", "thousand"));
   });
 
   it("refuses a unit it does not know rather than guessing a scale", () => {
@@ -83,6 +95,23 @@ describe("contextAround", () => {
 });
 
 describe("extractFacts", () => {
+  // A real sentence from the Marathi half of the Nagpur report, whose scale was
+  // read four orders of magnitude wrong before Devanagari units were matched.
+  it("scales a Marathi figure by the unit its own sentence states", () => {
+    const found = extractFacts([{ pageNumber: 1, content: "एकूण यनधी ₹ 27,559.26 कोटी होता." }]);
+    const amount = found.find((f) => f.kind === "monetary_amount");
+    expect(amount?.normalisedValue).toBe(27_559_26_00_00_000n.toString());
+  });
+
+  it("leaves a figure with no stated unit for a person to scale", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "Total annual Rent for both the offices: ₹1,53,427 was paid." },
+    ]);
+    const amount = found.find((f) => f.kind === "monetary_amount");
+    expect(amount).toBeDefined();
+    expect(amount?.normalisedValue).toBeNull();
+  });
+
   const page =
     "The work was awarded by the Executive Engineer, Public Works Division, Nagpur to " +
     "M/s. Vijay Constructions, Nagpur for ₹ 15.14 crore. The work remained incomplete.";
@@ -136,7 +165,9 @@ describe("extractFacts", () => {
   // Missing is never zero, and a figure read wrongly is worse than one not
   // read: the candidate is kept for review with no value attached.
   it("keeps a figure it cannot normalise, with a null value rather than a guess", () => {
-    const found = extractFacts([{ pageNumber: 1, content: "A sum of ₹ 0.123456 was noted." }]);
+    const found = extractFacts([
+      { pageNumber: 1, content: "A sum of ₹ 0.123456 crore was noted." },
+    ]);
     const amounts = found.filter((f) => f.kind === "monetary_amount");
     expect(amounts).toHaveLength(1);
     expect(amounts[0]?.normalisedValue).toBeNull();
