@@ -68,6 +68,20 @@ Also observed on 28 Aug 2026:
 
 ---
 
+## 4. PMGSY / OMMAS — republication forbidden, and collection with it
+
+**Fetched:** `https://pmgsy.dord.gov.in/Home/HomeLegalNotice/` · 28 Aug 2026 · HTTP 200 · title _"Legal Notices"_ · content owner **National Rural Infrastructure Development Agency (NRIDA)**
+
+> "the Materials may not be copied, reproduced, modified, published, republished, uploaded, downloaded, posted, transmitted, or distributed in any way, without NRIDA's prior written permission"
+
+> "You may download one copy of the Materials on a single computer for your personal, non-commercial internal use only unless specifically licensed to do otherwise by NRIDA in writing"
+
+The most restrictive terms examined, and the only ones that reach _collection_ rather than only display. BEAMS requires permission before publishing; NRIDA requires it before copying at all.
+
+This matters more than the others because of what sits behind it: the work-level agreement, contractor, progress, completion and final-bill data that rows 16–19 of the availability matrix record as having no source located. It exists, it needs no credential, and it may not be taken. See [`pmgsy-ommas-findings.md`](./pmgsy-ommas-findings.md).
+
+---
+
 ## What this blocks, concretely
 
 Every monetary figure the site renders today comes from BEAMS: the unit pages and the departmental finance page. Under the Finance Department's stated terms, publishing those to the public requires asking first.

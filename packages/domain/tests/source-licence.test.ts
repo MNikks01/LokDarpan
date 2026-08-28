@@ -19,6 +19,13 @@ describe("mayRepublish", () => {
     expect(mayRepublish("beams")).toBe(false);
   });
 
+  // The execution-half data exists and is reachable; NRIDA's terms forbid
+  // republishing it, and forbid systematic downloading too.
+  it("withholds PMGSY, whose terms forbid republication outright", () => {
+    expect(mayRepublish("pmgsy")).toBe(false);
+    expect(licenceFor("pmgsy")?.caveat).toContain("without NRIDA's prior written permission");
+  });
+
   // Withholding a figure delays a reader; publishing one we had no right to
   // publish damages the standing the whole project rests on.
   it("refuses a source nobody has recorded terms for", () => {
@@ -37,7 +44,7 @@ describe("attributionFor", () => {
   // acknowledged", so there is no correct way to render this material without
   // a credit line.
   it("names a publisher for every recorded source", () => {
-    for (const id of ["lgd", "cag", "beams"]) {
+    for (const id of ["lgd", "cag", "beams", "pmgsy"]) {
       expect(attributionFor(id).length, id).toBeGreaterThan(10);
     }
   });
@@ -57,7 +64,7 @@ describe("the registry itself", () => {
   // A licence with no link is an assertion. A reader checking our right to
   // publish must be able to read the same page we read.
   it("cites the page each licence was read from, and when", () => {
-    for (const id of ["lgd", "cag", "beams"]) {
+    for (const id of ["lgd", "cag", "beams", "pmgsy"]) {
       const licence = licenceFor(id);
       expect(licence?.termsUrl, id).toMatch(/^https:\/\/[a-z0-9.-]+\.gov\.in\//u);
       expect(licence?.verifiedOn, id).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
@@ -73,6 +80,6 @@ describe("the registry itself", () => {
   });
 
   it("lists what is held back, so an operator can act on it", () => {
-    expect(awaitingPermission().map((l) => l.sourceId)).toEqual(["beams"]);
+    expect(awaitingPermission().map((l) => l.sourceId)).toEqual(["beams", "pmgsy"]);
   });
 });
