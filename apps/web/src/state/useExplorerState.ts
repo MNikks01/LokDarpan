@@ -37,7 +37,8 @@ function writeUrl(state: ExplorerState): void {
  */
 export interface ExplorerActions {
   readonly selectState: (stateCode: string | null) => void;
-  readonly selectDistrict: (districtId: string | null) => void;
+  /** Any unit below state level: district, taluka, municipal body, village. */
+  readonly selectUnit: (unitId: number | null) => void;
   readonly selectDocument: (documentId: number | null) => void;
   readonly resetAll: () => void;
 }
@@ -58,9 +59,9 @@ export function useExplorerState(
 
   const selectState = useCallback(
     (stateCode: string | null) => {
-      // A district id from Maharashtra is meaningless once the reader moves to
+      // A unit id from Maharashtra is meaningless once the reader moves to
       // Gujarat, and a record is recorded against a unit — both are dropped.
-      apply(() => ({ geo: { stateCode, districtId: null }, selectedDocumentId: null }));
+      apply(() => ({ geo: { stateCode, unitId: null }, selectedDocumentId: null }));
     },
     [apply],
   );
@@ -68,8 +69,8 @@ export function useExplorerState(
   const actions = useMemo<ExplorerActions>(
     () => ({
       selectState,
-      selectDistrict: (districtId) => {
-        apply((previous) => ({ ...previous, geo: { ...previous.geo, districtId } }));
+      selectUnit: (unitId) => {
+        apply((previous) => ({ ...previous, geo: { ...previous.geo, unitId } }));
       },
       selectDocument: (selectedDocumentId) => {
         apply((previous) => ({ ...previous, selectedDocumentId }));

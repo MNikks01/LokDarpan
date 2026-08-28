@@ -234,6 +234,17 @@ export class PostgresGeographyRepository implements GeographyRepository {
     return result.rows.map(toUnit);
   }
 
+  /**
+   * Ledger state units keyed by LGD code, for joining to outlines that carry no
+   * ledger identity of their own.
+   */
+  async statesByLgdCode(): Promise<ReadonlyMap<string, number>> {
+    const result = await this.db.query<{ id: string; lgd_code: string }>(
+      `SELECT id, lgd_code FROM admin_unit WHERE level = 'state' AND lgd_code IS NOT NULL`,
+    );
+    return new Map(result.rows.map((r) => [r.lgd_code, Number(r.id)]));
+  }
+
   /** Detailed geometry for one unit, for framing and highlighting it. */
   async boundaryOf(id: number): Promise<unknown> {
     const result = await this.db.query<{ geometry: unknown }>(

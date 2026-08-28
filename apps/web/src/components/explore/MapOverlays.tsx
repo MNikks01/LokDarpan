@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-import type { DistrictSummary, StateSummary } from "@/domain/geography";
 import { basemapStyleUrl } from "@/map/style";
 import { AreaTooltip, type HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
@@ -17,22 +16,22 @@ import styles from "./explorer.module.css";
  */
 export function MapOverlays({
   hover,
-  state,
-  district,
+  placeName,
+  stateName,
   loading,
 }: {
   readonly hover: HoverTarget | null;
-  readonly state: StateSummary | null;
-  readonly district: DistrictSummary | null;
+  readonly placeName: string | null;
+  readonly stateName: string | null;
   readonly loading: boolean;
 }): React.JSX.Element {
-  const place = placeName({ state, district });
+  const place = placeName ?? stateName;
 
   return (
     <>
       {hover !== null && <AreaTooltip target={hover} />}
       <p className={styles.attribution}>
-        Boundaries: Census 2011 administrative units ·{" "}
+        Boundaries: Census 2011 (states) · OpenStreetMap ODbL (below) ·{" "}
         {basemapStyleUrl() === null ? "no basemap" : "configured basemap"} · MapLibre GL
       </p>
       {loading && (
@@ -45,14 +44,6 @@ export function MapOverlays({
       </span>
     </>
   );
-}
-
-/** The narrowest place currently selected, or null at the national view. */
-function placeName(scope: {
-  readonly state: StateSummary | null;
-  readonly district: DistrictSummary | null;
-}): string | null {
-  return scope.district?.name ?? scope.state?.name ?? null;
 }
 
 export function MapUnavailable({ reason }: { readonly reason: string }): React.JSX.Element {

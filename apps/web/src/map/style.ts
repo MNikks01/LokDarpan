@@ -16,7 +16,12 @@ import type { StyleSpecification, LayerSpecification, SourceSpecification } from
 
 export const SOURCE = {
   states: "ld-states",
-  districts: "ld-districts",
+  /** Whatever level is currently being drilled into — districts, talukas,
+   *  municipal bodies, villages. One source, because the map draws one level at
+   *  a time and the level is decided by the data, not by the renderer. */
+  children: "ld-children",
+  /** The selected unit's own boundary, drawn above its siblings. */
+  active: "ld-active-unit",
 } as const;
 
 export const LAYER = {
@@ -24,9 +29,10 @@ export const LAYER = {
   stateFill: "ld-state-fill",
   stateFillActive: "ld-state-fill-active",
   stateLine: "ld-state-line",
-  districtFill: "ld-district-fill",
-  districtFillActive: "ld-district-fill-active",
-  districtLine: "ld-district-line",
+  childFill: "ld-child-fill",
+  childLine: "ld-child-line",
+  activeFill: "ld-active-fill",
+  activeLine: "ld-active-line",
 } as const;
 
 const EMPTY: SourceSpecification = {
@@ -87,35 +93,37 @@ function overlayLayers(withBasemap: boolean): LayerSpecification[] {
       },
     },
     {
-      id: LAYER.districtFill,
+      // The selected unit is a BACKDROP, drawn beneath its children. Painted on
+      // top it covered the very boundaries the reader drilled in to see.
+      id: LAYER.activeFill,
       type: "fill",
-      source: SOURCE.districts,
+      source: SOURCE.active,
+      paint: { "fill-color": color.accent.soft, "fill-opacity": 0.55 },
+    },
+    {
+      id: LAYER.childFill,
+      type: "fill",
+      source: SOURCE.children,
       paint: {
+        // Nearly transparent: the fill exists to catch the pointer and to lift
+        // on hover, not to tint the map. The outline carries the shape.
         "fill-color": color.bg.surface,
-        "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 1, 0.65],
+        "fill-opacity": ["case", ["boolean", ["feature-state", "hover"], false], 0.55, 0.06],
       },
     },
     {
-      id: LAYER.districtFillActive,
-      type: "fill",
-      source: SOURCE.districts,
-      filter: ["==", ["get", "districtCode"], "__none__"],
-      paint: { "fill-color": color.accent.soft, "fill-opacity": 1 },
-    },
-    {
-      id: LAYER.districtLine,
+      id: LAYER.childLine,
       type: "line",
-      source: SOURCE.districts,
+      source: SOURCE.children,
       layout: { "line-join": "round" },
-      paint: {
-        "line-color": [
-          "case",
-          ["boolean", ["feature-state", "active"], false],
-          color.accent.base,
-          color.border.hair,
-        ],
-        "line-width": ["case", ["boolean", ["feature-state", "active"], false], 1.6, 0.6],
-      },
+      paint: { "line-color": color.border.strong, "line-width": 1 },
+    },
+    {
+      id: LAYER.activeLine,
+      type: "line",
+      source: SOURCE.active,
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: { "line-color": color.accent.base, "line-width": 2.2 },
     },
   );
 
@@ -125,7 +133,8 @@ function overlayLayers(withBasemap: boolean): LayerSpecification[] {
 function sources(): Record<string, SourceSpecification> {
   return {
     [SOURCE.states]: { ...EMPTY, promoteId: "stateCode" } as SourceSpecification,
-    [SOURCE.districts]: { ...EMPTY, promoteId: "districtCode" } as SourceSpecification,
+    [SOURCE.children]: { ...EMPTY, promoteId: "unitId" } as SourceSpecification,
+    [SOURCE.active]: EMPTY,
   };
 }
 

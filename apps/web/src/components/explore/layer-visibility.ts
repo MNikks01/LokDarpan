@@ -7,13 +7,14 @@
  */
 export interface LayerVisibility {
   readonly states: boolean;
-  readonly districts: boolean;
+  /** Boundaries of whatever level is being drilled into. */
+  readonly areas: boolean;
   readonly placeNames: boolean;
 }
 
 export const DEFAULT_LAYERS: LayerVisibility = {
   states: true,
-  districts: true,
+  areas: true,
   placeNames: true,
 };
 
@@ -23,7 +24,11 @@ export const LAYER_LABELS: readonly {
   readonly note: string;
 }[] = [
   { key: "states", label: "State boundaries", note: "Census 2011 administrative units" },
-  { key: "districts", label: "District boundaries", note: "Shown once a state is selected" },
+  {
+    key: "areas",
+    label: "Area boundaries",
+    note: "Districts, talukas, municipal bodies — whichever level is in view",
+  },
   {
     key: "placeNames",
     label: "Place names",

@@ -6,54 +6,56 @@ import { Map as MapLibreMap } from "maplibre-gl";
 import type { GeoJSONSource, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
 import type React from "react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import type { DistrictSummary, StateSummary } from "@/domain/geography";
+import type { GeoUnit } from "@lokdarpan/domain";
+import { LEVEL_LABEL } from "@lokdarpan/domain";
+import type { BBox, FeatureCollection } from "geojson";
 import { INDIA_BBOX } from "@/domain/geography";
+import type { StateOption } from "@/data/geography";
 import { CAMERA_MS, fitTo, framePadding } from "@/map/camera";
 import {
   EMPTY_COLLECTION,
   GeometryUnavailableError,
-  fetchDistricts,
   fetchStateOutlines,
 } from "@/map/geometry-source";
 import { LAYER, SOURCE, buildStyle } from "@/map/style";
 import { createPlaceLabelLayer, type PlaceLabel, type PlaceLabelLayer } from "@/map/place-labels";
-import type { GeoSelection } from "@/state/useExplorerState";
 import type { LayerVisibility } from "./layer-visibility";
 import { MapOverlays, MapUnavailable } from "./MapOverlays";
 import type { HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
-import type { FeatureCollection } from "geojson";
 
 export interface MapHandle {
   readonly zoomIn: () => void;
   readonly zoomOut: () => void;
-  /** Re-frame the current selection; used by "Reset view". */
   readonly reframe: () => void;
 }
 
 export interface MapCanvasProps {
-  readonly geo: GeoSelection;
-  readonly state: StateSummary | null;
-  readonly district: DistrictSummary | null;
-  /** Everything nameable at the current level, for the label layer. */
-  readonly states: readonly StateSummary[];
-  readonly districts: readonly DistrictSummary[];
+  readonly stateCode: string | null;
+  readonly stateBbox: BBox | null;
+  readonly activeUnit: GeoUnit | null;
+  readonly activeGeometry: unknown;
+  readonly childBoundaries: FeatureCollection | null;
+  readonly states: readonly StateOption[];
   readonly layers: LayerVisibility;
   readonly insets: { readonly left: number; readonly right: number };
   readonly compact: boolean;
   readonly handleRef: React.RefObject<MapHandle | null>;
   readonly onSelectState: (stateCode: string) => void;
-  readonly onSelectDistrict: (districtId: string) => void;
+  readonly onSelectUnit: (unitId: number) => void;
 }
 
-function setSourceData(
-  map: MapLibreMap,
-  id: string,
-  data: FeatureCollection | GeoJSON.Feature,
-): void {
+const LOAD_TIMEOUT_MS = 15_000;
+
+/** A ledger level rendered for a reader, falling back to the raw value. */
+function levelLabel(level: string): string {
+  return (LEVEL_LABEL as Readonly<Record<string, string | undefined>>)[level] ?? level;
+}
+
+function setSourceData(map: MapLibreMap, id: string, data: unknown): void {
   const source = map.getSource(id);
   // `setData` returns the source for chaining; nothing here needs the return.
-  if (source !== undefined) (source as GeoJSONSource).setData(data);
+  if (source !== undefined) (source as GeoJSONSource).setData(data as FeatureCollection);
 }
 
 /**
@@ -63,8 +65,6 @@ function setSourceData(
  * WebGL context — and an unbounded await leaves the reader looking at an empty
  * frame with no explanation forever. A timeout turns that into a message.
  */
-const LOAD_TIMEOUT_MS = 15_000;
-
 function whenLoaded(map: MapLibreMap): Promise<void> {
   if (map.loaded()) return Promise.resolve();
   return new Promise<void>((resolve, reject) => {
@@ -80,18 +80,29 @@ function whenLoaded(map: MapLibreMap): Promise<void> {
   });
 }
 
+/**
+ * The map.
+ *
+ * Draws three things: state outlines, the boundaries of whatever level is being
+ * drilled into, and the selected unit. It does not know what those levels are —
+ * "children" is one source fed by the ledger, so a district of talukas and a
+ * taluka of villages render through the same path with no per-level code.
+ *
+ * Geometry is handed to MapLibre and never diffed by React.
+ */
 export function MapCanvas({
-  geo,
-  state,
-  district,
+  stateCode,
+  stateBbox,
+  activeUnit,
+  activeGeometry,
+  childBoundaries,
   states,
-  districts,
   layers,
   insets,
   compact,
   handleRef,
   onSelectState,
-  onSelectDistrict,
+  onSelectUnit,
 }: MapCanvasProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -101,9 +112,8 @@ export function MapCanvas({
 
   // Callbacks are read through a ref inside long-lived MapLibre handlers, so a
   // re-render never forces the map to tear its listeners down and rebind them.
-  const callbacks = useRef({ onSelectState, onSelectDistrict });
-  callbacks.current = { onSelectState, onSelectDistrict };
-
+  const callbacks = useRef({ onSelectState, onSelectUnit });
+  callbacks.current = { onSelectState, onSelectUnit };
   const framing = useRef({ insets, compact });
   framing.current = { insets, compact };
 
@@ -112,16 +122,13 @@ export function MapCanvas({
     const container = containerRef.current;
     if (container === null) return;
 
-    // The instance lives on a mutable holder rather than a `let`: the cleanup
-    // closure runs after the async setup, and a plain binding would be narrowed
-    // to its initial `null` by control-flow analysis.
     const holder: { instance: MapLibreMap | null; cancelled: boolean } = {
       instance: null,
       cancelled: false,
     };
     // Read through a call, not the property: control-flow analysis narrows a
-    // property that is only ever assigned in the cleanup closure to `false`,
-    // and would quietly delete every bail-out below.
+    // property only assigned in the cleanup closure to `false`, and would
+    // quietly delete every bail-out below.
     const cancelled = (): boolean => holder.cancelled;
 
     const start = async (): Promise<void> => {
@@ -150,8 +157,7 @@ export function MapCanvas({
 
       // A renderer error is reported, never swallowed. MapLibre keeps a broken
       // map on screen as a blank rectangle, which a reader cannot tell apart
-      // from "this area has no records" — the one confusion this product must
-      // not create.
+      // from "this area has no records".
       map.on("error", (event: { readonly error?: { readonly message?: string } }) => {
         if (cancelled()) return;
         setFailure(event.error?.message ?? "The map renderer reported an error.");
@@ -173,9 +179,11 @@ export function MapCanvas({
       // because "the map is blank" is otherwise undiagnosable in the field.
       console.error("[lokdarpan] map initialisation failed", error);
       setFailure(
-        error instanceof Error
+        error instanceof Error && !(error instanceof GeometryUnavailableError)
           ? error.message
-          : "The map could not be initialised in this browser.",
+          : error instanceof GeometryUnavailableError
+            ? error.message
+            : "The map could not be initialised in this browser.",
       );
     });
 
@@ -194,45 +202,58 @@ export function MapCanvas({
     const canvas = map.getCanvas();
 
     /**
-     * ONE hit test, not one listener per layer.
-     *
-     * Per-layer `mousemove` handlers all fire for the same pointer position and
-     * the last one to run wins, so the district polygon underneath a road was
-     * overwriting the road's own hover — the reader got "Nagpur, District" while
-     * pointing straight at a work. Querying in priority order makes precedence
-     * explicit: the smallest thing under the cursor is the thing you meant.
+     * ONE hit test, not one listener per layer. Per-layer handlers all fire for
+     * the same pointer and the last to run wins, so the state polygon underneath
+     * an area was overwriting the area's own hover.
      */
     const topmost = (point: MapMouseEvent["point"]): MapGeoJSONFeature | null => {
-      for (const layers of [[LAYER.districtFill], [LAYER.stateFill]]) {
-        const present = layers.filter((id) => map.getLayer(id) !== undefined);
-        if (present.length === 0) continue;
-        const [hit] = map.queryRenderedFeatures(point, { layers: present });
+      for (const id of [LAYER.childFill, LAYER.stateFill]) {
+        if (map.getLayer(id) === undefined) continue;
+        const [hit] = map.queryRenderedFeatures(point, { layers: [id] });
         if (hit !== undefined) return hit;
       }
       return null;
     };
 
+    // Feature-state hover, so the fill lifts under the pointer without React
+    // re-rendering the map on every mouse move.
+    let hovered: string | number | undefined;
+    const clearHover = (): void => {
+      if (hovered !== undefined) {
+        map.setFeatureState({ source: SOURCE.children, id: hovered }, { hover: false });
+        hovered = undefined;
+      }
+    };
+
     const onMove = (event: MapMouseEvent): void => {
       const feature = topmost(event.point);
       if (feature === null) {
+        clearHover();
         canvas.style.cursor = "";
         setHover(null);
         return;
       }
+      if (feature.source === SOURCE.children && feature.id !== hovered) {
+        clearHover();
+        hovered = feature.id;
+        if (hovered !== undefined) {
+          map.setFeatureState({ source: SOURCE.children, id: hovered }, { hover: true });
+        }
+      }
       canvas.style.cursor = "pointer";
       const { x, y } = event.point;
-
-      const districtName: unknown = feature.properties["districtName"];
+      const level: unknown = feature.properties["level"];
       setHover({
         kind: "area",
-        title: String(districtName ?? feature.properties["stateName"] ?? ""),
-        subtitle: districtName === undefined ? "State" : "District",
+        title: String(feature.properties["name"] ?? feature.properties["stateName"] ?? ""),
+        subtitle: typeof level === "string" ? levelLabel(level) : "State",
         x,
         y,
       });
     };
 
     const onLeave = (): void => {
+      clearHover();
       canvas.style.cursor = "";
       setHover(null);
     };
@@ -240,72 +261,50 @@ export function MapCanvas({
     const onClick = (event: MapMouseEvent): void => {
       const feature = topmost(event.point);
       if (feature === null) return;
-      const properties = feature.properties;
-
-      const districtCode: unknown = properties["districtCode"];
-      if (typeof districtCode === "string") {
-        callbacks.current.onSelectDistrict(`${String(properties["stateCode"])}-${districtCode}`);
+      const unitId: unknown = feature.properties["unitId"];
+      if (typeof unitId === "number") {
+        callbacks.current.onSelectUnit(unitId);
         return;
       }
-      if (typeof properties["stateCode"] === "string") {
-        callbacks.current.onSelectState(properties["stateCode"]);
-      }
+      const code: unknown = feature.properties["stateCode"];
+      if (typeof code === "string") callbacks.current.onSelectState(code);
     };
 
     map.on("mousemove", onMove);
     map.on("mouseout", onLeave);
     map.on("click", onClick);
-
     return () => {
+      clearHover();
       map.off("mousemove", onMove);
       map.off("mouseout", onLeave);
       map.off("click", onClick);
     };
   }, [ready]);
 
-  /* ------------------------------------------------------------- geometry */
+  /* ------------------------------------------------------------ geometry */
   useEffect(() => {
     const map = mapRef.current;
     if (map === null || !ready) return;
-    let cancelled = false;
+    setSourceData(map, SOURCE.children, childBoundaries ?? EMPTY_COLLECTION);
+  }, [childBoundaries, ready]);
 
-    if (geo.stateCode === null) {
-      setSourceData(map, SOURCE.districts, EMPTY_COLLECTION);
-      return;
-    }
-    void fetchDistricts(geo.stateCode)
-      .then((collection) => {
-        if (!cancelled && mapRef.current !== null) {
-          setSourceData(mapRef.current, SOURCE.districts, collection);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setFailure(
-            error instanceof GeometryUnavailableError
-              ? error.message
-              : "District boundaries could not be loaded.",
-          );
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [geo.stateCode, ready]);
-
-  /* -------------------------------------------------------------- filters */
   useEffect(() => {
     const map = mapRef.current;
     if (map === null || !ready) return;
+    setSourceData(
+      map,
+      SOURCE.active,
+      activeGeometry === null || activeGeometry === undefined
+        ? EMPTY_COLLECTION
+        : { type: "Feature", properties: {}, geometry: activeGeometry },
+    );
+  }, [activeGeometry, ready]);
 
-    map.setFilter(LAYER.stateFillActive, ["==", ["get", "stateCode"], geo.stateCode ?? "__none__"]);
-    map.setFilter(LAYER.districtFillActive, [
-      "==",
-      ["get", "districtCode"],
-      district?.code ?? "__none__",
-    ]);
-  }, [district, geo.stateCode, ready]);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map === null || !ready) return;
+    map.setFilter(LAYER.stateFillActive, ["==", ["get", "stateCode"], stateCode ?? "__none__"]);
+  }, [ready, stateCode]);
 
   /* ------------------------------------------------------ layer visibility */
   useEffect(() => {
@@ -318,8 +317,8 @@ export function MapCanvas({
     };
     show(LAYER.stateLine, layers.states);
     show(LAYER.stateFill, layers.states);
-    show(LAYER.districtLine, layers.districts);
-    show(LAYER.districtFill, layers.districts);
+    show(LAYER.childFill, layers.areas);
+    show(LAYER.childLine, layers.areas);
   }, [layers, ready]);
 
   /* --------------------------------------------------------------- labels */
@@ -337,8 +336,8 @@ export function MapCanvas({
   }, [ready]);
 
   const labels = useMemo(
-    () => labelsFor({ geo, states, districts, district }),
-    [district, districts, geo, states],
+    () => labelsFor(stateCode, states, childBoundaries),
+    [childBoundaries, stateCode, states],
   );
 
   useEffect(() => {
@@ -355,25 +354,28 @@ export function MapCanvas({
     if (map === null) return;
     const padding = framePadding(framing.current.insets, framing.current.compact);
 
-    if (district !== null) {
-      fitTo(map, district.bbox, { duration: CAMERA_MS.district, padding, maxZoom: 11 });
+    // The selected unit's own extent first, then the state's, then the country.
+    if (activeUnit?.bbox != null) {
+      fitTo(map, [...activeUnit.bbox] as BBox, {
+        duration: CAMERA_MS.district,
+        padding,
+        maxZoom: 13,
+      });
       return;
     }
-    if (state !== null) {
-      fitTo(map, state.bbox, { duration: CAMERA_MS.state, padding, maxZoom: 9 });
+    if (stateBbox !== null) {
+      fitTo(map, stateBbox, { duration: CAMERA_MS.state, padding, maxZoom: 9 });
       return;
     }
     fitTo(map, INDIA_BBOX, { duration: CAMERA_MS.country, padding, maxZoom: 6 });
-  }, [district, state]);
+  }, [activeUnit, stateBbox]);
 
   useEffect(() => {
     if (ready) frame();
   }, [frame, ready]);
 
-  // Re-frame when the viewport changes size. MapLibre resizes its canvas on its
-  // own but keeps the centre and zoom, so a window that grows leaves the
-  // selection sitting small and off-centre — the reader sees the map "drift"
-  // for no reason they caused.
+  // MapLibre watches the window, not its container. A container that changes
+  // size on its own leaves the canvas at a stale resolution.
   useEffect(() => {
     const container = containerRef.current;
     if (container === null || !ready) return;
@@ -381,9 +383,6 @@ export function MapCanvas({
     const observer = new ResizeObserver(() => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        // MapLibre only watches the window, not its container. A container that
-        // changes size on its own leaves the canvas at a stale resolution, so
-        // the resize has to be handed to it before the camera is re-framed.
         mapRef.current?.resize();
         frame();
       }, 150);
@@ -410,7 +409,12 @@ export function MapCanvas({
   return (
     <>
       <div ref={containerRef} className={styles.map} data-testid="map-canvas" />
-      <MapOverlays hover={hover} state={state} district={district} loading={!ready} />
+      <MapOverlays
+        hover={hover}
+        placeName={activeUnit?.name ?? null}
+        stateName={states.find((s) => s.code === stateCode)?.name ?? null}
+        loading={!ready}
+      />
     </>
   );
 }
@@ -418,23 +422,17 @@ export function MapCanvas({
 /**
  * Which places are named, and how loudly.
  *
- * One level at a time. Showing state names over a district view, or district
- * names over a single town, produces a map where the labels compete with each
- * other instead of describing what the reader is looking at.
- *
- * Priority decides who survives a collision: bigger administrative units first,
- * and among local bodies the denser ones, because a municipal corporation is
- * what a reader is most likely looking for and a gram panchayat the least.
+ * One level at a time. Showing state names over a district view produces a map
+ * where the labels compete with each other instead of describing what the
+ * reader is looking at. Below state level the anchors come from the boundaries
+ * themselves, so a level nobody anticipated still gets labelled.
  */
-function labelsFor(scope: {
-  readonly geo: GeoSelection;
-  readonly states: readonly StateSummary[];
-  readonly districts: readonly DistrictSummary[];
-  readonly district: DistrictSummary | null;
-}): readonly PlaceLabel[] {
-  const { geo, states, districts, district } = scope;
-
-  if (geo.stateCode === null) {
+function labelsFor(
+  stateCode: string | null,
+  states: readonly StateOption[],
+  children: FeatureCollection | null,
+): readonly PlaceLabel[] {
+  if (stateCode === null) {
     return states.map((s) => ({
       id: `state-${s.code}`,
       text: s.name,
@@ -443,28 +441,70 @@ function labelsFor(scope: {
       tone: "primary" as const,
     }));
   }
+  if (children === null) return [];
 
-  if (geo.districtId === null) {
-    return districts.map((d) => ({
-      id: `district-${d.id}`,
-      text: d.name,
-      lngLat: d.labelPoint,
-      priority: d.labelWeight,
-      tone: "primary" as const,
-    }));
+  return children.features.flatMap((feature) => {
+    const anchor = centroidOf(feature.geometry);
+    const properties = feature.properties ?? {};
+    const name: unknown = properties["name"];
+    if (anchor === null || typeof name !== "string") return [];
+    return [
+      {
+        id: `unit-${String(properties["unitId"] ?? name)}`,
+        text: name,
+        lngLat: anchor,
+        // Bigger areas win a collision, measured from the geometry itself.
+        priority: extentOf(feature.geometry),
+        tone: "primary" as const,
+      },
+    ];
+  });
+}
+
+/** Every coordinate in a geometry, however deeply nested. */
+function* positions(geometry: unknown): Generator<readonly [number, number]> {
+  if (!Array.isArray(geometry)) return;
+  if (typeof geometry[0] === "number" && typeof geometry[1] === "number") {
+    yield [geometry[0], geometry[1]];
+    return;
   }
+  for (const part of geometry) yield* positions(part);
+}
 
-  // Inside a district: name the district itself. Nothing is recorded below
-  // state level, so there are no settlements to place.
-  return district === null
-    ? []
-    : [
-        {
-          id: `district-${district.id}`,
-          text: `${district.name} district`,
-          lngLat: district.labelPoint,
-          priority: district.labelWeight,
-          tone: "secondary" as const,
-        },
-      ];
+function coordsOf(geometry: unknown): readonly (readonly [number, number])[] {
+  if (typeof geometry !== "object" || geometry === null) return [];
+  const coordinates = (geometry as { coordinates?: unknown }).coordinates;
+  return [...positions(coordinates)];
+}
+
+function centroidOf(geometry: unknown): readonly [number, number] | null {
+  const points = coordsOf(geometry);
+  if (points.length === 0) return null;
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+  for (const [lng, lat] of points) {
+    west = Math.min(west, lng);
+    south = Math.min(south, lat);
+    east = Math.max(east, lng);
+    north = Math.max(north, lat);
+  }
+  return [(west + east) / 2, (south + north) / 2];
+}
+
+function extentOf(geometry: unknown): number {
+  const points = coordsOf(geometry);
+  if (points.length === 0) return 0;
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+  for (const [lng, lat] of points) {
+    west = Math.min(west, lng);
+    south = Math.min(south, lat);
+    east = Math.max(east, lng);
+    north = Math.max(north, lat);
+  }
+  return (east - west) * (north - south);
 }
