@@ -3,7 +3,7 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { GeoUnit } from "@lokdarpan/domain";
+import type { GeoUnit, SearchResult } from "@lokdarpan/domain";
 import type { StateOption } from "@/data/geography";
 import { Button, controlStyles } from "@/components/ui";
 import { cx } from "@/ui/cx";
@@ -14,6 +14,7 @@ import { MapCanvas, type MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
+import { SearchDialog } from "./SearchDialog";
 import { BoundarySources } from "./BoundarySources";
 import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
 import { useExplorerGeography, type RecordsState } from "./use-explorer-data";
@@ -58,6 +59,7 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
 
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
   const [compact, setCompact] = useState(false);
   const mapHandle = useRef<MapHandle | null>(null);
@@ -74,6 +76,29 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
       query.removeEventListener("change", apply);
     };
   }, []);
+
+  /**
+   * A search result becomes a geographic selection.
+   *
+   * Both the state and the unit are set together: a unit id alone would leave
+   * the state selector empty and the records panel scoped to nowhere, so the
+   * reader would arrive at the right place with the wrong context around it.
+   */
+  const onSelectPlace = useCallback(
+    (result: SearchResult) => {
+      setSearchOpen(false);
+      actions.selectPlace(result.stateCode, result.hasBoundary ? result.id : null);
+    },
+    [actions],
+  );
+
+  const onSelectRecord = useCallback(
+    (documentId: number) => {
+      setSearchOpen(false);
+      actions.selectDocument(documentId);
+    },
+    [actions],
+  );
 
   const onSelectLevel = useCallback(
     (unitId: number | null) => {
@@ -98,6 +123,9 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
         stateName={selectedState?.name ?? null}
         ancestors={ancestors}
         onSelectLevel={onSelectLevel}
+        onOpenSearch={() => {
+          setSearchOpen(true);
+        }}
       />
       <p className={styles.notice}>
         <span aria-hidden="true">◆</span>
@@ -170,6 +198,15 @@ export function ExploreShell({ states, initialState }: ExploreShellProps): React
           />
         </div>
 
+        <SearchDialog
+          open={searchOpen}
+          onClose={() => {
+            setSearchOpen(false);
+          }}
+          onSelectPlace={onSelectPlace}
+          onSelectRecord={onSelectRecord}
+        />
+
         {selectedDocumentId !== null && (
           <RecordDrawer
             key={selectedDocumentId}
@@ -189,10 +226,12 @@ function ExplorerHeader({
   stateName,
   ancestors,
   onSelectLevel,
+  onOpenSearch,
 }: {
   readonly stateName: string | null;
   readonly ancestors: readonly GeoUnit[];
   readonly onSelectLevel: (unitId: number | null) => void;
+  readonly onOpenSearch: () => void;
 }): React.JSX.Element {
   return (
     <header className={styles.header}>
@@ -205,6 +244,9 @@ function ExplorerHeader({
       <span className={styles.headerSpacer} />
       <Breadcrumb stateName={stateName} ancestors={ancestors} onSelectLevel={onSelectLevel} />
       <span className={styles.headerSpacer} />
+      <Button onClick={onOpenSearch}>
+        <span aria-hidden="true">⌕</span> Search
+      </Button>
       <Link href="/documents" className={controlStyles.link} style={{ fontSize: 12.5 }}>
         All records
       </Link>

@@ -118,3 +118,32 @@ export interface GeographyRepository {
     limit: number,
   ): Promise<readonly GeoUnit[]>;
 }
+
+/**
+ * What a search can return.
+ *
+ * Deliberately a union rather than a list of places. A reader typing "Nagpur"
+ * may mean the district, the municipal body, or the audit report named after
+ * the CAG office there — and the interface should offer all three rather than
+ * guess. Each result says what kind of thing it is, so choosing one is an
+ * informed choice.
+ */
+export type SearchResultKind = "place" | "record";
+
+export interface SearchResult {
+  readonly kind: SearchResultKind;
+  readonly id: number;
+  readonly title: string;
+  /** What this is, in the reader's terms: "District", "Audit report". */
+  readonly subtitle: string;
+  /** Where the result sits, for a place: "Maharashtra". Null when unknown. */
+  readonly context: string | null;
+  /** The LGD state code to select alongside, for a place inside one. */
+  readonly stateCode: string | null;
+  /** True when a place has a boundary and can therefore be framed on the map. */
+  readonly hasBoundary: boolean;
+}
+
+export interface SearchRepository {
+  search(term: string, limit: number): Promise<readonly SearchResult[]>;
+}

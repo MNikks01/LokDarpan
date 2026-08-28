@@ -52,6 +52,27 @@ test.describe("explore", () => {
     await expect(page.getByRole("checkbox", { name: /State boundaries/ })).toBeChecked();
   });
 
+  test("search opens and degrades honestly when the ledger is down", async ({ page }) => {
+    await page.goto("/explore");
+    await page.getByRole("button", { name: "Search" }).click();
+
+    const dialog = page.getByRole("dialog", { name: "Search places and records" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("searchbox")).toBeFocused();
+
+    // Below two characters nothing is queried at all: a single letter matches
+    // most of the ledger and answers nobody's question.
+    await dialog.getByRole("searchbox").fill("n");
+    await expect(dialog.getByText(/Nothing held matches/)).toBeHidden();
+
+    // With a query and no ledger, it says so rather than showing an empty list
+    // that reads as "no such place".
+    await dialog.getByRole("searchbox").fill("nagpur");
+    await expect(
+      dialog.getByText(/Search is unavailable|Nothing held matches|Places/),
+    ).toBeVisible();
+  });
+
   test("a deep link is restored rather than reset", async ({ page }) => {
     // §17: copy the address, open it elsewhere, arrive at the same place. The
     // state survives even when the ledger cannot name the unit.

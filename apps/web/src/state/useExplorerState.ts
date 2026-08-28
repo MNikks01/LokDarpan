@@ -39,6 +39,8 @@ export interface ExplorerActions {
   readonly selectState: (stateCode: string | null) => void;
   /** Any unit below state level: district, taluka, municipal body, village. */
   readonly selectUnit: (unitId: number | null) => void;
+  /** State and unit together, for arriving from a search result. */
+  readonly selectPlace: (stateCode: string | null, unitId: number | null) => void;
   readonly selectDocument: (documentId: number | null) => void;
   readonly resetAll: () => void;
 }
@@ -71,6 +73,9 @@ export function useExplorerState(
       selectState,
       selectUnit: (unitId) => {
         apply((previous) => ({ ...previous, geo: { ...previous.geo, unitId } }));
+      },
+      selectPlace: (stateCode, unitId) => {
+        apply((previous) => ({ ...previous, geo: { stateCode, unitId } }));
       },
       selectDocument: (selectedDocumentId) => {
         apply((previous) => ({ ...previous, selectedDocumentId }));

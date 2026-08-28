@@ -146,6 +146,20 @@ export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promi
 }
 
 /**
+ * Level depth in SQL, matching `LEVEL_DEPTH` in the domain.
+ *
+ * Containment alone is not enough to name a parent. Nagpur City contains the
+ * representative point of Nagpur Urban Taluka, so geometry alone filed a taluka
+ * under a municipal corporation — which is true of the shapes and false of the
+ * administration. A parent must also sit at a shallower level.
+ */
+const LEVEL_DEPTH_SQL = `CASE level
+    WHEN 'country' THEN 0 WHEN 'state' THEN 1 WHEN 'district' THEN 2
+    WHEN 'sub_district' THEN 3 WHEN 'block' THEN 4 WHEN 'urban_local_body' THEN 4
+    WHEN 'gram_panchayat' THEN 5 WHEN 'village' THEN 5 WHEN 'ward' THEN 6
+    ELSE 9 END`;
+
+/**
  * Re-derive `parent_id` from geometry.
  *
  * The ingest is told which unit a query was scoped to, and writes that as the
@@ -161,7 +175,10 @@ export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promi
  */
 export async function assignParentsSpatially(db: pg.Client): Promise<number> {
   const result = await db.query(
-    `WITH candidate AS (
+    `WITH depth AS (
+       SELECT id, ${LEVEL_DEPTH_SQL} AS d FROM admin_unit
+     ),
+     candidate AS (
        SELECT c.id AS child_id,
               p.id AS parent_id,
               ROW_NUMBER() OVER (
@@ -169,9 +186,12 @@ export async function assignParentsSpatially(db: pg.Client): Promise<number> {
               ) AS rn
          FROM admin_unit c
          JOIN admin_unit_boundary cb ON cb.admin_unit_id = c.id
+         JOIN depth cd ON cd.id = c.id
          JOIN admin_unit p  ON p.id <> c.id
          JOIN admin_unit_boundary pb ON pb.admin_unit_id = p.id
+         JOIN depth pd ON pd.id = p.id
         WHERE pb.geometry && cb.geometry
+          AND pd.d < cd.d
           AND ST_Area(pb.geometry) > ST_Area(cb.geometry)
           AND ST_Contains(pb.geometry, ST_PointOnSurface(cb.geometry))
      )
