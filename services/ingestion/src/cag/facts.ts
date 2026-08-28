@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/2";
+export const PARSER_VERSION = "cag-facts/3";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -27,8 +27,28 @@ export interface FactCandidate {
   readonly extractionConfidence: number;
 }
 
-/** `₹ 15.14 crore`, `₹40 lakh`, `Rs. 1,234.56 crore`. */
-const AMOUNT = /(?:₹|Rs\.?)\s*([\d,]+(?:\.\d+)?)\s*(crore|lakh|thousand)?/giu;
+/**
+ * `₹ 15.14 crore`, `₹40 lakh`, `Rs. 1,234.56 crore`, `₹ 27,559.26 कोटी`.
+ *
+ * These reports are bilingual and the Marathi half states its units in
+ * Devanagari. Matching only the Latin words left every Marathi figure looking
+ * unqualified, which is how "₹ 27,559.26 कोटी" came to be stored as ₹27,559.26
+ * — four orders of magnitude out, under a correct-looking citation.
+ *
+ * The Devanagari stems are matched without their inflections: कोटी appears as
+ * कोटीची, कोटीहून and कोटींच्या depending on the case the sentence needs.
+ */
+/**
+ * Exported so the review triage re-derives amounts with exactly the rules the
+ * parser used. A second copy of this pattern would drift, and a self-check
+ * that disagrees with the parser it checks is worse than none.
+ *
+ * Safe to share: `String.prototype.matchAll` operates on an internal clone, so
+ * one consumer cannot leave `lastIndex` set for another.
+ */
+export const AMOUNT_IN =
+  /(?:₹|Rs\.?)\s*([\d,]+(?:\.\d+)?)\s*(crore|lakh|thousand|कोट[ीि]|लाख|हजार)?/giu;
+const AMOUNT = AMOUNT_IN;
 
 /**
  * `M/s.` is the conventional marker for a firm in Indian government documents.
@@ -46,7 +66,19 @@ const CONTRACTOR = /\bM\/s\.?\s+([A-Z][^,.;()]{2,70}?)(?=\s*[,.;()]|\s+(?:for|wa
 const OFFICER =
   /\b((?:Executive|Superintending|Deputy|Chief|Junior|Sectional|Assistant)\s+Engineer|Collector|Secretary)\b(?:\s*,?\s*([A-Z][A-Za-z\s]{2,44}?))?(?=\s*[,.;()]|\s+(?:requested|stated|had|was|issued)\b)/gu;
 
-const SCALE: Readonly<Record<string, number>> = { thousand: 1, lakh: 100, crore: 10_000 };
+/**
+ * Multipliers over `thousandsToPaise`, which is reused rather than reimplemented
+ * so there is only one money conversion in the codebase to get wrong.
+ */
+const SCALE: Readonly<Record<string, number>> = {
+  thousand: 1,
+  हजार: 1,
+  lakh: 100,
+  लाख: 100,
+  crore: 10_000,
+  कोटी: 10_000,
+  कोटि: 10_000,
+};
 
 /**
  * Characters of context kept either side of a match.
@@ -90,7 +122,14 @@ export function sentencesOf(page: string): string[] {
  * of them silently becomes wrong.
  */
 export function amountToPaise(digits: string, unit: string | undefined): bigint | null {
-  const multiplier = SCALE[(unit ?? "thousand").toLowerCase()];
+  // No default. An unqualified figure was previously read as thousands, an
+  // assumption carried over from BEAMS, whose report headers say "Amounts In
+  // Thousands". Audit prose says no such thing: a bare "₹1,53,427" in a rent
+  // calculation is rupees, and reading it as thousands inflated it a
+  // thousandfold. Where the source states no unit, neither do we — the
+  // candidate keeps its evidence and waits for a person to supply the scale.
+  if (unit === undefined) return null;
+  const multiplier = SCALE[unit.toLowerCase()];
   if (multiplier === undefined) return null;
   try {
     const paise = thousandsToPaise(digits);
