@@ -106,6 +106,34 @@ export function lgdReference(tags: OverpassTags): { code: string; kind: string }
 }
 
 /**
+ * The ledger level an LGD reference tag supplies a code for.
+ *
+ * The registers are level-specific and their codes are all bare integers, so a
+ * district code and a village code are indistinguishable as numbers. The tag
+ * suffix is the only thing that separates them, which makes it the only safe
+ * basis for treating a code as identity: a district code read as a village code
+ * would match some unrelated district exactly.
+ */
+const LGD_KIND_LEVEL: Readonly<Record<string, string>> = {
+  state: "state",
+  district: "district",
+  subdistrict: "sub_district",
+  block: "block",
+  village: "village",
+};
+
+/**
+ * Whether an LGD reference names a code for this level.
+ *
+ * A bare `ref:LGD` with no suffix says which register only by implication, so
+ * it is refused: identity is the one thing not worth inferring.
+ */
+export function lgdKindMatchesLevel(kind: string, level: string): boolean {
+  const suffix = kind.toLowerCase().replace(/^ref:lgd:?/u, "");
+  return LGD_KIND_LEVEL[suffix] === level;
+}
+
+/**
  * Assemble a relation's member ways into closed rings.
  *
  * Overpass `out geom` returns each member way's coordinates but not the order

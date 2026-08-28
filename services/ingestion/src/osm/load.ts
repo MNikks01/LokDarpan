@@ -1,6 +1,6 @@
 import type pg from "pg";
 import { OSM_ATTRIBUTION, OSM_LICENCE, type FetchedArtifact } from "./overpass";
-import type { ParsedUnit } from "./boundaries";
+import { lgdKindMatchesLevel, type ParsedUnit } from "./boundaries";
 
 /**
  * Load parsed OSM boundaries into the ledger.
@@ -38,6 +38,35 @@ function ringsToWkt(unit: ParsedUnit): string {
   return `POLYGON(${rings})`;
 }
 
+/**
+ * Let a relation take over the unit the directory already named.
+ *
+ * IDENTITY COMES FROM LGD, SHAPE COMES FROM OPENSTREETMAP.
+ *
+ * The directory is the authoritative registry of what places exist, and its
+ * units sit in the ledger already, named and identified but without geometry.
+ * A relation carrying that unit's LGD code is the same place, so it claims the
+ * existing row instead of inserting beside it. Otherwise every state would be
+ * held twice — once named by the registry, once by the map — and `admin_unit`
+ * would stop being the one hierarchy everything downstream resolves against.
+ *
+ * Only where the tag names a code for this level, and only where the row has
+ * not already been claimed: see `lgdKindMatchesLevel` for why the register
+ * cannot be inferred from a bare number.
+ */
+async function claimDirectoryUnit(db: pg.Client, unit: ParsedUnit): Promise<void> {
+  if (unit.lgdCode === null || unit.lgdCodeKind === null) return;
+  if (!lgdKindMatchesLevel(unit.lgdCodeKind, unit.level)) return;
+  await db.query(
+    `UPDATE admin_unit
+        SET osm_relation_id = $1
+      WHERE lgd_code = $2
+        AND level = $3::admin_unit_level
+        AND osm_relation_id IS NULL`,
+    [unit.osmRelationId, unit.lgdCode, unit.level],
+  );
+}
+
 export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promise<LoadResult> {
   const { units, artifact, parentId } = options;
   const failed: { osmRelationId: number; reason: string }[] = [];
@@ -68,6 +97,8 @@ export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promi
 
     for (const unit of units) {
       try {
+        await claimDirectoryUnit(db, unit);
+
         const upserted = await db.query<{ id: string; inserted: boolean }>(
           `INSERT INTO admin_unit
              (lgd_code, level, name_en, parent_id, osm_relation_id,
@@ -75,7 +106,14 @@ export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promi
            VALUES ($1, $2::admin_unit_level, $3, $4, $5, $6, $7, $8, CURRENT_DATE)
            ON CONFLICT (osm_relation_id) WHERE osm_relation_id IS NOT NULL
            DO UPDATE SET
-             name_en = EXCLUDED.name_en,
+             -- Deliberately NOT name_en. An existing row was named by whoever
+             -- created it, and for a unit the directory identified that is the
+             -- directory — the authoritative registry of what places are
+             -- called. This ingest is here for geometry, and letting it rename
+             -- places on every run would let a community edit quietly retitle a
+             -- government body. A new unit still takes its name from OSM on
+             -- insert, and a name that genuinely needs correcting is a delete
+             -- and re-ingest, which is a deliberate act.
              lgd_code = COALESCE(admin_unit.lgd_code, EXCLUDED.lgd_code),
              parent_id = COALESCE(EXCLUDED.parent_id, admin_unit.parent_id),
              dataset_version_id = EXCLUDED.dataset_version_id

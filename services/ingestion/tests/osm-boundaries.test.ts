@@ -3,6 +3,7 @@ import {
   assembleRings,
   levelFor,
   lgdReference,
+  lgdKindMatchesLevel,
   parseRelation,
   parseRelations,
   BoundaryRejected,
@@ -363,5 +364,41 @@ describe("a whole response, element by element", () => {
     ]);
     expect(outcome.rejected[0]?.osmRelationId).toBe(9);
     expect(outcome.rejected[0]?.reason).toContain("no member ways");
+  });
+});
+
+/**
+ * Whether an OSM relation may claim a unit the directory already named.
+ *
+ * This decides identity, so it is the one place where being wrong merges two
+ * different places into one row.
+ */
+describe("an LGD reference as identity", () => {
+  it("matches a state code to a state", () => {
+    expect(lgdKindMatchesLevel("ref:LGD:state", "state")).toBe(true);
+  });
+
+  it("maps the directory's spelling to the ledger's", () => {
+    // OSM writes `subdistrict`; the ledger's level is `sub_district`.
+    expect(lgdKindMatchesLevel("ref:LGD:subdistrict", "sub_district")).toBe(true);
+  });
+
+  it("is case-insensitive, because taggers are inconsistent", () => {
+    expect(lgdKindMatchesLevel("REF:lgd:District", "district")).toBe(true);
+  });
+
+  it("refuses a code for a different level", () => {
+    // Every LGD code is a bare integer, so a district code read as a village
+    // code would match some unrelated district exactly — silently, and with a
+    // real name attached to the wrong shape.
+    expect(lgdKindMatchesLevel("ref:LGD:district", "village")).toBe(false);
+  });
+
+  it("refuses a bare ref:LGD that names no register", () => {
+    expect(lgdKindMatchesLevel("ref:LGD", "state")).toBe(false);
+  });
+
+  it("refuses a suffix it has no mapping for", () => {
+    expect(lgdKindMatchesLevel("ref:LGD:ward", "ward")).toBe(false);
   });
 });
