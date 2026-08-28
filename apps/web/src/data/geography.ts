@@ -94,9 +94,34 @@ export interface StateOption extends StateSummary {
 }
 
 export async function listStateOptions(): Promise<readonly StateOption[]> {
-  const [outlines, units] = await Promise.all([
-    listStates(),
-    geographyRepository().statesByLgdCode(),
-  ]);
+  const outlines = await listStates();
+  const units = await ledgerStates();
   return outlines.map((state) => ({ ...state, unitId: units.get(state.code) ?? null }));
+}
+
+/**
+ * Ledger state ids, or none when the ledger cannot be reached.
+ *
+ * A map that cannot be drawn at all because the database is down is worse than
+ * a map of outlines that says nothing can be drilled into. The outlines come
+ * from a file and need no database, so an unreachable ledger degrades to
+ * browsing without descent rather than to a 500 — and the selector already says
+ * "not in the directory" for a state it has no unit for, which is exactly what
+ * is true in that case.
+ */
+async function ledgerStates(): Promise<ReadonlyMap<string, number>> {
+  try {
+    return await geographyRepository().statesByLgdCode();
+  } catch (error: unknown) {
+    process.stdout.write(
+      `${JSON.stringify({
+        level: "error",
+        message: "ledger_unavailable",
+        detail: error instanceof Error ? error.message : "unknown",
+        service: "web",
+        time: new Date().toISOString(),
+      })}\n`,
+    );
+    return new Map();
+  }
 }
