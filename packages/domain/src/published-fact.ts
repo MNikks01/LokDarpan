@@ -41,6 +41,14 @@ export interface PublishedFact {
 }
 
 export interface DocumentProvenance {
+  /**
+   * Which source this came from, so the credit line is read from the licence
+   * registry rather than guessed from the URL. Every source examined requires
+   * its source to be "prominently acknowledged"; deriving that from a hostname
+   * would put the wording of a legal obligation in a lookup table nobody
+   * checks against the terms.
+   */
+  readonly sourceId: string;
   readonly sourceUrl: string;
   readonly retrievedAt: string;
   readonly issuingAuthority: string;

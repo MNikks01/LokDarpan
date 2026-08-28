@@ -1,4 +1,4 @@
-import { displayTitle } from "@lokdarpan/domain";
+import { displayTitle, mayRepublish } from "@lokdarpan/domain";
 import { Money } from "@lokdarpan/money";
 import type {
   DocumentFactsView,
@@ -44,6 +44,7 @@ interface DocumentRow {
   readonly pages_without_text: number;
   readonly issuing_authority: string;
   readonly published_on: string | null;
+  readonly source_id: string;
   readonly source_url: string;
   readonly retrieved_at: string;
   readonly awaiting_review: string;
@@ -66,7 +67,7 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
     const documents = await this.db.query<DocumentRow>(
       `SELECT d.id, d.title, d.page_count, d.pages_without_text, d.issuing_authority,
               d.published_on, d.dataset_version_id,
-              s.source_url, s.retrieved_at,
+              s.source_id, s.source_url, s.retrieved_at,
               (SELECT count(*) FROM document_fact f
                 WHERE f.document_id = d.id AND f.verification_status = 'unverified'
               ) AS awaiting_review
@@ -77,6 +78,12 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
     );
     const document = documents.rows[0];
     if (document === undefined) return null;
+
+    // A source whose publisher has not permitted republication is withheld
+    // whole, not shown with its figures blanked: a page of empty rows would
+    // still assert that this document is one we hold and have read.
+    // `.docs/06-government-sources/source-licences.md` records the terms.
+    if (!mayRepublish(document.source_id)) return null;
 
     const facts = await this.db.query<FactRow>(
       `SELECT id, kind, page_number, raw_text, value, verification_status,
@@ -95,6 +102,7 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
       awaitingReview: Number(document.awaiting_review),
       facts: facts.rows.map(toFact).filter((f): f is PublishedFact => f !== null),
       provenance: {
+        sourceId: document.source_id,
         sourceUrl: document.source_url,
         retrievedAt: new Date(document.retrieved_at).toISOString(),
         issuingAuthority: document.issuing_authority,

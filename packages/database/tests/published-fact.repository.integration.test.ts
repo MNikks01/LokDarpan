@@ -160,6 +160,37 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect((await repository.documentFacts(documentId))?.facts).toHaveLength(0);
     });
 
+    // The licence gate, asserted at the read boundary. BEAMS terms require
+    // written permission before reproduction, so its material is withheld
+    // whole rather than shown with figures blanked - a page of empty rows
+    // would still assert that this is a document we hold and have read.
+    it("withholds a document whose publisher has not permitted republication", async () => {
+      await db().query(
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
+         VALUES ($1,'beams','https://beams.mahakosh.gov.in/x', now(), 10, 'beams/x')
+         ON CONFLICT (sha256) DO NOTHING`,
+        [`${"a".repeat(63)}2`],
+      );
+      const v = await db().query<{ id: string }>(
+        `INSERT INTO dataset_version (description) VALUES ('licence test') RETURNING id`,
+      );
+      const d = await db().query<{ id: string }>(
+        `INSERT INTO document (source_sha256, dataset_version_id, doc_type, title,
+                               issuing_authority, mime_type, page_count, pages_without_text,
+                               extraction_method)
+         VALUES ($1,$2,'audit_report','BEAMS Export','Finance Department','application/pdf',
+                 1,0,'test')
+         RETURNING id`,
+        [`${"a".repeat(63)}2`, Number(v.rows[0]?.id)],
+      );
+
+      expect(await repository.documentFacts(Number(d.rows[0]?.id))).toBeNull();
+    });
+
+    it("carries the source id, so attribution is read from the licence registry", async () => {
+      expect((await repository.documentFacts(documentId))?.provenance.sourceId).toBe("cag");
+    });
+
     it("returns null for a document that does not exist", async () => {
       expect(await repository.documentFacts(2_147_483_000)).toBeNull();
     });

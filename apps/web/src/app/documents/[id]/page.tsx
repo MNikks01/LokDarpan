@@ -2,7 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { byPage, type DocumentFactsView } from "@lokdarpan/domain";
+import { attributionFor, byPage, type DocumentFactsView } from "@lokdarpan/domain";
 
 import { ApiError, getJson } from "@/lib/api";
 import { ProvenanceNote } from "@/components/Provenance";
@@ -61,8 +61,16 @@ export default async function DocumentPage({
 
   return (
     <main style={{ maxWidth: 760, margin: "0 auto", padding: space[7] }}>
+      {/*
+        The credit line, above the title rather than buried in a footer. Both
+        licences that permit this material require the source to be
+        "prominently acknowledged" (.docs/06-government-sources/source-licences.md);
+        a hover-only or footer-only credit does not meet that, and the credit is
+        read from the licence registry so it cannot drift from the terms it
+        satisfies.
+      */}
       <p style={{ fontSize: 13, color: color.text.tertiary, margin: 0 }}>
-        {view.provenance.issuingAuthority}
+        {attributionFor(view.provenance.sourceId)}
       </p>
       <h1 style={{ fontSize: 26, lineHeight: 1.3, margin: "4px 0 0", color: color.text.primary }}>
         {view.title}
