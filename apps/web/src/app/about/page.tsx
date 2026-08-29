@@ -20,8 +20,8 @@ export default function AboutPage(): React.JSX.Element {
       <h2 style={{ fontSize: 18, marginTop: 28 }}>What is on this screen, and what is missing</h2>
       <ul style={{ maxWidth: "62ch", lineHeight: 1.65 }}>
         <li>
-          <strong>Boundaries</strong> — real. State and district geometry derived from Census 2011
-          administrative units and simplified for display.
+          <strong>Boundaries</strong> — real. State and district geometry from OpenStreetMap under
+          ODbL, identified against the Local Government Directory and simplified for display.
         </li>
         <li>
           <strong>Records</strong> — real. Audit reports published by the Comptroller and Auditor

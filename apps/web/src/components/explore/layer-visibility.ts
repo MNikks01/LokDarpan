@@ -23,7 +23,11 @@ export const LAYER_LABELS: readonly {
   readonly label: string;
   readonly note: string;
 }[] = [
-  { key: "states", label: "State boundaries", note: "Census 2011 administrative units" },
+  {
+    key: "states",
+    label: "State boundaries",
+    note: "OpenStreetMap, identified against the directory",
+  },
   {
     key: "areas",
     label: "Area boundaries",

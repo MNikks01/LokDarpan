@@ -35,7 +35,7 @@ export function MapOverlays({
         {basemapPresent
           ? "Base map © OpenStreetMap contributors (ODbL), self-hosted"
           : "No base map installed"}{" "}
-        · Boundaries: Census 2011 (states), OpenStreetMap (below) · MapLibre GL
+        · Boundaries © OpenStreetMap contributors (ODbL) · MapLibre GL
       </p>
       {loading && (
         <p className={styles.attribution} style={{ left: 12, right: "auto" }} role="status">
