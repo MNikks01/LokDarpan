@@ -199,7 +199,10 @@ export interface ProjectFinance {
   allocated: Money;
   released: Money;
   utilized: Money;
-  variance: Money; // released − utilized (or allocated − utilized, per context; see note)
+  /** Released − Utilized. `null` when either side is absent. */
+  releaseVariance: Money | null;
+  /** Allocated − Utilized. A different quantity, against a different denominator. */
+  allocationVariance: Money | null;
   deviationPct: number; // signed %; formula in doc 06
   costPerKmInr: number | null; // utilized / length_km, roads only (doc 08)
   status: "consistent" | "needs_verification" | "insufficient_data";
