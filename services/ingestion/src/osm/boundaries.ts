@@ -256,14 +256,27 @@ export function parseRelation(relation: OverpassRelation): ParsedUnit {
   const rings = assembleRings(relation);
   assertWithinIndia(relation.id, rings);
 
+  // A reference is kept only when its register matches this level.
+  //
+  // Ladakh is the case that proved this: OSM tags Zanskar as admin_level 5 —
+  // a district here — while its only reference is `ref:LGD:subdistrict=15`.
+  // District 15 is Bilaspur, in Himachal Pradesh, five hundred kilometres
+  // away. Storing that code against Zanskar claims it IS Bilaspur, and every
+  // LGD code is a bare integer so nothing about the number says otherwise.
+  //
+  // Dropping it costs nothing: the unit is still identified by its relation
+  // id, which is what `admin_unit_identified` requires. A wrong identity is
+  // not a lesser problem than a missing one.
   const reference = lgdReference(tags);
+  const identified =
+    reference !== null && lgdKindMatchesLevel(reference.kind, level) ? reference : null;
   return {
     osmRelationId: relation.id,
     name,
     level,
     osmAdminLevel: adminLevel,
-    lgdCode: reference?.code ?? null,
-    lgdCodeKind: reference?.kind ?? null,
+    lgdCode: identified?.code ?? null,
+    lgdCodeKind: identified?.kind ?? null,
     rings,
   };
 }
