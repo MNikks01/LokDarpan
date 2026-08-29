@@ -96,6 +96,12 @@ export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promi
     if (datasetVersionId === undefined) throw new Error("could not open a dataset version");
 
     for (const unit of units) {
+      // A savepoint per unit, because the recovery below is otherwise a lie.
+      // Postgres aborts the whole transaction on the first failed statement, so
+      // catching the error and carrying on produced 25P02 on every subsequent
+      // unit and reported the symptom instead of the cause. Ladakh's six
+      // districts were lost that way, under an error naming none of them.
+      await db.query("SAVEPOINT unit");
       try {
         await claimDirectoryUnit(db, unit);
 
@@ -163,9 +169,11 @@ export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promi
             datasetVersionId,
           ],
         );
+        await db.query("RELEASE SAVEPOINT unit");
       } catch (error: unknown) {
-        // One malformed boundary must not abandon the rest of a district. It is
-        // recorded and reported; the transaction continues.
+        // One malformed boundary must not abandon the rest of a state. Rewind
+        // to the savepoint so the transaction is usable again, then record it.
+        await db.query("ROLLBACK TO SAVEPOINT unit");
         failed.push({
           osmRelationId: unit.osmRelationId,
           reason: error instanceof Error ? (error.message.split("\n")[0] ?? "unknown") : "unknown",

@@ -2,24 +2,19 @@
 /**
  * Build-time preparation of administrative boundary geometry.
  *
- * TWO SOURCES, WITH DIFFERENT TERMS
- * State outlines come from the ledger, where they were ingested from
- * OpenStreetMap under ODbL — a licence that permits redistribution with
- * attribution, which is why the attribution travels into the manifest and is
- * shown to the reader.
+ * ONE SOURCE, AND IT MAY BE REDISTRIBUTED
+ * Both layers now come from the ledger, where they were ingested from
+ * OpenStreetMap under ODbL, validated on the way in, and identified against the
+ * Local Government Directory. ODbL permits redistribution with attribution,
+ * which is why the attribution travels into the manifest and is shown to the
+ * reader rather than merely recorded.
  *
- * Districts still come from the Census-derived extract below, which declares no
- * licence at all. Until they are ingested too, that half stays fetched-not-
- * committed for exactly the reason it always was.
- *
- * WHY THIS IS A SCRIPT AND NOT COMMITTED DATA
- * The upstream repository publishes Census-2011-derived district polygons but
- * declares no licence. `.docs/17-legal/legal-ethical-rules.md` and the source
- * registry rule both forbid republishing material whose terms we have not
- * established, so the geometry is fetched into a gitignored directory at setup
- * and never checked in. `apps/web/public/geo/manifest.json` records the source,
- * the pinned commit and the retrieval date, so what is on disk is traceable —
- * the same standard the ingestion pipeline applies to government sources.
+ * This replaces a Census-derived extract that declared no licence at all. The
+ * geometry is still generated rather than committed, but the reason has changed
+ * from "we may not republish this" to "it is derived, and the ledger is where
+ * it is authored". `apps/web/public/geo/manifest.json` records what was written
+ * and when, so what is on disk stays traceable — the same standard the
+ * ingestion pipeline applies to government sources.
  *
  * Run: pnpm --filter @lokdarpan/web geo:fetch
  */
@@ -31,43 +26,27 @@ import simplify from "@turf/simplify";
 import type { Feature, FeatureCollection, Polygon, MultiPolygon, Position } from "geojson";
 import pg from "pg";
 
-/** Pinned to a commit: an unpinned `main` would change geometry under us silently. */
-const SOURCE = {
-  name: "india-maps-data (Census 2011 administrative boundaries)",
-  repository: "https://github.com/udit-001/india-maps-data",
-  commit: "2884453",
-  url: "https://cdn.jsdelivr.net/gh/udit-001/india-maps-data@2884453/geojson/india.geojson",
-  licence: "unknown — not declared by the upstream repository as of retrieval",
-} as const;
-
 /**
  * Two resolutions, because one does not serve both views. The national view
  * draws 700+ polygons at once and must stay under a few hundred kilobytes; a
  * single state is drawn alone and can afford ten times the vertex budget.
  */
+const TOLERANCE_NATIONAL = 0.02;
+const TOLERANCE_STATE = 0.004;
+
 /**
- * State outlines, as the ledger holds them.
+ * Boundaries, as the ledger holds them.
  *
  * Not a URL: the geometry has already been ingested, validated and attributed
  * by `services/ingestion/src/osm`, and re-fetching it here would be a second,
  * unverified path to the same shapes.
  */
-const STATE_SOURCE = {
+const LEDGER_SOURCE = {
   name: "OpenStreetMap administrative boundaries (via the LokDarpan ledger)",
   attribution: "© OpenStreetMap contributors",
   licence: "ODbL 1.0 — https://opendatacommons.org/licenses/odbl/1-0/",
   retrievedFrom: "admin_unit_boundary",
 } as const;
-
-const TOLERANCE_NATIONAL = 0.02;
-const TOLERANCE_STATE = 0.004;
-
-interface SourceProperties {
-  readonly st_nm: string;
-  readonly st_code: string;
-  readonly district: string;
-  readonly dt_code: string;
-}
 
 type AreaFeature = Feature<Polygon | MultiPolygon, Record<string, unknown>>;
 
@@ -160,41 +139,88 @@ function signedArea(ring: readonly Position[]): number {
   return total / 2;
 }
 
+export interface LedgerDistrict {
+  readonly stateCode: string;
+  readonly stateName: string;
+  readonly unitId: number;
+  readonly code: string | null;
+  readonly name: string;
+  readonly geometry: Polygon | MultiPolygon;
+}
+
 /**
- * State outlines from the ledger, as features this script can treat like any
- * other. Simplification and label placement then run over them unchanged, so a
- * state's label still sits on its largest landmass rather than the centre of a
- * bounding box that spans its islands.
+ * Both layers, read from the ledger in one connection.
+ *
+ * Simplification and label placement then run over them unchanged, so a state's
+ * label still sits on its largest landmass rather than the centre of a bounding
+ * box that spans its islands.
+ *
+ * A district reaches its state through `parent_id`, which the ingest assigns by
+ * containment. A district whose parent is not a state is left out rather than
+ * filed under a guess — the map would rather be missing a shape than show one
+ * in the wrong place.
  */
-async function ledgerStateOutlines(): Promise<AreaFeature[]> {
+async function ledgerGeography(): Promise<{
+  states: AreaFeature[];
+  districts: LedgerDistrict[];
+}> {
   const connectionString = process.env["DATABASE_URL"];
   if (connectionString === undefined || connectionString === "") {
-    throw new Error("DATABASE_URL is not set — state outlines are read from the ledger.");
+    throw new Error("DATABASE_URL is not set — boundary geometry is read from the ledger.");
   }
   const client = new pg.Client({ connectionString });
   await client.connect();
   try {
-    const result = await client.query<{ code: string; name: string; geometry: string }>(
+    const stateRows = await client.query<{ code: string; name: string; geometry: string }>(
       `SELECT u.lgd_code AS code, u.name_en AS name, ST_AsGeoJSON(b.geometry) AS geometry
          FROM admin_unit u
          JOIN admin_unit_boundary b ON b.admin_unit_id = u.id
         WHERE u.level = 'state'
         ORDER BY u.name_en`,
     );
-    if (result.rows.length === 0) {
+    if (stateRows.rows.length === 0) {
       // Writing an empty map would look like a working setup with no states in
       // India, which is worse than refusing to write one.
       throw new Error("The ledger holds no state boundaries. Run ingest:osm-boundaries first.");
     }
-    return result.rows.map((row) => ({
-      type: "Feature",
-      properties: {
-        stateCode: row.code,
-        stateName: row.name,
-        stateSlug: slugify(row.name),
-      },
-      geometry: JSON.parse(row.geometry) as Polygon | MultiPolygon,
-    }));
+
+    const districtRows = await client.query<{
+      state_code: string;
+      state_name: string;
+      unit_id: string;
+      code: string | null;
+      name: string;
+      geometry: string;
+    }>(
+      `SELECT s.lgd_code AS state_code, s.name_en AS state_name,
+              d.id AS unit_id, d.lgd_code AS code, d.name_en AS name,
+              ST_AsGeoJSON(b.geometry) AS geometry
+         FROM admin_unit d
+         JOIN admin_unit s ON s.id = d.parent_id AND s.level = 'state'
+         JOIN admin_unit_boundary b ON b.admin_unit_id = d.id
+        WHERE d.level = 'district'
+        ORDER BY s.name_en, d.name_en`,
+    );
+
+    return {
+      states: stateRows.rows.map((row) => ({
+        type: "Feature",
+        properties: {
+          stateCode: row.code,
+          stateName: row.name,
+          stateSlug: slugify(row.name),
+        },
+        geometry: JSON.parse(row.geometry) as Polygon | MultiPolygon,
+      })),
+      districts: districtRows.rows.map((row) => ({
+        stateCode: row.state_code,
+        stateName: row.state_name,
+        unitId: Number(row.unit_id),
+        code: row.code,
+        name: row.name,
+        geometry: JSON.parse(row.geometry) as Polygon | MultiPolygon,
+      })),
+    };
   } finally {
     await client.end();
   }
@@ -203,55 +229,38 @@ async function ledgerStateOutlines(): Promise<AreaFeature[]> {
 async function main(): Promise<void> {
   const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "geo");
 
-  process.stdout.write(`Fetching ${SOURCE.url}\n`);
-  const response = await fetch(SOURCE.url);
-  if (!response.ok) {
-    throw new Error(`boundary source returned ${String(response.status)} — geometry not written`);
-  }
-  const raw = (await response.json()) as FeatureCollection<
-    Polygon | MultiPolygon,
-    SourceProperties
-  >;
-  process.stdout.write(`  ${String(raw.features.length)} district features\n`);
+  const { states: stateRows, districts: districtRows } = await ledgerGeography();
+  process.stdout.write(
+    `  ${String(stateRows.length)} states, ${String(districtRows.length)} districts from the ledger\n`,
+  );
 
   await rm(outDir, { recursive: true, force: true });
   await mkdir(join(outDir, "districts"), { recursive: true });
 
-  // The source mixes two kinds of feature in one collection: district polygons,
-  // and whole-state outlines that carry no `district` property. Splitting them
-  // here means a state outline is used as published wherever one exists, and
-  // only reconstructed by dissolving districts for the states that lack one.
-  const byState = new Map<string, Feature<Polygon | MultiPolygon, SourceProperties>[]>();
-  for (const feature of raw.features) {
-    const code = feature.properties.st_code;
-    // Whole-state features carry no `district`. State outlines come from the
-    // ledger now, so these are simply not what this pass is collecting.
-    if (typeof feature.properties.district !== "string") continue;
-    const bucket = byState.get(code);
-    if (bucket === undefined) byState.set(code, [feature]);
-    else bucket.push(feature);
-  }
-
   const districtIndex: Record<string, unknown[]> = {};
   const districtCounts = new Map<string, number>();
 
-  for (const [stateCode, features] of [...byState.entries()].sort((a, b) =>
-    a[0].localeCompare(b[0]),
-  )) {
-    const stateName = features[0]?.properties.st_nm ?? "Unknown";
+  const byState = new Map<string, LedgerDistrict[]>();
+  for (const row of districtRows) {
+    const bucket = byState.get(row.stateCode);
+    if (bucket === undefined) byState.set(row.stateCode, [row]);
+    else bucket.push(row);
+  }
 
-    const districtFeatures: AreaFeature[] = features.map((f) =>
+  for (const [stateCode, rows] of [...byState.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const districtFeatures: AreaFeature[] = rows.map((row) =>
       simplified(
         {
           type: "Feature",
           properties: {
-            districtCode: f.properties.dt_code,
-            districtName: f.properties.district,
-            districtSlug: slugify(f.properties.district),
+            districtCode: row.code,
+            districtName: row.name,
+            districtSlug: slugify(row.name),
             stateCode,
-            stateName,
+            stateName: row.stateName,
+            unitId: row.unitId,
           },
-          geometry: f.geometry,
+          geometry: row.geometry,
         },
         TOLERANCE_STATE,
       ),
@@ -270,15 +279,12 @@ async function main(): Promise<void> {
     }));
 
     districtCounts.set(stateCode, districtFeatures.length);
-    process.stdout.write(`  ${stateName} — ${String(districtFeatures.length)} districts\n`);
   }
 
   // State outlines come from the ledger, not from dissolving the extract's
   // districts: they carry a licence, and they are the same shapes the unit
   // pages draw, so the country view and a state page cannot disagree.
-  const nationalOutlines = (await ledgerStateOutlines()).map((outline) =>
-    simplified(outline, TOLERANCE_NATIONAL),
-  );
+  const nationalOutlines = stateRows.map((outline) => simplified(outline, TOLERANCE_NATIONAL));
   const states = nationalOutlines.map((outline) => ({
     code: String(outline.properties["stateCode"]),
     name: String(outline.properties["stateName"]),
@@ -300,7 +306,7 @@ async function main(): Promise<void> {
     JSON.stringify(
       {
         generatedAt: new Date().toISOString(),
-        sources: { states: STATE_SOURCE, districts: SOURCE },
+        sources: { states: LEDGER_SOURCE, districts: LEDGER_SOURCE },
         note: "Administrative boundaries only. Boundary depiction follows the upstream dataset and is not an authoritative statement of any border.",
         states: [...states].sort((a, b) => a.name.localeCompare(b.name)),
         districts: districtIndex,

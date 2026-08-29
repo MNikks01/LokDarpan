@@ -402,3 +402,58 @@ describe("an LGD reference as identity", () => {
     expect(lgdKindMatchesLevel("ref:LGD:ward", "ward")).toBe(false);
   });
 });
+
+/**
+ * The case that proved the rule, kept as a test because it is not hypothetical.
+ *
+ * OSM tags Zanskar as admin_level 5 — a district, in India — while the only
+ * reference it carries is `ref:LGD:subdistrict=15`. LGD district 15 is
+ * Bilaspur, in Himachal Pradesh, some five hundred kilometres away.
+ */
+describe("a reference from the wrong register", () => {
+  const zanskar: OverpassRelation = {
+    type: "relation",
+    id: 10390947,
+    tags: { name: "Zanskar", admin_level: "5", "ref:LGD:subdistrict": "15" },
+    members: [
+      {
+        type: "way",
+        role: "outer",
+        geometry: [
+          { lat: 33.5, lon: 76.9 },
+          { lat: 33.5, lon: 77.4 },
+          { lat: 34.0, lon: 77.4 },
+          { lat: 33.5, lon: 76.9 },
+        ],
+      },
+    ],
+  };
+
+  it("is dropped rather than stored against the wrong place", () => {
+    // Storing 15 here does not merely mislabel Zanskar — it asserts Zanskar is
+    // Bilaspur, and every LGD code is a bare integer so the number itself
+    // raises no objection.
+    const unit = parseRelation(zanskar);
+    expect(unit.lgdCode).toBeNull();
+    expect(unit.lgdCodeKind).toBeNull();
+  });
+
+  it("still yields a usable unit, identified by its relation", () => {
+    // A missing code is not a missing unit: `admin_unit_identified` accepts a
+    // relation id alone, which is exactly what it is for.
+    const unit = parseRelation(zanskar);
+    expect(unit.osmRelationId).toBe(10390947);
+    expect(unit.name).toBe("Zanskar");
+    expect(unit.level).toBe("district");
+  });
+
+  it("keeps a reference whose register does match", () => {
+    const kargil = parseRelation({
+      ...zanskar,
+      id: 18773975,
+      tags: { name: "Kargil district", admin_level: "5", "ref:LGD:district": "6" },
+    });
+    expect(kargil.lgdCode).toBe("6");
+    expect(kargil.lgdCodeKind).toBe("ref:LGD:district");
+  });
+});

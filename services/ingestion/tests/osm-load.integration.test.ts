@@ -90,7 +90,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         [LGD_STATE, LGD_OTHER],
       ]);
       await client?.query(`DELETE FROM admin_unit WHERE osm_relation_id = ANY($1)`, [
-        [RELATION, RELATION_UNMATCHED],
+        [RELATION, RELATION_UNMATCHED, 990_000_201, 990_000_202, 990_000_203],
       ]);
       await client?.query(`DELETE FROM dataset_version WHERE id = $1`, [seedVersionId]);
       await client?.query(`DELETE FROM source_artifact WHERE sha256 = ANY($1)`, [
@@ -134,6 +134,56 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         [seededId],
       );
       expect(rows?.rows[0]?.name_en).toBe("Directory State");
+    });
+
+    it("loads the good units in a batch that also contains a bad one", async () => {
+      if (client === undefined) return;
+      // Postgres aborts the whole transaction on the first failed statement, so
+      // catching the error and carrying on used to leave every later unit
+      // failing with "current transaction is aborted" — an error naming none of
+      // them. Ladakh lost all six of its districts that way, and the run still
+      // reported "0 rejected". A savepoint is what makes the recovery real.
+      // Identified by relation id alone. They must not share the fixture's LGD
+      // code: `(lgd_code, level)` is unique, so three units carrying one code
+      // would all fail and prove nothing about isolation.
+      const anonymous = { lgdCode: null, lgdCodeKind: null } as const;
+      const good = unit({
+        ...anonymous,
+        osmRelationId: 990_000_201,
+        name: "Good",
+        rings: [square(65, -31)],
+      });
+      const bad = unit({
+        ...anonymous,
+        osmRelationId: 990_000_202,
+        name: "Bad",
+        // No rings: WKT for an empty polygon, which the geometry checks refuse.
+        rings: [],
+      });
+      const alsoGood = unit({
+        ...anonymous,
+        osmRelationId: 990_000_203,
+        name: "Also good",
+        rings: [square(67, -31)],
+      });
+
+      const result = await loadBoundaries(client, {
+        units: [good, bad, alsoGood],
+        artifact,
+        datasetDescription: "osm load integration test",
+        parentId: null,
+      });
+
+      expect(result.failed).toHaveLength(1);
+      expect(result.failed[0]?.osmRelationId).toBe(990_000_202);
+      // The failure names the unit that failed, not a transaction state.
+      expect(result.failed[0]?.reason).not.toContain("current transaction is aborted");
+
+      const loaded = await client.query<{ name_en: string }>(
+        `SELECT name_en FROM admin_unit WHERE osm_relation_id = ANY($1) ORDER BY name_en`,
+        [[990_000_201, 990_000_202, 990_000_203]],
+      );
+      expect(loaded.rows.map((r) => r.name_en)).toEqual(["Also good", "Good"]);
     });
 
     it("inserts a new unit when the reference names a different level", async () => {

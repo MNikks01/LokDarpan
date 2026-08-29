@@ -78,7 +78,7 @@ export function BoundarySources({
 
         <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "10px 0 0" }}>
           <span aria-hidden="true">▤ </span>
-          State outlines: {outlineSource.attribution} · {outlineSource.licence}
+          State and district outlines: {outlineSource.attribution} · {outlineSource.licence}
         </p>
 
         {withoutBoundary > 0 && (
