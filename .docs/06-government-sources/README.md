@@ -50,6 +50,7 @@ Read these two Sprint 0 findings first.
 - [`datagovin-api-findings.md`](./datagovin-api-findings.md) — the **catalogue API needs no key** (285,974 resources). Maharashtra publishes **no** procurement data; six other states do. Note the ignored-parameter trap.
 - [`gepnic-access-findings.md`](./gepnic-access-findings.md) — **award data is CAPTCHA-gated on every GePNIC portal tested**, and on CPPP. Changing state does not obtain it; Phase 1 stays Maharashtra.
 - [`sprint0-findings-q1-q3.md`](./sprint0-findings-q1-q3.md) — **Q1 no** (no Maharashtra PWD works register), **Q3 yes** (BEAMS public MIS: departmental/scheme/DDO expenditure, ten years, no login).
+- [`tender-ingestion-plan.md`](./tender-ingestion-plan.md) — Mahatenders re-verified closed (29 Aug). What a tender connector **can** collect — landing pages in 34 permitting states, forward-only, advertisements never awards — plus the schema, pipeline and copy that keep that limit visible.
 
 ## Documents
 
