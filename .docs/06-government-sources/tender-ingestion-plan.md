@@ -54,6 +54,8 @@ That is a genuine dataset — a national picture of what governments are adverti
 
 The highest-value unexplored path, and the only one that resolves Route 1. For a public-interest platform built entirely on official records, asking the department is not a fallback; it is the appropriate approach, and it may yield a better feed than crawling ever would — awards included, and structured.
 
+A draft letter is ready in [`mahatenders-access-request-draft.md`](./mahatenders-access-request-draft.md), together with a note on filing an RTI in parallel — the statutory route gets _an_ answer where a courteous one may get a better one.
+
 This is the recommendation. Everything below is buildable in the meantime.
 
 ---
@@ -135,6 +137,6 @@ The hard part is not the component; it is not overstating what we hold.
 
 ## 6. Recommendation
 
-1. **Write to the Government of Maharashtra** (Route 4). It is the only path to award data and to Route 1, and it is slow — so it should start first.
+1. **Write to the Government of Maharashtra** (Route 4) — draft ready in [`mahatenders-access-request-draft.md`](./mahatenders-access-request-draft.md). It is the only path to award data and to Route 1, and it is slow, so it should start first.
 2. **Build the GePNIC landing-page connector against Tamil Nadu**, an unrestricted portal, proving the shape end to end. It is the same parameterised connector for ~28 states.
 3. **Do not build a Mahatenders scraper.** Not as a spike, not behind a flag, not "for testing". The finding is recorded; the door is closed by the publisher, not by us.
