@@ -66,6 +66,9 @@ interface TenderLayer {
   readonly shadedBoundaries: FeatureCollection | null;
   readonly unitTenders: ReturnType<typeof useTendersFor>["tenders"];
   readonly unitTendersLoading: boolean;
+  readonly showingUnplaced: boolean;
+  readonly toggleUnplaced: () => void;
+  readonly unplacedTenders: ReturnType<typeof useTendersFor>["tenders"];
 }
 
 /**
@@ -82,8 +85,15 @@ function useTenderLayer(
   childBoundaries: FeatureCollection | null,
 ): TenderLayer {
   const [department, setDepartment] = useState<string | null>(null);
+  const [showingUnplaced, setShowingUnplaced] = useState(false);
   const { overview, failed } = useTenderOverview(department);
   const { tenders: unitTenders, loading: unitTendersLoading } = useTendersFor(unitId, department);
+  // Fetched only once asked for: the panel states the count from the overview,
+  // so the list itself is a second question the reader may never put.
+  const { tenders: unplacedTenders } = useTendersFor(null, department, showingUnplaced);
+  const toggleUnplaced = useCallback(() => {
+    setShowingUnplaced((showing) => !showing);
+  }, []);
 
   const shadedBoundaries = useMemo(
     () => withTenderCounts(childBoundaries, overview.districts),
@@ -98,6 +108,9 @@ function useTenderLayer(
     shadedBoundaries,
     unitTenders,
     unitTendersLoading,
+    showingUnplaced,
+    toggleUnplaced,
+    unplacedTenders,
   };
 }
 
@@ -375,10 +388,19 @@ function ExplorerRail({
         failed={tenderState.failed}
         department={tenderState.department}
         onSelectDepartment={tenderState.setDepartment}
+        showingUnplaced={tenderState.showingUnplaced}
+        onToggleUnplaced={tenderState.toggleUnplaced}
       />
+      {tenderState.showingUnplaced && (
+        <TenderList
+          heading="Tenders we could not place"
+          tenders={tenderState.unplacedTenders}
+          loading={false}
+        />
+      )}
       {activeUnit !== null && (
         <TenderList
-          districtName={activeUnit.name}
+          heading={`Tenders from offices in ${activeUnit.name}`}
           tenders={tenderState.unitTenders}
           loading={tenderState.unitTendersLoading}
         />
