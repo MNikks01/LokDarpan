@@ -4,6 +4,7 @@ import { parseDetail } from "./detail";
 import { CrawlNotPermitted, PortalSession, isStaleSession } from "./fetch";
 import { parseLanding } from "./landing";
 import { districtsOfState, loadTenders, type TenderRecord } from "./load";
+import { PORTALS, portalByCode } from "./portals";
 
 /**
  * Collect one GePNIC portal's currently advertised tenders.
@@ -78,21 +79,43 @@ function report(records: readonly TenderRecord[]): void {
   }
 }
 
+interface Target {
+  readonly portalCode: string;
+  readonly baseUrl: string;
+  readonly stateLgdCode: string;
+}
+
+/**
+ * Which portal to collect from.
+ *
+ * `--base` and `--state` stay available so a deployment can be tried before it
+ * is added to the table, but the table is the normal path: its URLs come from
+ * the verified source registry rather than from whoever is typing the command.
+ */
+function resolveTarget(): Target {
+  const portalCode = arg("portal");
+  const portal = portalCode === undefined ? undefined : portalByCode(portalCode);
+  const baseUrl = arg("base") ?? portal?.baseUrl;
+  const stateLgdCode = arg("state") ?? portal?.stateLgdCode;
+
+  if (portalCode === undefined || baseUrl === undefined || stateLgdCode === undefined) {
+    process.stderr.write(
+      "Usage: ingest:gepnic --portal=<code> [--base=<https://host> --state=<lgd code>]\n\n" +
+        `Known portals (${String(PORTALS.length)}):\n` +
+        PORTALS.map((p) => `  ${p.code.padEnd(14)} ${p.state}\n`).join(""),
+    );
+    process.exit(EXIT_USAGE);
+  }
+  return { portalCode, baseUrl, stateLgdCode };
+}
+
 async function main(): Promise<void> {
   const connectionString = process.env["DATABASE_URL"];
   if (connectionString === undefined || connectionString === "") {
     process.stderr.write("DATABASE_URL is not set.\n");
     process.exit(EXIT_MISCONFIGURED);
   }
-  const portalCode = arg("portal");
-  const baseUrl = arg("base");
-  const stateLgdCode = arg("state");
-  if (portalCode === undefined || baseUrl === undefined || stateLgdCode === undefined) {
-    process.stderr.write(
-      "Usage: ingest:gepnic --portal=<code> --base=<https://host> --state=<lgd code>\n",
-    );
-    process.exit(EXIT_USAGE);
-  }
+  const { portalCode, baseUrl, stateLgdCode } = resolveTarget();
 
   process.stdout.write(`Checking ${baseUrl} for a crawl policy …\n`);
   const { session, landing } = await PortalSession.open(baseUrl);
