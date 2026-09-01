@@ -194,3 +194,169 @@ export function TendersPanel({
     </div>
   );
 }
+
+export interface TenderSummary {
+  readonly id: number;
+  readonly title: string;
+  readonly tenderReference: string;
+  readonly department: string | null;
+  readonly closingAt: string | null;
+  readonly tenderCategory: string | null;
+  readonly productCategory: string | null;
+  readonly tenderType: string | null;
+  readonly location: string | null;
+  readonly pincode: string | null;
+  readonly tenderValueInr: string | null;
+  readonly emdInr: string | null;
+  readonly organisationChain: string | null;
+  readonly districtName: string | null;
+  readonly districtSource: string | null;
+  readonly sourceUrl: string;
+}
+
+/**
+ * Group a rupee figure the Indian way, without ever making it a number.
+ *
+ * `Intl.NumberFormat` would need a float, and a float loses precision on a
+ * large figure silently — behind a correct-looking source link, which is the
+ * worst way for a government number to be wrong. The digits arrive as a string
+ * from the server and stay one all the way to the screen.
+ */
+export function groupRupees(value: string): string {
+  const [whole = "", fraction] = value.split(".");
+  const head = whole.slice(0, -3);
+  const tail = whole.slice(-3);
+  const grouped = head === "" ? tail : `${head.replace(/\B(?=(\d{2})+(?!\d))/g, ",")},${tail}`;
+  // Whole rupees are shown whole. ".00" on every figure is noise, not precision.
+  return fraction === undefined || fraction === "00" ? grouped : `${grouped}.${fraction}`;
+}
+
+export function useTendersFor(
+  unitId: number | null,
+  department: string | null,
+): {
+  readonly tenders: readonly TenderSummary[];
+  readonly loading: boolean;
+} {
+  const [tenders, setTenders] = useState<readonly TenderSummary[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (unitId === null) {
+      setTenders([]);
+      return;
+    }
+    const controller = new AbortController();
+    setLoading(true);
+    const query = new URLSearchParams({ unit: String(unitId) });
+    if (department !== null) query.set("department", department);
+
+    fetch(`/api/v1/tenders?${query.toString()}`, { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
+      .then((body: { data: { tenders: readonly TenderSummary[] } }) => {
+        setTenders(body.data.tenders);
+        setLoading(false);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error && error.name === "AbortError") return;
+        setTenders([]);
+        setLoading(false);
+      });
+    return () => {
+      controller.abort();
+    };
+  }, [unitId, department]);
+
+  return { tenders, loading };
+}
+
+/** How the district was arrived at, in words a reader can weigh. */
+const PLACEMENT_NOTE: Readonly<Record<string, string>> = {
+  chain_unit: "The issuing office names this district.",
+  office_code: "Read from an office name, which may cover more than one district.",
+};
+
+export function TenderList({
+  districtName,
+  tenders,
+  loading,
+}: {
+  readonly districtName: string;
+  readonly tenders: readonly TenderSummary[];
+  readonly loading: boolean;
+}): React.JSX.Element {
+  return (
+    <div className={styles.panel}>
+      <div className={styles.panelBody}>
+        <h2 className={styles.panelTitle}>Tenders from offices in {districtName}</h2>
+
+        {loading && <p style={{ fontSize: 12.5, margin: 0 }}>Loading…</p>}
+
+        {!loading && tenders.length === 0 && (
+          <p style={{ fontSize: 12.5, color: "var(--ld-text-secondary)", margin: 0 }}>
+            <span aria-hidden="true">▤ </span>
+            No open tender from an office in this district is held. Collection began recently, so
+            this is a statement about what we hold, not about what was advertised.
+          </p>
+        )}
+
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
+          {tenders.map((tender) => (
+            <li key={tender.id} style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+              <span style={{ fontWeight: 600 }}>{tender.title}</span>
+              <span style={{ display: "block", color: "var(--ld-text-secondary)" }}>
+                {tender.department ?? "Department not stated"}
+                {tender.tenderCategory !== null && ` · ${tender.tenderCategory}`}
+              </span>
+              <span style={{ display: "block", color: "var(--ld-text-tertiary)", fontSize: 11.5 }}>
+                Ref {tender.tenderReference}
+                {tender.closingAt !== null &&
+                  ` · closes ${new Date(tender.closingAt).toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}`}
+              </span>
+              {tender.tenderValueInr !== null && (
+                <span style={{ display: "block", fontSize: 12 }}>
+                  Value ₹{groupRupees(tender.tenderValueInr)}
+                </span>
+              )}
+              {tender.tenderValueInr === null && (
+                <span
+                  style={{ display: "block", color: "var(--ld-text-tertiary)", fontSize: 11.5 }}
+                >
+                  <span aria-hidden="true">▤ </span>
+                  No value published for this tender.
+                </span>
+              )}
+              {tender.location !== null && (
+                <span
+                  style={{ display: "block", color: "var(--ld-text-tertiary)", fontSize: 11.5 }}
+                >
+                  {tender.location}
+                  {tender.pincode !== null && ` · ${tender.pincode}`}
+                </span>
+              )}
+              {tender.districtSource !== null && (
+                <span style={{ display: "block", color: "var(--ld-text-tertiary)", fontSize: 11 }}>
+                  {PLACEMENT_NOTE[tender.districtSource] ?? ""}
+                </span>
+              )}
+              <a
+                href={tender.sourceUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                style={{ fontSize: 11.5 }}
+              >
+                Source: the portal this was read from
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

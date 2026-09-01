@@ -3,6 +3,7 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import type { FeatureCollection } from "geojson";
 import type { GeoUnit, SearchResult } from "@lokdarpan/domain";
 import type { StateOption } from "@/data/geography";
 import { Button, controlStyles } from "@/components/ui";
@@ -16,7 +17,13 @@ import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
 import { SearchDialog } from "./SearchDialog";
 import { BoundarySources } from "./BoundarySources";
-import { TendersPanel, useTenderOverview, withTenderCounts } from "./tenders";
+import {
+  TenderList,
+  TendersPanel,
+  useTenderOverview,
+  useTendersFor,
+  withTenderCounts,
+} from "./tenders";
 import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
 import { useExplorerGeography, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
@@ -51,6 +58,49 @@ export interface ExploreShellProps {
  * goes from `fetch` to a MapLibre source and is replaced wholesale on the next
  * selection.
  */
+interface TenderLayer {
+  readonly overview: ReturnType<typeof useTenderOverview>["overview"];
+  readonly failed: boolean;
+  readonly department: string | null;
+  readonly setDepartment: (department: string | null) => void;
+  readonly shadedBoundaries: FeatureCollection | null;
+  readonly unitTenders: ReturnType<typeof useTendersFor>["tenders"];
+  readonly unitTendersLoading: boolean;
+}
+
+/**
+ * The tender layer's state, gathered so the shell keeps orchestrating rather
+ * than accumulating one feature's bookkeeping.
+ *
+ * The counts ride along inside the boundary features the map already draws, so
+ * there is no second source and no feature-state to keep in step. Selecting a
+ * unit lists its tenders through the explorer's existing click routing, which
+ * means a shaded district is clickable without a separate target to discover.
+ */
+function useTenderLayer(
+  unitId: number | null,
+  childBoundaries: FeatureCollection | null,
+): TenderLayer {
+  const [department, setDepartment] = useState<string | null>(null);
+  const { overview, failed } = useTenderOverview(department);
+  const { tenders: unitTenders, loading: unitTendersLoading } = useTendersFor(unitId, department);
+
+  const shadedBoundaries = useMemo(
+    () => withTenderCounts(childBoundaries, overview.districts),
+    [childBoundaries, overview.districts],
+  );
+
+  return {
+    overview,
+    failed,
+    department,
+    setDepartment,
+    shadedBoundaries,
+    unitTenders,
+    unitTendersLoading,
+  };
+}
+
 export function ExploreShell({
   states,
   initialState,
@@ -70,15 +120,7 @@ export function ExploreShell({
     scopeLabel,
   } = useExplorerGeography(states, geo.stateCode, geo.unitId);
 
-  const [department, setDepartment] = useState<string | null>(null);
-  const { overview: tenders, failed: tendersFailed } = useTenderOverview(department);
-
-  // The counts ride along in the boundary features the map already draws, so
-  // no second source and no feature-state bookkeeping is needed.
-  const shadedBoundaries = useMemo(
-    () => withTenderCounts(childBoundaries, tenders.districts),
-    [childBoundaries, tenders.districts],
-  );
+  const tenderState = useTenderLayer(geo.unitId, childBoundaries);
 
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
@@ -162,7 +204,7 @@ export function ExploreShell({
           stateBbox={selectedState?.bbox ?? null}
           activeUnit={activeUnit}
           activeGeometry={activeGeometry}
-          childBoundaries={shadedBoundaries}
+          childBoundaries={tenderState.shadedBoundaries}
           states={states}
           layers={layers}
           insets={insets}
@@ -199,10 +241,8 @@ export function ExploreShell({
           scopeLabel={scopeLabel}
           selectedDocumentId={selectedDocumentId}
           outlineSource={outlineSource}
-          tenders={tenders}
-          tendersFailed={tendersFailed}
-          department={department}
-          onSelectDepartment={setDepartment}
+          tenderState={tenderState}
+          activeUnit={activeUnit}
         />
 
         <div className={cx(styles.controls, drawerInset > 0 && styles.controlsShifted)}>
@@ -303,10 +343,8 @@ function ExplorerRail({
   scopeLabel,
   selectedDocumentId,
   outlineSource,
-  tenders,
-  tendersFailed,
-  department,
-  onSelectDepartment,
+  tenderState,
+  activeUnit,
 }: {
   readonly hidden: boolean;
   readonly states: readonly StateOption[];
@@ -319,10 +357,8 @@ function ExplorerRail({
   readonly scopeLabel: string;
   readonly selectedDocumentId: number | null;
   readonly outlineSource: OutlineSource;
-  readonly tenders: ReturnType<typeof useTenderOverview>["overview"];
-  readonly tendersFailed: boolean;
-  readonly department: string | null;
-  readonly onSelectDepartment: (department: string | null) => void;
+  readonly tenderState: TenderLayer;
+  readonly activeUnit: GeoUnit | null;
 }): React.JSX.Element {
   return (
     <div id="explorer-rail" className={cx(styles.rail, hidden && styles.railCollapsed)}>
@@ -335,11 +371,18 @@ function ExplorerRail({
         ancestors={ancestors}
       />
       <TendersPanel
-        overview={tenders}
-        failed={tendersFailed}
-        department={department}
-        onSelectDepartment={onSelectDepartment}
+        overview={tenderState.overview}
+        failed={tenderState.failed}
+        department={tenderState.department}
+        onSelectDepartment={tenderState.setDepartment}
       />
+      {activeUnit !== null && (
+        <TenderList
+          districtName={activeUnit.name}
+          tenders={tenderState.unitTenders}
+          loading={tenderState.unitTendersLoading}
+        />
+      )}
       <BoundarySources units={units} outlineSource={outlineSource} />
       <RecordsPanel
         scopeLabel={scopeLabel}
