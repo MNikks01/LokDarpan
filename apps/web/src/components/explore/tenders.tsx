@@ -112,11 +112,15 @@ export function TendersPanel({
   failed,
   department,
   onSelectDepartment,
+  showingUnplaced,
+  onToggleUnplaced,
 }: {
   readonly overview: TenderOverview;
   readonly failed: boolean;
   readonly department: string | null;
   readonly onSelectDepartment: (department: string | null) => void;
+  readonly showingUnplaced: boolean;
+  readonly onToggleUnplaced: () => void;
 }): React.JSX.Element {
   const onChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -177,7 +181,23 @@ export function TendersPanel({
                 <span aria-hidden="true">▤ </span>
                 {overview.unplacedCount} further{" "}
                 {overview.unplacedCount === 1 ? "tender names" : "tenders name"} no district we
-                hold, so {overview.unplacedCount === 1 ? "it is" : "they are"} not shaded here.
+                hold, so {overview.unplacedCount === 1 ? "it is" : "they are"} not shaded here.{" "}
+                <button
+                  type="button"
+                  onClick={onToggleUnplaced}
+                  aria-expanded={showingUnplaced}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    font: "inherit",
+                    color: "var(--ld-accent)",
+                    textDecoration: "underline",
+                    cursor: "pointer",
+                  }}
+                >
+                  {showingUnplaced ? "Hide them" : "Show them"}
+                </button>
               </p>
             )}
 
@@ -234,6 +254,7 @@ export function groupRupees(value: string): string {
 export function useTendersFor(
   unitId: number | null,
   department: string | null,
+  unplaced = false,
 ): {
   readonly tenders: readonly TenderSummary[];
   readonly loading: boolean;
@@ -242,13 +263,15 @@ export function useTendersFor(
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (unitId === null) {
+    if (unitId === null && !unplaced) {
       setTenders([]);
       return;
     }
     const controller = new AbortController();
     setLoading(true);
-    const query = new URLSearchParams({ unit: String(unitId) });
+    const query = new URLSearchParams();
+    if (unitId !== null) query.set("unit", String(unitId));
+    if (unplaced) query.set("unplaced", "true");
     if (department !== null) query.set("department", department);
 
     fetch(`/api/v1/tenders?${query.toString()}`, { signal: controller.signal })
@@ -265,7 +288,7 @@ export function useTendersFor(
     return () => {
       controller.abort();
     };
-  }, [unitId, department]);
+  }, [unitId, department, unplaced]);
 
   return { tenders, loading };
 }
@@ -277,26 +300,28 @@ const PLACEMENT_NOTE: Readonly<Record<string, string>> = {
 };
 
 export function TenderList({
-  districtName,
+  heading,
   tenders,
   loading,
 }: {
-  readonly districtName: string;
+  /** Stated by the caller, because a placed list and an unplaced one are
+   *  different claims and neither should be phrased as the other. */
+  readonly heading: string;
   readonly tenders: readonly TenderSummary[];
   readonly loading: boolean;
 }): React.JSX.Element {
   return (
     <div className={styles.panel}>
       <div className={styles.panelBody}>
-        <h2 className={styles.panelTitle}>Tenders from offices in {districtName}</h2>
+        <h2 className={styles.panelTitle}>{heading}</h2>
 
         {loading && <p style={{ fontSize: 12.5, margin: 0 }}>Loading…</p>}
 
         {!loading && tenders.length === 0 && (
           <p style={{ fontSize: 12.5, color: "var(--ld-text-secondary)", margin: 0 }}>
             <span aria-hidden="true">▤ </span>
-            No open tender from an office in this district is held. Collection began recently, so
-            this is a statement about what we hold, not about what was advertised.
+            No open tender is held here. Collection began recently, so this is a statement about
+            what we hold, not about what was advertised.
           </p>
         )}
 
