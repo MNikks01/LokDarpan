@@ -17,7 +17,8 @@
     "review": "tsx src/review/cli.ts",
     "review:triage": "tsx src/review/triage-cli.ts",
     "ingest:osm-boundaries": "tsx src/osm/cli.ts",
-    "ingest:gepnic": "tsx src/gepnic/cli.ts"
+    "ingest:gepnic": "tsx src/gepnic/cli.ts",
+    "ingest:gepnic-sample": "tsx src/gepnic/sample-window.ts"
   },
   "dependencies": {
     "@lokdarpan/database": "workspace:*",
