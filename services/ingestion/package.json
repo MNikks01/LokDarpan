@@ -16,7 +16,8 @@
     "extract:cag-facts": "tsx src/cag/facts-cli.ts",
     "review": "tsx src/review/cli.ts",
     "review:triage": "tsx src/review/triage-cli.ts",
-    "ingest:osm-boundaries": "tsx src/osm/cli.ts"
+    "ingest:osm-boundaries": "tsx src/osm/cli.ts",
+    "ingest:gepnic": "tsx src/gepnic/cli.ts"
   },
   "dependencies": {
     "@lokdarpan/database": "workspace:*",
