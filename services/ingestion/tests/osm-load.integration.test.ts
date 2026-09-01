@@ -16,8 +16,22 @@ const DATABASE_URL = process.env["DATABASE_URL"];
  * beside it. Duplicate units would not fail anything loudly — they would just
  * quietly give one place two pages, two sets of records and two URLs.
  */
+/**
+ * The 5s default is too tight for this suite and has failed it twice on a
+ * machine where it passes alone. Each test opens a transaction, writes an
+ * artefact, a dataset version, several units and their PostGIS geometry, then
+ * cleans up — and it runs beside every other integration suite against one
+ * database. The timeouts were never a hang: they surfaced as "SAVEPOINT can
+ * only be used in transaction blocks", because vitest abandoned the test
+ * mid-transaction and the next statement ran on a connection whose transaction
+ * had already gone. Raising the limit fixes the flake; shortening the work
+ * would mean testing less of it.
+ */
+const SLOW_DB_TIMEOUT_MS = 30_000;
+
 describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
   "osm boundary load (integration)",
+  { timeout: SLOW_DB_TIMEOUT_MS },
   () => {
     let client: pg.Client | undefined;
 
