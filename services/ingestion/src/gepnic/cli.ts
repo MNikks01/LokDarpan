@@ -34,6 +34,14 @@ const EXIT_NOT_PERMITTED = 77;
 /** Courtesy gap between detail fetches. */
 const PAUSE_MS = 1_500;
 
+/**
+ * Longer gap between portals in a sweep.
+ *
+ * Each is a different government's server, and finishing one is a natural
+ * place to pause rather than rolling straight into the next.
+ */
+const BETWEEN_PORTALS_MS = 5_000;
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -67,18 +75,6 @@ async function collectDetails(
   return records;
 }
 
-function report(records: readonly TenderRecord[]): void {
-  const byDepartment = new Map<string, number>();
-  for (const record of records) {
-    const name = record.detail?.department ?? "(not stated)";
-    byDepartment.set(name, (byDepartment.get(name) ?? 0) + 1);
-  }
-  process.stdout.write("\nBy department:\n");
-  for (const [name, count] of [...byDepartment].sort((a, b) => b[1] - a[1])) {
-    process.stdout.write(`  ${String(count).padStart(3)}  ${name}\n`);
-  }
-}
-
 interface Target {
   readonly portalCode: string;
   readonly baseUrl: string;
@@ -109,58 +105,142 @@ function resolveTarget(): Target {
   return { portalCode, baseUrl, stateLgdCode };
 }
 
+interface PortalOutcome {
+  readonly portal: string;
+  readonly advertised: number;
+  readonly inserted: number;
+  readonly updated: number;
+  readonly placed: number;
+  readonly failed: number;
+  /** Set when the portal could not be collected at all. */
+  readonly refusal: string | null;
+}
+
+/**
+ * Collect one portal.
+ *
+ * Returns an outcome rather than printing and exiting, so a sweep can carry on
+ * past a portal that refuses us or falls over. A single run still surfaces
+ * everything through the summary printed by the caller.
+ */
+async function collectPortal(client: pg.Client, target: Target): Promise<PortalOutcome> {
+  const { portalCode, baseUrl, stateLgdCode } = target;
+  const empty = {
+    portal: portalCode,
+    advertised: 0,
+    inserted: 0,
+    updated: 0,
+    placed: 0,
+    failed: 0,
+  };
+
+  let session;
+  let landing;
+  try {
+    ({ session, landing } = await PortalSession.open(baseUrl));
+  } catch (error: unknown) {
+    // A portal that disallows crawling is a finding, not a failure — and it
+    // must not stop the twenty that permit it.
+    const refusal =
+      error instanceof CrawlNotPermitted
+        ? "disallows crawling"
+        : error instanceof Error
+          ? error.message.slice(0, 70)
+          : "unreachable";
+    return { ...empty, refusal };
+  }
+
+  const { tenders } = parseLanding(landing.body);
+  if (tenders.length === 0) return { ...empty, refusal: null };
+
+  const districts = await districtsOfState(client, stateLgdCode);
+  if (districts.size === 0) {
+    // Without the state's districts every tender loads unplaced and the map
+    // shows an empty country while the run reports success.
+    return { ...empty, advertised: tenders.length, refusal: "no districts held for this state" };
+  }
+
+  const records = await collectDetails(session, baseUrl, tenders, new Set(districts.keys()));
+  const result = await loadTenders(client, {
+    portalCode,
+    stateLgdCode,
+    records,
+    artifact: landing,
+    datasetDescription: `gepnic ${portalCode} landing ${landing.retrievedAt}`,
+  });
+
+  return {
+    portal: portalCode,
+    advertised: tenders.length,
+    inserted: result.inserted,
+    updated: result.updated,
+    placed: result.placed,
+    failed: result.failed.length,
+    refusal: null,
+  };
+}
+
+function line(outcome: PortalOutcome): string {
+  if (outcome.refusal !== null) {
+    return `  ${outcome.portal.padEnd(14)} ${outcome.refusal}\n`;
+  }
+  return (
+    `  ${outcome.portal.padEnd(14)} ${String(outcome.advertised).padStart(3)} advertised · ` +
+    `${String(outcome.inserted).padStart(3)} new · ` +
+    `${String(outcome.placed).padStart(3)} placed\n`
+  );
+}
+
 async function main(): Promise<void> {
   const connectionString = process.env["DATABASE_URL"];
   if (connectionString === undefined || connectionString === "") {
     process.stderr.write("DATABASE_URL is not set.\n");
     process.exit(EXIT_MISCONFIGURED);
   }
-  const { portalCode, baseUrl, stateLgdCode } = resolveTarget();
 
-  process.stdout.write(`Checking ${baseUrl} for a crawl policy …\n`);
-  const { session, landing } = await PortalSession.open(baseUrl);
-  const { tenders, rejected } = parseLanding(landing.body);
-  process.stdout.write(
-    `  ${String(tenders.length)} advertised tenders, ${String(rejected.length)} rejected\n`,
-  );
-  if (tenders.length === 0) {
-    process.stdout.write("Nothing advertised on the landing page right now.\n");
-    return;
-  }
+  const sweep = process.argv.includes("--all");
+  const targets: readonly Target[] = sweep
+    ? PORTALS.map((p) => ({
+        portalCode: p.code,
+        baseUrl: p.baseUrl,
+        stateLgdCode: p.stateLgdCode,
+      }))
+    : [resolveTarget()];
 
   const client = new pg.Client({ connectionString });
   await client.connect();
+  const outcomes: PortalOutcome[] = [];
   try {
-    const districts = await districtsOfState(client, stateLgdCode);
-    if (districts.size === 0) {
-      // Without the state's districts every tender loads unplaced and the map
-      // shows an empty country while the run reports success.
-      process.stderr.write(
-        `No districts held for state ${stateLgdCode}. Ingest boundaries first.\n`,
-      );
-      process.exit(EXIT_MISCONFIGURED);
+    for (const [index, target] of targets.entries()) {
+      if (index > 0) await sleep(BETWEEN_PORTALS_MS);
+      process.stdout.write(`${target.portalCode} …\n`);
+      const outcome = await collectPortal(client, target);
+      outcomes.push(outcome);
+      process.stdout.write(line(outcome));
     }
-
-    const records = await collectDetails(session, baseUrl, tenders, new Set(districts.keys()));
-    const result = await loadTenders(client, {
-      portalCode,
-      stateLgdCode,
-      records,
-      artifact: landing,
-      datasetDescription: `gepnic ${portalCode} landing ${landing.retrievedAt}`,
-    });
-
-    process.stdout.write(
-      `\n${String(result.inserted)} inserted, ${String(result.updated)} updated, ` +
-        `${String(result.failed.length)} failed\n` +
-        `${String(result.placed)} of ${String(records.length)} placed to a district\n`,
-    );
-    for (const failure of result.failed.slice(0, 5)) {
-      process.stdout.write(`  ! ${failure.portalTenderId}: ${failure.reason}\n`);
-    }
-    report(records);
   } finally {
     await client.end();
+  }
+
+  const total = outcomes.reduce(
+    (sum, o) => ({
+      advertised: sum.advertised + o.advertised,
+      inserted: sum.inserted + o.inserted,
+      placed: sum.placed + o.placed,
+    }),
+    { advertised: 0, inserted: 0, placed: 0 },
+  );
+  const refused = outcomes.filter((o) => o.refusal !== null);
+
+  process.stdout.write(
+    `\n${String(outcomes.length)} portal(s): ${String(total.advertised)} advertised, ` +
+      `${String(total.inserted)} new, ${String(total.placed)} placed to a district\n`,
+  );
+  if (refused.length > 0) {
+    // Named, never summed away. A portal we could not collect is a gap in the
+    // map, and the operator has to know which one.
+    process.stdout.write(`${String(refused.length)} not collected:\n`);
+    for (const o of refused) process.stdout.write(line(o));
   }
 }
 
