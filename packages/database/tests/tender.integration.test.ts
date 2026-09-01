@@ -155,7 +155,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     it("keeps an unplaced tender reachable", async () => {
       // It could not be put on the map. It is still a real advertisement by a
       // real office, and hiding it would be a coverage gap disguised as a fact.
-      const unplaced = (await repository?.listTenders({ unplacedOnly: true })) ?? [];
+      // Scoped to this suite's own department. Once real portals were collected
+      // there were nearly two hundred unplaced tenders, and an unscoped query
+      // returned its first hundred by closing date — which did not include a
+      // fixture closing in 2099. A test that only passes on an empty database
+      // is a test that stops meaning anything the moment the data arrives.
+      const unplaced =
+        (await repository?.listTenders({ unplacedOnly: true, department: "Test Department" })) ??
+        [];
       expect(unplaced.map((t) => t.title)).toContain("Open but unplaced");
       expect(await repository?.unplacedCount()).toBeGreaterThanOrEqual(1);
     });
