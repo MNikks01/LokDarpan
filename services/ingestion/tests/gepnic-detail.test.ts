@@ -82,6 +82,23 @@ describe("which district issued the tender", () => {
     expect(districtFromChain(["Chennai", "Some Wing"], TN)).toBeNull();
   });
 
+  it("finds a district named inside a city corporation", () => {
+    // `MAWS||Tiruchirappalli City Municipal Corporation` — the shape every city
+    // corporation in the country takes, and a real miss until whole words were
+    // tested rather than only comma and dash separated parts.
+    const tn = new Set(["Tiruchirappalli", "Chennai"].map(normalise));
+    const found = districtFromChain(["MAWS", "Tiruchirappalli City Municipal Corporation"], tn);
+    expect(found?.name).toBe("Tiruchirappalli");
+    expect(found?.source).toBe("office_code");
+  });
+
+  it("does not let a short abbreviation place a tender", () => {
+    // Dropping vowels makes short tokens collide readily. An office code is not
+    // a district, and guessing from one would be a false placement.
+    const tn = new Set(["Erode", "Theni"].map(normalise));
+    expect(districtFromChain(["Dept", "TN Co-operative Sugar Federation"], tn)).toBeNull();
+  });
+
   it("finds nothing rather than guessing when no district is named", () => {
     expect(districtFromChain(["Highways Department", "Head Office"], TN)).toBeNull();
   });

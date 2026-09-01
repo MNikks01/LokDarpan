@@ -115,6 +115,14 @@ export function normalise(name: string): string {
     .replace(/[aeiou]/g, "");
 }
 
+/**
+ * Shortest word that may be tested as a district name.
+ *
+ * The normalisation is lossy, so a short token matches far too readily: an
+ * abbreviation in an office name should never place a tender in a district.
+ */
+const MIN_DISTRICT_TOKEN = 5;
+
 /** `Villupuram,RD,TN` → `Villupuram`. */
 function cleanSegment(segment: string): string {
   // `split` always yields at least one element, so no fallback is reachable.
@@ -171,9 +179,13 @@ export function districtFromChain(
   // office's reach is wider than its own district, so this is the weaker claim
   // and downstream confidence must be able to tell the two apart.
   for (const segment of units) {
-    for (const word of segment.split(/[-,|]/)) {
+    for (const word of segment.split(/[-,|\s]+/)) {
       const candidate = word.trim();
-      if (candidate !== "" && known.has(normalise(candidate))) {
+      // Short tokens are excluded. Dropping vowels makes a three-letter word
+      // collide easily, and `Tiruchirappalli City Municipal Corporation` — the
+      // shape every city corporation in the country takes — needs only whole
+      // words to be tested, not fragments.
+      if (candidate.length >= MIN_DISTRICT_TOKEN && known.has(normalise(candidate))) {
         return { name: candidate, source: "office_code" };
       }
     }
