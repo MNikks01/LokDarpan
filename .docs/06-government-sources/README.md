@@ -51,6 +51,7 @@ Read these two Sprint 0 findings first.
 - [`gepnic-access-findings.md`](./gepnic-access-findings.md) — **award data is CAPTCHA-gated on every GePNIC portal tested**, and on CPPP. Changing state does not obtain it; Phase 1 stays Maharashtra.
 - [`sprint0-findings-q1-q3.md`](./sprint0-findings-q1-q3.md) — **Q1 no** (no Maharashtra PWD works register), **Q3 yes** (BEAMS public MIS: departmental/scheme/DDO expenditure, ten years, no login).
 - [`mahatenders-access-request-draft.md`](./mahatenders-access-request-draft.md) — Route 4, drafted: a letter to the Government of Maharashtra asking whether an official channel exists, with an RTI as the parallel statutory route. **Needs its addressee verified before sending.**
+- [`tender-collection-cadence.md`](./tender-collection-cadence.md) — **daily is not often enough.** The landing-page window turns over almost completely within six hours, so a daily sweep captures a minority of what is advertised while looking complete. The scheduled job is paused until the cadence is chosen.
 - [`tender-ingestion-plan.md`](./tender-ingestion-plan.md) — Mahatenders re-verified closed (29 Aug). What a tender connector **can** collect — landing pages in 34 permitting states, forward-only, advertisements never awards — plus the schema, pipeline and copy that keep that limit visible.
 
 ## Documents

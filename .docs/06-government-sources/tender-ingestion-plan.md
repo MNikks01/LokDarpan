@@ -45,6 +45,9 @@ The `data.gov.in` API is a **sanctioned channel** — the publisher built it for
 **Its limits are the point, not the footnote:**
 
 - **Forward-only.** It accumulates the tender universe from the day collection starts. It does not backfill. A tender advertised last year is not recoverable this way, and the UI must never imply otherwise.
+
+  **Amended 1 September 2026 —** and not merely from the day it starts, but from each moment it runs. Measurement showed the window turning over almost entirely within six hours, so cadence decides coverage: see [`tender-collection-cadence.md`](./tender-collection-cadence.md).
+
 - **Not Maharashtra.** Phase 1's state is `Disallow: /`. Coverage would begin in the eight states where both procurement and treasury are open — Tamil Nadu, Odisha, Kerala, Rajasthan, Andhra Pradesh, Telangana, West Bengal, Punjab.
 - **Advertisements, never outcomes.** No award, no winner, no contract value paid.
 
