@@ -16,6 +16,7 @@ import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
 import { SearchDialog } from "./SearchDialog";
 import { BoundarySources } from "./BoundarySources";
+import { TendersPanel, useTenderOverview, withTenderCounts } from "./tenders";
 import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
 import { useExplorerGeography, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
@@ -68,6 +69,16 @@ export function ExploreShell({
     records,
     scopeLabel,
   } = useExplorerGeography(states, geo.stateCode, geo.unitId);
+
+  const [department, setDepartment] = useState<string | null>(null);
+  const { overview: tenders, failed: tendersFailed } = useTenderOverview(department);
+
+  // The counts ride along in the boundary features the map already draws, so
+  // no second source and no feature-state bookkeeping is needed.
+  const shadedBoundaries = useMemo(
+    () => withTenderCounts(childBoundaries, tenders.districts),
+    [childBoundaries, tenders.districts],
+  );
 
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
@@ -151,7 +162,7 @@ export function ExploreShell({
           stateBbox={selectedState?.bbox ?? null}
           activeUnit={activeUnit}
           activeGeometry={activeGeometry}
-          childBoundaries={childBoundaries}
+          childBoundaries={shadedBoundaries}
           states={states}
           layers={layers}
           insets={insets}
@@ -188,6 +199,10 @@ export function ExploreShell({
           scopeLabel={scopeLabel}
           selectedDocumentId={selectedDocumentId}
           outlineSource={outlineSource}
+          tenders={tenders}
+          tendersFailed={tendersFailed}
+          department={department}
+          onSelectDepartment={setDepartment}
         />
 
         <div className={cx(styles.controls, drawerInset > 0 && styles.controlsShifted)}>
@@ -288,6 +303,10 @@ function ExplorerRail({
   scopeLabel,
   selectedDocumentId,
   outlineSource,
+  tenders,
+  tendersFailed,
+  department,
+  onSelectDepartment,
 }: {
   readonly hidden: boolean;
   readonly states: readonly StateOption[];
@@ -300,6 +319,10 @@ function ExplorerRail({
   readonly scopeLabel: string;
   readonly selectedDocumentId: number | null;
   readonly outlineSource: OutlineSource;
+  readonly tenders: ReturnType<typeof useTenderOverview>["overview"];
+  readonly tendersFailed: boolean;
+  readonly department: string | null;
+  readonly onSelectDepartment: (department: string | null) => void;
 }): React.JSX.Element {
   return (
     <div id="explorer-rail" className={cx(styles.rail, hidden && styles.railCollapsed)}>
@@ -310,6 +333,12 @@ function ExplorerRail({
         actions={actions}
         loading={loadingChildren}
         ancestors={ancestors}
+      />
+      <TendersPanel
+        overview={tenders}
+        failed={tendersFailed}
+        department={department}
+        onSelectDepartment={onSelectDepartment}
       />
       <BoundarySources units={units} outlineSource={outlineSource} />
       <RecordsPanel

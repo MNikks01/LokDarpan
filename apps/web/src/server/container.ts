@@ -6,6 +6,7 @@ import "server-only";
 import { PostgresAdminUnitRepository } from "@lokdarpan/database/repository";
 import { PostgresGeographyRepository } from "@lokdarpan/database/geography";
 import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-fact";
+import { PostgresTenderRepository } from "@lokdarpan/database/tender";
 import pg from "pg";
 import { UnitService } from "@lokdarpan/domain";
 
@@ -25,6 +26,7 @@ import { UnitService } from "@lokdarpan/domain";
 let repository: PostgresAdminUnitRepository | undefined;
 let facts: PostgresPublishedFactRepository | undefined;
 let geography: PostgresGeographyRepository | undefined;
+let tenders: PostgresTenderRepository | undefined;
 let sharedPool: pg.Pool | undefined;
 
 function databaseUrl(): string {
@@ -87,4 +89,13 @@ export function publishedFactRepository(): PostgresPublishedFactRepository {
 export function geographyRepository(): PostgresGeographyRepository {
   geography ??= new PostgresGeographyRepository(pool());
   return geography;
+}
+
+/**
+ * Tenders advertised on state e-procurement portals. Shares the isolate's pool
+ * for the same reason the others do.
+ */
+export function tenderRepository(): PostgresTenderRepository {
+  tenders ??= new PostgresTenderRepository(pool());
+  return tenders;
 }

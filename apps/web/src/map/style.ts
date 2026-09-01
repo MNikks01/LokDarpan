@@ -44,6 +44,7 @@ export const LAYER = {
   childFill: "ld-child-fill",
   childLine: "ld-child-line",
   activeFill: "ld-active-fill",
+  tenderFill: "ld-tender-fill",
   activeLine: "ld-active-line",
 } as const;
 
@@ -124,6 +125,38 @@ function overlayLayers(withBasemap: boolean): LayerSpecification[] {
       type: "fill",
       source: SOURCE.active,
       paint: { "fill-color": color.accent.soft, "fill-opacity": opacity.active },
+    },
+    {
+      // TENDER SHADING — how many tenders offices in this district have
+      // advertised. Sequential teal, never a red or a diverging ramp: a count
+      // of advertisements is a measurement, not a severity, and a red district
+      // would read as an accusation before a word of the legend is read
+      // (.docs/17-legal/legal-ethical-rules.md).
+      //
+      // Districts with no tenders carry no `tenderCount` and are left unshaded
+      // rather than painted the palest colour. Collection is forward-only, so
+      // "none advertised" and "we hold none" are the same statement, and an
+      // explicit lightest shade would imply we had looked and found nothing.
+      id: LAYER.tenderFill,
+      type: "fill",
+      source: SOURCE.children,
+      filter: ["has", "tenderCount"],
+      paint: {
+        "fill-color": [
+          "interpolate",
+          ["linear"],
+          ["get", "tenderCount"],
+          1,
+          "#CDE7E3",
+          3,
+          "#7FC4BC",
+          6,
+          "#3C9A90",
+          12,
+          color.accent.base,
+        ],
+        "fill-opacity": 0.72,
+      },
     },
     {
       id: LAYER.childFill,
