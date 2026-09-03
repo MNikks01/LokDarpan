@@ -116,3 +116,54 @@ export function presentCandidate(
  * keypress should never publish a claim about a named company.
  */
 export const PROMPT = "  [enter] skip   [v] verify   [r] reject   [c] correct   [q] quit  ";
+
+/** The evidence around the figure, trimmed to what fits on one line. */
+function around(text: string, value: string | null, width: number): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  if (value === null) return flat.slice(0, width);
+  // Centre the window on the figure. A window that starts at the beginning of
+  // a long paragraph often does not contain the number being judged, which
+  // would make the line unreadable as evidence.
+  const at = flat.indexOf(value.replace(/\.00$/, ""));
+  if (at < 0) return flat.slice(0, width);
+  const start = Math.max(0, at - Math.floor(width / 3));
+  return (start > 0 ? "…" : "") + flat.slice(start, start + width);
+}
+
+/**
+ * A page of candidates, one line each.
+ *
+ * ONLY EVER USED FOR THE `confirmed` PARTITION
+ * These are candidates whose figure re-derives exactly from their own evidence
+ * and from no other reading of it. The reviewer is checking that the parser
+ * took the right sentence, not adjudicating between several amounts — that is
+ * a question a line can carry and a paragraph is not needed for.
+ *
+ * The evidence is shown, not summarised. A page listing only values and page
+ * numbers would be approval-without-reading with extra steps, and there would
+ * be nothing for the reviewer to actually check.
+ */
+export function presentBatch(
+  candidates: readonly ReviewCandidate[],
+  offset: number,
+  total: number,
+): string {
+  const lines = candidates.map((c, i) => {
+    // The same formatter the single-candidate view uses. A page rendering
+    // amounts differently from the screen a flagged one lands on would make
+    // the two hard to compare at exactly the moment it matters.
+    const value = describeValue(c.kind, c.normalisedValue);
+    return (
+      `  ${BOLD}${String(i + 1)}${RESET}  ${value.padStart(18)}  ${DIM}p${String(c.pageNumber)}${RESET}\n` +
+      `     ${DIM}${around(c.rawText, c.normalisedValue, 96)}${RESET}`
+    );
+  });
+  return (
+    `${BOLD}${String(offset + 1)}–${String(offset + candidates.length)} of ${String(total)}${RESET}` +
+    `  ${DIM}each figure below is stated by its own evidence and by no other reading of it${RESET}\n\n` +
+    lines.join("\n\n")
+  );
+}
+
+export const BATCH_PROMPT =
+  "\n  [a] all correct   [1-9] one is wrong   [enter] skip page   [q] quit  ";
