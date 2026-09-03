@@ -13,7 +13,13 @@ import {
   reviseDecision,
   type Decision,
 } from "./decide";
-import { PROMPT, presentCandidate, type ReviewCandidate } from "./present";
+import {
+  BATCH_PROMPT,
+  PROMPT,
+  presentBatch,
+  presentCandidate,
+  type ReviewCandidate,
+} from "./present";
 import { factById, pendingReview, reviewProgress, type ReviewProgress } from "./queue";
 import { selfCheck, type SelfCheck } from "./triage";
 
@@ -269,6 +275,108 @@ async function buildQueue(
   return limit === undefined ? matching : matching.slice(0, Number(limit));
 }
 
+/**
+ * Review a page of candidates at once.
+ *
+ * WHY THIS IS SAFE HERE AND NOWHERE ELSE
+ * Restricted to the `confirmed` partition by its caller, and that restriction
+ * is the whole basis for it. A confirmed candidate's figure is stated by its
+ * own evidence and by no other reading of it, so the question is "did the
+ * parser take the right sentence" — which a line of evidence can answer.
+ *
+ * `ambiguous` asks which of several amounts on the page is the right one, and
+ * `no value` asks the reviewer to supply a scale. Neither is a question a page
+ * of ten lines can carry, and offering this mode for them would turn a
+ * genuine judgement into a keystroke.
+ *
+ * Accepting a page still writes one attributed decision per fact. It is a
+ * faster way to read, not a weaker kind of approval.
+ */
+async function reviewBatch(
+  client: pg.Client,
+  rl: Interface,
+  page: readonly ReviewCandidate[],
+  context: { offset: number; total: number; reviewer: string },
+): Promise<{ outcome: "quit" | "next"; decided: number; flagged: ReviewCandidate[] }> {
+  say(`\n${presentBatch(page, context.offset, context.total)}`);
+  const answer = await ask(rl, BATCH_PROMPT);
+  if (answer === null || answer.toLowerCase() === "q") {
+    return { outcome: "quit", decided: 0, flagged: [] };
+  }
+
+  // A number pulls that one out for the full single-candidate screen, and the
+  // rest of the page is left undecided — a reviewer who spotted one wrong
+  // reading has reason to look at its neighbours again too.
+  const flaggedIndex = /^[1-9]$/.test(answer) ? Number(answer) - 1 : -1;
+  if (flaggedIndex >= 0 && flaggedIndex < page.length) {
+    const candidate = page[flaggedIndex];
+    return { outcome: "next", decided: 0, flagged: candidate === undefined ? [] : [candidate] };
+  }
+
+  if (answer.toLowerCase() !== "a") return { outcome: "next", decided: 0, flagged: [] };
+
+  let decided = 0;
+  for (const candidate of page) {
+    const result = await apply(
+      client,
+      { factId: candidate.id, decision: "verified", reviewer: context.reviewer },
+      undefined,
+      "",
+    );
+    decided += result === "decided" ? 1 : 0;
+  }
+  say(`  recorded: ${String(decided)} verified`);
+  return { outcome: "next", decided, flagged: [] };
+}
+
+/**
+ * Walk the queue a page at a time, dropping into the single-candidate screen
+ * for anything the reviewer flags.
+ *
+ * A flagged candidate leaves the rest of its page undecided on purpose: a
+ * reviewer who has just found one wrong reading has reason to look again at
+ * the ones beside it, and silently accepting them would be the opposite of
+ * what flagging meant.
+ */
+async function runBatchQueue(
+  client: pg.Client,
+  rl: Interface,
+  queue: readonly ReviewCandidate[],
+  options: { batchSize: number; reviewer: string },
+): Promise<number> {
+  let decided = 0;
+  for (let offset = 0; offset < queue.length; offset += options.batchSize) {
+    const page = queue.slice(offset, offset + options.batchSize);
+    const context = { offset, total: queue.length, reviewer: options.reviewer };
+
+    const result = await reviewBatch(client, rl, page, context);
+    decided += result.decided;
+    if (result.outcome === "quit") return decided;
+
+    const flagged = await reviewFlagged(client, rl, result.flagged, context);
+    decided += flagged.decided;
+    if (flagged.quit) return decided;
+  }
+  return decided;
+}
+
+/** The single-candidate screen, for candidates pulled out of a page. */
+async function reviewFlagged(
+  client: pg.Client,
+  rl: Interface,
+  flagged: readonly ReviewCandidate[],
+  context: { offset: number; total: number; reviewer: string },
+): Promise<{ decided: number; quit: boolean }> {
+  let decided = 0;
+  for (const candidate of flagged) {
+    say(`\n${presentCandidate(candidate, context.offset + 1, context.total)}\n`);
+    const outcome = await reviewOne(client, rl, candidate, context.reviewer);
+    if (outcome === "quit") return { decided, quit: true };
+    decided += outcome === "decided" ? 1 : 0;
+  }
+  return { decided, quit: false };
+}
+
 async function main(): Promise<void> {
   const { connectionString, reviewer } = requireConfig();
 
@@ -297,18 +405,30 @@ async function main(): Promise<void> {
     }
     say(`Reviewing as ${reviewer}. Nothing publishes until you say so.`);
 
-    let decided = 0;
-    for (const [index, candidate] of queue.entries()) {
-      const checked = selfCheck({
-        id: candidate.id,
-        rawText: candidate.rawText,
-        normalisedValue: candidate.normalisedValue,
-      });
-      say(`\n${presentCandidate(candidate, index + 1, queue.length, checked.check)}\n`);
-      const outcome = await reviewOne(client, rl, candidate, reviewer);
-      if (outcome === "quit") break;
-      decided += outcome === "decided" ? 1 : 0;
+    const batchSize = Number(arg("batch") ?? "0");
+    if (batchSize > 0 && options.only !== "confirmed") {
+      // The mode exists because a confirmed candidate can be judged from a
+      // line. Nothing else can, so nothing else gets the fast path.
+      say("--batch is only available with --check=confirmed.\n");
+      return;
     }
+
+    let decided = 0;
+
+    if (batchSize > 0) {
+      decided += await runBatchQueue(client, rl, queue, { batchSize, reviewer });
+    } else
+      for (const [index, candidate] of queue.entries()) {
+        const checked = selfCheck({
+          id: candidate.id,
+          rawText: candidate.rawText,
+          normalisedValue: candidate.normalisedValue,
+        });
+        say(`\n${presentCandidate(candidate, index + 1, queue.length, checked.check)}\n`);
+        const outcome = await reviewOne(client, rl, candidate, reviewer);
+        if (outcome === "quit") break;
+        decided += outcome === "decided" ? 1 : 0;
+      }
 
     const after = await reviewProgress(client);
     say(
