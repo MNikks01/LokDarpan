@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hourly landing-window sample, as a launchd agent.
+
+  WHY NOT CRON
+  The cron entry this replaces fired zero times in two days and said nothing
+  about it. On macOS, /usr/sbin/cron needs Full Disk Access to run jobs at all,
+  and without it the daemon simply does not: no error, no log line, no signal
+  of any kind. A scheduler whose failure mode is silence is the wrong tool for
+  a measurement whose whole purpose is noticing what is missing.
+
+  launchd reports its own state. `launchctl print gui/$UID/in.lokdarpan.tender-sample`
+  shows whether the job is loaded and what it last exited with, so a job that is
+  not running can be seen to not be running.
+
+  StartInterval rather than StartCalendarInterval: the sample wants roughly even
+  spacing to measure decay against, not a particular minute past the hour, and
+  StartInterval copes better with the machine having slept — launchd runs a
+  missed job once on wake rather than skipping it silently.
+
+  WHY THE SCRIPT RUNS FROM ~/bin AND NOT FROM THE REPO
+  The repo lives under ~/Desktop, which macOS protects. A scheduler is refused
+  execution of anything inside it — cron silently, launchd with exit 126 and
+  "Operation not permitted". Moving the executable out of the protected folder
+  fixes the class of problem rather than this instance of it; granting a shell
+  Full Disk Access would fix only this machine, and only until an OS update.
+
+  The repo keeps the canonical copy. Install both together:
+    mkdir -p ~/bin/lokdarpan
+    cp services/ingestion/scripts/*.sh ~/bin/lokdarpan/
+    cp services/ingestion/scripts/in.lokdarpan.tender-sample.plist ~/Library/LaunchAgents/
+    launchctl bootstrap gui/$UID ~/Library/LaunchAgents/in.lokdarpan.tender-sample.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>in.lokdarpan.tender-sample</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/apple/bin/lokdarpan/hourly-sample.sh</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <!-- Run once on load, so the agent can be seen to work rather than assumed
+         to. The cron entry it replaces was trusted for two days on the strength
+         of the script having been tested, which is a different claim from the
+         schedule having fired. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- launchd's own view of the job, separate from the script's log. If the
+         script never starts, this is where the reason appears. -->
+    <key>StandardOutPath</key>
+    <string>/Users/apple/Library/Logs/lokdarpan/launchd-sample.out</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/apple/Library/Logs/lokdarpan/launchd-sample.err</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>
