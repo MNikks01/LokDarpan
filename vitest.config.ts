@@ -50,6 +50,8 @@ export default defineConfig({
         "services/ingestion/src/cag/facts-cli.ts",
         "services/ingestion/src/cag/figure-link-cli.ts",
         "services/ingestion/src/cag/reprocess-cli.ts",
+        "services/ingestion/src/ocr/manifest-cli.ts",
+        "services/ingestion/src/ocr/score-cli.ts",
         "services/ingestion/src/review/cli.ts",
         "services/ingestion/src/review/triage-cli.ts",
         "services/ingestion/src/osm/cli.ts",
