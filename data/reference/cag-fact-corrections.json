@@ -1,0 +1,140 @@
+[
+  {
+    "id": 5865,
+    "amount": "11,977",
+    "unit": "कोटी",
+    "note": "the unit is deferred to the next figure in the list — 'अनुक्रमे ₹ 11,977 आणि ₹ 13,782.36 कोटी' states both in crore. Confirmed by fact #6236, where the two sum to the ₹25,759.36 crore of back-to-back GST compensation loans"
+  },
+  {
+    "id": 5987,
+    "amount": "1,500",
+    "unit": "rupees",
+    "note": "दरमहा ₹1,500 — a monthly benefit under Mukhyamantri Majhi Ladki Bahin Yojana, written out in full. Refused automatically only because this page also carries a (₹ कोटीत) table caption"
+  },
+  {
+    "id": 6213,
+    "amount": "145",
+    "unit": "crore",
+    "note": "the source misspells crore as 'core'. The same clause states '(₹ 1,902 crore)' for the neighbouring head, and a ₹145 rise in a receipts head would not be reported"
+  },
+  {
+    "id": 6265,
+    "amount": "261.78",
+    "unit": "crore",
+    "note": "the source misspells crore as 'core'. The sentence reads 'from ₹ 261.78 core in 2023-24 to ₹ 33,554.36 crore in 2024-25', so both ends of the comparison are in crore"
+  },
+  {
+    "id": 6349,
+    "amount": "11,977",
+    "unit": "crore",
+    "note": "the unit is deferred to the next figure — 'Excluding ₹ 11,977 and ₹ 13,782.36 crore as back-to-back loans from GoI'"
+  },
+  {
+    "id": 6373,
+    "amount": "18,440",
+    "unit": "crore",
+    "note": "the unit is deferred within the list — 'a loan of ₹ 18,440 in 2024-25, ₹ 7,700 crore in 2023-24 and ₹ 2,500 crore in 2022-23 from HUDCO'"
+  },
+  {
+    "id": 6380,
+    "amount": "11,977",
+    "unit": "crore",
+    "note": "the unit is deferred to the next figure, in the same footnote text as fact #6349"
+  },
+  {
+    "id": 6771,
+    "amount": "2,000",
+    "unit": "rupees",
+    "note": "वार्षिक ₹2,000 — the annual provision for educational materials for students in arts, science, commerce and nursing, written out in full"
+  },
+  {
+    "id": 6807,
+    "amount": "15",
+    "unit": "rupees",
+    "note": "प्रति अभिलेख ₹15 — the prescribed per-record rate for RoR downloads, written out in full"
+  },
+  {
+    "id": 6819,
+    "amount": "3,650",
+    "unit": "rupees",
+    "note": "प्रति चौरस मीटर ₹3,650 — the slab rate per square metre under the 2017-18 Annual Rate Statement"
+  },
+  {
+    "id": 6823,
+    "amount": "3,650",
+    "unit": "rupees",
+    "note": "the 2017-18 Annual Rate Statement rate of ₹3,650 per square metre, as stated in the occupancy-fee working"
+  },
+  {
+    "id": 6824,
+    "amount": "18,13,500",
+    "unit": "rupees",
+    "note": "the 2017-18 Annual Rate Statement rate of ₹18,13,500 per hectare"
+  },
+  {
+    "id": 6825,
+    "amount": "3650",
+    "unit": "rupees",
+    "note": "the per-square-metre rate in the first line of the occupancy-fee working (500 sq m × ₹3,650)"
+  },
+  {
+    "id": 6826,
+    "amount": "18,13,500",
+    "unit": "rupees",
+    "note": "the per-hectare rate in the occupancy-fee line, 0.219 × ₹18,13,500"
+  },
+  {
+    "id": 6827,
+    "amount": "3650",
+    "unit": "rupees",
+    "note": "the per-square-metre rate in the second line of the working (1500 sq m × ₹3,650 × 90 per cent)"
+  },
+  {
+    "id": 6828,
+    "amount": "3,650",
+    "unit": "rupees",
+    "note": "the per-square-metre rate in the third line of the working (190 × ₹3,650 × 80 per cent)"
+  },
+  {
+    "id": 6829,
+    "amount": "18,13,500",
+    "unit": "rupees",
+    "note": "the per-hectare rate quoted in footnote 68 of the same page"
+  },
+  {
+    "id": 6830,
+    "amount": "3,97,157",
+    "unit": "rupees",
+    "note": "the occupancy fee the footnote derives: 0.219 hectare × ₹18,13,500 per hectare = ₹3,97,157"
+  },
+  {
+    "id": 7048,
+    "amount": "5,000",
+    "unit": "rupees",
+    "note": "₹5,000 per annum for medical and engineering students — the first of the two rates the sentence states, and the first candidate the parser produced from it"
+  },
+  {
+    "id": 7049,
+    "amount": "2,000",
+    "unit": "rupees",
+    "note": "₹2,000 per annum for students in other disciplines — the second of the two rates the sentence states, and the second candidate the parser produced from it"
+  },
+  {
+    "id": 7085,
+    "amount": "5",
+    "unit": "rupees",
+    "note": "the Government share of ₹5 per record, written out in full"
+  },
+  {
+    "id": 7091,
+    "amount": "15",
+    "unit": "rupees",
+    "note": "the prescribed rate of ₹15 per record for RoR downloads, written out in full"
+  },
+  {
+    "id": 9629,
+    "amount": "5,000",
+    "unit": "rupees",
+    "note": "वार्षिक ₹5,000 — the annual provision for educational materials for medical and engineering students; the Marathi statement of the same rate as fact #7048"
+  }
+]

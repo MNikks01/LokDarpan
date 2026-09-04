@@ -29,6 +29,11 @@ async function main(): Promise<void> {
       halves.set(`${p.document_id}:${String(p.page_number)}`, halfOfPage(p.content));
     }
 
+    // The published value, not the parser's reading: a corrected fact carries
+    // its figure in `corrected_value` and leaves `normalised_value` null, and
+    // pairing on the latter would let every figure a person supplied escape the
+    // rule and be counted twice. `published_fact` coalesces the same way.
+    //
     // Rejected facts are excluded: a criterion or a misreading is not a figure
     // anyone reported, so pairing it would assert a correspondence between two
     // things neither of which counts.
@@ -38,7 +43,9 @@ async function main(): Promise<void> {
       page_number: number;
       normalised_value: string | null;
     }>(
-      `SELECT id, document_id, page_number, normalised_value FROM document_fact
+      `SELECT id, document_id, page_number,
+              coalesce(corrected_value, normalised_value) AS normalised_value
+         FROM document_fact
         WHERE kind = 'monetary_amount' AND verification_status <> 'rejected'
         ORDER BY id`,
     );

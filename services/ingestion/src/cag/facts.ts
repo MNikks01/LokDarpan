@@ -112,12 +112,38 @@ const SCALE: Readonly<Record<string, number>> = {
  * belong to that table, and reading it as rupees would understate a government
  * figure by seven orders of magnitude.
  *
- * Deliberately generous. A false positive here only leaves a figure unvalued
- * for a person to read; a false negative publishes a wrong number. When the two
- * errors are that asymmetric, over-detecting is the safe direction.
+ * A declaration names a unit **without naming an amount**: "(₹ in crore)",
+ * "(₹ कोटीत)", "(₹ लाखात)". That is the whole discriminator, and it matters —
+ * a first attempt matched any parenthesis containing a unit word, which swept
+ * up "(₹ 1,902 crore)" and "(₹ 10 crore and above)". Those are a figure and a
+ * criterion; each carries its own unit and says nothing about the scale of
+ * anything else on the page. Treating them as captions refused whole pages of
+ * ordinary rupee prose for no reason.
+ *
+ * Still deliberately generous within that shape. A false positive leaves a
+ * figure unvalued for a person to read; a false negative publishes a wrong
+ * number, and when the errors are that asymmetric over-detecting is the safe
+ * direction.
  */
 const PAGE_DECLARES_UNIT =
-  /\((?:[^)]{0,24}?)(?:crore|lakh|thousand|कोट[ीि]|ोट[ीि]|लाख|हजार)(?:[^)]{0,10}?)\)|(?:₹|\bRs\.?|amount|amounts)\s*(?:are\s+)?in\s+(?:crore|lakh|thousand)/iu;
+  /\(\s*(?:₹|Rs\.?|amount|amounts|रक्कम)?[^)\d]{0,18}?(?:crore|lakh|thousand|कोट[ीि]|ोट[ीि]|लाख|हजार)[^)\d]{0,10}\)|(?:₹|\bRs\.?|amount|amounts)\s*(?:are\s+)?in\s+(?:crore|lakh|thousand)/iu;
+
+/**
+ * Spellings that sit where a unit goes and are not units this parser knows.
+ *
+ * "₹ 145 core" is crore misspelled, and "₹ 7,700 cr" is crore abbreviated. The
+ * parser does not translate either — mapping a typo to a meaning is a guess
+ * about what a government document intended. What it must not do is treat them
+ * as *absent*: reading "₹ 145 core" as one hundred and forty-five rupees would
+ * be wrong by seven orders of magnitude, and it is wrong precisely because the
+ * source did state a unit.
+ *
+ * So an attempted-but-unreadable unit refuses, wherever it appears and whatever
+ * its page declares. "No unit was written" and "a unit was written that I
+ * cannot read" are different facts, and only the first licenses rupees.
+ */
+const UNREADABLE_UNIT =
+  /^\s*(?:core|cores|crores|cr|crs|lac|lacs|lakhs|thousands|mn|bn|करोड|कोटय|ोटय)\b/iu;
 
 /** Whether this page states a scale its bare figures could belong to. */
 export function pageDeclaresUnit(content: string): boolean {
@@ -265,7 +291,10 @@ export function trimToName(captured: string): string {
 function moneyIn(sentence: string, pageNumber: number, unitless: UnitlessReading): FactCandidate[] {
   const found: FactCandidate[] = [];
   for (const m of sentence.matchAll(AMOUNT)) {
-    const paise = amountToPaise(m[1] ?? "", m[2], unitless);
+    // A unit the parser could not read is not a missing unit.
+    const after = sentence.slice(m.index + m[0].length, m.index + m[0].length + 12);
+    const reading = m[2] === undefined && UNREADABLE_UNIT.test(after) ? "refuse" : unitless;
+    const paise = amountToPaise(m[1] ?? "", m[2], reading);
     found.push({
       kind: "monetary_amount",
       pageNumber,
