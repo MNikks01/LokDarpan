@@ -428,3 +428,60 @@ describe("crore whose conjunct the font mapping substituted", () => {
     expect(found?.normalisedValue).toBeNull();
   });
 });
+
+describe("a ₹ that ends a column header", () => {
+  // "No. | Name of Institution | Amount in ₹" is followed by the first row, so
+  // the digits after that ₹ are a serial number. Three facts read ₹1, ₹23 and
+  // ₹51 out of row numbers before this was guarded.
+  it("does not start a figure at a column header", () => {
+    const found = extractFacts([
+      {
+        pageNumber: 1,
+        content: "No. Name of Institution Amount in ₹ 1 Academy of Nursing Bhopal 33,000",
+      },
+    ]).filter((f) => f.kind === "monetary_amount");
+    expect(found.map((f) => f.normalisedValue)).not.toContain("100");
+  });
+
+  it("still reads a figure that merely follows the word amount", () => {
+    const [found] = extractFacts([
+      { pageNumber: 1, content: "The amount of ₹ 15.14 crore was sanctioned." },
+    ]);
+    expect(found?.normalisedValue).toBe("15140000000");
+  });
+});
+
+describe("units that occur too rarely to scale", () => {
+  // "Loan amount Rs 283.9 Million or Rs 28.39 crores" — one occurrence in 4,586
+  // pages. Read as rupees it is wrong by a million; given a SCALE entry on one
+  // data point it would be a guess. Refusing sends it to a person.
+  it("refuses million rather than reading it as rupees", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "Loan amount Rs 283.9 Million was sanctioned." },
+    ]).find((f) => f.kind === "monetary_amount");
+    expect(found?.normalisedValue).toBeNull();
+  });
+});
+
+describe("a decimal point split from its fraction", () => {
+  // "CGF of ₹177. 75 crore" is ₹177.75 crore. The digit group stops at the
+  // point, so it was stored as ₹177 — wrong by seven orders of magnitude, and
+  // silently, because ₹177 is a perfectly well-formed number.
+  it("refuses a figure whose fraction was separated from its point", () => {
+    for (const text of ["CGF of ₹177. 75 crore was provided", "actual of ₹ 1636. 54 crore"]) {
+      const found = extractFacts([{ pageNumber: 1, content: text }]).find(
+        (f) => f.kind === "monetary_amount",
+      );
+      expect(found?.normalisedValue).toBeNull();
+    }
+  });
+
+  // The reason it refuses rather than repairs: without the unit requirement,
+  // repairing would read ₹100.5 here, where the source says ₹100.
+  it("does not disturb a figure followed by a sentence break", () => {
+    const [found] = extractFacts([
+      { pageNumber: 1, content: "The cost was ₹ 100. 5 villages were covered by the scheme." },
+    ]);
+    expect(found?.normalisedValue).toBe("10000");
+  });
+});

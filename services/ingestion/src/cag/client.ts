@@ -3,8 +3,27 @@ import { sha256Of } from "../raw-store";
 const USER_AGENT = "LokDarpan/0.1 (+https://github.com/MNikks01/LokDarpan)";
 const BASE = "https://cag.gov.in";
 
-/** Maharashtra's state id in the CAG audit-report filter, read from the page. */
+/**
+ * Maharashtra's state id in the CAG audit-report filter, read from the page.
+ *
+ * Kept as the default so existing callers are unchanged, and as the one value
+ * this file states from memory. Every other state is discovered with
+ * `listStates`, because the registry's rule applies to identifiers as much as
+ * to URLs: a state id typed from memory is a guess that will silently fetch the
+ * wrong state's reports.
+ */
 export const MAHARASHTRA_STATE_ID = 79;
+
+export interface StateOption {
+  /** The value the audit-report filter expects. */
+  readonly id: number;
+  /** The state's name exactly as the filter spells it. */
+  readonly name: string;
+}
+
+/** The `<select id="state">` block, so report-type options are not mistaken for states. */
+const STATE_SELECT = /<select[^>]*id=["']state["'][^>]*>([\s\S]*?)<\/select>/iu;
+const OPTION = /<option[^>]*value=["'](\d+)["'][^>]*>([^<]+)<\/option>/giu;
 
 export interface FetchedDocument {
   readonly url: string;
@@ -70,6 +89,38 @@ export class CagClient {
   }
 
   /** Report PDFs listed for one state. `cag.gov.in` serves no `robots.txt`. */
+  /**
+   * Every state the audit-report filter offers, with the id it expects.
+   *
+   * Read from the page rather than held in a table here. The filter also
+   * carries report-type options — Union, Civil, Railways — in a different
+   * select, so the state list is taken from `id="state"` specifically; a
+   * looser parse would offer "Defence" as a state and fetch nothing.
+   */
+  async listStates(): Promise<StateOption[]> {
+    const page = await this.request(`${this.baseUrl}/en/audit-report?gt=49`);
+    if (page.status !== 200) {
+      throw new Error(`CAG audit-report page returned HTTP ${String(page.status)}.`);
+    }
+
+    const block = STATE_SELECT.exec(page.body.toString("utf8"));
+    if (block === null) {
+      throw new Error(
+        "CAG audit-report page has no state filter — refusing to guess at state ids. " +
+          "The page structure may have changed.",
+      );
+    }
+
+    const states: StateOption[] = [];
+    for (const m of (block[1] ?? "").matchAll(OPTION)) {
+      states.push({ id: Number(m[1]), name: decodeEntities(m[2] ?? "").trim() });
+    }
+    if (states.length === 0) {
+      throw new Error("CAG state filter contained no options — refusing to report an empty list.");
+    }
+    return states;
+  }
+
   async listStateReports(stateId = MAHARASHTRA_STATE_ID): Promise<ReportLink[]> {
     const url = `${this.baseUrl}/en/audit-report?gt=49&state%5B0%5D=${String(stateId)}`;
     const page = await this.request(url);
