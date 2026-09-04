@@ -433,14 +433,32 @@ describe("a ₹ that ends a column header", () => {
   // "No. | Name of Institution | Amount in ₹" is followed by the first row, so
   // the digits after that ₹ are a serial number. Three facts read ₹1, ₹23 and
   // ₹51 out of row numbers before this was guarded.
-  it("does not start a figure at a column header", () => {
-    const found = extractFacts([
-      {
-        pageNumber: 1,
-        content: "No. Name of Institution Amount in ₹ 1 Academy of Nursing Bhopal 33,000",
-      },
-    ]).filter((f) => f.kind === "monetary_amount");
-    expect(found.map((f) => f.normalisedValue)).not.toContain("100");
+  // The first version required "amount in" exactly, and let "Amt. in ₹ 1" and
+  // "Amount ₹ 1" through — both of which fabricate ₹1 out of a row number.
+  it.each([
+    "No. Name of Institution Amount in ₹ 1 Academy of Nursing Bhopal 33,000",
+    "Sl. Name Amt. in ₹ 1 Academy of Nursing Bhopal 33,000",
+    "Sl. Name Value in ₹ 51 Indira Gandhi Memorial College",
+  ])("does not start a figure at a column header: %s", (content) => {
+    const found = extractFacts([{ pageNumber: 1, content }]).filter(
+      (f) => f.kind === "monetary_amount",
+    );
+    expect(found).toHaveLength(0);
+  });
+
+  // The "in" is what separates a heading from prose, and it must stay required.
+  // Without it, "Total ₹ 12.11 crore" and "Paid amount ₹ 6,30,612" are
+  // suppressed too — nineteen real figures lost to catch a form no document
+  // here actually produces.
+  it.each([
+    ["The amount of ₹ 15.14 crore was sanctioned.", "15140000000"],
+    ["a total of ₹ 4.53 crore was paid", "4530000000"],
+    ["value of ₹ 2,268 was paid", "226800"],
+    ["Total ₹ 12.11 crore was spent", "12110000000"],
+    ["total amount ₹ 7.42 crore up to October 2024", "7420000000"],
+  ])("still reads a figure the sentence introduces: %s", (content, expected) => {
+    const [found] = extractFacts([{ pageNumber: 1, content }]);
+    expect(found?.normalisedValue).toBe(expected);
   });
 
   it("still reads a figure that merely follows the word amount", () => {

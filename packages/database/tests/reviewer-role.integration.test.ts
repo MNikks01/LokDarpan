@@ -35,6 +35,13 @@ describe.skipIf(REVIEWER_URL === undefined || REVIEWER_URL === "")(
 
     // Each attempt runs in its own transaction so a rejected statement cannot
     // poison the next, and nothing survives even if a grant ever regresses.
+    //
+    // Every statement carries `WHERE false`. PostgreSQL checks column
+    // privileges before it executes, so matching no row proves the grant just
+    // as well — and an unqualified UPDATE locks every row in `document_fact`,
+    // which deadlocked against the other integration suites once the table held
+    // a few thousand facts instead of a few hundred. The test was always taking
+    // a table-wide lock it never needed; the corpus growing only made it show.
     const refuses = async (label: string, sql: string): Promise<void> => {
       await db().query("BEGIN");
       try {
@@ -65,36 +72,39 @@ describe.skipIf(REVIEWER_URL === undefined || REVIEWER_URL === "")(
     it("can record a decision", async () => {
       await allows(
         `UPDATE document_fact SET verification_status = 'rejected',
-                verified_by = 'test', verified_at = now(), reviewer_note = 'n'`,
+                verified_by = 'test', verified_at = now(), reviewer_note = 'n' WHERE false`,
       );
     });
 
     it("can supply a correction", async () => {
-      await allows(`UPDATE document_fact SET corrected_value = '42'`);
+      await allows(`UPDATE document_fact SET corrected_value = '42' WHERE false`);
     });
 
     // The load-bearing one. A reviewer records a judgement beside what the
     // parser read; they never overwrite it. Anyone auditing the decision later
     // must still be able to see the text the claim was drawn from.
     it("cannot rewrite the text the parser read from the page", async () => {
-      await refuses("raw_text", `UPDATE document_fact SET raw_text = 'rewritten'`);
+      await refuses("raw_text", `UPDATE document_fact SET raw_text = 'rewritten' WHERE false`);
     });
 
     it("cannot rewrite the parser's normalised reading", async () => {
-      await refuses("normalised_value", `UPDATE document_fact SET normalised_value = '999'`);
+      await refuses(
+        "normalised_value",
+        `UPDATE document_fact SET normalised_value = '999' WHERE false`,
+      );
     });
 
     it("cannot move a candidate to a different page or document", async () => {
-      await refuses("page_number", `UPDATE document_fact SET page_number = 1`);
-      await refuses("document_id", `UPDATE document_fact SET document_id = 1`);
+      await refuses("page_number", `UPDATE document_fact SET page_number = 1 WHERE false`);
+      await refuses("document_id", `UPDATE document_fact SET document_id = 1 WHERE false`);
     });
 
     it("cannot restate how or by what version the claim was extracted", async () => {
       await refuses(
         "extraction_confidence",
-        `UPDATE document_fact SET extraction_confidence = 1.0`,
+        `UPDATE document_fact SET extraction_confidence = 1.0 WHERE false`,
       );
-      await refuses("parser_version", `UPDATE document_fact SET parser_version = 'x'`);
+      await refuses("parser_version", `UPDATE document_fact SET parser_version = 'x' WHERE false`);
     });
 
     // Review is judging what a parser produced. A hand-written candidate would
