@@ -113,6 +113,8 @@ Read these two Sprint 0 findings first.
 
 This matters concretely here. A set of `.gov.in`/`.nic.in` hosts — including **OMMAS**, eGramSwaraj, and MoRD — were unreachable from this environment. `lgdirectory.gov.in` was among them and then **succeeded on a second network channel**, proving the pattern is a vantage-point restriction rather than site failure.
 
+The rule earned its keep twice over, and in both directions. **OMMAS was retried on 28 August and found alive** — but not where it was looked for: `online.omms.nic.in` is absent from two independent resolvers and its zone has no NS delegation, because the system moved to `pmgsy.dord.gov.in`. So the original record was right to say "existence not disproven" and wrong to assume a vantage-point restriction by analogy. A name absent from every resolver, with no delegation, is gone rather than withheld — and the only way to tell the two apart is to retry. See [`pmgsy-ommas-findings.md`](./pmgsy-ommas-findings.md).
+
 Every such host is recorded as _"not reachable from the verification vantage point on 21 August 2026; existence not disproven"_ — and flagged for re-verification from an Indian network.
 
 ---

@@ -8,11 +8,11 @@ Companion to [`access-and-permissions.md`](./access-and-permissions.md), which a
 
 ## Summary
 
-|        | Question                                               | Answer                                                       |
-| ------ | ------------------------------------------------------ | ------------------------------------------------------------ |
-| **Q1** | Does Maharashtra PWD publish a public works register?  | **No** — not on its public website                           |
-| **Q2** | Is PMGSY's OMMAS publicly accessible?                  | **Still unknown** — host unreachable from this vantage point |
-| **Q3** | Does BEAMS expose allocation and expenditure publicly? | **Yes** — and more than expected                             |
+|        | Question                                               | Answer                                                                                                                                                                                                                |
+| ------ | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Q1** | Does Maharashtra PWD publish a public works register?  | **No** — not on its public website                                                                                                                                                                                    |
+| **Q2** | Is PMGSY's OMMAS publicly accessible?                  | **Answered 28 Aug, after this session** — reachable and licence-blocked ([`pmgsy-ommas-findings.md`](./pmgsy-ommas-findings.md)). As recorded here on 25 Aug: still unknown, host unreachable from this vantage point |
+| **Q3** | Does BEAMS expose allocation and expenditure publicly? | **Yes** — and more than expected                                                                                                                                                                                      |
 
 ---
 
@@ -72,11 +72,11 @@ Directly populates the money-out side at **department → major head → detail 
 
 The sprint plan branches on whether the project-level chain exists. Q1 and Q3 move the picture:
 
-|                           | Before Sprint 0   | Now                                                                            |
-| ------------------------- | ----------------- | ------------------------------------------------------------------------------ |
-| Project-level chain       | Unknown           | **Still unknown** — rests entirely on Q2/OMMAS. Maharashtra PWD is not a route |
-| Unit/department money-out | Unknown           | **Confirmed available**, 10 years, monthly, to scheme and DDO level            |
-| Maharashtra procurement   | Assumed available | **Closed to crawling**; needs a permitted route                                |
+|                           | Before Sprint 0   | Now                                                                                                                                                                        |
+| ------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project-level chain       | Unknown           | **Superseded 28 Aug** — OMMAS publishes it, under terms that forbid republication ([`pmgsy-ommas-findings.md`](./pmgsy-ommas-findings.md)). Maharashtra PWD is not a route |
+| Unit/department money-out | Unknown           | **Confirmed available**, 10 years, monthly, to scheme and DDO level                                                                                                        |
+| Maharashtra procurement   | Assumed available | **Closed to crawling**; needs a permitted route                                                                                                                            |
 
 **Branch B is stronger than the plan assumed.** It was written as "tender-and-budget intelligence". With BEAMS confirmed, Branch B is _budget → allocation → distribution → actual expenditure, by department, scheme and DDO, across ten years_ — a real financial ledger with genuine analytical depth, just not attributed to individual works.
 

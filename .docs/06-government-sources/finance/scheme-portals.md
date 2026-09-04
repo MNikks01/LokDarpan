@@ -27,7 +27,7 @@
 | AMRUT · Smart Cities · PMAY | MoHUA                     | —                        | 🔍 unreachable from this vantage point               |
 | Jal Jeevan Mission          | Jal Shakti                | —                        | ✅ verified                                          |
 
-**PMGSY is the best-instrumented road scheme in the country** and is the natural Phase-1 target: a dedicated national procurement portal plus a dedicated monitoring system. Its value depends entirely on OMMAS being publicly accessible — currently unverified.
+**PMGSY is the best-instrumented road scheme in the country** and is the natural Phase-1 target: a dedicated national procurement portal plus a dedicated monitoring system. OMMAS is publicly accessible (verified 28 Aug at `pmgsy.dord.gov.in`), and its value to this project depends instead on permission: NRIDA's terms forbid copying or republication without prior written consent ([`pmgsy-ommas-findings.md`](../pmgsy-ommas-findings.md)).
 
 ## §14 field checklist
 

@@ -22,7 +22,7 @@ Observed coverage relevant here: 7,323 development blocks · 677,367 villages ·
 
 eGramSwaraj is documented by MoPR as integrating with **LGD** (place codes) and **PFMS** (fund flow) through unique codes. If that integration is publicly queryable, it would give panchayat-level money-in/money-out joined to LGD codes — which is precisely what `.docs/wireframes/06-unit.md`'s Gram Panchayat screen needs.
 
-**It is unverified.** Treat as the second-highest-priority verification target after OMMAS.
+**It is unverified.** With OMMAS now verified and licence-blocked (28 Aug), this is the highest-priority remaining verification target.
 
 ## Finance Commission grants
 
