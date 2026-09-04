@@ -41,6 +41,7 @@ const extracted: ExtractedDocument = {
       width: 595.32,
       height: 841.92,
       rotation: 0,
+      substitutedCurrencyMarks: 0,
       items: [],
     },
     {
@@ -51,6 +52,7 @@ const extracted: ExtractedDocument = {
       width: 595.32,
       height: 841.92,
       rotation: 270,
+      substitutedCurrencyMarks: 0,
       items: [
         { seq: 0, charStart: 0, charEnd: 26, x0: 72, y0: 700, x1: 210, y1: 709 },
         { seq: 1, charStart: 26, charEnd: 39, x0: 210, y0: 700, x1: 268, y1: 709 },
@@ -64,6 +66,7 @@ const extracted: ExtractedDocument = {
       width: 595.32,
       height: 841.92,
       rotation: 0,
+      substitutedCurrencyMarks: 0,
       items: [],
     },
   ],

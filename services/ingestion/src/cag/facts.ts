@@ -13,7 +13,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/13";
+export const PARSER_VERSION = "cag-facts/14";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -107,6 +107,46 @@ export interface FactCandidate {
 export const AMOUNT_IN =
   /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|Crore|lakh|Lakh|thousand|Thousand|कोटी|कोटि|कोट|िोटी|िोटि|िोट|ोटी|ोटि|ोट|लाख|हजार)?/gu;
 const AMOUNT = AMOUNT_IN;
+
+/**
+ * The same amount, with a stray mark where the page prints ₹.
+ *
+ * Some documents map the rupee glyph through a font whose encoding the text
+ * layer cannot resolve, and emit a backtick instead. `` ` 40.80 कोटी `` is what
+ * arrives; ₹ 40.80 कोटी is what the page prints.
+ *
+ * **This is decoding, not inference**, and the distinction is the whole reason
+ * it is allowed here while `039` refuses the same repair on OCR output. There,
+ * a mark is an engine's guess at a glyph it could not recognise, and no one can
+ * say what was printed. Here the glyph *is* printed: every fact now stores the
+ * region it came from, so the exact characters can be rendered and looked at.
+ * They were, for one site in each of the twelve affected documents, and eleven
+ * showed ₹ unambiguously — see `040`.
+ *
+ * It is still not trusted on sight. A figure read this way carries a lower
+ * confidence than one whose mark the layer resolved, and it reaches a reader
+ * only after a person has reviewed it, like every other candidate.
+ */
+export const AMOUNT_WITH_SUBSTITUTED_MARK =
+  /[`´]\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|Crore|lakh|Lakh|thousand|Thousand|कोटी|कोटि|कोट|िोटी|िोटि|िोट|ोटी|ोटि|ोट|लाख|हजार)?/gu;
+
+/**
+ * How many amounts on this page lost their currency mark.
+ *
+ * Scoped to the page, like `pageDeclaresUnit`. A stray backtick on an otherwise
+ * sound page is punctuation; a page carrying several of them is one whose font
+ * mapping dropped a glyph, and only there is the mark read as a currency
+ * symbol. Requiring the page to show the defect before decoding any of its
+ * marks is what keeps a quoted word from becoming a government figure.
+ */
+const SUBSTITUTION_EVIDENCE = /[`´]\s?\d[\d,]*(?:\.\d+)?/gu;
+
+/** One mark alone is punctuation; this many on one page is a broken mapping. */
+const SUBSTITUTIONS_BEFORE_DECODING = 2;
+
+export function pageLostItsCurrencyMark(page: string): boolean {
+  return (page.match(SUBSTITUTION_EVIDENCE) ?? []).length >= SUBSTITUTIONS_BEFORE_DECODING;
+}
 
 /**
  * `M/s.` is the conventional marker for a firm in Indian government documents.
@@ -462,14 +502,37 @@ export function trimToName(captured: string): string {
   return kept.join(" ");
 }
 
-function moneyIn(
+/**
+ * How this page is to be read, decided once for the page and carried down.
+ *
+ * These are page-scoped judgements — whether a caption declares a scale,
+ * whether the font mapping dropped the rupee glyph — and no single sentence can
+ * make either of them. Passing them together keeps that visible.
+ */
+interface ReadingRules {
+  readonly pageNumber: number;
+  readonly unitless: UnitlessReading;
+  /** True where the page shows a lost currency glyph; see `pageLostItsCurrencyMark`. */
+  readonly decodeMark: boolean;
+  readonly locate?: (from: number, to: number) => FactCandidate["box"];
+}
+
+function moneyIn(sentence: string, rules: ReadingRules): FactCandidate[] {
+  const found = matchesIn(sentence, AMOUNT, rules, false);
+  if (rules.decodeMark) {
+    found.push(...matchesIn(sentence, AMOUNT_WITH_SUBSTITUTED_MARK, rules, true));
+  }
+  return found;
+}
+
+function matchesIn(
   sentence: string,
-  pageNumber: number,
-  unitless: UnitlessReading,
-  locate?: (from: number, to: number) => FactCandidate["box"],
+  pattern: RegExp,
+  rules: ReadingRules,
+  markWasDecoded: boolean,
 ): FactCandidate[] {
   const found: FactCandidate[] = [];
-  for (const m of sentence.matchAll(AMOUNT)) {
+  for (const m of sentence.matchAll(pattern)) {
     // A ₹ that ends a column header is a declaration, not a figure. Audit tables
     // headed "No. | Name of Institution | Amount in ₹" are followed by the first
     // row, so the digits after that ₹ are a serial number: "Amount in ₹ 1
@@ -481,19 +544,30 @@ function moneyIn(
     // fraction the text layer separated from its decimal point.
     const after = sentence.slice(m.index + m[0].length, m.index + m[0].length + 20);
     const unreadable = UNREADABLE_UNIT.test(after) || SPLIT_DECIMAL.test(after);
-    const reading = m[2] === undefined && unreadable ? "refuse" : unitless;
+    const reading = m[2] === undefined && unreadable ? "refuse" : rules.unitless;
     const paise = amountToPaise(m[1] ?? "", m[2], reading);
     found.push({
       kind: "monetary_amount",
-      pageNumber,
+      pageNumber: rules.pageNumber,
       rawText: contextAround(sentence, m.index, m.index + m[0].length),
       normalisedValue: paise === null ? null : paise.toString(),
       // A stated unit is the safest reading. A figure read as rupees because
       // its page declares no scale is a sound inference and still an
       // inference, so it sits between a stated unit and no reading at all.
-      extractionConfidence: m[2] !== undefined ? 0.8 : paise === null ? 0.4 : 0.6,
+      // A decoded mark sits below a stated one at every tier. The glyph was
+      // read from the page rather than from the text layer, and a reader is
+      // entitled to know the difference before the figure is published.
+      extractionConfidence: markWasDecoded
+        ? m[2] !== undefined
+          ? 0.5
+          : 0.3
+        : m[2] !== undefined
+          ? 0.8
+          : paise === null
+            ? 0.4
+            : 0.6,
       ...(() => {
-        const box = locate?.(m.index, m.index + m[0].length);
+        const box = rules.locate?.(m.index, m.index + m[0].length);
         return box === undefined ? {} : { box };
       })(),
     });
@@ -537,16 +611,11 @@ function officersIn(sentence: string, pageNumber: number): FactCandidate[] {
   return found;
 }
 
-function candidatesIn(
-  sentence: string,
-  pageNumber: number,
-  unitless: UnitlessReading,
-  locate?: (from: number, to: number) => FactCandidate["box"],
-): FactCandidate[] {
+function candidatesIn(sentence: string, rules: ReadingRules): FactCandidate[] {
   return [
-    ...moneyIn(sentence, pageNumber, unitless, locate),
-    ...contractorsIn(sentence, pageNumber),
-    ...officersIn(sentence, pageNumber),
+    ...moneyIn(sentence, rules),
+    ...contractorsIn(sentence, rules.pageNumber),
+    ...officersIn(sentence, rules.pageNumber),
   ];
 }
 
@@ -567,6 +636,9 @@ export function extractFacts(pages: readonly PageInput[]): FactCandidate[] {
     // Decided per page, not per sentence: a table's caption sits at the top and
     // governs cells far below it, well outside any one sentence's window.
     const unitless: UnitlessReading = pageDeclaresUnit(page.content) ? "refuse" : "rupees";
+    // Scoped to the page for the same reason: one stray mark is punctuation,
+    // several are a font mapping that dropped the rupee glyph.
+    const decodeMark = pageLostItsCurrencyMark(page.content);
     const items = page.items;
     for (const sentence of locatedSentencesOf(page.content)) {
       // Sentence offsets are meaningless to anyone else, so the mapping back to
@@ -580,7 +652,14 @@ export function extractFacts(pages: readonly PageInput[]): FactCandidate[] {
               if (start === undefined || last === undefined) return undefined;
               return boxAround(items, start, last + 1) ?? undefined;
             };
-      out.push(...candidatesIn(sentence.text, page.pageNumber, unitless, locate));
+      out.push(
+        ...candidatesIn(sentence.text, {
+          pageNumber: page.pageNumber,
+          unitless,
+          decodeMark,
+          ...(locate === undefined ? {} : { locate }),
+        }),
+      );
     }
   }
   return out;
