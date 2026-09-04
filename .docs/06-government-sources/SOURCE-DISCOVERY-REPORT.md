@@ -142,7 +142,7 @@ Labour ──❌──> Equipment ──❌──> Specification ──🟡─�
 
 1. **LGD** — the place spine. Highest confidence in the registry.
 2. **CPPP + 36 State/UT portals** — the procurement layer, essentially complete.
-3. **OMMAS** _(unverified)_ — would close the execution gap for rural roads in one source.
+3. **OMMAS** _(reachable 28 Aug, licence-blocked)_ — it does close the execution gap for rural roads in one source, and NRIDA's terms forbid copying or republishing it without written permission. See [`pmgsy-ommas-findings.md`](./pmgsy-ommas-findings.md).
 4. **India Budget + CGA** — the money-in side.
 5. **Maharashtra BEAMS** _(surface unverified)_ — closest thing found to a state allocation system.
 6. **CAG** — audit, as cited documents.

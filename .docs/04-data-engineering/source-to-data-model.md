@@ -68,14 +68,14 @@ The `verification_status`, `http_status`, `final_url`, `page_title`, `verified_a
 
 ## Unmapped — the gaps
 
-| `.docs/05-data-model/database-design.md` element  | Source status                                                                          |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `project.external_work_id`                        | **No works register located**                                                          |
-| `project_progress.physical_pct` / `financial_pct` | **No source verified** (OMMAS unverified)                                              |
-| `release` (per project)                           | PFMS, largely authenticated                                                            |
-| `expenditure.project_id`                          | **The critical gap** — expenditure is published by budget head, not by work            |
-| `road.length_km` / `width_m` / `surface_type`     | No source verified — required by `.docs/03-domain/road-infrastructure-intelligence.md` |
-| `contractor.registration_no`                      | No public register located                                                             |
-| `facility` / `utility_asset` / `transport_asset`  | Out of Phase-1 scope; unassessed                                                       |
+| `.docs/05-data-model/database-design.md` element  | Source status                                                                           |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `project.external_work_id`                        | **No works register located**                                                           |
+| `project_progress.physical_pct` / `financial_pct` | **Published by OMMAS, licence-blocked** — reachable 28 Aug; NRIDA forbids republication |
+| `release` (per project)                           | PFMS, largely authenticated                                                             |
+| `expenditure.project_id`                          | **The critical gap** — expenditure is published by budget head, not by work             |
+| `road.length_km` / `width_m` / `surface_type`     | No source verified — required by `.docs/03-domain/road-infrastructure-intelligence.md`  |
+| `contractor.registration_no`                      | No public register located                                                              |
+| `facility` / `utility_asset` / `transport_asset`  | Out of Phase-1 scope; unassessed                                                        |
 
 **Five of `.docs/05-data-model/database-design.md`'s core project-and-execution fields have no verified source.** That is the honest state after discovery, and it is the agenda for the next phase.
