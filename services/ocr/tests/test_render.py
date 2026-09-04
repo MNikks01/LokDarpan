@@ -102,6 +102,14 @@ class TestRender:
         assert y1 == pytest.approx(HEIGHT, abs=1)
 
 
+def test_a_page_that_draws_no_image_reports_none() -> None:
+    # A page with no text layer is not automatically a scan. Knowing it draws no
+    # image at all is what separates "photograph of a table" from "blank sheet",
+    # and 428 of this corpus's 522 unread pages turned out to be the latter.
+    with PdfRenderer(one_page_pdf(0)) as renderer:
+        assert renderer.page_images(1) == []
+
+
 def test_a_page_outside_the_document_is_named_rather_than_wrapped() -> None:
     with (
         PdfRenderer(one_page_pdf(0)) as renderer,

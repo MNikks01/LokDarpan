@@ -20,7 +20,9 @@
     "ingest:gepnic": "tsx src/gepnic/cli.ts",
     "ingest:gepnic-sample": "tsx src/gepnic/sample-window.ts",
     "link:figures": "tsx src/cag/figure-link-cli.ts",
-    "reprocess:cag": "tsx src/cag/reprocess-cli.ts"
+    "reprocess:cag": "tsx src/cag/reprocess-cli.ts",
+    "ocr:manifest": "tsx src/ocr/manifest-cli.ts",
+    "ocr:score": "tsx src/ocr/score-cli.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",
