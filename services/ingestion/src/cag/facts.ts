@@ -13,7 +13,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/14";
+export const PARSER_VERSION = "cag-facts/15";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -265,6 +265,23 @@ const PAGE_DECLARES_UNIT =
  * Requiring a unit word after the fraction is what keeps the two apart, and a
  * refused figure goes to a person rather than into the ledger.
  */
+/**
+ * A scale word that governs a bracketed group rather than the amount inside it.
+ *
+ * The page states "shortfall of ₹11,553 (₹7,011+₹4,542) crore". Both amounts in
+ * the bracket are in crore, and both were read as plain rupees — ₹4,542 instead
+ * of ₹4,542 crore, **wrong by seven orders of magnitude**, in a well-formed
+ * small figure nothing downstream could question. Three such readings reached
+ * the review queue and were caught by hand.
+ *
+ * So an unqualified amount is refused when a closing bracket followed by a
+ * scale word can be reached from it without leaving the bracket. The lookahead
+ * is bounded and stops at any further bracket or full stop, because a scale
+ * word two clauses away governs something else.
+ */
+const SCALE_OUTSIDE_BRACKET =
+  /^[^().।]{0,40}\)\s*(?:crore|Crore|lakh|Lakh|thousand|Thousand|कोटी|कोटि|कोट|िोटी|िोटि|िोट|ोटी|ोटि|ोट|लाख|हजार)\b/u;
+
 const SPLIT_DECIMAL = /^\.\s+\d+\s*(?:crore|lakh|thousand|कोट|िोट|ोट|लाख|हजार)/iu;
 
 const DECLARES_RUPEES = /(?:amount|amounts|amt|figures?|value|values|rupees)\.?\s+in\s*$/iu;
@@ -525,6 +542,24 @@ function moneyIn(sentence: string, rules: ReadingRules): FactCandidate[] {
   return found;
 }
 
+/**
+ * Whether an unqualified amount's scale can be trusted to be absent.
+ *
+ * Three ways it cannot: a unit the parser could not read, a fraction the text
+ * layer separated from its decimal point, and a scale word the sentence states
+ * outside a bracket that governs what is inside it. Each means the figure has a
+ * magnitude the parser cannot establish, so it is refused rather than read as
+ * rupees — which is the same error seven orders down.
+ */
+function scaleIsUnusable(sentence: string, from: number): boolean {
+  const after = sentence.slice(from, from + 20);
+  return (
+    UNREADABLE_UNIT.test(after) ||
+    SPLIT_DECIMAL.test(after) ||
+    SCALE_OUTSIDE_BRACKET.test(sentence.slice(from, from + 60))
+  );
+}
+
 function matchesIn(
   sentence: string,
   pattern: RegExp,
@@ -540,11 +575,10 @@ function matchesIn(
     // holds; it does not begin an amount.
     if (DECLARES_RUPEES.test(sentence.slice(Math.max(0, m.index - 24), m.index))) continue;
 
-    // A unit the parser could not read is not a missing unit, and neither is a
-    // fraction the text layer separated from its decimal point.
-    const after = sentence.slice(m.index + m[0].length, m.index + m[0].length + 20);
-    const unreadable = UNREADABLE_UNIT.test(after) || SPLIT_DECIMAL.test(after);
-    const reading = m[2] === undefined && unreadable ? "refuse" : rules.unitless;
+    const reading =
+      m[2] === undefined && scaleIsUnusable(sentence, m.index + m[0].length)
+        ? "refuse"
+        : rules.unitless;
     const paise = amountToPaise(m[1] ?? "", m[2], reading);
     found.push({
       kind: "monetary_amount",
