@@ -58,8 +58,20 @@ describe("trimToName", () => {
     expect(trimToName("Vijay Constructions 29/09/2022 168")).toBe("Vijay Constructions");
   });
 
-  it("drops a trailing stray initial", () => {
-    expect(trimToName("Water Staywordship Organization J")).toBe("Water Staywordship Organization");
+  // Was "drops a trailing stray initial", which kept the rest of the capture.
+  // A trailing initial means the capture stopped *inside* a name — the page
+  // says "M/s Water Staywordship Organization J.V Baramati", a joint venture —
+  // and keeping the head of it names one partner instead of the venture. The
+  // asymmetry that governs this parser applies: a missed firm costs a reviewer
+  // nothing, a misnamed one attaches the wrong company to a public claim.
+  it("captures nothing when a trailing initial shows the name was cut", () => {
+    expect(trimToName("Water Staywordship Organization J")).toBe("");
+  });
+
+  // A single capital on its own is not a name that was cut; there is nothing
+  // to be wrong about.
+  it("still returns empty for a lone initial", () => {
+    expect(trimToName("J")).toBe("");
   });
 
   it("keeps a joiner that sits inside the name", () => {
@@ -335,5 +347,26 @@ describe("an unreadable unit is not a missing unit", () => {
       { pageNumber: 1, content: "a penalty of ₹54,33,780 was levied on 14 schools" },
     ]);
     expect(found?.normalisedValue).toBe("543378000");
+  });
+});
+
+describe("a firm cut mid-name is not a firm", () => {
+  // "M/s Water Staywordship Organization J.V Baramati" is a joint venture. The
+  // capture stops at the full stop in "J.", and dropping the stray initial to
+  // keep "…Organization" names one partner instead of the venture the page
+  // names. A misnamed firm on a public claim is the error this parser exists to
+  // avoid, so it captures nothing.
+  it("captures nothing when the name was cut at an initial", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "awarded to M/s Water Staywordship Organization J.V Baramati" },
+    ]).filter((f) => f.kind === "contractor_reference");
+    expect(found).toHaveLength(0);
+  });
+
+  it("still captures a firm whose name ends cleanly", () => {
+    const [found] = extractFacts([
+      { pageNumber: 1, content: "awarded to M/s Vijay Constructions, Nagpur for the work." },
+    ]).filter((f) => f.kind === "contractor_reference");
+    expect(found?.normalisedValue).toBe("Vijay Constructions");
   });
 });
