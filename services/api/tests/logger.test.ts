@@ -38,12 +38,24 @@ describe("structured logging", () => {
       token: "secret",
       email: "a@b.c",
     });
-    const line = lines[0] ?? "";
-    expect(line).not.toContain("ABC Infra");
-    expect(line).not.toContain("18.5");
-    expect(line).not.toContain("secret");
-    expect(line).not.toContain("a@b.c");
-    expect(line.match(/\[redacted\]/g)).toHaveLength(5);
+    // The substring check runs over the payload with the timestamp removed, and
+    // the timestamp is then asserted separately.
+    //
+    // Checking the raw line was flaky roughly one run in six hundred: an ISO
+    // timestamp emitted in second 18 with milliseconds 5xx reads
+    // "…T17:29:18.567Z", which contains "18.5" — the very latitude the test
+    // asserts is absent. It failed three times in one afternoon and each
+    // failure pointed at redaction, which was working the whole time.
+    const parsed = JSON.parse(lines[0] ?? "{}") as Record<string, unknown> & { time?: string };
+    expect(parsed.time).toMatch(/^\d{4}-\d{2}-\d{2}T/u);
+    delete parsed.time;
+
+    const payload = JSON.stringify(parsed);
+    expect(payload).not.toContain("ABC Infra");
+    expect(payload).not.toContain("18.5");
+    expect(payload).not.toContain("secret");
+    expect(payload).not.toContain("a@b.c");
+    expect(payload.match(/\[redacted\]/g)).toHaveLength(5);
   });
 });
 
