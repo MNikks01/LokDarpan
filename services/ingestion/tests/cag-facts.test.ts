@@ -289,3 +289,51 @@ describe("Rs is a currency marker, not the end of an English word", () => {
     expect(found?.normalisedValue).toBe("1234560000000");
   });
 });
+
+describe("a declaration names a unit without naming an amount", () => {
+  // "(₹ 1,902 crore)" is a figure carrying its own unit, and "(₹ 10 crore and
+  // above)" is a criterion. Neither says anything about the scale of other
+  // figures on the page, and treating them as captions refused whole pages of
+  // ordinary rupee prose.
+  it("does not mistake a parenthesised figure for a table caption", () => {
+    const [found] = extractFacts([
+      {
+        pageNumber: 1,
+        content:
+          "The increase was under Urban development (₹ 1,902 crore). " +
+          "A benefit of ₹ 1,500 per month is paid to each woman.",
+      },
+    ])
+      .filter((f) => f.kind === "monetary_amount")
+      .slice(1);
+    expect(found?.normalisedValue).toBe("150000");
+  });
+
+  it("still refuses on a genuine caption", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "Table 2.6 (₹ in crore) Sr. Grant ₹ 5376.31 total." },
+    ]).find((f) => f.kind === "monetary_amount");
+    expect(found?.normalisedValue).toBeNull();
+  });
+});
+
+describe("an unreadable unit is not a missing unit", () => {
+  // "₹ 145 core" is crore misspelled. Reading it as one hundred and forty-five
+  // rupees would be wrong by seven orders of magnitude — and wrong precisely
+  // because the source did state a unit.
+  it("refuses a figure whose unit was written but cannot be read", () => {
+    for (const text of ["₹ 145 core under mining", "a loan of ₹ 7,700 cr in 2023-24"]) {
+      const found = extractFacts([{ pageNumber: 1, content: text }]).find(
+        (f) => f.kind === "monetary_amount",
+      );
+      expect(found?.normalisedValue).toBeNull();
+    }
+  });
+
+  it("still reads a figure that simply states no unit", () => {
+    const [found] = extractFacts([
+      { pageNumber: 1, content: "a penalty of ₹54,33,780 was levied on 14 schools" },
+    ]);
+    expect(found?.normalisedValue).toBe("543378000");
+  });
+});

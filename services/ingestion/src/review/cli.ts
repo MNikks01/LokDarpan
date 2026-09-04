@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { createInterface, type Interface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 
@@ -28,6 +29,7 @@ import {
   reviewProgress,
   type ReviewProgress,
 } from "./queue";
+import { CorrectionError, prepareCorrections } from "./corrections";
 import { thresholdPhrase } from "./threshold";
 import { selfCheck, type ClaimedByPage, type SelfCheck } from "./triage";
 
@@ -387,6 +389,45 @@ async function reviewBatch(
 }
 
 /**
+ * The `--corrections` branch: values a person supplies, one fact at a time.
+ *
+ * Each is recorded as a `corrected` decision carrying its own reason, which is
+ * what `corrected` is for — the parser could not read the figure and a person
+ * says what it is. Refused as a set by `--decide` for exactly this reason: one
+ * flag cannot honestly supply a value per fact, and a file can.
+ */
+async function runCorrections(client: pg.Client, reviewer: string): Promise<boolean> {
+  const path = arg("corrections");
+  if (path === undefined) return false;
+
+  let prepared;
+  try {
+    prepared = prepareCorrections(JSON.parse(await readFile(path, "utf8")));
+  } catch (error) {
+    // Nothing is applied if any entry is wrong. A partly-applied corrections
+    // file is worse than none: it leaves no single state anyone reasoned about.
+    say(
+      `Nothing applied. ${error instanceof CorrectionError || error instanceof Error ? error.message : String(error)}`,
+    );
+    return true;
+  }
+
+  say(`\nApplying ${String(prepared.length)} corrections, each with its own reason.\n`);
+  let applied = 0;
+  for (const c of prepared) {
+    const result = await apply(
+      client,
+      { factId: c.id, decision: "corrected", reviewer },
+      c.paise,
+      `${c.note} [read as ${c.amount} ${c.unit}]`,
+    );
+    applied += result === "decided" ? 1 : 0;
+  }
+  say(`\n${String(applied)} corrected.`);
+  return true;
+}
+
+/**
  * The `--revise` branch, or false when the caller did not ask for one.
  *
  * Kept whole and out of `main` because its refusals are the interesting part:
@@ -646,6 +687,21 @@ async function reviewFlagged(
   return { decided, quit: false };
 }
 
+/**
+ * The modes that name their facts explicitly instead of walking the queue.
+ *
+ * Kept together because that is what they have in common, and it is the
+ * property that makes them safe: neither can decide a fact nobody asked about.
+ */
+async function runNamedFactMode(
+  client: pg.Client,
+  rl: Interface,
+  reviewer: string,
+): Promise<boolean> {
+  if (await runRevise(client, rl, reviewer)) return true;
+  return runCorrections(client, reviewer);
+}
+
 async function main(): Promise<void> {
   const { connectionString, reviewer } = requireConfig();
 
@@ -654,7 +710,7 @@ async function main(): Promise<void> {
   const rl = createInterface({ input: stdin, output: stdout });
 
   try {
-    if (await runRevise(client, rl, reviewer)) return;
+    if (await runNamedFactMode(client, rl, reviewer)) return;
 
     const options = queueOptions();
     if (options === null) {
