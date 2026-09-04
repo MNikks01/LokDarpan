@@ -4,7 +4,7 @@ import pg from "pg";
 
 import { openDatasetVersion, recordArtifact, sealDatasetVersion } from "../lgd/load";
 import { putArtifact } from "../raw-store";
-import { CagClient } from "./client";
+import { CagClient, MAHARASHTRA_STATE_ID } from "./client";
 import { extractDocument } from "./extract";
 import { loadDocument } from "./load";
 
@@ -20,6 +20,15 @@ const sleep = (ms: number): Promise<void> =>
     setTimeout(done, ms);
   });
 
+/** `--state=Madhya Pradesh`. Rejoins on "=" so a value may contain one. */
+function arg(name: string): string | undefined {
+  return process.argv
+    .find((a) => a.startsWith(`--${name}=`))
+    ?.split("=")
+    .slice(1)
+    .join("=");
+}
+
 async function main(): Promise<void> {
   const connectionString = process.env["DATABASE_URL"];
   if (connectionString === undefined || connectionString === "") {
@@ -29,17 +38,48 @@ async function main(): Promise<void> {
 
   const limit = Number(process.argv[2] ?? "3");
   const client = new CagClient();
-  const reports = await client.listStateReports();
-  process.stdout.write(`discovered ${String(reports.length)} Maharashtra reports\n`);
+
+  // `--state="Madhya Pradesh"`, spelled as the CAG filter spells it. The id is
+  // looked up from the page rather than held here, and an unrecognised name
+  // lists what is on offer instead of silently fetching the default state's
+  // reports under another state's name.
+  const wanted = arg("state");
+  let stateId = MAHARASHTRA_STATE_ID;
+  let stateName = "Maharashtra";
+  if (wanted !== undefined) {
+    const states = await client.listStates();
+    const match = states.find((s) => s.name.toLowerCase() === wanted.toLowerCase());
+    if (match === undefined) {
+      process.stderr.write(
+        `The CAG filter offers no state called "${wanted}". It offers:\n` +
+          states.map((s) => `  ${s.name}`).join("\n") +
+          "\n",
+      );
+      process.exit(64);
+    }
+    stateId = match.id;
+    stateName = match.name;
+  }
+
+  const reports = await client.listStateReports(stateId);
+  process.stdout.write(`discovered ${String(reports.length)} ${stateName} reports\n`);
 
   const db = new pg.Client({ connectionString });
   await db.connect();
 
   try {
+    // Matched by name rather than by a hard-coded LGD code, so adding a state
+    // needs no second lookup table to keep in step. A document whose state is
+    // not in `admin_unit` still loads, with a null unit and a warning — the
+    // report is real whether or not the hierarchy has caught up with it.
     const state = await db.query<{ id: string }>(
-      `SELECT id FROM admin_unit WHERE level = 'state' AND lgd_code = '27'`,
+      `SELECT id FROM admin_unit WHERE level = 'state' AND lower(name_en) = lower($1)`,
+      [stateName],
     );
     const adminUnitId = state.rows[0] === undefined ? null : Number(state.rows[0].id);
+    if (adminUnitId === null) {
+      process.stdout.write(`no admin_unit for "${stateName}" — documents will load without one.\n`);
+    }
 
     // Which reports we already hold, by the URL they were retrieved from.
     //

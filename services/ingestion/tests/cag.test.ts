@@ -128,3 +128,45 @@ describe("glyphSubstitution", () => {
     expect(glyphSubstitution("")).toBeNull();
   });
 });
+
+describe("CagClient.listStates", () => {
+  // The filter carries report-type options — Union, Civil, Railways — in a
+  // different select. Parsing options loosely would offer "Defence" as a state
+  // and fetch nothing under it.
+  const page = `<html>
+    <select name="type"><option value="49">State</option><option value="61">Defence</option></select>
+    <select name="state[]" id="state">
+      <option value="78">Madhya Pradesh</option>
+      <option value="79">Maharashtra</option>
+      <option value="88">Tamil Nadu</option>
+    </select></html>`;
+
+  const respondWith =
+    (body: string, status = 200): HttpLike =>
+    () =>
+      Promise.resolve(new Response(body, { status }));
+
+  it("reads only the states, with the ids the filter expects", async () => {
+    const states = await new CagClient("https://cag.test", respondWith(page)).listStates();
+    expect(states).toEqual([
+      { id: 78, name: "Madhya Pradesh" },
+      { id: 79, name: "Maharashtra" },
+      { id: 88, name: "Tamil Nadu" },
+    ]);
+  });
+
+  // A state id typed from memory silently fetches another state's reports, so
+  // an unreadable page must stop rather than fall back to a guess.
+  it("refuses when the page has no state filter", async () => {
+    const client = new CagClient("https://cag.test", respondWith("<html>changed</html>"));
+    await expect(client.listStates()).rejects.toThrow(/no state filter/);
+  });
+
+  it("refuses an empty option list rather than reporting no states", async () => {
+    const client = new CagClient(
+      "https://cag.test",
+      respondWith(`<select name="state[]" id="state"></select>`),
+    );
+    await expect(client.listStates()).rejects.toThrow(/no options/);
+  });
+});

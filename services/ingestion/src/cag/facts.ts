@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/8";
+export const PARSER_VERSION = "cag-facts/11";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -178,9 +178,39 @@ const PAGE_DECLARES_UNIT =
  * So an attempted-but-unreadable unit refuses, wherever it appears and whatever
  * its page declares. "No unit was written" and "a unit was written that I
  * cannot read" are different facts, and only the first licenses rupees.
+ *
+ * `million` and `billion` are here rather than in `SCALE` deliberately. They are
+ * not ambiguous words — but they occur **once** in 4,586 pages, and one data
+ * point is not enough to add a scale to the money path. Refusing sends that one
+ * figure to a person, which is what a single unfamiliar unit deserves; if these
+ * become common in another state's reports, they earn a `SCALE` entry then.
  */
+/**
+ * Words that make a ₹ a column header rather than the start of a figure.
+ *
+ * Narrow on purpose. Suppressing a match costs a candidate, which the parser
+ * treats as cheap; matching one wrongly puts a serial number in the ledger as
+ * an amount of money.
+ */
+/**
+ * A decimal point the text layer split from its fraction, with a unit after it.
+ *
+ * "CGF of ₹177. 75 crore" is ₹177.75 crore. The digit group stops at the point,
+ * so the figure was stored as ₹177 — wrong by seven orders of magnitude, and
+ * silently, because ₹177 is a perfectly well-formed number.
+ *
+ * The guard refuses rather than repairs. Allowing whitespace inside the decimal
+ * would also match "cost ₹ 100. 5 villages were covered", reading ₹100.5 where
+ * the source says ₹100 — trading a rare truncation for a commoner invention.
+ * Requiring a unit word after the fraction is what keeps the two apart, and a
+ * refused figure goes to a person rather than into the ledger.
+ */
+const SPLIT_DECIMAL = /^\.\s+\d+\s*(?:crore|lakh|thousand|कोट|िोट|ोट|लाख|हजार)/iu;
+
+const DECLARES_RUPEES = /(?:amount|amounts|figures|value|rupees)\s+in\s*$/iu;
+
 const UNREADABLE_UNIT =
-  /^\s*(?:core|cores|crores|cr|crs|lac|lacs|lakhs|thousands|mn|bn|करोड|कोटय|ोटय)\b/iu;
+  /^\s*(?:core|cores|crores|cr|crs|lac|lacs|lakhs|thousands|million|millions|billion|billions|mn|bn|करोड|कोटय|ोटय)\b/iu;
 
 /** Whether this page states a scale its bare figures could belong to. */
 export function pageDeclaresUnit(content: string): boolean {
@@ -344,9 +374,18 @@ export function trimToName(captured: string): string {
 function moneyIn(sentence: string, pageNumber: number, unitless: UnitlessReading): FactCandidate[] {
   const found: FactCandidate[] = [];
   for (const m of sentence.matchAll(AMOUNT)) {
-    // A unit the parser could not read is not a missing unit.
-    const after = sentence.slice(m.index + m[0].length, m.index + m[0].length + 12);
-    const reading = m[2] === undefined && UNREADABLE_UNIT.test(after) ? "refuse" : unitless;
+    // A ₹ that ends a column header is a declaration, not a figure. Audit tables
+    // headed "No. | Name of Institution | Amount in ₹" are followed by the first
+    // row, so the digits after that ₹ are a serial number: "Amount in ₹ 1
+    // Academy of Nursing … 33,000" yielded ₹1. The symbol says what the column
+    // holds; it does not begin an amount.
+    if (DECLARES_RUPEES.test(sentence.slice(Math.max(0, m.index - 24), m.index))) continue;
+
+    // A unit the parser could not read is not a missing unit, and neither is a
+    // fraction the text layer separated from its decimal point.
+    const after = sentence.slice(m.index + m[0].length, m.index + m[0].length + 20);
+    const unreadable = UNREADABLE_UNIT.test(after) || SPLIT_DECIMAL.test(after);
+    const reading = m[2] === undefined && unreadable ? "refuse" : unitless;
     const paise = amountToPaise(m[1] ?? "", m[2], reading);
     found.push({
       kind: "monetary_amount",
