@@ -45,22 +45,38 @@ export class AmountFormatError extends Error {
  * government asserting an amount; an absence is the lack of an assertion.
  */
 export function scaledToPaise(raw: string, unit: PublishedUnit): bigint | null {
-  const shift = PAISE_SHIFT[unit];
+  return shiftedToPaise(raw, PAISE_SHIFT[unit], unit);
+}
+
+/**
+ * Converts a decimal figure to exact paise at a stated decimal shift.
+ *
+ * The shift is the unit's own distance from paise — 9 for crore, 7 for lakh, 2
+ * for a figure written out in rupees. It is a parameter because **the precision
+ * check has to run at the scale the source states**, not at some intermediate
+ * one. Reading "0.0000001 crore" by way of thousands refused it for carrying
+ * seven decimals, when at crore scale it is exactly ₹1 and needs no rounding at
+ * all; the same detour truncated "₹1.234" to ₹1.23 on the way back down.
+ *
+ * `unit` names the scale in the refusal only, so a reader is told which scale
+ * the figure was judged against.
+ */
+export function shiftedToPaise(raw: string, shift: number, unit: string): bigint | null {
   const trimmed = raw.trim().replace(/,/gu, "");
   if (ABSENT.has(trimmed) || ABSENT.has(trimmed.toUpperCase())) return null;
 
   const match = THOUSANDS.exec(trimmed);
   if (match === null) {
     throw new AmountFormatError(
-      `"${raw}" is not a BEAMS amount. Refusing to guess at a government figure.`,
+      `"${raw}" is not an amount in ${unit}. Refusing to guess at a government figure.`,
     );
   }
 
   const [, sign, whole, fraction = ""] = match;
 
-  // More than five decimal places in a thousands figure would express less than
-  // one paisa. Rounding it would silently invent precision the source does not
-  // have, so it is refused instead.
+  // More decimal places than the scale has room for would express less than one
+  // paisa. Rounding is refused rather than performed: it would silently invent
+  // precision the source does not claim.
   if (fraction.length > shift) {
     throw new AmountFormatError(
       `"${raw}" carries sub-paise precision for a figure in ${unit} ` +

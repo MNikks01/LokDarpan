@@ -42,9 +42,15 @@ export interface ExtractedPage {
    * `glyphSubstitution`. `null` where the question does not arise.
    */
   readonly glyphSubstitution: number | null;
-  /** The page box in points, from pdf.js's viewport. */
+  /**
+   * The page box in points, **unrotated** — the same space `items` and a fact's
+   * box are in. A rotated page has two boxes, and storing the upright one beside
+   * unrotated coordinates put highlights off the edge of their own page.
+   */
   readonly width: number;
   readonly height: number;
+  /** The page's declared /Rotate, so a renderer can turn the page itself. */
+  readonly rotation: number;
   /** Every text item, in the order pdf.js reported it. */
   readonly items: readonly TextItem[];
 }
@@ -250,7 +256,14 @@ export async function extractDocument(bytes: Buffer): Promise<ExtractedDocument>
   const pages: ExtractedPage[] = [];
   for (let n = 1; n <= pdf.numPages; n++) {
     const page = await pdf.getPage(n);
-    const [textContent, viewport] = [await page.getTextContent(), page.getViewport({ scale: 1 })];
+    // `rotation: 0` asks for the box the file states rather than the one a
+    // reader sees. Text-item transforms are in that unrotated space, so the two
+    // have to be requested together or a landscape page disagrees by a quarter
+    // turn.
+    const [textContent, viewport] = [
+      await page.getTextContent(),
+      page.getViewport({ scale: 1, rotation: 0 }),
+    ];
     // pdf.js mixes text items with marked-content boundaries in the same array;
     // only the former carry `str` and a transform.
     const raw = (textContent.items as PdfTextItem[]).filter(
@@ -268,6 +281,7 @@ export async function extractDocument(bytes: Buffer): Promise<ExtractedDocument>
       glyphSubstitution: content === "" ? null : glyphSubstitution(content),
       width: viewport.width,
       height: viewport.height,
+      rotation: ((page.rotate % 360) + 360) % 360,
       items,
     });
   }
