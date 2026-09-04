@@ -62,12 +62,13 @@ export async function loadDocument(
 
   for (const page of extracted.pages) {
     await client.query(
-      `INSERT INTO document_page (document_id, page_number, content, script)
-       VALUES ($1,$2,$3,$4)
+      `INSERT INTO document_page (document_id, page_number, content, script, glyph_substitution)
+       VALUES ($1,$2,$3,$4,$5)
        ON CONFLICT (document_id, page_number) DO UPDATE SET
-         content = EXCLUDED.content,
-         script  = EXCLUDED.script`,
-      [documentId, page.pageNumber, page.content, page.script],
+         content            = EXCLUDED.content,
+         script             = EXCLUDED.script,
+         glyph_substitution = EXCLUDED.glyph_substitution`,
+      [documentId, page.pageNumber, page.content, page.script, page.glyphSubstitution],
     );
   }
 

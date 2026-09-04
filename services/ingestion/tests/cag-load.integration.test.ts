@@ -33,9 +33,14 @@ const extracted: ExtractedDocument = {
   pagesWithoutText: 1,
   extractionMethod: "unpdf/pdfjs text layer",
   pages: [
-    { pageNumber: 1, content: "अनुपालन लेखापरीक्षा", script: "devanagari" },
-    { pageNumber: 2, content: "Executive Engineer awarded ₹15.14 crore", script: "latin" },
-    { pageNumber: 3, content: null, script: "none" },
+    { pageNumber: 1, content: "अनुपालन लेखापरीक्षा", script: "devanagari", glyphSubstitution: 0 },
+    {
+      pageNumber: 2,
+      content: "Executive Engineer awarded ₹15.14 crore",
+      script: "latin",
+      glyphSubstitution: null,
+    },
+    { pageNumber: 3, content: null, script: "none", glyphSubstitution: null },
   ],
 };
 
