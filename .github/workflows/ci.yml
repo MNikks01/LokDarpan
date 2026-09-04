@@ -153,6 +153,35 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
 
+  # ── The OCR service is Python, and is gated like everything else. A spec with
+  #    no enforcement mechanism becomes fiction; so does a sidecar service. The
+  #    engines themselves are NOT installed here: the suite must pass with them
+  #    absent, which is what proves a missing engine is reported rather than
+  #    silently halving the evidence.
+  ocr:
+    name: OCR service · Lint · Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/ocr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with: { version: "0.5.11" }
+      - name: Lint
+        run: uvx ruff@0.7.4 check .
+      - name: Format
+        run: uvx ruff@0.7.4 format --check .
+      - name: Tests
+        run: |
+          uv venv --python 3.12
+          # pypdfium2 and Pillow are core: the renderer decides page geometry,
+          # and its tests check every rotation against real pdfium. The OCR
+          # engines are still absent, which is what proves a missing engine is
+          # reported rather than silently halving the evidence.
+          uv pip install --python .venv pydantic pytest pypdfium2 Pillow
+          .venv/bin/python -m pytest -q
+
   security:
     name: Dependencies · Secrets
     runs-on: ubuntu-latest

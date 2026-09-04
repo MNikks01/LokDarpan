@@ -1,0 +1,10 @@
+{
+  "contract_version": "ocr/1",
+  "document_sha256": "3faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "readings": [],
+  "refusals": [],
+  "consensus": {
+    "page_number": 1,
+    "content": "Rs 15.14 crore"
+  }
+}

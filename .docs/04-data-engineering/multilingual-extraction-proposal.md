@@ -185,17 +185,17 @@ store.
 
 ### Self-hosted
 
-|               | **PaddleOCR**                                                                      | **Tesseract 5**                                                         | **Surya**                                       | **docTR**                                |
-| ------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------- |
-| Indic scripts | Devanagari + several Indic families; per-model **[verify against the model list]** | Widest published Indic `traineddata` coverage **[verify per language]** | Strong multilingual + layout **[verify]**       | Latin-centric; Indic sparse **[verify]** |
-| Tables        | PP-Structure — genuine table structure                                             | None; needs a separate layout step                                      | Table recognition included                      | Limited                                  |
-| Accuracy      | Generally strong on print **[benchmark locally]**                                  | Weakest of these on noisy scans **[benchmark]**                         | Reported strong **[benchmark]**                 | **[benchmark]**                          |
-| Hosting       | Self-hosted, Python                                                                | Self-hosted, C++ binary                                                 | Self-hosted, Python                             | Self-hosted, Python                      |
-| Cost          | Compute only                                                                       | Compute only                                                            | Compute only                                    | Compute only                             |
-| GPU           | Optional; CPU markedly slower                                                      | CPU only                                                                | **Effectively required**                        | Optional                                 |
-| Licence       | Apache-2.0                                                                         | Apache-2.0                                                              | **GPL-family with commercial terms — [verify]** | Apache-2.0                               |
-| Complexity    | A Python service + models                                                          | Lowest — a binary and `traineddata`                                     | Python + GPU + model weights                    | Python service                           |
-| Failure modes | Confident wrong digits on low-DPI; table cells merged                              | Degrades sharply below ~300 DPI; no confidence on some builds           | **[verify]**                                    | **[verify]**                             |
+|               | **PaddleOCR**                                                                      | **Tesseract 5**                                                         | **Surya**                                 | **docTR**                                |
+| ------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------- | ---------------------------------------- |
+| Indic scripts | Devanagari + several Indic families; per-model **[verify against the model list]** | Widest published Indic `traineddata` coverage **[verify per language]** | Strong multilingual + layout **[verify]** | Latin-centric; Indic sparse **[verify]** |
+| Tables        | PP-Structure — genuine table structure                                             | None; needs a separate layout step                                      | Table recognition included                | Limited                                  |
+| Accuracy      | Generally strong on print **[benchmark locally]**                                  | Weakest of these on noisy scans **[benchmark]**                         | Reported strong **[benchmark]**           | **[benchmark]**                          |
+| Hosting       | Self-hosted, Python                                                                | Self-hosted, C++ binary                                                 | Self-hosted, Python                       | Self-hosted, Python                      |
+| Cost          | Compute only                                                                       | Compute only                                                            | Compute only                              | Compute only                             |
+| GPU           | Optional; CPU markedly slower                                                      | CPU only                                                                | **Effectively required**                  | Optional                                 |
+| Licence       | Apache-2.0                                                                         | Apache-2.0                                                              | Apache-2.0 (verified 4 Sep 2026)          | Apache-2.0                               |
+| Complexity    | A Python service + models                                                          | Lowest — a binary and `traineddata`                                     | Python + GPU + model weights              | Python service                           |
+| Failure modes | Confident wrong digits on low-DPI; table cells merged                              | Degrades sharply below ~300 DPI; no confidence on some builds           | **[verify]**                              | **[verify]**                             |
 
 **`OCRmyPDF`** is not an engine — it wraps Tesseract to _add_ a text layer to a
 scanned PDF. Attractive because the rest of this pipeline then works unchanged,
@@ -203,10 +203,13 @@ but it writes a derived text layer that would be indistinguishable from a
 publisher's own. It must never write into `data/raw`, which is
 content-addressed and immutable.
 
-**Surya's licence is the blocker to check first.** This repository is
-Apache-2.0. If Surya is GPL, it cannot be linked into the service without
-changing the project's licence, whatever its accuracy. **[verify the current
-licence text before any evaluation effort goes into it.]**
+~~**Surya's licence is the blocker to check first.**~~ **Verified 4 September
+2026, and this was wrong.** `surya-ocr` 0.22.1 publishes Apache-2.0 on PyPI,
+`datalab-to/surya` reports SPDX Apache-2.0, and its `LICENSE` file is the Apache
+2.0 text. The GPL claim came from recollection rather than from the licence —
+the failure this project has a standing rule against. See
+[`ocr-engine-verification.md`](./ocr-engine-verification.md). Surya remains
+unchosen, on grounds other than its licence.
 
 ### Cloud
 

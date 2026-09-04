@@ -14,3 +14,10 @@ services/ingestion/tests/fixtures/
 
 # dotenv sample — prettier has no parser for it
 .env.example
+
+# Python service: virtualenv, caches and build output.
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
