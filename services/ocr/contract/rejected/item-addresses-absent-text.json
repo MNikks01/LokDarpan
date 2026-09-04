@@ -1,0 +1,37 @@
+{
+  "contract_version": "ocr/1",
+  "document_sha256": "3faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "readings": [
+    {
+      "page_number": 1,
+      "engine": {
+        "name": "tesseract",
+        "version": "5.4.1",
+        "model_versions": {},
+        "languages": ["eng"]
+      },
+      "render": {
+        "dpi": 300,
+        "raster_width": 2480,
+        "raster_height": 3508,
+        "page_width": 595.32,
+        "page_height": 841.92,
+        "rotation": 0
+      },
+      "content": "short",
+      "items": [
+        {
+          "seq": 0,
+          "char_start": 0,
+          "char_end": 99,
+          "x0": 72.0,
+          "y0": 700.0,
+          "x1": 88.0,
+          "y1": 709.0,
+          "confidence": 0.98
+        }
+      ]
+    }
+  ],
+  "refusals": []
+}

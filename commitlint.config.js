@@ -13,6 +13,7 @@ export default {
         "database",
         "observability",
         "ingestion",
+        "ocr",
         "docs",
         "ci",
         "deps",

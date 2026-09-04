@@ -50,3 +50,10 @@ apps/web/public/basemap/
 
 # The pinned pmtiles CLI, downloaded by that script.
 tools/
+
+# Python service: virtualenv, caches and build output.
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/

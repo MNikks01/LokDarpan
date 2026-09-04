@@ -1,0 +1,115 @@
+{
+  "contract_version": "ocr/1",
+  "document_sha256": "3faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "readings": [
+    {
+      "page_number": 83,
+      "engine": {
+        "name": "tesseract",
+        "version": "5.4.1",
+        "model_versions": {},
+        "languages": ["eng", "mar"]
+      },
+      "render": {
+        "dpi": 300,
+        "raster_width": 2480,
+        "raster_height": 3508,
+        "page_width": 595.32,
+        "page_height": 841.92,
+        "rotation": 0
+      },
+      "content": "Rs 15.14 crore\nwas sanctioned",
+      "items": [
+        {
+          "seq": 0,
+          "char_start": 0,
+          "char_end": 2,
+          "x0": 72.0,
+          "y0": 700.0,
+          "x1": 88.0,
+          "y1": 709.0,
+          "confidence": 0.98
+        },
+        {
+          "seq": 1,
+          "char_start": 3,
+          "char_end": 8,
+          "x0": 90.0,
+          "y0": 700.0,
+          "x1": 134.0,
+          "y1": 709.0,
+          "confidence": 0.96
+        },
+        {
+          "seq": 2,
+          "char_start": 9,
+          "char_end": 14,
+          "x0": 136.0,
+          "y0": 700.0,
+          "x1": 184.0,
+          "y1": 709.0,
+          "confidence": 0.93
+        },
+        {
+          "seq": 3,
+          "char_start": 15,
+          "char_end": 18,
+          "x0": 72.0,
+          "y0": 686.0,
+          "x1": 96.0,
+          "y1": 695.0,
+          "confidence": 0.99
+        },
+        {
+          "seq": 4,
+          "char_start": 19,
+          "char_end": 29,
+          "x0": 98.0,
+          "y0": 686.0,
+          "x1": 182.0,
+          "y1": 695.0,
+          "confidence": 0.97
+        }
+      ]
+    },
+    {
+      "page_number": 12,
+      "engine": {
+        "name": "paddleocr",
+        "version": "3.7.0",
+        "model_versions": {
+          "lang": "en"
+        },
+        "languages": ["en"]
+      },
+      "render": {
+        "dpi": 300,
+        "raster_width": 3508,
+        "raster_height": 2480,
+        "page_width": 595.32,
+        "page_height": 841.92,
+        "rotation": 270
+      },
+      "content": "Annexure",
+      "items": [
+        {
+          "seq": 0,
+          "char_start": 0,
+          "char_end": 8,
+          "x0": 430.1,
+          "y0": 120.5,
+          "x1": 505.4,
+          "y1": 133.0,
+          "confidence": 0.91
+        }
+      ]
+    }
+  ],
+  "refusals": [
+    {
+      "page_number": 84,
+      "engine": "paddleocr",
+      "reason": "the page could not be rendered: encrypted stream"
+    }
+  ]
+}

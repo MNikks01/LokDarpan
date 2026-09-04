@@ -1,0 +1,47 @@
+[project]
+name = "lokdarpan-ocr"
+version = "0.1.0"
+description = "Reads a page image and says what it saw, and where — never what it inferred."
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+
+# The engines are deliberately NOT here. They are heavy, they pull platform
+# wheels, and the service must be testable and startable without them: an engine
+# that cannot be loaded is reported as unavailable, never quietly skipped.
+dependencies = [
+    "pydantic>=2.9",
+    "fastapi>=0.115",
+    "pypdfium2>=4.30",
+    # The renderer produces the page image every reading is taken from, so it is
+    # core rather than an engine extra.
+    "Pillow>=10.4",
+]
+
+[project.optional-dependencies]
+tesseract = ["pytesseract>=0.3.13"]
+paddle = ["paddleocr>=3.0", "paddlepaddle>=3.0", "numpy>=1.26"]
+serve = ["uvicorn>=0.30"]
+dev = ["pytest>=8.3", "ruff>=0.7"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lokdarpan_ocr"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI declares request parts as argument defaults — `File(...)`, `Form(...)`.
+# That is the framework's own idiom, not the mutable-default hazard B008 is for.
+"src/lokdarpan_ocr/service.py" = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
