@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/6";
+export const PARSER_VERSION = "cag-facts/7";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -51,12 +51,34 @@ export interface FactCandidate {
  * figure is in crore whatever happened to the glyph. The same corruption is
  * already handled in the criterion screen for अधिक → अचधक.
  *
- * `Rs` needs a word boundary because the pattern is case-insensitive and these
- * reports are full of English plurals. Without it "Parameters 2020-21" read as
- * ₹2020, "Surrenders 2.5.4" as ₹2.5 and "years 10.32" as ₹10.32 — years,
- * paragraph numbers and table columns entering the ledger as money. 64 such
- * candidates existed; none had been verified, because none carried a unit and
- * all of them stopped in the queue as "the source stated no unit".
+ * `Rs` needs a word boundary, and the pattern is **case-sensitive** for it.
+ *
+ * The boundary came first: case-insensitively, `Rs` matched the end of English
+ * plurals, so "Parameters 2020-21" read as ₹2020 and "years 10.32" as ₹10.32.
+ * The case matters for a second reason found later. These reports index their
+ * own series with all-caps codes — GSS, ES, **RS**, COPU — so a table of audit
+ * report numbers reading "GSS 12, 17 … RS 9, 16 … COPU 08,09" produced ₹916,
+ * ₹33, ₹37, ₹54 and ₹56 out of report numbers. Across 2,792 pages, **every one
+ * of the eleven `RS` occurrences before digits is a series code, and not one
+ * genuine `Rs.` currency marker exists** — these reports write `₹`. Dropping
+ * the flag costs nothing here and refuses all five fabrications.
+ *
+ * The unit words are therefore enumerated by case. Measured over the corpus:
+ * `crore` 1,533, `lakh` 153, `Lakh` 1, and no all-caps form.
+ *
+ * `कोट` is matched as a **bare stem** when it has to be, without requiring its
+ * ी matra — but the intact spellings are listed **first**, because alternation
+ * is ordered and the longest match must win. Matching the bare stem first
+ * shortened every intact `कोटी` match by one character, which moved every
+ * evidence window, which changed the identity of every Devanagari crore fact in
+ * the corpus and stranded 504 sound decisions. A parser fix must not orphan the
+ * review that was done against it.
+ * The
+ * broken font mapping in some documents replaces the matra with a digit or
+ * punctuation — कोट2, कोट5, कोट8, कोट-, कोट: — or detaches it behind a space,
+ * "₹ 100 कोट ीं हून". Requiring `कोट[ीि]` read 721 crore figures as bare rupees,
+ * wrong by seven orders of magnitude. Every one of the कोट-stem forms following
+ * a figure in this corpus means crore; there is no other word it could begin.
  */
 /**
  * Exported so the review triage re-derives amounts with exactly the rules the
@@ -67,7 +89,7 @@ export interface FactCandidate {
  * one consumer cannot leave `lastIndex` set for another.
  */
 export const AMOUNT_IN =
-  /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|lakh|thousand|कोट[ीि]|ोट[ीि]|लाख|हजार)?/giu;
+  /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|Crore|lakh|Lakh|thousand|Thousand|कोटी|कोटि|कोट|ोटी|ोटि|ोट|लाख|हजार)?/gu;
 const AMOUNT = AMOUNT_IN;
 
 /**
@@ -96,10 +118,13 @@ const SCALE: Readonly<Record<string, number>> = {
   lakh: 100,
   लाख: 100,
   crore: 10_000,
+  // The stem, however its matra survived the font mapping.
+  कोट: 10_000,
   कोटी: 10_000,
   कोटि: 10_000,
   // The text layer's detached-conjunct spelling of the same word. Quoted
   // because the key begins with a combining mark and is not an identifier.
+  "ोट": 10_000,
   "ोटी": 10_000,
   "ोटि": 10_000,
 };
@@ -126,7 +151,7 @@ const SCALE: Readonly<Record<string, number>> = {
  * direction.
  */
 const PAGE_DECLARES_UNIT =
-  /\(\s*(?:₹|Rs\.?|amount|amounts|रक्कम)?[^)\d]{0,18}?(?:crore|lakh|thousand|कोट[ीि]|ोट[ीि]|लाख|हजार)[^)\d]{0,10}\)|(?:₹|\bRs\.?|amount|amounts)\s*(?:are\s+)?in\s+(?:crore|lakh|thousand)/iu;
+  /\(\s*(?:₹|Rs\.?|amount|amounts|रक्कम)?[^)\d]{0,18}?(?:crore|lakh|thousand|कोट|ोट|लाख|हजार)[^)\d]{0,10}\)|(?:₹|\bRs\.?|amount|amounts)\s*(?:are\s+)?in\s+(?:crore|lakh|thousand)/iu;
 
 /**
  * Spellings that sit where a unit goes and are not units this parser knows.
