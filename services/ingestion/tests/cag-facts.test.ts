@@ -213,10 +213,12 @@ describe("extractFacts", () => {
   });
 
   // Missing is never zero, and a figure read wrongly is worse than one not
-  // read: the candidate is kept for review with no value attached.
+  // read: the candidate is kept for review with no value attached. Ten decimal
+  // places in crore is finer than a paisa, so there is no exact reading to
+  // give it — unlike six places, which is ₹1,23,456 and is kept.
   it("keeps a figure it cannot normalise, with a null value rather than a guess", () => {
     const found = extractFacts([
-      { pageNumber: 1, content: "A sum of ₹ 0.123456 crore was noted." },
+      { pageNumber: 1, content: "A sum of ₹ 0.1234567890 crore was noted." },
     ]);
     const amounts = found.filter((f) => f.kind === "monetary_amount");
     expect(amounts).toHaveLength(1);

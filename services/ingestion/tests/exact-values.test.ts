@@ -51,23 +51,37 @@ describe("a figure keeps the precision the source gave it", () => {
 
   // Refusing is the requirement's own policy: missing beats incorrect.
   //
-  // The limit is five decimal places, applied *before* the unit multiplier.
-  // `thousandsToPaise` shifts five places and refuses anything finer, and the
-  // crore or lakh multiplier is applied to its result. So "₹0.0000001 crore" is
-  // refused even though it is exactly 100 paise: the check runs at the thousands
-  // scale, where that figure is a hundredth of a paisa.
+  // The limit is the scale's own distance from paise: nine decimal places in
+  // crore, seven in lakh, five in thousand, two in a figure written out in
+  // rupees. It is checked at the scale the source states, so a figure that is
+  // exactly representable is kept and only a genuinely sub-paise one is
+  // refused.
   //
-  // That is conservative rather than correct — it refuses a handful of figures
-  // it could represent exactly. It errs toward refusing, which is the direction
-  // this project chooses everywhere, and no figure in the corpus states more
-  // than four decimal places. Widening it would mean moving the precision check
-  // after the multiplier, which is a change to the one money path in the
-  // codebase and is not worth making without a document that needs it.
-  it("refuses a figure finer than the money path can check, rather than rounding", () => {
-    expect(amountToPaise("1.234567", "thousand")).toBeNull();
-    expect(amountToPaise("0.0000001", "crore")).toBeNull();
-    // Four places is within the headroom and is kept exactly.
+  // This was once checked at the thousands scale for every unit, because crore
+  // was a multiplier over `thousandsToPaise`. That refused figures it could
+  // represent exactly — "₹0.0000001 crore" is ₹1 — and, in the other direction,
+  // truncated "₹1.234" to ₹1.23 on the way back down to rupees. Refusing too
+  // much was defensible; the silent truncation was not.
+  it("keeps every figure the stated scale can represent exactly", () => {
+    // ₹1 exactly, at a scale where one paisa is 0.000000001.
+    expect(amountToPaise("0.0000001", "crore")).toBe(100n);
+    expect(amountToPaise("0.123456", "crore")).toBe(123456000n);
     expect(amountToPaise("1.2345", "crore")).toBe(1234500000n);
+    expect(amountToPaise("0.0000001", "lakh")).toBe(1n);
+  });
+
+  it("refuses a figure finer than the stated scale, rather than rounding", () => {
+    // One decimal place beyond each scale's reach.
+    expect(amountToPaise("1.2345678901", "crore")).toBeNull();
+    expect(amountToPaise("1.23456789", "lakh")).toBeNull();
+    expect(amountToPaise("1.234567", "thousand")).toBeNull();
+  });
+
+  // The truncation this replaced: read as thousands and divided back down,
+  // "1.234" rupees came out as 123 paise, losing the last digit in silence.
+  it("refuses a sub-paise figure written out in rupees, rather than truncating it", () => {
+    expect(amountToPaise("1.234", undefined, "rupees")).toBeNull();
+    expect(amountToPaise("1.23", undefined, "rupees")).toBe(123n);
   });
 });
 

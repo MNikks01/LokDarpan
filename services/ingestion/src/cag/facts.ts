@@ -1,4 +1,4 @@
-import { AmountFormatError, thousandsToPaise } from "../beams/amount";
+import { AmountFormatError, shiftedToPaise } from "../beams/amount";
 import { boxAround, type TextItem } from "./extract";
 
 /**
@@ -13,7 +13,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/12";
+export const PARSER_VERSION = "cag-facts/13";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -125,27 +125,32 @@ const OFFICER =
   /\b((?:Executive|Superintending|Deputy|Chief|Junior|Sectional|Assistant)\s+Engineer|Collector|Secretary)\b(?:\s*,?\s*([A-Z][A-Za-z\s]{2,44}?))?(?=\s*[,.;()]|\s+(?:requested|stated|had|was|issued)\b)/gu;
 
 /**
- * Multipliers over `thousandsToPaise`, which is reused rather than reimplemented
- * so there is only one money conversion in the codebase to get wrong.
+ * Decimal places from the unit the text states down to paise, for the one
+ * conversion in the codebase — `shiftedToPaise`, shared with BEAMS.
+ *
+ * A shift rather than a multiplier over thousands. The distinction is not
+ * cosmetic: routing crore through thousands ran the sub-paise check at the
+ * wrong scale, refusing figures that were exactly representable and truncating
+ * others on the way back down.
  */
 const SCALE: Readonly<Record<string, number>> = {
-  thousand: 1,
-  हजार: 1,
-  lakh: 100,
-  लाख: 100,
-  crore: 10_000,
+  thousand: 5,
+  हजार: 5,
+  lakh: 7,
+  लाख: 7,
+  crore: 9,
   // The stem, however its matra and its conjunct survived the font mapping.
-  कोट: 10_000,
-  "िोट": 10_000,
-  "िोटी": 10_000,
-  "िोटि": 10_000,
-  कोटी: 10_000,
-  कोटि: 10_000,
+  कोट: 9,
+  "िोट": 9,
+  "िोटी": 9,
+  "िोटि": 9,
+  कोटी: 9,
+  कोटि: 9,
   // The text layer's detached-conjunct spelling of the same word. Quoted
   // because the key begins with a combining mark and is not an identifier.
-  "ोट": 10_000,
-  "ोटी": 10_000,
-  "ोटि": 10_000,
+  "ोट": 9,
+  "ोटी": 9,
+  "ोटि": 9,
 };
 
 /**
@@ -358,6 +363,9 @@ export function sentencesOf(page: string): string[] {
  * writing a second money path — two conversions that can disagree is how one
  * of them silently becomes wrong.
  */
+/** A figure written out in rupees is two decimal shifts from paise. */
+const RUPEES_SHIFT = 2;
+
 export function amountToPaise(
   digits: string,
   unit: string | undefined,
@@ -371,24 +379,18 @@ export function amountToPaise(
   // `rupees` is the caller stating that it has checked the page states no
   // scale, so the ₹ figure is written out in full. It is an argument rather
   // than a default because the whole defect was a default nobody passed.
-  if (unit === undefined) {
-    if (unitless === "refuse") return null;
-    try {
-      const rupees = thousandsToPaise(digits.replace(/\s+/gu, ""));
-      // thousands → paise is a shift of five; rupees → paise is two.
-      return rupees === null ? null : rupees / 1000n;
-    } catch (error) {
-      if (error instanceof AmountFormatError) return null;
-      throw error;
-    }
-  }
-  const multiplier = SCALE[unit.toLowerCase()];
-  if (multiplier === undefined) return null;
+  if (unit === undefined && unitless === "refuse") return null;
+
+  // A figure written out in full is two decimal shifts from paise. Reading it
+  // by way of thousands and dividing back down truncated "₹1.234" to ₹1.23 —
+  // a silent repair of exactly the kind this parser exists to refuse.
+  const shift = unit === undefined ? RUPEES_SHIFT : SCALE[unit.toLowerCase()];
+  if (shift === undefined) return null;
+
   try {
-    // `scaledToPaise` strips commas but not spaces, and the digit group may now
+    // `shiftedToPaise` strips commas but not spaces, and the digit group may now
     // carry the ones the text layer injected between them.
-    const paise = thousandsToPaise(digits.replace(/\s+/gu, ""));
-    return paise === null ? null : paise * BigInt(multiplier);
+    return shiftedToPaise(digits.replace(/\s+/gu, ""), shift, unit ?? "rupees");
   } catch (error) {
     // `thousandsToPaise` throws rather than round, which is right for a BEAMS
     // cell: a figure the parser cannot represent exactly is a defect in a
