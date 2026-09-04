@@ -108,6 +108,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         inserted: 2,
         skippedAlreadyReviewed: 0,
         refreshed: 0,
+        located: 0,
         retired: 0,
         strandedDecisions: 0,
       });
@@ -138,6 +139,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         inserted: 0,
         skippedAlreadyReviewed: 1,
         refreshed: 0,
+        located: 0,
         retired: 0,
         strandedDecisions: 0,
       });
@@ -210,6 +212,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         inserted: 0,
         skippedAlreadyReviewed: 0,
         refreshed: 0,
+        located: 0,
         retired: 0,
         strandedDecisions: 0,
       });

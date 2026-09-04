@@ -1,4 +1,5 @@
 import { AmountFormatError, thousandsToPaise } from "../beams/amount";
+import { boxAround, type TextItem } from "./extract";
 
 /**
  * Pattern extraction over audit prose.
@@ -25,6 +26,12 @@ export interface FactCandidate {
   /** Paise for money, trimmed name for a party. `null` if not normalisable. */
   readonly normalisedValue: string | null;
   readonly extractionConfidence: number;
+  /**
+   * Where on the page the figure itself sits — not the evidence window round
+   * it. Absent when the page's text items were not supplied, which is every
+   * caller that has only the stored text.
+   */
+  readonly box?: { x0: number; y0: number; x1: number; y1: number };
 }
 
 /**
@@ -261,13 +268,87 @@ export function contextAround(text: string, start: number, end: number): string 
   return `${head}${body}${tail}`;
 }
 
+const SENTENCE_BREAK = /(?<!\bM\/s)(?<!\bNo)(?<!\bRs)(?<![A-Z])\.\s+(?=[A-Z₹(])/gu;
+
+/** A sentence, and where each of its characters sits in the page's text. */
+export interface LocatedSentence {
+  readonly text: string;
+  /** `source[i]` is the index in the page of this sentence's character `i`. */
+  readonly source: readonly number[];
+}
+
+/**
+ * Splits into sentences without losing the abbreviations these documents use,
+ * and says where every character came from.
+ *
+ * The offsets are what let a figure be traced to a region of the page. They
+ * have to be carried rather than recomputed, because the split runs over text
+ * whose whitespace has been collapsed: a match at index 40 of a sentence is not
+ * at index 40 of anything stored, and searching the page for the matched string
+ * would find the wrong occurrence whenever a figure repeats.
+ *
+ * `sentencesOf` is kept as the plain-text view and delegates here, so there is
+ * one splitter and no chance of the two disagreeing about where a sentence ends.
+ */
+/**
+ * Collapses runs of whitespace to one space, remembering where each surviving
+ * character came from. `source[i]` is the index in `page` of `collapsed[i]`.
+ */
+function collapseWhitespace(page: string): { collapsed: string; source: number[] } {
+  let collapsed = "";
+  const source: number[] = [];
+  let inRun = false;
+
+  for (let i = 0; i < page.length; i++) {
+    const ch = page[i] ?? "";
+    const isSpace = /\s/u.test(ch);
+    if (isSpace && inRun) continue;
+    collapsed += isSpace ? " " : ch;
+    source.push(i);
+    inRun = isSpace;
+  }
+
+  return { collapsed, source };
+}
+
+/** The half-open range of each sentence in the collapsed text. */
+function sentenceRanges(collapsed: string): { start: number; end: number }[] {
+  const pieces: { start: number; end: number }[] = [];
+  let cursor = 0;
+
+  SENTENCE_BREAK.lastIndex = 0;
+  for (const m of collapsed.matchAll(SENTENCE_BREAK)) {
+    // The whole separator is dropped, full stop included. That is not a
+    // stylistic choice: `String.split` discarded it, so every sentence ever
+    // reviewed was stored without it. Keeping it here re-words the evidence of
+    // every decided fact and strands the decision — which is exactly what
+    // happened when this was first written the other way.
+    pieces.push({ start: cursor, end: m.index });
+    cursor = m.index + m[0].length;
+  }
+  pieces.push({ start: cursor, end: collapsed.length });
+
+  return pieces;
+}
+
+export function locatedSentencesOf(page: string): LocatedSentence[] {
+  const { collapsed, source } = collapseWhitespace(page);
+
+  const out: LocatedSentence[] = [];
+  for (const piece of sentenceRanges(collapsed)) {
+    let { start } = piece;
+    let { end } = piece;
+    while (start < end && /\s/u.test(collapsed[start] ?? "")) start++;
+    while (end > start && /\s/u.test(collapsed[end - 1] ?? "")) end--;
+    if (end <= start) continue;
+    out.push({ text: collapsed.slice(start, end), source: source.slice(start, end) });
+  }
+  return out;
+}
+
 /** Splits into sentences without losing the abbreviations these documents use. */
 export function sentencesOf(page: string): string[] {
-  return page
-    .replace(/\s+/gu, " ")
-    .split(/(?<!\bM\/s)(?<!\bNo)(?<!\bRs)(?<![A-Z])\.\s+(?=[A-Z₹(])/u)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
+  return locatedSentencesOf(page).map((s) => s.text);
 }
 
 /**
@@ -379,7 +460,12 @@ export function trimToName(captured: string): string {
   return kept.join(" ");
 }
 
-function moneyIn(sentence: string, pageNumber: number, unitless: UnitlessReading): FactCandidate[] {
+function moneyIn(
+  sentence: string,
+  pageNumber: number,
+  unitless: UnitlessReading,
+  locate?: (from: number, to: number) => FactCandidate["box"],
+): FactCandidate[] {
   const found: FactCandidate[] = [];
   for (const m of sentence.matchAll(AMOUNT)) {
     // A ₹ that ends a column header is a declaration, not a figure. Audit tables
@@ -404,6 +490,10 @@ function moneyIn(sentence: string, pageNumber: number, unitless: UnitlessReading
       // its page declares no scale is a sound inference and still an
       // inference, so it sits between a stated unit and no reading at all.
       extractionConfidence: m[2] !== undefined ? 0.8 : paise === null ? 0.4 : 0.6,
+      ...(() => {
+        const box = locate?.(m.index, m.index + m[0].length);
+        return box === undefined ? {} : { box };
+      })(),
     });
   }
   return found;
@@ -449,9 +539,10 @@ function candidatesIn(
   sentence: string,
   pageNumber: number,
   unitless: UnitlessReading,
+  locate?: (from: number, to: number) => FactCandidate["box"],
 ): FactCandidate[] {
   return [
-    ...moneyIn(sentence, pageNumber, unitless),
+    ...moneyIn(sentence, pageNumber, unitless, locate),
     ...contractorsIn(sentence, pageNumber),
     ...officersIn(sentence, pageNumber),
   ];
@@ -460,6 +551,11 @@ function candidatesIn(
 export interface PageInput {
   readonly pageNumber: number;
   readonly content: string | null;
+  /**
+   * The page's text items, if the caller has them. Supplying them is what lets
+   * a fact carry a region; omitting them changes nothing else.
+   */
+  readonly items?: readonly TextItem[];
 }
 
 export function extractFacts(pages: readonly PageInput[]): FactCandidate[] {
@@ -469,8 +565,20 @@ export function extractFacts(pages: readonly PageInput[]): FactCandidate[] {
     // Decided per page, not per sentence: a table's caption sits at the top and
     // governs cells far below it, well outside any one sentence's window.
     const unitless: UnitlessReading = pageDeclaresUnit(page.content) ? "refuse" : "rupees";
-    for (const sentence of sentencesOf(page.content)) {
-      out.push(...candidatesIn(sentence, page.pageNumber, unitless));
+    const items = page.items;
+    for (const sentence of locatedSentencesOf(page.content)) {
+      // Sentence offsets are meaningless to anyone else, so the mapping back to
+      // the page — and from there to a region — is closed over here.
+      const locate =
+        items === undefined
+          ? undefined
+          : (from: number, to: number): FactCandidate["box"] => {
+              const start = sentence.source[from];
+              const last = sentence.source[to - 1];
+              if (start === undefined || last === undefined) return undefined;
+              return boxAround(items, start, last + 1) ?? undefined;
+            };
+      out.push(...candidatesIn(sentence.text, page.pageNumber, unitless, locate));
     }
   }
   return out;
