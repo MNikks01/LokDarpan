@@ -50,9 +50,17 @@ const CRITERION_BEFORE =
  * the two words with no space — "₹ 10 कोटींपेक्षा अधिक". The amount pattern
  * consumes `कोटी` and leaves the anusvara sitting between it and the criterion,
  * which is enough to hide the phrase from a whitespace-only gap.
+ *
+ * The gap either side of the unit is therefore any run of **non-letters**,
+ * bounded so it cannot reach across a clause. That one class covers both forms
+ * the font mapping produces, because neither a matra nor a substituted glyph is
+ * a letter: "₹ 100 कोट ीं हून अधिक" detaches the matra behind a space, and
+ * "₹ 100 कोट2 पेक्षा जास्त" replaces it with a digit. The first is an appendix
+ * heading — a criterion — and the gap hid it, so it was verified as a ₹100
+ * spending figure when the page says ₹100 crore and reports no figure at all.
  */
 const CRITERION_AFTER =
-  /^\s*(?:कोट[ीि]|लाख|हजार|crore|lakh|thousand)?[ऀ-ः़-्]*\s*(?:or more|and above|or above|and more|or less|पेक्षा\s*(?:अधिक|अचधक|जास्त|कमी)|हून\s*(?:अधिक|अचधक|जास्त)|आणि\s*त्यावरील|व\s*त्यावरील)/u;
+  /^[^\p{L}]{0,4}(?:कोट|ोट|लाख|हजार|crore|lakh|thousand)?[^\p{L}]{0,6}(?:or more|and above|or above|and more|or less|पेक्षा\s*(?:अधिक|अचधक|जास्त|कमी)|हून\s*(?:अधिक|अचधक|जास्त)|आणि\s*त्यावरील|व\s*त्यावरील)/u;
 
 /** How far either side of the figure the criterion words are looked for. */
 const BEFORE_CHARS = 30;

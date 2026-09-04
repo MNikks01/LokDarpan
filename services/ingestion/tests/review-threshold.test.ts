@@ -80,3 +80,21 @@ describe("thresholdPhrase across the corpus's actual spellings", () => {
     ).toContain("पेक्षा");
   });
 });
+
+describe("criteria the font mapping fragmented", () => {
+  // "बचत ( ₹ 100 कोट ीं हून अधिक)" — an appendix heading meaning "savings over
+  // ₹100 crore". The broken font mapping detached the matra behind a space,
+  // which hid the criterion and let the figure be read as ₹100 rather than
+  // ₹100 crore. It was verified in that state.
+  it("reads a criterion whose unit lost its matra behind a space", () => {
+    expect(
+      thresholdPhrase("मोठ्या बचत ( ₹ 100 कोट ीं हून अधिक) असलेली अनुदाने", "100000000000"),
+    ).toContain("हून");
+  });
+
+  it("reads a criterion after a matra replaced by a stray glyph", () => {
+    expect(
+      thresholdPhrase("प्रत्येक प्रकरणात ₹ 100 कोट2 पेक्षा जास्त होती", "100000000000"),
+    ).toContain("पेक्षा");
+  });
+});
