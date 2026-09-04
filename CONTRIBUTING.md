@@ -44,13 +44,19 @@ gh pr create --base development
 
 Promotion to `main` is a **release PR** from `development`, merged as a merge commit so the constituent commits survive. `main` is what Vercel deploys, so **`main` must always be releasable**.
 
-**Immediately after the release merge, bring `development` level again:**
+`main` allows merge commits only; squash and rebase are disabled for it ([`adr/041`](./.docs/adr/041-the-merge-method-is-a-setting-not-a-checklist-line.md)). That is a repository setting rather than a rule you have to remember, because remembering it failed three times.
+
+**Immediately after the release merge, check the release merged the way it had to, then bring `development` level:**
 
 ```bash
-git fetch origin && git push origin origin/main:refs/heads/development
+git fetch origin
+git merge-base --is-ancestor origin/development origin/main   # must succeed
+git push origin origin/main:refs/heads/development
 ```
 
 The merge commit lands on `main` and not on `development`, so the moment a release completes `development` is one commit behind — and it stays a fast-forward only until someone branches from it. This is not housekeeping. `development` was retired once ([`adr/023`](./.docs/adr/023-features-target-main.md)) after drifting to two divergent commits that could not be reconciled under `required_linear_history`, and [`adr/032`](./.docs/adr/032-development-is-reinstated.md) names exactly this drift as the signal that the flow has failed again.
+
+**If `--is-ancestor` fails**, the release was squashed or rebased and `development` now diverges: it can neither fast-forward nor accept a merge commit. Do not force anything yet. `git diff origin/main origin/development` must be empty and `git cherry origin/main origin/development` must show no `+` line — together they prove the branch lost only its ancestry and not any work. [`adr/041`](./.docs/adr/041-the-merge-method-is-a-setting-not-a-checklist-line.md) has the recovery.
 
 A fix that cannot wait for a release branches from `main` as `hotfix/*` and **must be merged back into `development`**, or the next release silently reintroduces the bug. This step is easy to forget and nothing enforces it.
 
