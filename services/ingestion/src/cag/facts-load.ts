@@ -27,6 +27,8 @@ export interface FactLoadResult {
   readonly strandedDecisions: number;
   /** Undecided rows whose `parser_version` was brought up to date. */
   readonly refreshed: number;
+  /** Facts that gained a bounding box they did not have. */
+  readonly located: number;
 }
 
 /**
@@ -65,17 +67,75 @@ const EXTRACTION_METHOD = "regex over pdf text layer";
  * The asymmetry is the point: undecided rows belong to the parser, and decided
  * ones belong to the person who decided them.
  */
-export async function loadFactCandidates(
+/** What reconciling one already-loaded row against its candidate did. */
+interface Reconciled {
+  readonly located: boolean;
+  readonly alreadyReviewed: boolean;
+  readonly refreshed: boolean;
+}
+
+/**
+ * Brings an existing row into step with the candidate the parser now produces,
+ * without re-offering it or disturbing a decision.
+ */
+async function reconcile(
+  client: SqlClient,
+  row: { id: string; status: string; parserVersion: string; needsBox: boolean },
+  c: FactCandidate,
+): Promise<Reconciled> {
+  // Geometry first, and whatever the row's status. A box is not part of
+  // identity and not part of what a person reviewed — it says where on the page
+  // a figure the reviewer already saw is sitting. Gating it behind `unverified`,
+  // as this first did, would leave every decided fact — the only ones a reader
+  // can reach — as the ones with no region to show.
+  let located = false;
+  if (row.needsBox && c.box !== undefined) {
+    await client.query(
+      `UPDATE document_fact SET bbox_x0=$2, bbox_y0=$3, bbox_x1=$4, bbox_y1=$5 WHERE id = $1`,
+      [row.id, c.box.x0, c.box.y0, c.box.x1, c.box.y1],
+    );
+    located = true;
+  }
+
+  if (row.status !== "unverified") {
+    return { located, alreadyReviewed: true, refreshed: false };
+  }
+
+  // An undecided candidate's provenance is the parser that currently produces
+  // it. Leaving the old version on the row would have it claim it was read by a
+  // parser that no longer exists, which is a false statement about how a figure
+  // was arrived at — and these rows are exactly the ones a reviewer is about to
+  // publish.
+  //
+  // Decided rows are not touched: their version is part of what a person
+  // reviewed, and the parser does not get to restate that.
+  if (row.parserVersion !== PARSER_VERSION) {
+    await client.query(`UPDATE document_fact SET parser_version = $2 WHERE id = $1`, [
+      row.id,
+      PARSER_VERSION,
+    ]);
+    return { located, alreadyReviewed: false, refreshed: true };
+  }
+
+  return { located, alreadyReviewed: false, refreshed: false };
+}
+
+/** The rows already held for a document, keyed by what makes a fact that fact. */
+async function heldByIdentity(
   client: SqlClient,
   documentId: number,
-  candidates: readonly FactCandidate[],
-): Promise<FactLoadResult> {
+): Promise<Map<string, { id: string; status: string; parserVersion: string; needsBox: boolean }>> {
   const held = await client.query(
-    `SELECT id, page_number, kind, raw_text, normalised_value, verification_status, parser_version
+    `SELECT id, page_number, kind, raw_text, normalised_value, verification_status,
+            parser_version, bbox_x0
        FROM document_fact WHERE document_id = $1`,
     [documentId],
   );
-  const existing = new Map<string, { id: string; status: string; parserVersion: string }>();
+
+  const existing = new Map<
+    string,
+    { id: string; status: string; parserVersion: string; needsBox: boolean }
+  >();
   for (const row of held.rows as {
     id: string;
     page_number: number;
@@ -84,6 +144,7 @@ export async function loadFactCandidates(
     normalised_value: string | null;
     verification_status: string;
     parser_version: string;
+    bbox_x0: string | null;
   }[]) {
     const key = identity({
       pageNumber: row.page_number,
@@ -95,53 +156,65 @@ export async function loadFactCandidates(
       id: row.id,
       status: row.verification_status,
       parserVersion: row.parser_version,
+      needsBox: row.bbox_x0 === null,
     });
   }
+  return existing;
+}
+
+/** A candidate nobody has seen, offered for review with its region if it has one. */
+async function insertCandidate(
+  client: SqlClient,
+  documentId: number,
+  c: FactCandidate,
+): Promise<void> {
+  await client.query(
+    `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
+                                extraction_method, parser_version, extraction_confidence,
+                                bbox_x0, bbox_y0, bbox_x1, bbox_y1)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+    [
+      documentId,
+      c.pageNumber,
+      c.kind,
+      c.rawText,
+      c.normalisedValue,
+      EXTRACTION_METHOD,
+      PARSER_VERSION,
+      c.extractionConfidence,
+      c.box?.x0 ?? null,
+      c.box?.y0 ?? null,
+      c.box?.x1 ?? null,
+      c.box?.y1 ?? null,
+    ],
+  );
+}
+
+export async function loadFactCandidates(
+  client: SqlClient,
+  documentId: number,
+  candidates: readonly FactCandidate[],
+): Promise<FactLoadResult> {
+  const existing = await heldByIdentity(client, documentId);
 
   const produced = new Set(candidates.map(identity));
   let inserted = 0;
   let skippedAlreadyReviewed = 0;
   let refreshed = 0;
+  let located = 0;
 
   for (const c of candidates) {
     const row = existing.get(identity(c));
 
     if (row !== undefined) {
-      if (row.status !== "unverified") {
-        skippedAlreadyReviewed += 1;
-      } else if (row.parserVersion !== PARSER_VERSION) {
-        // An undecided candidate's provenance is the parser that currently
-        // produces it. Leaving the old version on the row would have it claim
-        // it was read by a parser that no longer exists, which is a false
-        // statement about how a figure was arrived at — and these rows are
-        // exactly the ones a reviewer is about to publish.
-        //
-        // Decided rows are not touched: their version is part of what a person
-        // reviewed, and the parser does not get to restate that.
-        await client.query(`UPDATE document_fact SET parser_version = $2 WHERE id = $1`, [
-          row.id,
-          PARSER_VERSION,
-        ]);
-        refreshed += 1;
-      }
+      const outcome = await reconcile(client, row, c);
+      located += outcome.located ? 1 : 0;
+      skippedAlreadyReviewed += outcome.alreadyReviewed ? 1 : 0;
+      refreshed += outcome.refreshed ? 1 : 0;
       continue;
     }
 
-    await client.query(
-      `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
-                                  extraction_method, parser_version, extraction_confidence)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-      [
-        documentId,
-        c.pageNumber,
-        c.kind,
-        c.rawText,
-        c.normalisedValue,
-        EXTRACTION_METHOD,
-        PARSER_VERSION,
-        c.extractionConfidence,
-      ],
-    );
+    await insertCandidate(client, documentId, c);
     inserted += 1;
   }
 
@@ -156,6 +229,7 @@ export async function loadFactCandidates(
     inserted,
     skippedAlreadyReviewed,
     refreshed,
+    located,
     retired: retirable.length,
     strandedDecisions: stale.length - retirable.length,
   };
