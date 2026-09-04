@@ -122,3 +122,44 @@ describe("the self-check can reproduce a decoded reading", () => {
     expect(checked.check).toBe("mismatch");
   });
 });
+
+describe("a scale word outside a bracket still governs what is inside it", () => {
+  const money = (page: string): (string | null)[] =>
+    extractFacts([{ pageNumber: 1, content: page }])
+      .filter((f) => f.kind === "monetary_amount")
+      .map((f) => f.normalisedValue);
+
+  it("refuses both amounts of a bracketed sum the sentence scales", () => {
+    // The page states "shortfall of ₹11,553 (₹7,011+₹4,542) crore". Read as
+    // plain rupees, ₹4,542 crore became ₹4,542 — the same error as any other
+    // lost scale, seven orders down, in a figure nothing downstream can
+    // question. Three of these reached the review queue.
+    const page =
+      "shortfall of ` 11,553 (` 7,011+` 4,542) crore was recorded. A second ` 1.00 crore.";
+    const values = money(page);
+    expect(values).toContain(null);
+    expect(values).not.toContain("701100");
+    expect(values).not.toContain("454200");
+  });
+
+  it("keeps the amount that carries its own scale word", () => {
+    const page = "shortfall of ` 11,553 crore and ` 7,011 crore were recorded together.";
+    expect(money(page)).toEqual(["11553000000000", "7011000000000"]);
+  });
+
+  it("does not reach past a full stop for a scale word", () => {
+    // A scale two clauses away governs something else.
+    const page = "A total of ` 2,400 (as recorded) was paid. Separately ` 5.00 crore was released.";
+    expect(money(page)).toContain("240000");
+  });
+
+  it("does not reach past another bracket", () => {
+    const page = "The sum ` 900 (see note) (of ` 4.00 crore) was noted. And ` 3.00 crore more.";
+    expect(money(page)).toContain("90000");
+  });
+
+  it("leaves a bracketed amount alone when no scale follows the bracket", () => {
+    const page = "The dues (` 12,000 and ` 15,000) were outstanding for two developers.";
+    expect(money(page)).toEqual(["1200000", "1500000"]);
+  });
+});
