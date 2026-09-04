@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/7";
+export const PARSER_VERSION = "cag-facts/8";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -66,6 +66,15 @@ export interface FactCandidate {
  * The unit words are therefore enumerated by case. Measured over the corpus:
  * `crore` 1,533, `lakh` 153, `Lakh` 1, and no all-caps form.
  *
+ * The stem itself is also substituted. Document 3511 renders every `क` as `ि`,
+ * so its crore figures read `₹ 2.12 िोटी` and were stored as ₹1. Measured over
+ * the corpus, the character before `ोट` when it follows a figure is `क` 2,027
+ * times, `ि` 21 times and absent 7 times — so the observed forms are listed and
+ * nothing is guessed at. A mapping this corpus has not shown will slip past,
+ * which is what the small-value screen in review is for: a two-digit rupee
+ * finding in a CAG report is worth a person's eye, and that is how `ि` was
+ * found.
+ *
  * `कोट` is matched as a **bare stem** when it has to be, without requiring its
  * ी matra — but the intact spellings are listed **first**, because alternation
  * is ordered and the longest match must win. Matching the bare stem first
@@ -89,7 +98,7 @@ export interface FactCandidate {
  * one consumer cannot leave `lastIndex` set for another.
  */
 export const AMOUNT_IN =
-  /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|Crore|lakh|Lakh|thousand|Thousand|कोटी|कोटि|कोट|ोटी|ोटि|ोट|लाख|हजार)?/gu;
+  /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|Crore|lakh|Lakh|thousand|Thousand|कोटी|कोटि|कोट|िोटी|िोटि|िोट|ोटी|ोटि|ोट|लाख|हजार)?/gu;
 const AMOUNT = AMOUNT_IN;
 
 /**
@@ -118,8 +127,11 @@ const SCALE: Readonly<Record<string, number>> = {
   lakh: 100,
   लाख: 100,
   crore: 10_000,
-  // The stem, however its matra survived the font mapping.
+  // The stem, however its matra and its conjunct survived the font mapping.
   कोट: 10_000,
+  "िोट": 10_000,
+  "िोटी": 10_000,
+  "िोटि": 10_000,
   कोटी: 10_000,
   कोटि: 10_000,
   // The text layer's detached-conjunct spelling of the same word. Quoted
@@ -151,7 +163,7 @@ const SCALE: Readonly<Record<string, number>> = {
  * direction.
  */
 const PAGE_DECLARES_UNIT =
-  /\(\s*(?:₹|Rs\.?|amount|amounts|रक्कम)?[^)\d]{0,18}?(?:crore|lakh|thousand|कोट|ोट|लाख|हजार)[^)\d]{0,10}\)|(?:₹|\bRs\.?|amount|amounts)\s*(?:are\s+)?in\s+(?:crore|lakh|thousand)/iu;
+  /\(\s*(?:₹|Rs\.?|amount|amounts|रक्कम)?[^)\d]{0,18}?(?:crore|lakh|thousand|कोट|िोट|ोट|लाख|हजार)[^)\d]{0,10}\)|(?:₹|\bRs\.?|amount|amounts)\s*(?:are\s+)?in\s+(?:crore|lakh|thousand)/iu;
 
 /**
  * Spellings that sit where a unit goes and are not units this parser knows.
