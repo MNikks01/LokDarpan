@@ -214,5 +214,179 @@
     "amount": "16,288.51",
     "unit": "crore",
     "note": "amount transferred to existing Personal Deposit accounts during 2020-21, stated without a unit in a footnote. Page 376 declares its scale as (\u20b9 in crore)"
+  },
+  {
+    "id": 16916,
+    "amount": "177.75",
+    "unit": "crore",
+    "note": "the text layer separated the decimal point from its fraction \u2014 'CGF of \u20b9177. 75 crore was provided up to 31 March 2022'. Consistent with the \u20b9136.81 crore drawn from it that the same sentence states, recorded as fact #15424"
+  },
+  {
+    "id": 16915,
+    "amount": "1636.54",
+    "unit": "crore",
+    "note": "the text layer separated the decimal point from its fraction \u2014 'against actual of \u20b9 389.13 crore and \u20b9 1636. 54 crore, respectively'. The other half of the same comparison carries an intact decimal and is recorded as fact #14959"
+  },
+  {
+    "id": 14764,
+    "amount": "2,000",
+    "unit": "rupees",
+    "note": "a nominal token provision stated inline as 'Token (\u20b92,000)'. The page's (\u20b9 in crore) caption governs its table columns, not this parenthetical \u2014 applying it would read \u20b92,000 crore"
+  },
+  {
+    "id": 15093,
+    "amount": "95.92",
+    "unit": "crore",
+    "note": "a figure in Appendix 8, 'Statement showing Liquidated Damage recoverable from the contractors in MVS', whose caption declares (\u20b9 in crore). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15094,
+    "amount": "8.46",
+    "unit": "crore",
+    "note": "a figure in Appendix 8, 'Statement showing Liquidated Damage recoverable from the contractors in MVS', whose caption declares (\u20b9 in crore). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15095,
+    "amount": "87.46",
+    "unit": "crore",
+    "note": "a figure in Appendix 8, 'Statement showing Liquidated Damage recoverable from the contractors in MVS', whose caption declares (\u20b9 in crore). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15099,
+    "amount": "43,236.81",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15100,
+    "amount": "38,913.13",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15101,
+    "amount": "43,582.70",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15102,
+    "amount": "1,81,837.59",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15103,
+    "amount": "1,63,653.83",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15104,
+    "amount": "1,83,292.29",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15105,
+    "amount": "43,236.13",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15106,
+    "amount": "38,913.13",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15107,
+    "amount": "1,81,837.59",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15108,
+    "amount": "1,63,653.83",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15109,
+    "amount": "43,582.70",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15110,
+    "amount": "39,224.43",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15111,
+    "amount": "1,83,292.29",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15112,
+    "amount": "1,64,963.06",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15113,
+    "amount": "39,224.43",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15114,
+    "amount": "38,913.13",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15115,
+    "amount": "311.30",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15116,
+    "amount": "1,64,963.06",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15117,
+    "amount": "1,63,653.83",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15118,
+    "amount": "1,309.23",
+    "unit": "lakh",
+    "note": "a figure in the PAC derivation working on a page whose caption declares (\u20b9 in lakh). Read from the table's own declared scale, not inferred from the size of the number"
+  },
+  {
+    "id": 15739,
+    "amount": "4.51",
+    "unit": "crore",
+    "note": "the unit sits on the first figure of the comparison and is not repeated \u2014 'not competent to execute even a single work of \u20b9 0.11 crore, let alone the total work of \u20b9 4.51 allotted to him'"
+  },
+  {
+    "id": 15975,
+    "amount": "1856.70",
+    "unit": "crore",
+    "note": "the unit sits on the earlier members of the list \u2014 'NJPTS: \u20b9 1699.83 crore, ISP-Kalisindh Phase-I: \u20b9 2807.43 crore and NKMP: \u20b9 1856.70'"
+  },
+  {
+    "id": 16914,
+    "amount": "28.39",
+    "unit": "crore",
+    "note": "the source converts the figure itself \u2014 'Loan amount Rs 283.9 Million or Rs 28.39 crores'. Million is refused by the parser as a unit occurring once in the corpus, so the crore reading the document supplies is used; the same loan is recorded in English as fact #16473"
   }
 ]
