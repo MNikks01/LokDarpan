@@ -1,4 +1,5 @@
 import { AmountFormatError, shiftedToPaise } from "../beams/amount";
+import { validate, type Verdict } from "./validation";
 import { boxAround, type TextItem } from "./extract";
 
 /**
@@ -13,7 +14,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/15";
+export const PARSER_VERSION = "cag-facts/16";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -26,6 +27,18 @@ export interface FactCandidate {
   /** Paise for money, trimmed name for a party. `null` if not normalisable. */
   readonly normalisedValue: string | null;
   readonly extractionConfidence: number;
+  /**
+   * What the field's own rules could establish about this reading.
+   *
+   * **Advisory.** A `rejected` verdict does not remove the value and does not
+   * stop the candidate: it records that the sentence says this figure is a rate,
+   * a threshold or an illustration, and leaves the decision where it has always
+   * been. Sweeping the rules across the 5,102 figures already published found
+   * 129 they disagree with, of which 113 are rates a reviewer chose to publish —
+   * a question about the ledger's standard, not something a regular expression
+   * should settle by unpublishing government figures.
+   */
+  readonly validation: Verdict;
   /**
    * Where on the page the figure itself sits — not the evidence window round
    * it. Absent when the page's text items were not supplied, which is every
@@ -591,6 +604,12 @@ function matchesIn(
       // A decoded mark sits below a stated one at every tier. The glyph was
       // read from the page rather than from the text layer, and a reader is
       // entitled to know the difference before the figure is published.
+      validation: validate({
+        kind: "monetary_amount",
+        evidence: sentence,
+        at: m.index,
+        length: m[0].length,
+      }),
       extractionConfidence: markWasDecoded
         ? m[2] !== undefined
           ? 0.5
@@ -618,6 +637,12 @@ function contractorsIn(sentence: string, pageNumber: number): FactCandidate[] {
     if (firm === "") continue;
     found.push({
       kind: "contractor_reference",
+      validation: validate({
+        kind: "contractor_reference",
+        evidence: sentence,
+        at: m.index,
+        length: m[0].length,
+      }),
       pageNumber,
       rawText: contextAround(sentence, m.index, m.index + m[0].length),
       normalisedValue: firm,
@@ -634,6 +659,12 @@ function officersIn(sentence: string, pageNumber: number): FactCandidate[] {
     const office = trimToName(m[2] ?? "");
     found.push({
       kind: "officer_role_reference",
+      validation: validate({
+        kind: "officer_role_reference",
+        evidence: sentence,
+        at: m.index,
+        length: m[0].length,
+      }),
       pageNumber,
       rawText: contextAround(sentence, m.index, m.index + m[0].length),
       normalisedValue: office === "" ? role : `${role}, ${office}`,

@@ -22,6 +22,7 @@ const money: FactCandidate = {
   rawText: "awarded to M/s. Vijay Constructions for ₹ 15.14 crore",
   normalisedValue: "15140000000",
   extractionConfidence: 0.8,
+  validation: { state: "needs_review", reason: "" },
 };
 
 /** The same figure, once the extractor can say where on the page it sits. */
@@ -36,6 +37,7 @@ const firm: FactCandidate = {
   rawText: "awarded to M/s. Vijay Constructions for ₹ 15.14 crore",
   normalisedValue: "Vijay Constructions",
   extractionConfidence: 0.7,
+  validation: { state: "needs_review", reason: "" },
 };
 
 describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
