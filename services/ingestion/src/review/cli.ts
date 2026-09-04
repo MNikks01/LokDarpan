@@ -20,8 +20,27 @@ import {
   presentCandidate,
   type ReviewCandidate,
 } from "./present";
-import { factById, pendingReview, reviewProgress, type ReviewProgress } from "./queue";
-import { selfCheck, type SelfCheck } from "./triage";
+import {
+  claimedAmountsByPage,
+  factById,
+  pageKeyOf,
+  pendingReview,
+  reviewProgress,
+  type ReviewProgress,
+} from "./queue";
+import { thresholdPhrase } from "./threshold";
+import { selfCheck, type ClaimedByPage, type SelfCheck } from "./triage";
+
+/**
+ * `--check=criterion`: the candidates whose figure states a cut-off.
+ *
+ * Not a `SelfCheck`. The arithmetic partitions answer "does this sentence
+ * contain this figure"; this answers "is this figure an amount anyone
+ * reported", which is a question about words. Keeping it a separate axis is
+ * what lets it *subtract* from the arithmetic partitions rather than compete
+ * with them — see `.docs/adr/025-a-criterion-is-not-a-fact.md`.
+ */
+const CRITERION = "criterion";
 
 /**
  * The review terminal.
@@ -37,6 +56,15 @@ import { selfCheck, type SelfCheck } from "./triage";
  * runs under it; connecting as the owner would leave the protection in the
  * schema and absent from practice.
  */
+
+/**
+ * The partitions the page-at-a-time mode is offered for.
+ *
+ * Both are partitions where arithmetic has already accounted for every amount
+ * in the window. Adding to this set means arguing that a new partition's
+ * question fits on one line — see `presentBatch`.
+ */
+const BATCHABLE: ReadonlySet<SelfCheck> = new Set<SelfCheck>(["confirmed", "confirmed_in_context"]);
 
 const EXIT_MISCONFIGURED = 78;
 const EXIT_NO_REVIEWER = 2;
@@ -58,13 +86,15 @@ interface QueueOptions {
    * candidates matched, which understates the work and hides the rest of it
    * behind a number that looks complete.
    */
-  readonly only: SelfCheck | undefined;
+  readonly only: SelfCheck | typeof CRITERION | undefined;
   /**
    * A reviewer works through one report in a sitting: it has one publisher, one
    * period and one set of conventions. Offering candidates from three reports
    * interleaved makes every answer a context switch.
    */
   readonly documentId: number | undefined;
+  /** `--ids=5733,5734`, for acting on a named set rather than a partition. */
+  readonly ids: readonly number[] | undefined;
 }
 
 /** Parsed queue filters, or null when `--document` is not a document id. */
@@ -72,11 +102,19 @@ function queueOptions(): QueueOptions | null {
   const documentArg = arg("document");
   const documentId = documentArg === undefined ? undefined : Number(documentArg);
   if (documentId !== undefined && !Number.isInteger(documentId)) return null;
+
+  const idsArg = arg("ids");
+  const ids = idsArg === undefined ? undefined : idsArg.split(",").map(Number);
+  // One unparseable id would silently shrink the set, and a reviewer would
+  // never learn which candidate they meant to act on was left behind.
+  if (ids !== undefined && !ids.every(Number.isInteger)) return null;
+
   return {
     kind: arg("kind") as FactKind | undefined,
     limit: arg("limit"),
-    only: arg("check") as SelfCheck | undefined,
+    only: arg("check") as SelfCheck | typeof CRITERION | undefined,
     documentId,
+    ids,
   };
 }
 
@@ -254,25 +292,44 @@ async function applyRevision(
  */
 async function buildQueue(
   client: pg.Client,
-  { kind, limit, only, documentId }: QueueOptions,
+  { kind, limit, only, documentId, ids }: QueueOptions,
+  claimed: ClaimedByPage,
 ): Promise<ReviewCandidate[]> {
   const all = await pendingReview(client, {
     ...(kind === undefined ? {} : { kind }),
     ...(documentId === undefined ? {} : { documentId }),
+    ...(ids === undefined ? {} : { ids }),
     ...(only === undefined && limit === undefined
       ? {}
       : { limit: only === undefined ? Number(limit) : 100_000 }),
   });
 
+  const governed = (c: ReviewCandidate): boolean =>
+    thresholdPhrase(c.rawText, c.normalisedValue) !== null;
+
   const matching =
     only === undefined
       ? all
-      : all.filter(
-          (c) =>
-            selfCheck({ id: c.id, rawText: c.rawText, normalisedValue: c.normalisedValue })
-              .check === only,
-        );
+      : only === CRITERION
+        ? all.filter(governed)
+        : all.filter(
+            (c) =>
+              checkOf(c, claimed).check === only &&
+              // A criterion-governed candidate never enters a partition a page
+              // of ten lines can be accepted from. Its question is not the one
+              // that partition asks, and the fast path would answer it wrongly
+              // at ten candidates a keystroke.
+              !(BATCHABLE.has(only) && governed(c)),
+          );
   return limit === undefined ? matching : matching.slice(0, Number(limit));
+}
+
+/** One candidate's verdict, judged against what else its page accounts for. */
+function checkOf(c: ReviewCandidate, claimed: ClaimedByPage) {
+  return selfCheck(
+    { id: c.id, rawText: c.rawText, normalisedValue: c.normalisedValue },
+    claimed.get(pageKeyOf(c.documentId, c.pageNumber)),
+  );
 }
 
 /**
@@ -296,9 +353,9 @@ async function reviewBatch(
   client: pg.Client,
   rl: Interface,
   page: readonly ReviewCandidate[],
-  context: { offset: number; total: number; reviewer: string },
+  context: { offset: number; total: number; reviewer: string; partition: SelfCheck },
 ): Promise<{ outcome: "quit" | "next"; decided: number; flagged: ReviewCandidate[] }> {
-  say(`\n${presentBatch(page, context.offset, context.total)}`);
+  say(`\n${presentBatch(page, context.offset, context.total, context.partition)}`);
   const answer = await ask(rl, BATCH_PROMPT);
   if (answer === null || answer.toLowerCase() === "q") {
     return { outcome: "quit", decided: 0, flagged: [] };
@@ -330,6 +387,189 @@ async function reviewBatch(
 }
 
 /**
+ * The `--revise` branch, or false when the caller did not ask for one.
+ *
+ * Kept whole and out of `main` because its refusals are the interesting part:
+ * every one of them is a way of revising that would leave the audit trail
+ * unable to explain itself.
+ */
+async function runRevise(client: pg.Client, rl: Interface, reviewer: string): Promise<boolean> {
+  const reviseArg = arg("revise");
+  if (reviseArg === undefined) return false;
+
+  const ids = reviseArg.split(",").map(Number);
+  if (!ids.every(Number.isInteger)) {
+    say("--revise takes one fact id, or a comma-separated list of them.");
+    return true;
+  }
+
+  const decision = arg("decide");
+  if (decision === undefined) {
+    // The interactive screen shows one fact and its prior decisions, which is
+    // the only honest way to revise something you have not otherwise read.
+    const only = ids.length === 1 ? ids[0] : undefined;
+    if (only === undefined) say("Revising more than one fact at a time needs --decide and --note.");
+    else await revise(client, rl, only, reviewer);
+    return true;
+  }
+  if (decision !== "verified" && decision !== "rejected") {
+    say('--decide takes "verified" or "rejected".');
+    return true;
+  }
+
+  const note = arg("note")?.trim() ?? "";
+  if (note === "") {
+    say("--revise with --decide requires --note: a replaced decision has to say why.");
+    return true;
+  }
+
+  await reviseAll(client, ids, { decision, note, reviewer });
+  return true;
+}
+
+/**
+ * Replaces the decision on a named set of facts, with the reason on each.
+ *
+ * Only ever reachable through `--revise`, which names the facts explicitly:
+ * revision stays something a reviewer chooses rather than something a queue
+ * walks them into. The reason is required by `reviseDecision` itself, and
+ * migration 0009's trigger keeps every superseded decision, so a reader can
+ * see both what a fact used to be and why it stopped being that.
+ */
+async function reviseAll(
+  client: pg.Client,
+  ids: readonly number[],
+  options: { decision: Decision; note: string; reviewer: string },
+): Promise<number> {
+  say(
+    `\nReplacing the decision on ${String(ids.length)} facts with ${options.decision}.\n` +
+      `  reason: ${options.note}\n`,
+  );
+
+  let revised = 0;
+  for (const factId of ids) {
+    try {
+      const applied = await reviseDecision(client, {
+        factId,
+        decision: options.decision,
+        reviewer: options.reviewer,
+        note: options.note,
+      });
+      say(applied ? `  #${String(factId)} revised` : `  #${String(factId)} was never decided`);
+      revised += applied ? 1 : 0;
+    } catch (error) {
+      say(`  #${String(factId)} not revised: ${error instanceof Error ? error.message : ""}`);
+    }
+  }
+  return revised;
+}
+
+/**
+ * Applies one decision to every candidate in a scoped queue, with no prompt.
+ *
+ * WHY THIS EXISTS, AND WHY IT IS NOT SIMPLY A FASTER REVIEW
+ * Some decisions are reached by a rule rather than by reading a page. The
+ * criterion-governed figures `thresholdPhrase` finds are rejected because of
+ * what their sentence does with the number, and that reasoning is identical
+ * for every one of them. The alternative — feeding synthetic keystrokes to the
+ * interactive prompt — would write an audit trail claiming a person read each
+ * page one at a time. Saying plainly what happened is better than a trail that
+ * misrepresents it.
+ *
+ * The guards are the substance of it:
+ *
+ * - **A note is required and may not be blank**, and it is recorded against
+ *   every fact decided. A decision reached by a rule has to state the rule, or
+ *   nobody can later tell whether it was applied to the right candidates.
+ * - **The queue must be scoped** by `--ids` or `--check`. "Decide everything
+ *   still outstanding" is deliberately not expressible.
+ * - **`corrected` is refused.** A correction carries a per-fact value, and one
+ *   flag cannot honestly supply it for a set.
+ */
+async function decideAll(
+  client: pg.Client,
+  queue: readonly ReviewCandidate[],
+  options: { decision: Decision; note: string; reviewer: string },
+): Promise<number> {
+  say(
+    `\nRecording ${options.decision} against ${String(queue.length)} candidates, ` +
+      `with the reason stored on each.\n  reason: ${options.note}\n`,
+  );
+
+  let decided = 0;
+  for (const candidate of queue) {
+    const result = await apply(
+      client,
+      { factId: candidate.id, decision: options.decision, reviewer: options.reviewer },
+      undefined,
+      options.note,
+    );
+    decided += result === "decided" ? 1 : 0;
+  }
+  return decided;
+}
+
+/**
+ * The partition `--batch` may run over, a refusal, or null for no batching.
+ *
+ * An absent `--check` counts as not batchable: a page at a time over an
+ * unfiltered queue would mix back in the partitions a page cannot carry. The
+ * mode exists because these candidates can be judged from a line — every
+ * amount in the window is accounted for, so the question is whether the parser
+ * took the right sentence. `ambiguous` asks which of several unexplained
+ * amounts is meant, and `no value` asks the reviewer to supply a scale;
+ * neither fits on a line, so neither gets the fast path.
+ */
+function batchPartition(
+  options: QueueOptions,
+  batchSize: number,
+): SelfCheck | { refusal: string } | null {
+  if (batchSize <= 0) return null;
+  const partition = options.only;
+  if (partition === undefined || partition === CRITERION || !BATCHABLE.has(partition)) {
+    return {
+      refusal: "--batch is only available with --check=confirmed or --check=confirmed_in_context.",
+    };
+  }
+  return partition;
+}
+
+/**
+ * The non-interactive decision, validated, or a refusal to state.
+ *
+ * Returns a message rather than throwing so `main` can print it and stop
+ * without a stack trace: every one of these is a misuse the caller can fix.
+ */
+function bulkDecision(
+  options: QueueOptions,
+): { decision: Decision; note: string } | { refusal: string } | null {
+  const raw = arg("decide");
+  if (raw === undefined) return null;
+
+  if (raw !== "verified" && raw !== "rejected") {
+    return {
+      refusal:
+        `--decide takes "verified" or "rejected". A correction carries a value ` +
+        `per fact, which one flag cannot supply for a set.`,
+    };
+  }
+  const note = arg("note")?.trim() ?? "";
+  if (note === "") {
+    return {
+      refusal:
+        "--decide requires --note. A decision reached by a rule has to state the rule, " +
+        "or nobody can tell later whether it was applied to the right candidates.",
+    };
+  }
+  if (options.ids === undefined && options.only === undefined) {
+    return {
+      refusal: "--decide needs --ids or --check. Deciding the whole queue at once is not offered.",
+    };
+  }
+  return { decision: raw, note };
+}
+
+/**
  * Walk the queue a page at a time, dropping into the single-candidate screen
  * for anything the reviewer flags.
  *
@@ -342,12 +582,17 @@ async function runBatchQueue(
   client: pg.Client,
   rl: Interface,
   queue: readonly ReviewCandidate[],
-  options: { batchSize: number; reviewer: string },
+  options: { batchSize: number; reviewer: string; partition: SelfCheck },
 ): Promise<number> {
   let decided = 0;
   for (let offset = 0; offset < queue.length; offset += options.batchSize) {
     const page = queue.slice(offset, offset + options.batchSize);
-    const context = { offset, total: queue.length, reviewer: options.reviewer };
+    const context = {
+      offset,
+      total: queue.length,
+      reviewer: options.reviewer,
+      partition: options.partition,
+    };
 
     const result = await reviewBatch(client, rl, page, context);
     decided += result.decided;
@@ -356,6 +601,30 @@ async function runBatchQueue(
     const flagged = await reviewFlagged(client, rl, result.flagged, context);
     decided += flagged.decided;
     if (flagged.quit) return decided;
+  }
+  return decided;
+}
+
+/**
+ * The whole queue, one candidate at a time.
+ *
+ * The unaccelerated path, and the only one offered for the partitions that ask
+ * a reviewer a question a line cannot carry. Each candidate is shown with the
+ * verdict its page context produced, so the screen says why it is being asked.
+ */
+async function runSingleQueue(
+  client: pg.Client,
+  rl: Interface,
+  queue: readonly ReviewCandidate[],
+  { claimed, reviewer }: { claimed: ClaimedByPage; reviewer: string },
+): Promise<number> {
+  let decided = 0;
+  for (const [index, candidate] of queue.entries()) {
+    const checked = checkOf(candidate, claimed);
+    say(`\n${presentCandidate(candidate, index + 1, queue.length, checked.check)}\n`);
+    const outcome = await reviewOne(client, rl, candidate, reviewer);
+    if (outcome === "quit") break;
+    decided += outcome === "decided" ? 1 : 0;
   }
   return decided;
 }
@@ -385,18 +654,18 @@ async function main(): Promise<void> {
   const rl = createInterface({ input: stdin, output: stdout });
 
   try {
-    const reviseId = arg("revise");
-    if (reviseId !== undefined) {
-      await revise(client, rl, Number(reviseId), reviewer);
-      return;
-    }
+    if (await runRevise(client, rl, reviewer)) return;
 
     const options = queueOptions();
     if (options === null) {
       say("--document must be a document id.");
       return;
     }
-    const queue = await buildQueue(client, options);
+    const claimed = await claimedAmountsByPage(
+      client,
+      options.documentId === undefined ? {} : { documentId: options.documentId },
+    );
+    const queue = await buildQueue(client, options, claimed);
 
     say(`\n${summarise(await reviewProgress(client))}`);
     if (queue.length === 0) {
@@ -405,30 +674,25 @@ async function main(): Promise<void> {
     }
     say(`Reviewing as ${reviewer}. Nothing publishes until you say so.`);
 
-    const batchSize = Number(arg("batch") ?? "0");
-    if (batchSize > 0 && options.only !== "confirmed") {
-      // The mode exists because a confirmed candidate can be judged from a
-      // line. Nothing else can, so nothing else gets the fast path.
-      say("--batch is only available with --check=confirmed.\n");
+    const bulk = bulkDecision(options);
+    if (bulk !== null && "refusal" in bulk) {
+      say(`${bulk.refusal}\n`);
       return;
     }
 
-    let decided = 0;
+    const batchSize = Number(arg("batch") ?? "0");
+    const batch = batchPartition(options, batchSize);
+    if (batch !== null && typeof batch === "object") {
+      say(`${batch.refusal}\n`);
+      return;
+    }
 
-    if (batchSize > 0) {
-      decided += await runBatchQueue(client, rl, queue, { batchSize, reviewer });
-    } else
-      for (const [index, candidate] of queue.entries()) {
-        const checked = selfCheck({
-          id: candidate.id,
-          rawText: candidate.rawText,
-          normalisedValue: candidate.normalisedValue,
-        });
-        say(`\n${presentCandidate(candidate, index + 1, queue.length, checked.check)}\n`);
-        const outcome = await reviewOne(client, rl, candidate, reviewer);
-        if (outcome === "quit") break;
-        decided += outcome === "decided" ? 1 : 0;
-      }
+    const decided =
+      bulk !== null
+        ? await decideAll(client, queue, { ...bulk, reviewer })
+        : batch !== null
+          ? await runBatchQueue(client, rl, queue, { batchSize, reviewer, partition: batch })
+          : await runSingleQueue(client, rl, queue, { claimed, reviewer });
 
     const after = await reviewProgress(client);
     say(

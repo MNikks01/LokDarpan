@@ -165,7 +165,9 @@ jobs:
         with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - name: Known vulnerabilities (high and above)
-        run: pnpm audit --audit-level high
+        # Fails on an advisory; warns, and does not fail, when npm's advisory
+        # service cannot be reached. See the script for why those differ.
+        run: .github/scripts/audit-dependencies.sh high
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2
         env:

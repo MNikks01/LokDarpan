@@ -19,6 +19,18 @@ import { AMOUNT_IN, amountToPaise } from "../cag/facts";
 export type SelfCheck =
   /** The evidence states exactly one amount, and it is the stored one. */
   | "confirmed"
+  /**
+   * The evidence states several amounts, and every one of the others is itself
+   * recorded as a fact on this page.
+   *
+   * This is window overlap, not a competing reading. `CONTEXT_CHARS` keeps 160
+   * characters either side of a figure, so a paragraph naming three deficits
+   * produces three candidates whose windows each contain all three. Asking a
+   * reviewer which amount the claim is "really" about presumes a choice that
+   * was never open: the neighbours were taken by their own candidates, and
+   * nothing in the window is unaccounted for.
+   */
+  | "confirmed_in_context"
   /** The evidence states several amounts; the stored one is among them. */
   | "ambiguous"
   /** The evidence states amounts, and none of them is the stored one. */
@@ -39,6 +51,23 @@ export interface CheckInput {
   readonly normalisedValue: string | null;
 }
 
+/** A candidate together with the page it was read from, as `document:page`. */
+export interface TriageInput extends CheckInput {
+  readonly pageKey?: string;
+}
+
+/**
+ * Every amount claimed by a fact, per page.
+ *
+ * Built from *all* facts on the page, whatever their verification status, and
+ * not only from the ones still awaiting review. A sibling that leaves the queue
+ * because someone decided on it has not stopped accounting for its amount, and
+ * a set that shrank as review progressed would move candidates back into
+ * `ambiguous` — the partition would depend on how far through the queue the
+ * reviewer happened to be.
+ */
+export type ClaimedByPage = ReadonlyMap<string, ReadonlySet<string>>;
+
 /**
  * Re-derives every amount the evidence states, and compares.
  *
@@ -46,7 +75,7 @@ export interface CheckInput {
  * the trillions of paise, where a float comparison would start inventing
  * differences of its own.
  */
-export function selfCheck(input: CheckInput): Checked {
+export function selfCheck(input: CheckInput, claimedOnPage?: ReadonlySet<string>): Checked {
   const amounts: string[] = [];
   for (const m of input.rawText.matchAll(AMOUNT_IN)) {
     const paise = amountToPaise(m[1] ?? "", m[2]);
@@ -63,25 +92,56 @@ export function selfCheck(input: CheckInput): Checked {
   }
   // One figure, once. Anything else leaves a reviewer a choice to make about
   // which of several amounts the claim is actually about.
-  const check: SelfCheck = amounts.length === 1 ? "confirmed" : "ambiguous";
-  return { id: input.id, check, amountsInEvidence: amounts };
+  if (amounts.length === 1) {
+    return { id: input.id, check: "confirmed", amountsInEvidence: amounts };
+  }
+
+  // Unless the choice is already settled: if every other amount in the window
+  // is claimed by a fact of its own, the overlap is the window's doing and not
+  // a question about this reading. Without page context this cannot be known,
+  // so the candidate stays ambiguous — the refinement only ever narrows.
+  const unaccounted =
+    claimedOnPage === undefined
+      ? amounts.filter((a) => a !== input.normalisedValue)
+      : amounts.filter((a) => a !== input.normalisedValue && !claimedOnPage.has(a));
+
+  return {
+    id: input.id,
+    check: unaccounted.length === 0 ? "confirmed_in_context" : "ambiguous",
+    amountsInEvidence: amounts,
+  };
 }
 
 export interface Triage {
   readonly confirmed: number;
+  readonly confirmedInContext: number;
   readonly ambiguous: number;
   readonly mismatch: number;
   readonly noValue: number;
 }
 
-export function triage(inputs: readonly CheckInput[]): Triage {
-  const counts = { confirmed: 0, ambiguous: 0, mismatch: 0, noValue: 0 };
+export function triage(inputs: readonly TriageInput[], claimed?: ClaimedByPage): Triage {
+  const counts = { confirmed: 0, confirmedInContext: 0, ambiguous: 0, mismatch: 0, noValue: 0 };
   for (const input of inputs) {
-    const { check } = selfCheck(input);
+    const { check } = selfCheck(input, contextFor(input, claimed));
     if (check === "no_value") counts.noValue += 1;
+    else if (check === "confirmed_in_context") counts.confirmedInContext += 1;
     else counts[check] += 1;
   }
   return counts;
+}
+
+/**
+ * The amounts accounted for on this candidate's page, when both the page it
+ * came from and a map of claims are known. Either missing means no context,
+ * which leaves `selfCheck` at its unrefined answer.
+ */
+export function contextFor(
+  input: TriageInput,
+  claimed: ClaimedByPage | undefined,
+): ReadonlySet<string> | undefined {
+  if (claimed === undefined || input.pageKey === undefined) return undefined;
+  return claimed.get(input.pageKey);
 }
 
 /**
@@ -91,11 +151,15 @@ export function triage(inputs: readonly CheckInput[]): Triage {
  * a defect, and finding those early is worth more than confirming a thousand
  * readings that were already right. `confirmed` is deliberately last - it is
  * the group where a reviewer adds least, and working it first is how the
- * mismatches end up never being reached.
+ * mismatches end up never being reached. `confirmed_in_context` sits beside it
+ * for the same reason: arithmetic has already accounted for every figure in
+ * the window, so a reviewer is checking the parser took the right sentence
+ * rather than adjudicating between readings.
  */
 export const TRIAGE_ORDER: readonly SelfCheck[] = [
   "mismatch",
   "no_value",
   "ambiguous",
+  "confirmed_in_context",
   "confirmed",
 ];

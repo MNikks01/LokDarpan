@@ -5,12 +5,14 @@ import {
   describeCitation,
   describeConfidence,
   describeValue,
+  presentBatch,
   presentCandidate,
   type ReviewCandidate,
 } from "../src/review/present";
 
 const candidate: ReviewCandidate = {
   id: 7,
+  documentId: 4,
   pageNumber: 112,
   kind: "monetary_amount",
   rawText: "awarded to M/s. Vijay Constructions for a contract value of 15.14 crore",
@@ -118,5 +120,57 @@ describe("PROMPT", () => {
     for (const word of ["verify", "reject", "correct", "quit"]) {
       expect(PROMPT).toContain(word);
     }
+  });
+});
+
+describe("presentBatch evidence window", () => {
+  // The stored value is paise and the page states rupees-and-a-unit, so a
+  // window located by searching for the paise string never found the figure
+  // and quietly showed the opening of the paragraph instead. On a page of
+  // overlapping windows that is a reviewer approving a figure the line in
+  // front of them does not contain.
+  it("centres the line on the figure, not on the start of the paragraph", () => {
+    const lead = "A".repeat(200);
+    const line = presentBatch(
+      [
+        {
+          ...candidate,
+          rawText: `${lead} the fiscal deficit was ₹ 1,24,208.74 crore in that year.`,
+          normalisedValue: "124208740000000",
+        },
+      ],
+      0,
+      1,
+      "confirmed_in_context",
+    );
+    expect(line).toContain("1,24,208.74");
+  });
+
+  // A Marathi figure has to locate the same way; half the corpus states its
+  // unit in Devanagari, and a window that cannot find those figures would show
+  // unreadable evidence for exactly the half already hardest to read.
+  it("locates a figure whose unit the sentence states in Devanagari", () => {
+    const line = presentBatch(
+      [
+        {
+          ...candidate,
+          rawText: `${"क".repeat(200)} महसुली तूट ₹ 29,994.76 कोटी होती.`,
+          normalisedValue: "29994760000000",
+        },
+      ],
+      0,
+      1,
+      "confirmed_in_context",
+    );
+    expect(line).toContain("29,994.76");
+  });
+
+  it("names the partition it is showing, and never overstates it", () => {
+    const page = [candidate];
+    expect(presentBatch(page, 0, 1, "confirmed")).toContain("by no other reading of it");
+    expect(presentBatch(page, 0, 1, "confirmed_in_context")).toContain(
+      "recorded as facts of their own",
+    );
+    expect(presentBatch(page, 0, 1, "confirmed_in_context")).not.toContain("no other reading");
   });
 });

@@ -8,6 +8,14 @@ import type { ReviewCandidate } from "./present";
 export interface QueueFilter {
   readonly kind?: FactKind;
   readonly documentId?: number;
+  /**
+   * Exactly these facts, named by id.
+   *
+   * For acting on a set some other reading produced — the criterion-governed
+   * figures the triage lists, say — where walking the queue and counting to
+   * the right position would be both slow and a way to decide the wrong one.
+   */
+  readonly ids?: readonly number[];
   /** Skip candidates the parser was least sure of, when triaging. */
   readonly minConfidence?: number;
   readonly limit?: number;
@@ -15,6 +23,7 @@ export interface QueueFilter {
 
 interface Row {
   readonly id: string;
+  readonly document_id: string;
   readonly page_number: number;
   readonly kind: FactKind;
   readonly raw_text: string;
@@ -51,6 +60,10 @@ export async function pendingReview(
     params.push(filter.documentId);
     where.push(`f.document_id = $${String(params.length)}`);
   }
+  if (filter.ids !== undefined) {
+    params.push(filter.ids);
+    where.push(`f.id = ANY($${String(params.length)}::bigint[])`);
+  }
   if (filter.minConfidence !== undefined) {
     params.push(filter.minConfidence);
     where.push(`f.extraction_confidence >= $${String(params.length)}`);
@@ -58,7 +71,7 @@ export async function pendingReview(
   params.push(filter.limit ?? 500);
 
   const result = await client.query(
-    `SELECT f.id, f.page_number, f.kind, f.raw_text, f.normalised_value,
+    `SELECT f.id, f.document_id, f.page_number, f.kind, f.raw_text, f.normalised_value,
             f.extraction_confidence, f.parser_version,
             d.title AS document_title, s.source_url
        FROM document_fact f
@@ -72,6 +85,7 @@ export async function pendingReview(
 
   return (result.rows as Row[]).map((r) => ({
     id: Number(r.id),
+    documentId: Number(r.document_id),
     pageNumber: r.page_number,
     kind: r.kind,
     rawText: r.raw_text,
@@ -81,6 +95,52 @@ export async function pendingReview(
     documentTitle: displayTitle(r.document_title),
     sourceUrl: r.source_url,
   }));
+}
+
+/**
+ * Every monetary amount claimed by a fact, grouped by the page it sits on.
+ *
+ * Deliberately unfiltered by verification status. This is what lets the triage
+ * tell window overlap apart from a genuine choice between readings, and a
+ * sibling that has already been decided still accounts for its amount. Scoping
+ * it to the queue would shrink the context as the reviewer worked, moving
+ * candidates back into `ambiguous` behind them.
+ */
+export async function claimedAmountsByPage(
+  client: SqlClient,
+  filter: { documentId?: number } = {},
+): Promise<Map<string, Set<string>>> {
+  const params: unknown[] = [];
+  let scope = "";
+  if (filter.documentId !== undefined) {
+    params.push(filter.documentId);
+    scope = ` AND document_id = $${String(params.length)}`;
+  }
+
+  const result = await client.query(
+    `SELECT document_id, page_number, normalised_value
+       FROM document_fact
+      WHERE kind = 'monetary_amount' AND normalised_value IS NOT NULL${scope}`,
+    params,
+  );
+
+  const claimed = new Map<string, Set<string>>();
+  for (const row of result.rows as {
+    document_id: string;
+    page_number: number;
+    normalised_value: string;
+  }[]) {
+    const key = pageKeyOf(Number(row.document_id), row.page_number);
+    const values = claimed.get(key) ?? new Set<string>();
+    values.add(row.normalised_value);
+    claimed.set(key, values);
+  }
+  return claimed;
+}
+
+/** The page identity the triage groups by. One shape, defined once. */
+export function pageKeyOf(documentId: number, pageNumber: number): string {
+  return `${String(documentId)}:${String(pageNumber)}`;
 }
 
 export interface ReviewProgress {
@@ -117,7 +177,7 @@ export async function reviewProgress(client: SqlClient): Promise<ReviewProgress>
  */
 export async function factById(client: SqlClient, factId: number): Promise<ReviewCandidate | null> {
   const result = await client.query(
-    `SELECT f.id, f.page_number, f.kind, f.raw_text, f.normalised_value,
+    `SELECT f.id, f.document_id, f.page_number, f.kind, f.raw_text, f.normalised_value,
             f.extraction_confidence, f.parser_version,
             d.title AS document_title, s.source_url
        FROM document_fact f
@@ -130,6 +190,7 @@ export async function factById(client: SqlClient, factId: number): Promise<Revie
   if (row === undefined) return null;
   return {
     id: Number(row.id),
+    documentId: Number(row.document_id),
     pageNumber: row.page_number,
     kind: row.kind,
     rawText: row.raw_text,

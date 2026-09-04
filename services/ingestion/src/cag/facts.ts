@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/3";
+export const PARSER_VERSION = "cag-facts/4";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -37,6 +37,21 @@ export interface FactCandidate {
  *
  * The Devanagari stems are matched without their inflections: कोटी appears as
  * कोटीची, कोटीहून and कोटींच्या depending on the case the sentence needs.
+ *
+ * The digit group tolerates whitespace *around its commas only*. This corpus's
+ * text layer splits digit groups — "₹ 20 ,564.71 कोटी", "₹ 97 ,188.32 कोटी" —
+ * and `[\d,]+` stopped at the space, capturing "20" and losing the unit that
+ * followed. Those figures were then stored with no value at all and offered to
+ * a reviewer as "the source stated no unit", which is false: the unit is
+ * printed on the page. Requiring a comma to continue the group is what keeps
+ * "₹ 1,500 26,200" from being read as one number.
+ *
+ * `Rs` needs a word boundary because the pattern is case-insensitive and these
+ * reports are full of English plurals. Without it "Parameters 2020-21" read as
+ * ₹2020, "Surrenders 2.5.4" as ₹2.5 and "years 10.32" as ₹10.32 — years,
+ * paragraph numbers and table columns entering the ledger as money. 64 such
+ * candidates existed; none had been verified, because none carried a unit and
+ * all of them stopped in the queue as "the source stated no unit".
  */
 /**
  * Exported so the review triage re-derives amounts with exactly the rules the
@@ -47,7 +62,7 @@ export interface FactCandidate {
  * one consumer cannot leave `lastIndex` set for another.
  */
 export const AMOUNT_IN =
-  /(?:₹|Rs\.?)\s*([\d,]+(?:\.\d+)?)\s*(crore|lakh|thousand|कोट[ीि]|लाख|हजार)?/giu;
+  /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|lakh|thousand|कोट[ीि]|लाख|हजार)?/giu;
 const AMOUNT = AMOUNT_IN;
 
 /**
@@ -132,7 +147,9 @@ export function amountToPaise(digits: string, unit: string | undefined): bigint 
   const multiplier = SCALE[unit.toLowerCase()];
   if (multiplier === undefined) return null;
   try {
-    const paise = thousandsToPaise(digits);
+    // `scaledToPaise` strips commas but not spaces, and the digit group may now
+    // carry the ones the text layer injected between them.
+    const paise = thousandsToPaise(digits.replace(/\s+/gu, ""));
     return paise === null ? null : paise * BigInt(multiplier);
   } catch (error) {
     // `thousandsToPaise` throws rather than round, which is right for a BEAMS

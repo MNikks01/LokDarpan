@@ -154,12 +154,50 @@ ADRs append; they are never rewritten. A superseded ADR gets a status header and
 
 ---
 
+## Changesets — the record of what changed
+
+**A PR that changes what the pipeline extracts, stores or publishes carries a changeset.**
+
+```bash
+pnpm changeset          # write one
+pnpm changeset:status    # what is pending
+```
+
+Nothing here is published — every package is `private: true` at `0.0.0` — so
+`changeset version` writes versions and `CHANGELOG.md` files and stops there. The
+point is the record, not a release.
+
+It exists because of what this project claims. We say a figure can be traced to
+the document it came from; the code that reads those documents deserves the same
+standard. When a published figure changes because a parser changed, someone has
+to be able to find out which change did it and why. A conventional commit says
+what one commit did and an ADR says why a decision was taken — neither answers
+"what changed in the thing that reads government PDFs, between one state of this
+repository and the next", which is the question asked when a number looks wrong.
+
+Skip it for documentation, tests, formatting, or a refactor that provably changes
+no output. Most substantial PRs want **both** a changeset and an ADR: the ADR for
+the decision, the changeset for the behaviour.
+
+Write the summary for the person reading it in a year, not for the diff:
+
+> **Good** — "`Rs` now requires a word boundary. It was matching the end of
+> English plurals, so `Parameters 2020-21` was read as ₹2020; 79 such candidates
+> existed, none verified."
+>
+> **Useless** — "fix regex in facts.ts".
+
+See [`.changeset/README.md`](./.changeset/README.md).
+
+---
+
 ## Pull requests
 
 Use the checklist in [`.github/pull_request_template.md`](./.github/pull_request_template.md). Before opening:
 
 ```bash
 pnpm -r typecheck && pnpm test && pnpm neutrality apps packages
+pnpm changeset:status   # a behaviour change needs a changeset
 ```
 
 Keep PRs focused. A connector, a bug fix, or one feature — not three.

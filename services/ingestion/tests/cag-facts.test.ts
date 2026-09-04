@@ -186,3 +186,68 @@ describe("sentencesOf", () => {
     expect(s[0]).toContain("M/s. Alpha");
   });
 });
+
+describe("digit groups the text layer has split", () => {
+  // "₹ 20 ,564.71 कोटी" on page 32 of the Mumbai SFAR. The old digit group
+  // stopped at the injected space, captured "20", and lost the कोटी that
+  // followed — so the figure was stored with no value and offered to a
+  // reviewer as "the source stated no unit". The unit is printed on the page.
+  it("reads a figure whose digit group carries an injected space", () => {
+    const [found] = extractFacts([
+      { pageNumber: 32, content: "राज्याची रोख शिल्लक ₹ 20 ,564.71 कोटी होती." },
+    ]);
+    expect(found?.normalisedValue).toBe("20564710000000");
+  });
+
+  it("reads the same figure identically when the text layer did not split it", () => {
+    const [split] = extractFacts([{ pageNumber: 1, content: "शिल्लक ₹ 97 ,188.32 कोटी होती." }]);
+    const [whole] = extractFacts([{ pageNumber: 1, content: "शिल्लक ₹ 97,188.32 कोटी होती." }]);
+    expect(split?.normalisedValue).toBe(whole?.normalisedValue);
+  });
+
+  // The guard on the widening: a comma is required to continue the group, so
+  // two figures separated by a space stay two figures. Merging them would
+  // invent a number that appears nowhere on the page.
+  it("does not run two adjacent figures together", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "A benefit of ₹ 1,500 and an outlay of ₹ 26,200 crore." },
+    ]).filter((f) => f.kind === "monetary_amount");
+    expect(found).toHaveLength(2);
+    expect(found[1]?.normalisedValue).toBe("26200000000000");
+  });
+
+  // Still no default unit. A split digit group is a reading problem; an absent
+  // unit is the source declining to state a scale, and the two must not be
+  // confused now that one of them has been fixed.
+  it("leaves a figure with no stated unit unvalued", () => {
+    const [found] = extractFacts([
+      { pageNumber: 1, content: "Total annual rent of ₹ 1 ,53,427 was paid." },
+    ]);
+    expect(found?.normalisedValue).toBeNull();
+  });
+});
+
+describe("Rs is a currency marker, not the end of an English word", () => {
+  // The pattern is case-insensitive and these reports are written in English.
+  // Without a word boundary "Parameters 2020-21" read as ₹2020 and
+  // "Surrenders 2.5.4" as ₹2.5 — a year and a paragraph number entering the
+  // ledger as money.
+  it("does not read the tail of a plural noun as a currency marker", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "Parameters 2020-21 and Surrenders 2.5.4 are shown." },
+    ]).filter((f) => f.kind === "monetary_amount");
+    expect(found).toHaveLength(0);
+  });
+
+  it("does not turn a trailing comma into a figure", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "based on vouchers, challans, and subsidiary registers." },
+    ]).filter((f) => f.kind === "monetary_amount");
+    expect(found).toHaveLength(0);
+  });
+
+  it("still reads a real Rs figure", () => {
+    const [found] = extractFacts([{ pageNumber: 1, content: "a contract of Rs. 1,234.56 crore." }]);
+    expect(found?.normalisedValue).toBe("1234560000000");
+  });
+});
