@@ -103,13 +103,51 @@ describe("extractFacts", () => {
     expect(amount?.normalisedValue).toBe(27_559_26_00_00_000n.toString());
   });
 
-  it("leaves a figure with no stated unit for a person to scale", () => {
+  // Audit prose writes crore and lakh out when it means them, so a ₹ figure
+  // with no scale word is the amount itself — "₹1,53,427" is one lakh
+  // fifty-three thousand four hundred and twenty-seven rupees.
+  it("reads a figure with no stated unit as rupees when its page declares no scale", () => {
     const found = extractFacts([
       { pageNumber: 1, content: "Total annual Rent for both the offices: ₹1,53,427 was paid." },
     ]);
     const amount = found.find((f) => f.kind === "monetary_amount");
-    expect(amount).toBeDefined();
+    expect(amount?.normalisedValue).toBe("15342700");
+    // A sound inference is still an inference, and says so.
+    expect(amount?.extractionConfidence).toBeLessThan(0.8);
+  });
+
+  // The dangerous direction, and the reason the reading is page-scoped. A table
+  // states its scale in the caption and then prints bare cells; reading one of
+  // those as rupees understates a government figure by seven orders of
+  // magnitude, so on such a page the parser goes back to refusing.
+  it("refuses to scale a bare figure on a page whose caption declares a unit", () => {
+    const found = extractFacts([
+      {
+        pageNumber: 1,
+        content:
+          "Table 2.6: Unnecessary Supplementary Budget Allocation (₹ in crore) " +
+          "Sr. No. Grant Amount 1. A-2 ₹ 5376.31 for the year.",
+      },
+    ]);
+    const amount = found.find((f) => f.kind === "monetary_amount");
     expect(amount?.normalisedValue).toBeNull();
+  });
+
+  it("refuses on a Marathi table that declares its scale as (₹ कोटीत)", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "परिशिष्ट 2.7 मोठ्या बचती (₹ कोटीत) अनु. क्र. ₹ 5376.31 आहे." },
+    ]);
+    const amount = found.find((f) => f.kind === "monetary_amount");
+    expect(amount?.normalisedValue).toBeNull();
+  });
+
+  // The text layer drops the leading conjunct of कोटी, leaving "ोटी". The
+  // figure is in crore whatever happened to the glyph.
+  it("reads कोटी even when the text layer detached its conjunct", () => {
+    const [found] = extractFacts([
+      { pageNumber: 1, content: "देय रक्कम ₹ 919.80 ोटींच् या इतकी होती." },
+    ]);
+    expect(found?.normalisedValue).toBe("919800000000");
   });
 
   const page =
@@ -219,11 +257,11 @@ describe("digit groups the text layer has split", () => {
   // Still no default unit. A split digit group is a reading problem; an absent
   // unit is the source declining to state a scale, and the two must not be
   // confused now that one of them has been fixed.
-  it("leaves a figure with no stated unit unvalued", () => {
+  it("reads a split digit group with no unit as rupees", () => {
     const [found] = extractFacts([
       { pageNumber: 1, content: "Total annual rent of ₹ 1 ,53,427 was paid." },
     ]);
-    expect(found?.normalisedValue).toBeNull();
+    expect(found?.normalisedValue).toBe("15342700");
   });
 });
 

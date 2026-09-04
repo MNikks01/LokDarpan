@@ -67,7 +67,8 @@ const AFTER_CHARS = 26;
  */
 function offsetOfAmount(flat: string, paise: string): { at: number; length: number } | null {
   for (const m of flat.matchAll(AMOUNT_IN)) {
-    if (amountToPaise(m[1] ?? "", m[2])?.toString() === paise) {
+    // Reads unitless figures as rupees — a criterion can govern a figure read as rupees just as well.
+    if (amountToPaise(m[1] ?? "", m[2], "rupees")?.toString() === paise) {
       return { at: m.index, length: m[0].length };
     }
   }

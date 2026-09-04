@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/4";
+export const PARSER_VERSION = "cag-facts/5";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -46,6 +46,11 @@ export interface FactCandidate {
  * printed on the page. Requiring a comma to continue the group is what keeps
  * "₹ 1,500 26,200" from being read as one number.
  *
+ * `ोटी` — कोटी with its leading conjunct detached — is matched because the text
+ * layer produces it: "₹ 919.80 ोटींच् या" is कोटींच्या with the क lost, and the
+ * figure is in crore whatever happened to the glyph. The same corruption is
+ * already handled in the criterion screen for अधिक → अचधक.
+ *
  * `Rs` needs a word boundary because the pattern is case-insensitive and these
  * reports are full of English plurals. Without it "Parameters 2020-21" read as
  * ₹2020, "Surrenders 2.5.4" as ₹2.5 and "years 10.32" as ₹10.32 — years,
@@ -62,7 +67,7 @@ export interface FactCandidate {
  * one consumer cannot leave `lastIndex` set for another.
  */
 export const AMOUNT_IN =
-  /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|lakh|thousand|कोट[ीि]|लाख|हजार)?/giu;
+  /(?:₹|\bRs\.?)\s*(\d+(?:\s*,\s*\d+)*(?:\.\d+)?)\s*(crore|lakh|thousand|कोट[ीि]|ोट[ीि]|लाख|हजार)?/giu;
 const AMOUNT = AMOUNT_IN;
 
 /**
@@ -93,7 +98,42 @@ const SCALE: Readonly<Record<string, number>> = {
   crore: 10_000,
   कोटी: 10_000,
   कोटि: 10_000,
+  // The text layer's detached-conjunct spelling of the same word. Quoted
+  // because the key begins with a combining mark and is not an identifier.
+  "ोटी": 10_000,
+  "ोटि": 10_000,
 };
+
+/**
+ * A page that states the unit its figures are in.
+ *
+ * Audit tables carry the scale in the caption — "(₹ in crore)", "(₹ कोटीत)" —
+ * and then print bare numbers in the cells. A bare figure on such a page may
+ * belong to that table, and reading it as rupees would understate a government
+ * figure by seven orders of magnitude.
+ *
+ * Deliberately generous. A false positive here only leaves a figure unvalued
+ * for a person to read; a false negative publishes a wrong number. When the two
+ * errors are that asymmetric, over-detecting is the safe direction.
+ */
+const PAGE_DECLARES_UNIT =
+  /\((?:[^)]{0,24}?)(?:crore|lakh|thousand|कोट[ीि]|ोट[ीि]|लाख|हजार)(?:[^)]{0,10}?)\)|(?:₹|\bRs\.?|amount|amounts)\s*(?:are\s+)?in\s+(?:crore|lakh|thousand)/iu;
+
+/** Whether this page states a scale its bare figures could belong to. */
+export function pageDeclaresUnit(content: string): boolean {
+  return PAGE_DECLARES_UNIT.test(content);
+}
+
+/**
+ * How to read a figure the source attached no unit to.
+ *
+ * `refuse` is the historical behaviour and stays the default: a bare figure in
+ * a BEAMS export means thousands, and guessing there inflated a figure a
+ * thousandfold. `rupees` is only ever passed for a figure in audit prose on a
+ * page that declares no scale, where the ₹ sign is present and the amount is
+ * simply written out — "₹1,500 per month", "₹50,000 per student".
+ */
+export type UnitlessReading = "refuse" | "rupees";
 
 /**
  * Characters of context kept either side of a match.
@@ -136,14 +176,30 @@ export function sentencesOf(page: string): string[] {
  * writing a second money path — two conversions that can disagree is how one
  * of them silently becomes wrong.
  */
-export function amountToPaise(digits: string, unit: string | undefined): bigint | null {
-  // No default. An unqualified figure was previously read as thousands, an
-  // assumption carried over from BEAMS, whose report headers say "Amounts In
-  // Thousands". Audit prose says no such thing: a bare "₹1,53,427" in a rent
-  // calculation is rupees, and reading it as thousands inflated it a
-  // thousandfold. Where the source states no unit, neither do we — the
-  // candidate keeps its evidence and waits for a person to supply the scale.
-  if (unit === undefined) return null;
+export function amountToPaise(
+  digits: string,
+  unit: string | undefined,
+  unitless: UnitlessReading = "refuse",
+): bigint | null {
+  // Never a silent default. An unqualified figure was once read as thousands,
+  // an assumption carried over from BEAMS, whose report headers say "Amounts
+  // In Thousands"; a bare "₹1,53,427" in a rent calculation is rupees, and
+  // reading it as thousands inflated it a thousandfold.
+  //
+  // `rupees` is the caller stating that it has checked the page states no
+  // scale, so the ₹ figure is written out in full. It is an argument rather
+  // than a default because the whole defect was a default nobody passed.
+  if (unit === undefined) {
+    if (unitless === "refuse") return null;
+    try {
+      const rupees = thousandsToPaise(digits.replace(/\s+/gu, ""));
+      // thousands → paise is a shift of five; rupees → paise is two.
+      return rupees === null ? null : rupees / 1000n;
+    } catch (error) {
+      if (error instanceof AmountFormatError) return null;
+      throw error;
+    }
+  }
   const multiplier = SCALE[unit.toLowerCase()];
   if (multiplier === undefined) return null;
   try {
@@ -206,18 +262,19 @@ export function trimToName(captured: string): string {
   return kept.join(" ");
 }
 
-function moneyIn(sentence: string, pageNumber: number): FactCandidate[] {
+function moneyIn(sentence: string, pageNumber: number, unitless: UnitlessReading): FactCandidate[] {
   const found: FactCandidate[] = [];
   for (const m of sentence.matchAll(AMOUNT)) {
-    const paise = amountToPaise(m[1] ?? "", m[2]);
+    const paise = amountToPaise(m[1] ?? "", m[2], unitless);
     found.push({
       kind: "monetary_amount",
       pageNumber,
       rawText: contextAround(sentence, m.index, m.index + m[0].length),
       normalisedValue: paise === null ? null : paise.toString(),
-      // An unqualified figure could be rupees, thousands, or a page number in
-      // disguise; a stated unit is far safer to read.
-      extractionConfidence: m[2] === undefined ? 0.4 : 0.8,
+      // A stated unit is the safest reading. A figure read as rupees because
+      // its page declares no scale is a sound inference and still an
+      // inference, so it sits between a stated unit and no reading at all.
+      extractionConfidence: m[2] !== undefined ? 0.8 : paise === null ? 0.4 : 0.6,
     });
   }
   return found;
@@ -259,9 +316,13 @@ function officersIn(sentence: string, pageNumber: number): FactCandidate[] {
   return found;
 }
 
-function candidatesIn(sentence: string, pageNumber: number): FactCandidate[] {
+function candidatesIn(
+  sentence: string,
+  pageNumber: number,
+  unitless: UnitlessReading,
+): FactCandidate[] {
   return [
-    ...moneyIn(sentence, pageNumber),
+    ...moneyIn(sentence, pageNumber, unitless),
     ...contractorsIn(sentence, pageNumber),
     ...officersIn(sentence, pageNumber),
   ];
@@ -276,8 +337,11 @@ export function extractFacts(pages: readonly PageInput[]): FactCandidate[] {
   const out: FactCandidate[] = [];
   for (const page of pages) {
     if (page.content === null) continue;
+    // Decided per page, not per sentence: a table's caption sits at the top and
+    // governs cells far below it, well outside any one sentence's window.
+    const unitless: UnitlessReading = pageDeclaresUnit(page.content) ? "refuse" : "rupees";
     for (const sentence of sentencesOf(page.content)) {
-      out.push(...candidatesIn(sentence, page.pageNumber));
+      out.push(...candidatesIn(sentence, page.pageNumber, unitless));
     }
   }
   return out;

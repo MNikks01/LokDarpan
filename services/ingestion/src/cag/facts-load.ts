@@ -25,6 +25,8 @@ export interface FactLoadResult {
    * makes review mean anything. Reported so someone can revise them.
    */
   readonly strandedDecisions: number;
+  /** Undecided rows whose `parser_version` was brought up to date. */
+  readonly refreshed: number;
 }
 
 /**
@@ -69,11 +71,11 @@ export async function loadFactCandidates(
   candidates: readonly FactCandidate[],
 ): Promise<FactLoadResult> {
   const held = await client.query(
-    `SELECT id, page_number, kind, raw_text, normalised_value, verification_status
+    `SELECT id, page_number, kind, raw_text, normalised_value, verification_status, parser_version
        FROM document_fact WHERE document_id = $1`,
     [documentId],
   );
-  const existing = new Map<string, { id: string; status: string }>();
+  const existing = new Map<string, { id: string; status: string; parserVersion: string }>();
   for (const row of held.rows as {
     id: string;
     page_number: number;
@@ -81,6 +83,7 @@ export async function loadFactCandidates(
     raw_text: string;
     normalised_value: string | null;
     verification_status: string;
+    parser_version: string;
   }[]) {
     const key = identity({
       pageNumber: row.page_number,
@@ -88,18 +91,39 @@ export async function loadFactCandidates(
       rawText: row.raw_text,
       normalisedValue: row.normalised_value,
     });
-    existing.set(key, { id: row.id, status: row.verification_status });
+    existing.set(key, {
+      id: row.id,
+      status: row.verification_status,
+      parserVersion: row.parser_version,
+    });
   }
 
   const produced = new Set(candidates.map(identity));
   let inserted = 0;
   let skippedAlreadyReviewed = 0;
+  let refreshed = 0;
 
   for (const c of candidates) {
     const row = existing.get(identity(c));
 
     if (row !== undefined) {
-      if (row.status !== "unverified") skippedAlreadyReviewed += 1;
+      if (row.status !== "unverified") {
+        skippedAlreadyReviewed += 1;
+      } else if (row.parserVersion !== PARSER_VERSION) {
+        // An undecided candidate's provenance is the parser that currently
+        // produces it. Leaving the old version on the row would have it claim
+        // it was read by a parser that no longer exists, which is a false
+        // statement about how a figure was arrived at — and these rows are
+        // exactly the ones a reviewer is about to publish.
+        //
+        // Decided rows are not touched: their version is part of what a person
+        // reviewed, and the parser does not get to restate that.
+        await client.query(`UPDATE document_fact SET parser_version = $2 WHERE id = $1`, [
+          row.id,
+          PARSER_VERSION,
+        ]);
+        refreshed += 1;
+      }
       continue;
     }
 
@@ -131,6 +155,7 @@ export async function loadFactCandidates(
   return {
     inserted,
     skippedAlreadyReviewed,
+    refreshed,
     retired: retirable.length,
     strandedDecisions: stale.length - retirable.length,
   };
