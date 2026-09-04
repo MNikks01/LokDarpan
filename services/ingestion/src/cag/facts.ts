@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/11";
+export const PARSER_VERSION = "cag-facts/12";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -188,9 +188,17 @@ const PAGE_DECLARES_UNIT =
 /**
  * Words that make a ₹ a column header rather than the start of a figure.
  *
- * Narrow on purpose. Suppressing a match costs a candidate, which the parser
- * treats as cheap; matching one wrongly puts a serial number in the ledger as
- * an amount of money.
+ * The word may be abbreviated — "Amt. in ₹" — but the **"in" is required**, and
+ * that boundary was found the hard way. Dropping it, and adding "total", was an
+ * attempt to catch a hypothetical "Amount ₹ 1"; it instead suppressed
+ * "Total ₹ 12.11 crore", "total amount ₹ 7.42 crore" and "Paid amount
+ * ₹ 6,30,612" — nineteen real figures already verified, to catch a form no
+ * document in this corpus actually produces.
+ *
+ * So this matches what the corpus contains and not what it might. A heading
+ * reads "Amount in ₹"; prose reads "amount of ₹" or "amount ₹". The "in" is the
+ * only reliable separator, and a guard that guesses wider destroys more than it
+ * saves.
  */
 /**
  * A decimal point the text layer split from its fraction, with a unit after it.
@@ -207,7 +215,7 @@ const PAGE_DECLARES_UNIT =
  */
 const SPLIT_DECIMAL = /^\.\s+\d+\s*(?:crore|lakh|thousand|कोट|िोट|ोट|लाख|हजार)/iu;
 
-const DECLARES_RUPEES = /(?:amount|amounts|figures|value|rupees)\s+in\s*$/iu;
+const DECLARES_RUPEES = /(?:amount|amounts|amt|figures?|value|values|rupees)\.?\s+in\s*$/iu;
 
 const UNREADABLE_UNIT =
   /^\s*(?:core|cores|crores|cr|crs|lac|lacs|lakhs|thousands|million|millions|billion|billions|mn|bn|करोड|कोटय|ोटय)\b/iu;
