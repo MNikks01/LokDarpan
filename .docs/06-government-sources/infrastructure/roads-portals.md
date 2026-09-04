@@ -16,13 +16,13 @@
 
 ## Road authority map
 
-| Road class                 | Authority               | Source                                                 | Status                                      |
-| -------------------------- | ----------------------- | ------------------------------------------------------ | ------------------------------------------- |
-| National Highways          | MoRTH / NHAI / NHIDCL   | `morth.nic.in` ✅ · `nhai.gov.in` ✅ · `nhidcl.com` ✅ | verified live                               |
-| **Rural roads (PMGSY)**    | MoRD / NRIDA            | `pmgsytenders.gov.in` ✅ · **OMMAS** 🔍                | procurement verified; monitoring unverified |
-| State highways / MDR / ODR | State PWD               | MH: `pwd.maharashtra.gov.in` ✅                        | site verified; works data not located       |
-| State expressways          | State road corporations | MH: MSRDC `msrdc.in` ✅                                | verified live                               |
-| Urban roads                | ULBs                    | municipal portals                                      | catalogued, not assessed                    |
+| Road class                 | Authority               | Source                                                      | Status                                                         |
+| -------------------------- | ----------------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+| National Highways          | MoRTH / NHAI / NHIDCL   | `morth.nic.in` ✅ · `nhai.gov.in` ✅ · `nhidcl.com` ✅      | verified live                                                  |
+| **Rural roads (PMGSY)**    | MoRD / NRIDA            | `pmgsytenders.gov.in` ✅ · **OMMAS** ⚖️ `pmgsy.dord.gov.in` | procurement verified; monitoring reachable but licence-blocked |
+| State highways / MDR / ODR | State PWD               | MH: `pwd.maharashtra.gov.in` ✅                             | site verified; works data not located                          |
+| State expressways          | State road corporations | MH: MSRDC `msrdc.in` ✅                                     | verified live                                                  |
+| Urban roads                | ULBs                    | municipal portals                                           | catalogued, not assessed                                       |
 
 This maps onto `.docs/05-data-model/data-models.md` `roadClass` (`NH`/`SH`/`MDR`/`ODR`/`rural`/`urban`) — **the authority differs per class, so each class needs a different source**. A single "roads" connector will not work.
 
