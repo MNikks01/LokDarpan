@@ -42,6 +42,8 @@ export interface ExtractedPage {
    * `glyphSubstitution`. `null` where the question does not arise.
    */
   readonly glyphSubstitution: number | null;
+  /** How many amounts lost their currency mark — see `substitutedCurrencyMarks`. */
+  readonly substitutedCurrencyMarks: number;
   /**
    * The page box in points, **unrotated** — the same space `items` and a fact's
    * box are in. A rotated page has two boxes, and storing the upright one beside
@@ -216,6 +218,32 @@ export function cleanWithItems(
   return { content, items: adjusted };
 }
 
+/**
+ * A stray mark standing where the page prints a currency symbol.
+ *
+ * `` ` 40.80 कोटी `` and `` ` 25.96 crore `` are the shape. The mark is a
+ * backtick or an acute accent immediately before a number, which is not
+ * something an audit report writes: rendering the exact region these characters
+ * occupy shows ₹ printed on the page in eleven of the twelve affected
+ * documents.
+ *
+ * The pattern requires the number, not just the mark. A backtick quoting a word
+ * is ordinary punctuation; a backtick immediately before a decimal amount is a
+ * font mapping that lost a glyph.
+ */
+const SUBSTITUTED_CURRENCY = /[`´]\s?\d[\d,]*(?:\.\d+)?/gu;
+
+/**
+ * How many amounts on this page have lost their currency mark.
+ *
+ * Counted rather than judged: 0 is a measurement — the page was read and no
+ * such mark was found — and it is deliberately different from the `null` a page
+ * that was never measured carries.
+ */
+export function substitutedCurrencyMarks(content: string): number {
+  return (content.match(SUBSTITUTED_CURRENCY) ?? []).length;
+}
+
 export function glyphSubstitution(content: string): number | null {
   const devanagari = (content.match(/[ऀ-ॿ]/gu) ?? []).length;
   if (devanagari < ENOUGH_DEVANAGARI) return null;
@@ -279,6 +307,7 @@ export async function extractDocument(bytes: Buffer): Promise<ExtractedDocument>
       content: content === "" ? null : content,
       script: scriptOf(content),
       glyphSubstitution: content === "" ? null : glyphSubstitution(content),
+      substitutedCurrencyMarks: substitutedCurrencyMarks(content),
       width: viewport.width,
       height: viewport.height,
       rotation: ((page.rotate % 360) + 360) % 360,
