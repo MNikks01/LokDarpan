@@ -60,7 +60,7 @@ const CRITERION_BEFORE =
  * spending figure when the page says ₹100 crore and reports no figure at all.
  */
 const CRITERION_AFTER =
-  /^[^\p{L}]{0,4}(?:कोट|ोट|लाख|हजार|crore|lakh|thousand)?[^\p{L}]{0,6}(?:or more|and above|or above|and more|or less|पेक्षा\s*(?:अधिक|अचधक|जास्त|कमी)|हून\s*(?:अधिक|अचधक|जास्त)|आणि\s*त्यावरील|व\s*त्यावरील)/u;
+  /^[^\p{L}]{0,4}(?:कोट|िोट|ोट|लाख|हजार|crore|lakh|thousand)?[^\p{L}]{0,6}(?:or more|and above|or above|and more|or less|पेक्षा\s*(?:अधिक|अचधक|जास्त|कमी)|हून\s*(?:अधिक|अचधक|जास्त)|आणि\s*त्यावरील|व\s*त्यावरील)/u;
 
 /** How far either side of the figure the criterion words are looked for. */
 const BEFORE_CHARS = 30;

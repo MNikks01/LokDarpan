@@ -406,3 +406,25 @@ describe("units the font mapping fragmented", () => {
     expect(found?.normalisedValue).toBeNull();
   });
 });
+
+describe("crore whose conjunct the font mapping substituted", () => {
+  // Document 3511 renders every क as ि, so its crore figures read "₹ 2.12 िोटी"
+  // and were stored as ₹1 — wrong by seven orders of magnitude. Measured over
+  // the corpus the character before ोट after a figure is क (2,027), ि (21) or
+  // absent (7); those are listed, and nothing beyond them is guessed at.
+  it("reads crore when क has been replaced by ि", () => {
+    for (const unit of ["िोटी", "िोट", "कोटी", "ोटी"]) {
+      const [found] = extractFacts([
+        { pageNumber: 1, content: `नुकसान भरपाई ₹ 2.12 ${unit} होती.` },
+      ]);
+      expect(found?.normalisedValue).toBe("2120000000");
+    }
+  });
+
+  it("recognises a caption whose unit carries the substituted conjunct", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "तक्ता 3 (₹ िोटीत) अनु. क्र. ₹ 5376.31 आहे." },
+    ]).find((f) => f.kind === "monetary_amount");
+    expect(found?.normalisedValue).toBeNull();
+  });
+});
