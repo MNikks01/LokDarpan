@@ -9,7 +9,7 @@ import {
   readApplied,
 } from "@lokdarpan/database";
 
-import type { FactCandidate } from "../src/cag/facts";
+import { PARSER_VERSION, type FactCandidate } from "../src/cag/facts";
 import { loadFactCandidates } from "../src/cag/facts-load";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
@@ -107,6 +107,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(r).toEqual({
         inserted: 2,
         skippedAlreadyReviewed: 0,
+        refreshed: 0,
         retired: 0,
         strandedDecisions: 0,
       });
@@ -136,6 +137,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(again).toEqual({
         inserted: 0,
         skippedAlreadyReviewed: 1,
+        refreshed: 0,
         retired: 0,
         strandedDecisions: 0,
       });
@@ -207,6 +209,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(await loadFactCandidates(db(), documentId, [])).toEqual({
         inserted: 0,
         skippedAlreadyReviewed: 0,
+        refreshed: 0,
         retired: 0,
         strandedDecisions: 0,
       });
@@ -246,6 +249,48 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(again.strandedDecisions).toBe(1);
       expect(await statusOf()).toBe("verified");
       expect(await countFacts()).toBe(1);
+    });
+
+    // An undecided candidate's provenance is the parser that currently produces
+    // it. A row claiming a parser version that no longer exists misdescribes how
+    // a figure was arrived at, and these are the rows about to be published.
+    it("brings an undecided row's parser version up to date", async () => {
+      await loadFactCandidates(db(), documentId, [money]);
+      await db().query(
+        `UPDATE document_fact SET parser_version = 'cag-facts/1' WHERE document_id = $1`,
+        [documentId],
+      );
+
+      const again = await loadFactCandidates(db(), documentId, [money]);
+
+      expect(again.refreshed).toBe(1);
+      expect(again.inserted).toBe(0);
+      const v = await db().query<{ parser_version: string }>(
+        `SELECT parser_version FROM document_fact WHERE document_id = $1`,
+        [documentId],
+      );
+      expect(v.rows[0]?.parser_version).toBe(PARSER_VERSION);
+    });
+
+    // A decided row's version is part of what a person reviewed. The parser
+    // does not get to restate that.
+    it("leaves a decided row's parser version alone", async () => {
+      await loadFactCandidates(db(), documentId, [money]);
+      await db().query(
+        `UPDATE document_fact SET parser_version = 'cag-facts/1',
+                verification_status = 'verified', verified_by = 'reviewer@example.test',
+                verified_at = now() WHERE document_id = $1`,
+        [documentId],
+      );
+
+      const again = await loadFactCandidates(db(), documentId, [money]);
+
+      expect(again.refreshed).toBe(0);
+      const v = await db().query<{ parser_version: string }>(
+        `SELECT parser_version FROM document_fact WHERE document_id = $1`,
+        [documentId],
+      );
+      expect(v.rows[0]?.parser_version).toBe("cag-facts/1");
     });
 
     // Two amounts in one short sentence share an evidence window, so the value

@@ -77,8 +77,13 @@ export type ClaimedByPage = ReadonlyMap<string, ReadonlySet<string>>;
  */
 export function selfCheck(input: CheckInput, claimedOnPage?: ReadonlySet<string>): Checked {
   const amounts: string[] = [];
+  // `rupees` rather than the default refusal: the parser reads a bare figure as
+  // rupees on a page that declares no scale, and a self-check that could not
+  // reproduce that reading would report every one of those facts as a mismatch
+  // — a defect flag on the exact candidates arithmetic agrees with. The two
+  // readings never collide, being seven orders of magnitude apart.
   for (const m of input.rawText.matchAll(AMOUNT_IN)) {
-    const paise = amountToPaise(m[1] ?? "", m[2]);
+    const paise = amountToPaise(m[1] ?? "", m[2], "rupees");
     if (paise !== null) amounts.push(paise.toString());
   }
 

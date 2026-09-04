@@ -134,7 +134,8 @@ export const PROMPT = "  [enter] skip   [v] verify   [r] reject   [c] correct   
  */
 function offsetOfAmount(flat: string, paise: string): number {
   for (const m of flat.matchAll(AMOUNT_IN)) {
-    if (amountToPaise(m[1] ?? "", m[2])?.toString() === paise) return m.index;
+    // Reads unitless figures as rupees — the evidence line must be able to centre on a figure read as rupees.
+    if (amountToPaise(m[1] ?? "", m[2], "rupees")?.toString() === paise) return m.index;
   }
   return -1;
 }
