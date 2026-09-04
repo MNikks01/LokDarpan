@@ -2,38 +2,38 @@
   {
     "id": 5865,
     "amount": "11,977",
-    "unit": "कोटी",
-    "note": "the unit is deferred to the next figure in the list — 'अनुक्रमे ₹ 11,977 आणि ₹ 13,782.36 कोटी' states both in crore. Confirmed by fact #6236, where the two sum to the ₹25,759.36 crore of back-to-back GST compensation loans"
+    "unit": "\u0915\u094b\u091f\u0940",
+    "note": "the unit is deferred to the next figure in the list \u2014 '\u0905\u0928\u0941\u0915\u094d\u0930\u092e\u0947 \u20b9 11,977 \u0906\u0923\u093f \u20b9 13,782.36 \u0915\u094b\u091f\u0940' states both in crore. Confirmed by fact #6236, where the two sum to the \u20b925,759.36 crore of back-to-back GST compensation loans"
   },
   {
     "id": 5987,
     "amount": "1,500",
     "unit": "rupees",
-    "note": "दरमहा ₹1,500 — a monthly benefit under Mukhyamantri Majhi Ladki Bahin Yojana, written out in full. Refused automatically only because this page also carries a (₹ कोटीत) table caption"
+    "note": "\u0926\u0930\u092e\u0939\u093e \u20b91,500 \u2014 a monthly benefit under Mukhyamantri Majhi Ladki Bahin Yojana, written out in full. Refused automatically only because this page also carries a (\u20b9 \u0915\u094b\u091f\u0940\u0924) table caption"
   },
   {
     "id": 6213,
     "amount": "145",
     "unit": "crore",
-    "note": "the source misspells crore as 'core'. The same clause states '(₹ 1,902 crore)' for the neighbouring head, and a ₹145 rise in a receipts head would not be reported"
+    "note": "the source misspells crore as 'core'. The same clause states '(\u20b9 1,902 crore)' for the neighbouring head, and a \u20b9145 rise in a receipts head would not be reported"
   },
   {
     "id": 6265,
     "amount": "261.78",
     "unit": "crore",
-    "note": "the source misspells crore as 'core'. The sentence reads 'from ₹ 261.78 core in 2023-24 to ₹ 33,554.36 crore in 2024-25', so both ends of the comparison are in crore"
+    "note": "the source misspells crore as 'core'. The sentence reads 'from \u20b9 261.78 core in 2023-24 to \u20b9 33,554.36 crore in 2024-25', so both ends of the comparison are in crore"
   },
   {
     "id": 6349,
     "amount": "11,977",
     "unit": "crore",
-    "note": "the unit is deferred to the next figure — 'Excluding ₹ 11,977 and ₹ 13,782.36 crore as back-to-back loans from GoI'"
+    "note": "the unit is deferred to the next figure \u2014 'Excluding \u20b9 11,977 and \u20b9 13,782.36 crore as back-to-back loans from GoI'"
   },
   {
     "id": 6373,
     "amount": "18,440",
     "unit": "crore",
-    "note": "the unit is deferred within the list — 'a loan of ₹ 18,440 in 2024-25, ₹ 7,700 crore in 2023-24 and ₹ 2,500 crore in 2022-23 from HUDCO'"
+    "note": "the unit is deferred within the list \u2014 'a loan of \u20b9 18,440 in 2024-25, \u20b9 7,700 crore in 2023-24 and \u20b9 2,500 crore in 2022-23 from HUDCO'"
   },
   {
     "id": 6380,
@@ -45,55 +45,55 @@
     "id": 6771,
     "amount": "2,000",
     "unit": "rupees",
-    "note": "वार्षिक ₹2,000 — the annual provision for educational materials for students in arts, science, commerce and nursing, written out in full"
+    "note": "\u0935\u093e\u0930\u094d\u0937\u093f\u0915 \u20b92,000 \u2014 the annual provision for educational materials for students in arts, science, commerce and nursing, written out in full"
   },
   {
     "id": 6807,
     "amount": "15",
     "unit": "rupees",
-    "note": "प्रति अभिलेख ₹15 — the prescribed per-record rate for RoR downloads, written out in full"
+    "note": "\u092a\u094d\u0930\u0924\u093f \u0905\u092d\u093f\u0932\u0947\u0916 \u20b915 \u2014 the prescribed per-record rate for RoR downloads, written out in full"
   },
   {
     "id": 6819,
     "amount": "3,650",
     "unit": "rupees",
-    "note": "प्रति चौरस मीटर ₹3,650 — the slab rate per square metre under the 2017-18 Annual Rate Statement"
+    "note": "\u092a\u094d\u0930\u0924\u093f \u091a\u094c\u0930\u0938 \u092e\u0940\u091f\u0930 \u20b93,650 \u2014 the slab rate per square metre under the 2017-18 Annual Rate Statement"
   },
   {
     "id": 6823,
     "amount": "3,650",
     "unit": "rupees",
-    "note": "the 2017-18 Annual Rate Statement rate of ₹3,650 per square metre, as stated in the occupancy-fee working"
+    "note": "the 2017-18 Annual Rate Statement rate of \u20b93,650 per square metre, as stated in the occupancy-fee working"
   },
   {
     "id": 6824,
     "amount": "18,13,500",
     "unit": "rupees",
-    "note": "the 2017-18 Annual Rate Statement rate of ₹18,13,500 per hectare"
+    "note": "the 2017-18 Annual Rate Statement rate of \u20b918,13,500 per hectare"
   },
   {
     "id": 6825,
     "amount": "3650",
     "unit": "rupees",
-    "note": "the per-square-metre rate in the first line of the occupancy-fee working (500 sq m × ₹3,650)"
+    "note": "the per-square-metre rate in the first line of the occupancy-fee working (500 sq m \u00d7 \u20b93,650)"
   },
   {
     "id": 6826,
     "amount": "18,13,500",
     "unit": "rupees",
-    "note": "the per-hectare rate in the occupancy-fee line, 0.219 × ₹18,13,500"
+    "note": "the per-hectare rate in the occupancy-fee line, 0.219 \u00d7 \u20b918,13,500"
   },
   {
     "id": 6827,
     "amount": "3650",
     "unit": "rupees",
-    "note": "the per-square-metre rate in the second line of the working (1500 sq m × ₹3,650 × 90 per cent)"
+    "note": "the per-square-metre rate in the second line of the working (1500 sq m \u00d7 \u20b93,650 \u00d7 90 per cent)"
   },
   {
     "id": 6828,
     "amount": "3,650",
     "unit": "rupees",
-    "note": "the per-square-metre rate in the third line of the working (190 × ₹3,650 × 80 per cent)"
+    "note": "the per-square-metre rate in the third line of the working (190 \u00d7 \u20b93,650 \u00d7 80 per cent)"
   },
   {
     "id": 6829,
@@ -105,36 +105,114 @@
     "id": 6830,
     "amount": "3,97,157",
     "unit": "rupees",
-    "note": "the occupancy fee the footnote derives: 0.219 hectare × ₹18,13,500 per hectare = ₹3,97,157"
+    "note": "the occupancy fee the footnote derives: 0.219 hectare \u00d7 \u20b918,13,500 per hectare = \u20b93,97,157"
   },
   {
     "id": 7048,
     "amount": "5,000",
     "unit": "rupees",
-    "note": "₹5,000 per annum for medical and engineering students — the first of the two rates the sentence states, and the first candidate the parser produced from it"
+    "note": "\u20b95,000 per annum for medical and engineering students \u2014 the first of the two rates the sentence states, and the first candidate the parser produced from it"
   },
   {
     "id": 7049,
     "amount": "2,000",
     "unit": "rupees",
-    "note": "₹2,000 per annum for students in other disciplines — the second of the two rates the sentence states, and the second candidate the parser produced from it"
+    "note": "\u20b92,000 per annum for students in other disciplines \u2014 the second of the two rates the sentence states, and the second candidate the parser produced from it"
   },
   {
     "id": 7085,
     "amount": "5",
     "unit": "rupees",
-    "note": "the Government share of ₹5 per record, written out in full"
+    "note": "the Government share of \u20b95 per record, written out in full"
   },
   {
     "id": 7091,
     "amount": "15",
     "unit": "rupees",
-    "note": "the prescribed rate of ₹15 per record for RoR downloads, written out in full"
+    "note": "the prescribed rate of \u20b915 per record for RoR downloads, written out in full"
   },
   {
     "id": 9629,
     "amount": "5,000",
     "unit": "rupees",
-    "note": "वार्षिक ₹5,000 — the annual provision for educational materials for medical and engineering students; the Marathi statement of the same rate as fact #7048"
+    "note": "\u0935\u093e\u0930\u094d\u0937\u093f\u0915 \u20b95,000 \u2014 the annual provision for educational materials for medical and engineering students; the Marathi statement of the same rate as fact #7048"
+  },
+  {
+    "id": 10371,
+    "amount": "3,093.40",
+    "unit": "\u0915\u094b\u091f\u0940",
+    "note": "the unit sits on the first figure of the range and is not repeated: '\u0936\u093f\u0932\u094d\u0932\u0915 \u0915\u0945\u092e\u094d\u092a\u093e \u0928\u093f\u0927\u0940\u091a\u0940 \u20b9 2,184.19 \u0915\u094b\u091f\u0940 \u0924\u0947 \u20b9 3,093.40 \u092a\u0930\u094d\u092f\u0902\u0924\u091a\u094d\u092f\u093e' \u2014 both ends of a range of unspent CAMPA funds are in crore"
+  },
+  {
+    "id": 10399,
+    "amount": "2,184.19",
+    "unit": "\u0915\u094b\u091f\u0940",
+    "note": "the unit sits on the second figure of the range: '\u20b9 2,184.19 \u0924\u0947 \u20b9 3,093.40 \u0915\u094b\u091f\u0940 \u092a\u0930\u094d\u092f\u0902\u0924\u091a\u093e \u0905\u0927\u093f\u0915\u091a\u093e \u0928\u093f\u0927\u0940' \u2014 both ends are in crore. The Marathi statement of the same range as fact #10371"
+  },
+  {
+    "id": 10825,
+    "amount": "13,518.30",
+    "unit": "crore",
+    "note": "the unit is separated from its figure by a parenthetical: 'the expenditure incurred was \u20b9 13,518.30 (96.85 per cent) crore'. Consistent with the \u20b913,957.47 crore total fund the same sentence states"
+  },
+  {
+    "id": 12072,
+    "amount": "3,18,560",
+    "unit": "rupees",
+    "note": "per capita GSDP of Maharashtra at current prices, 2023-24 \u2014 a per-head figure written out in full. First of the two figures the sentence states, and the first candidate the parser produced from it"
+  },
+  {
+    "id": 12073,
+    "amount": "2,11,725",
+    "unit": "rupees",
+    "note": "national per capita GDP, 2023-24 \u2014 the second figure the same sentence states, and the second candidate produced from it"
+  },
+  {
+    "id": 12126,
+    "amount": "24,918.53",
+    "unit": "crore",
+    "note": "the source misspells crore as 'core'. Page 287 declares its scale as crore, and the same increase is stated as \u20b924,918.53 crore in the Conclusion on page 338"
+  },
+  {
+    "id": 12134,
+    "amount": "24,857.06",
+    "unit": "crore",
+    "note": "own tax revenue increase for 2023-24, stated without a unit inside a parenthetical. Page 288 declares (\u20b9 in crore), and page 338 states the same increase as \u20b924,857.06 crore"
+  },
+  {
+    "id": 12373,
+    "amount": "2",
+    "unit": "rupees",
+    "note": "the guarantee fee rate \u2014 'the rate of Guarantee fee is \u20b9 2 per \u20b9100'. First of the two figures the sentence states"
+  },
+  {
+    "id": 12374,
+    "amount": "100",
+    "unit": "rupees",
+    "note": "the base the guarantee fee is charged on \u2014 'per \u20b9100'. Second of the two figures the sentence states"
+  },
+  {
+    "id": 12376,
+    "amount": "100",
+    "unit": "rupees",
+    "note": "the base the statutory guarantee fee is charged on \u2014 'ranging from 20 paise to \u20b9 two per \u20b9 100 per annum'. The rate itself is spelled out in words and carries no digits, so it produced no candidate"
+  },
+  {
+    "id": 12392,
+    "amount": "2,05,705.48",
+    "unit": "rupees",
+    "note": "the actual amount behind the rounded figure \u2014 '\u20b9 0.02 crore (\u20b9 2,05,705.48 in actuals)'. Stated in rupees by the source, which is what 'in actuals' means here"
+  },
+  {
+    "id": 12402,
+    "amount": "24,918.53",
+    "unit": "crore",
+    "note": "the source misspells crore as 'core'. The same sentence states the total it increased from in crore, and page 287 states the same increase"
+  },
+  {
+    "id": 12568,
+    "amount": "16,288.51",
+    "unit": "crore",
+    "note": "amount transferred to existing Personal Deposit accounts during 2020-21, stated without a unit in a footnote. Page 376 declares its scale as (\u20b9 in crore)"
   }
 ]

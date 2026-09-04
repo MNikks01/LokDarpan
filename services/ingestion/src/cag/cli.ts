@@ -41,7 +41,27 @@ async function main(): Promise<void> {
     );
     const adminUnitId = state.rows[0] === undefined ? null : Number(state.rows[0].id);
 
+    // Which reports we already hold, by the URL they were retrieved from.
+    //
+    // `loadDocument` is idempotent on the artefact's sha256, so re-ingesting is
+    // harmless to the database — but it is not harmless to the publisher. These
+    // are multi-megabyte PDFs on one government host, and re-downloading a
+    // document we already hold in order to compute a hash we already know is
+    // exactly the traffic `.docs/17-legal` §Data-sourcing ethics asks us not to
+    // generate. `--refetch` is how to ask for it deliberately — when a report
+    // has been revised in place, its bytes change and its sha256 with them.
+    const held = await db.query(`SELECT source_url FROM source_artifact WHERE source_id = 'cag'`);
+    const alreadyHeld = new Set((held.rows as { source_url: string }[]).map((r) => r.source_url));
+    const refetch = process.argv.includes("--refetch");
+
     for (const report of reports.slice(0, limit)) {
+      if (!refetch && alreadyHeld.has(report.url)) {
+        process.stdout.write(
+          `${report.title.slice(0, 52).padEnd(52)} already held, not refetched\n`,
+        );
+        continue;
+      }
+
       const fetched = await client.fetchReport(report.url);
 
       // Original bytes stored before anything is parsed. Re-extraction with a

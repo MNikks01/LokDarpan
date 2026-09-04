@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { titleFromUrl } from "../src/cag/client";
+import { glyphSubstitution } from "../src/cag/extract";
 import { scriptOf } from "../src/cag/extract";
 
 describe("scriptOf", () => {
@@ -103,5 +104,27 @@ describe("CagClient", () => {
 describe("extractDocument", () => {
   it("refuses bytes that are not a PDF rather than storing an empty document", async () => {
     await expect(extractDocument(Buffer.from("not a pdf"))).rejects.toThrow();
+  });
+});
+
+describe("glyphSubstitution", () => {
+  // pagesWithoutText counts pages with no text layer. This is the case it
+  // cannot see: a text layer that is present and wrong.
+  it("measures zero on clean Marathi", () => {
+    expect(glyphSubstitution("महसुली तूट ₹ 29,994.76 कोटी होती आणि वित्तीय तूट वाढली.")).toBe(0);
+  });
+
+  // "मेसस! इंडो अलाइड <ोटन फूस" for "मेसर्स इंडो अलाइड प्रोटीन फूड्स".
+  it("measures above zero where Latin glyphs are wedged into Devanagari words", () => {
+    const ratio = glyphSubstitution("मेसस! इंडो अलाइड <ोटन फूस <ाय}हेट KलKमटेड यांना दे$यात आले");
+    expect(ratio).not.toBeNull();
+    expect(ratio ?? 0).toBeGreaterThan(0.02);
+  });
+
+  // An English page is not evidence of a clean font mapping, and saying 0 would
+  // claim a measurement that was never made.
+  it("declines to judge a page with too little Devanagari", () => {
+    expect(glyphSubstitution("The revenue deficit was ₹ 29,994.76 crore.")).toBeNull();
+    expect(glyphSubstitution("")).toBeNull();
   });
 });
