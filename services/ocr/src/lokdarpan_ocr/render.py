@@ -67,6 +67,33 @@ class PdfRenderer:
     def page_count(self) -> int:
         return len(self._document)
 
+    def page_images(self, page_number: int) -> list[tuple[int, int]]:
+        """The pixel size of every image drawn on the page, largest first.
+
+        A page with no text layer is not automatically a scan. It might be a
+        photograph, a chart, or a blank separator. The images it draws — and at
+        what resolution — are the difference between "this page needs OCR at 400
+        dpi" and "there is nothing on this page to read", and both answers are
+        better made from the file than guessed from the absence of text.
+
+        An image whose size pdfium will not report is skipped rather than
+        counted as zero: an unknown resolution is not a resolution of none.
+        """
+        import pypdfium2.raw as raw
+
+        page = self._document[page_number - 1]
+        sizes: list[tuple[int, int]] = []
+        for obj in page.get_objects():
+            if obj.type != raw.FPDF_PAGEOBJ_IMAGE:
+                continue
+            try:
+                width, height = obj.get_px_size()
+            except Exception:
+                continue
+            sizes.append((int(width), int(height)))
+
+        return sorted(sizes, key=lambda wh: wh[0] * wh[1], reverse=True)
+
     def render(self, page_number: int, dpi: int) -> RenderedPage:
         """One page, 1-based, as a citation writes it."""
         if page_number < 1 or page_number > self.page_count:
