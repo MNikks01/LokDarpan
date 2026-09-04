@@ -301,9 +301,16 @@ async function buildQueue(
     ...(kind === undefined ? {} : { kind }),
     ...(documentId === undefined ? {} : { documentId }),
     ...(ids === undefined ? {} : { ids }),
-    ...(only === undefined && limit === undefined
-      ? {}
-      : { limit: only === undefined ? Number(limit) : 100_000 }),
+    // Naming facts explicitly must never be truncated. `pendingReview` defaults
+    // to 500, which is right for walking a queue and wrong for a set someone
+    // listed: asking for 824 named facts decided the first 500 and reported
+    // success, and only the count betrayed it. A partition is likewise filtered
+    // in this process, so its limit has to come off the database query first.
+    ...(ids !== undefined
+      ? { limit: ids.length }
+      : only === undefined && limit === undefined
+        ? {}
+        : { limit: only === undefined ? Number(limit) : 100_000 }),
   });
 
   const governed = (c: ReviewCandidate): boolean =>

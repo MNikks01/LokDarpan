@@ -14,6 +14,10 @@ export interface QueueFilter {
    * For acting on a set some other reading produced — the criterion-governed
    * figures the triage lists, say — where walking the queue and counting to
    * the right position would be both slow and a way to decide the wrong one.
+   *
+   * A caller passing these is naming facts, not sampling them, so it must also
+   * raise `limit` to cover them. The default of 500 belongs to queue-walking;
+   * applied to a named set it decides a prefix and reports success.
    */
   readonly ids?: readonly number[];
   /** Skip candidates the parser was least sure of, when triaging. */
