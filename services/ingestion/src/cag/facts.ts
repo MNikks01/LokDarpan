@@ -12,7 +12,7 @@ import { AmountFormatError, thousandsToPaise } from "../beams/amount";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/5";
+export const PARSER_VERSION = "cag-facts/6";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -264,7 +264,8 @@ const NAME_JOINERS = new Set(["of", "&"]);
  * candidate; keeping both would invent a single firm that does not exist, and
  * the reviewer still sees the whole sentence.
  */
-export function trimToName(captured: string): string {
+/** Tokens kept while they still look like part of a name. */
+function nameTokens(captured: string): string[] {
   const kept: string[] = [];
   for (const token of captured.trim().split(/\s+/u)) {
     const word = token.replace(/[,.;:]+$/u, "");
@@ -278,11 +279,26 @@ export function trimToName(captured: string): string {
     }
     kept.push(word);
   }
-  // A trailing joiner or stray initial is the start of something that was cut,
-  // not the end of the name.
+  return kept;
+}
+
+export function trimToName(captured: string): string {
+  const kept = nameTokens(captured);
+  // A trailing initial means the capture stopped inside a name, not at the end
+  // of one: "M/s Water Staywordship Organization J.V Baramati" ends its capture
+  // at the full stop in "J." and yields "…Organization J". Dropping the stray
+  // letter and keeping the rest names a different firm than the page does — a
+  // joint venture reduced to one of its partners — and a misnamed firm on a
+  // public claim is the error this parser exists to avoid. So it captures
+  // nothing: a missed contractor costs a reviewer nothing.
+  const last = kept[kept.length - 1] ?? "";
+  if (kept.length > 1 && last.length === 1 && /^[A-Z]$/u.test(last)) return "";
+
+  // A trailing joiner is the start of something that was cut, not the end of
+  // the name.
   while (kept.length > 0) {
-    const last = kept[kept.length - 1] ?? "";
-    if (last.length > 1 && !NAME_JOINERS.has(last.toLowerCase())) break;
+    const tail = kept[kept.length - 1] ?? "";
+    if (tail.length > 1 && !NAME_JOINERS.has(tail.toLowerCase())) break;
     kept.pop();
   }
   return kept.join(" ");
