@@ -1,0 +1,8 @@
+{
+  "contract_version": "ocr/1",
+  "document_sha256": "3faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "page_numbers": [83, 84],
+  "engines": ["tesseract", "paddleocr"],
+  "languages": ["eng", "mar"],
+  "dpi": 300
+}

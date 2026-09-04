@@ -1,0 +1,12 @@
+{
+  "contract_version": "ocr/1",
+  "document_sha256": "3faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "readings": [],
+  "refusals": [
+    {
+      "page_number": null,
+      "engine": "paddleocr",
+      "reason": "paddleocr is not installed; install this service with the 'paddle' extra"
+    }
+  ]
+}

@@ -213,6 +213,9 @@ importers:
 
   services/ingestion:
     dependencies:
+      '@lokdarpan/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@lokdarpan/database':
         specifier: workspace:*
         version: link:../../packages/database

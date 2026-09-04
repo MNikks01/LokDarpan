@@ -1,0 +1,17 @@
+{
+  "contract_version": "ocr/1",
+  "engines": [
+    {
+      "name": "paddleocr",
+      "available": false,
+      "version": null,
+      "detail": "paddleocr is not installed; install this service with the 'paddle' extra"
+    },
+    {
+      "name": "tesseract",
+      "available": true,
+      "version": "5.4.1",
+      "detail": null
+    }
+  ]
+}
