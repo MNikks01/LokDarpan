@@ -42,14 +42,19 @@ function onePagePdf(options: { rotate: number; text: string; x: number; y: numbe
 }
 
 describe("extractDocument reads a page's text and where it sits", () => {
-  it("returns the page box the file states", async () => {
+  it("returns the page's unrotated box and its declared rotation", async () => {
     const doc = await extractDocument(
-      onePagePdf({ rotate: 0, text: "Rs 15.14 crore", x: 72, y: 700 }),
+      onePagePdf({ rotate: 90, text: "Rs 15.14 crore", x: 72, y: 700 }),
     );
 
     expect(doc.pageCount).toBe(1);
-    expect(doc.pages[0]?.width).toBe(612);
-    expect(doc.pages[0]?.height).toBe(792);
+    const page = doc.pages[0];
+    // A quarter turn does not change the box the file states, and the
+    // coordinates below are in that same space. Reporting the upright box here
+    // is what once put boxes off the edge of their own page.
+    expect(page?.width).toBe(612);
+    expect(page?.height).toBe(792);
+    expect(page?.rotation).toBe(90);
   });
 
   it("places a text item where the content stream put it", async () => {
@@ -82,5 +87,10 @@ describe("extractDocument reads a page's text and where it sits", () => {
     expect(doc.pages[0]?.content).toBeNull();
     expect(doc.pagesWithoutText).toBe(1);
     expect(doc.pages[0]?.script).toBe("none");
+  });
+
+  it("normalises a rotation the file states outside 0-359", async () => {
+    const doc = await extractDocument(onePagePdf({ rotate: -90, text: "x", x: 10, y: 10 }));
+    expect(doc.pages[0]?.rotation).toBe(270);
   });
 });
