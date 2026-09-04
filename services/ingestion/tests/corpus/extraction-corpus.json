@@ -1,0 +1,1836 @@
+{
+  "generatedFrom": "6271 decided monetary facts",
+  "excludedAsNotSelfContained": 278,
+  "cases": [
+    {
+      "documentId": 1,
+      "pageNumber": 9,
+      "script": "mixed",
+      "evidence": "… धीचे अवववेकी पुनववयननर्ो जन (₹ दोन कोटीहून अचधक) 2.5(ए) 163 तरतुदीत वाढ करिे अन्र्ार्कारक ठरले 2.5(बी) 167 ववत्तीर् वषय 2024-25 दरम्र्ान मोठ्र्ा प्र मािात बचत (₹ 100 कोटी पेक्षा अचधक) असले ली अनुदाने 2.6 173 ववत्तीर् वषय 2022-23 ते 2024-25 दरम्र्ान सातत्र्पू िय बचत (₹ 100 कोटी पेक्षा अचधक) असले ली अनुदाने 2.7 177 ववत्तीर् वषय 20 …",
+      "class": "criterion",
+      "parserValue": "100000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase"
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 9,
+      "script": "mixed",
+      "evidence": "… महसुली खचायचे भाांडवली खचय म् हिू न चुकीचे वर्ीकरि 2.11 202 वषयभरातील प्र मु ख धोरिात्मक ननियर् क्र कां वा अर्यसांकल्पात प्रस्त् ताववत केलेल्र्ा नवीन र् ोजना (₹ 10 कोटीपेक्षा जास्त्त ) 2.12 203 माचय 2025 मध्र्े केलेला सांपू िय खचय 2.13 204 2024-25 दरम्र्ान सवय प्र धान शीषाांचा नतमाहीननहार् खचय 2.14 208 पररभावषत अांशदान ननवृत्त …",
+      "class": "criterion",
+      "parserValue": "10000000000",
+      "published": false,
+      "reason": "verified in error: this figure states a criterion - a table caption, appendix heading, contents line, audit-selection or pre-qualification threshold - and not an amount any body reported. Read individually before revising; four other criter"
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 107,
+      "script": "devanagari",
+      "evidence": "… ववतियोजि लेखे 2024-25 या िर्ाासाठी अनुदान आणण विननयोजनांच्या विश्लेर्णािरून असे ननदर्ानास आले की 80 अनुदानांमध् ये, बचत (प्रत्यापाण िगळता) प्रत् येक प्र करणात ₹ 100 कोटीपेक्षा जास्त होती (पररलशष्ट्ट 2.6). तसेच, असे ननदर्ानास आले की दोन अनुदाने आणण पाच विननयोजनांमध्ये , प्रत् येक प्र करणात ₹ दोन कोटीपेक्षा जास्त तरतुदी असूनही, त …",
+      "class": "criterion",
+      "parserValue": "100000000000",
+      "published": false,
+      "reason": "verified in error: this figure states a criterion - a table caption, appendix heading, contents line, audit-selection or pre-qualification threshold - and not an amount any body reported. Read individually before revising; four other criter"
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 389,
+      "script": "latin",
+      "evidence": "Audit examined selected 40 cases of booking under Minor head-800 where expenditure was more than ₹ 50 crore",
+      "class": "criterion",
+      "parserValue": "50000000000",
+      "published": false,
+      "reason": "verified in error: this figure states a criterion - a table caption, appendix heading, contents line, audit-selection or pre-qualification threshold - and not an amount any body reported. Read individually before revising; four other criter"
+    },
+    {
+      "documentId": 3514,
+      "pageNumber": 99,
+      "script": "latin",
+      "evidence": "… Mumbai Municipal Corporation Act, 1888 and The Maharashtra Municipal Corporation Act, 1949 1 Category A+ (population over one crore and per capita income above ` 50,000) : one; Category A (population between 25 lakh and one crore and per capita income above ` 8,000): two; Category B (population between 15 lakh and 25 lakh and …",
+      "class": "criterion",
+      "parserValue": "5000000",
+      "published": false,
+      "reason": "A threshold in a rule, not a sum (ADR-025): the value above or below which a scheme was sampled, the work-order value a bidder must have handled to qualify, and the per capita income bands that place a municipal corporation in a category. N"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 347,
+      "script": "latin",
+      "evidence": "Supplementary provisions aggregating to ₹ 29,563.05 crore obtained in 44 voted Grants (₹ 10 crore or more in each case) during the year proved unnecessary as the actual expenditure of ₹ 1,64,204.75 crore in these grants did not reach the levels of even the …",
+      "class": "criterion",
+      "parserValue": "10000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 355,
+      "script": "latin",
+      "evidence": "… opriation Accounts 2023-24 3.4.2 Major Policy pronouncements in Budget and their actual funding for ensuring implementation Several policy initiatives/schemes (₹ 10 crore and above) were taken up by the State Government during 2023-24",
+      "class": "criterion",
+      "parserValue": "10000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 363,
+      "script": "latin",
+      "evidence": "Four out of the 18 Sub-Heads registered savings of more than ₹ 50 crore in each case as shown in Table 3.17",
+      "class": "criterion",
+      "parserValue": "50000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 401,
+      "script": "latin",
+      "evidence": "… es Audit Report for the year 2023-24 132 Appendix- 3.2 (Reference: Paragraph 3.3.1, Page 82) Grants/ Appropriation closed with excess supplementary provisions (₹ 10 crore and more) during 2023-24 (₹ in crore) Sr",
+      "class": "criterion",
+      "parserValue": "10000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 81,
+      "script": "latin",
+      "evidence": "… : Appropriation Accounts 2024-25 Further, it was also observed that in 42 cases under 31 grants and two appropriations, there were persistent savings exceeding ₹100 crore in each case (Appendix 2.6) during 2022-23 to 2024-25",
+      "class": "criterion",
+      "parserValue": "100000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 89,
+      "script": "latin",
+      "evidence": "Audit observed that during the last five years from 2020-21 to 2024-25, there were persistent savings of more than ₹0.33 crore in six schemes ranging between 3.24 per cent to 100 per cent of the total budget allotment under the relevant appropriation as shown below in Table 2.14:",
+      "class": "criterion",
+      "parserValue": "330000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3851,
+      "pageNumber": 8,
+      "script": "latin",
+      "evidence": "… tails of works carried out from CGF 157 2.3.7 Details of works of Joint Physical Verification in selected clusters 159 2.3.8 Details of works costing more than ₹5.00 lakh in selected clusters 166 Glossary of abbreviations 169",
+      "class": "criterion",
+      "parserValue": "50000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 22,
+      "script": "latin",
+      "evidence": "… ort on Development of Roads in MP by PWD Page | 6Tender Documents Pre-qualification criteria for the contractors was applicable for the works valuing more than ₹5.00 crore",
+      "class": "criterion",
+      "parserValue": "5000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 22,
+      "script": "latin",
+      "evidence": "The Government has now issued (February 2025) circular that in works valuing ₹ 2.00 crore and ₹ 5.00 crore, the works will be commenced only after verification of laboratory by SE and CE respectively",
+      "class": "criterion",
+      "parserValue": "2000000000",
+      "published": false,
+      "reason": "A monetary threshold in a rule — the value a work must exceed for a field laboratory to be verified, or for pre-qualification criteria to apply — is a criterion, not a sum allocated, released or spent (ADR-025). Their identical twins on the"
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 22,
+      "script": "latin",
+      "evidence": "… ), for works up to ₹ 5.00 crore, the establishment of field laboratory and the deployment of technical staff will be verified by the SE and for the works worth ₹ 5.00 crore or more by, the CE. The first bill for the work done can be paid only after such verification",
+      "class": "criterion",
+      "parserValue": "5000000000",
+      "published": false,
+      "reason": "A monetary threshold in a rule — the value a work must exceed for a field laboratory to be verified, or for pre-qualification criteria to apply — is a criterion, not a sum allocated, released or spent (ADR-025). Their identical twins on the"
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 22,
+      "script": "latin",
+      "evidence": "Technical Circular As per GoMP order (February 2013), for works up to ₹ 5.00 crore, the establishment of field laboratory and the deployment of technical staff will be verified by the SE and for the works worth ₹ 5.00 crore or more by, the CE …",
+      "class": "criterion",
+      "parserValue": "5000000000",
+      "published": false,
+      "reason": "A monetary threshold in a rule — the value a work must exceed for a field laboratory to be verified, or for pre-qualification criteria to apply — is a criterion, not a sum allocated, released or spent (ADR-025). Their identical twins on the"
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 22,
+      "script": "latin",
+      "evidence": "The prequalification has now been revised (March 2025) and is applicable to works valuing more than ₹ 2.00 crore",
+      "class": "criterion",
+      "parserValue": "2000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 22,
+      "script": "latin",
+      "evidence": "The prequalification has now been revised (March 2025) and is applicable to works valuing more than ₹ 2.00 crore",
+      "class": "criterion",
+      "parserValue": "2000000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 22,
+      "script": "latin",
+      "evidence": "… ), for works up to ₹ 5.00 crore, the establishment of field laboratory and the deployment of technical staff will be verified by the SE and for the works worth ₹ 5.00 crore or more by, the CE. The first bill for the work done can be paid only after such verification.",
+      "class": "criterion",
+      "parserValue": "5000000000",
+      "published": false,
+      "reason": "A monetary threshold in a rule — the value a work must exceed for pre-qualification criteria or field-laboratory verification to apply — is a criterion, not a sum allocated, released or spent (ADR-025)."
+    },
+    {
+      "documentId": 3855,
+      "pageNumber": 28,
+      "script": "latin",
+      "evidence": "Though, he filed GSTR-1 returns for the month of June 2018 (taxable turnover ₹ 13.39 lakh) and September 2018 (taxable turnover ₹ 12.49 lakh)",
+      "class": "criterion",
+      "parserValue": "133900000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3855,
+      "pageNumber": 40,
+      "script": "latin",
+      "evidence": "The invoices were split to keep the value below ₹ 50,000 to avoid requirement of EWBs",
+      "class": "criterion",
+      "parserValue": "5000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3855,
+      "pageNumber": 40,
+      "script": "latin",
+      "evidence": "On being pointed out (November 2023 to December 2023), the Department stated that EWB is not required for consignment below ₹ 50,000",
+      "class": "criterion",
+      "parserValue": "5000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3855,
+      "pageNumber": 92,
+      "script": "latin",
+      "evidence": "… 922 2,922 5,844 2 MP09####09 24#########E1ZR 10#########M1ZF 2 55,506 2,775 2,775 5,550 The Department replied that since the value of these invoices was below ₹ 50,000 no penalty was imposed",
+      "class": "criterion",
+      "parserValue": "5000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3856,
+      "pageNumber": 71,
+      "script": "latin",
+      "evidence": "… in procurement of solar pumps As per Rule 161 of GFR, 2017, invitation to tenders by advertisement shall be used for procurement of goods of estimated value of ₹ 25 lakh and above",
+      "class": "criterion",
+      "parserValue": "250000000",
+      "published": false,
+      "reason": "states a criterion selecting which rows a table lists, not an amount any body reported; identified by thresholdPhrase. See ADR-025."
+    },
+    {
+      "documentId": 3511,
+      "pageNumber": 224,
+      "script": "latin",
+      "evidence": "Construction of Matoshri Road in GP Pimpalkhuta sanctioned at a cost of ₹ 23.69 lakh (MGNREGS: ₹ 15.05 lakh, State EGS: ₹ 15.05 lakh) was carried out by enrooting grass weeds, excavation of soil work, supplying and laying of hard murrum.",
+      "class": "duplicate-residue",
+      "parserValue": "150500000",
+      "published": false,
+      "reason": "Residue of a bad extraction run, not a fact. Each duplicates an already-decided row and differs from it only by a trailing full stop the broken sentence splitter retained. Verifying them double-counted four published figures."
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 83,
+      "script": "latin",
+      "evidence": "Due to this, Revenue Expenditure was understated by ₹2,004.48 crore, and Capital expenditure was overstated by ₹2,004.48 crore.",
+      "class": "duplicate-residue",
+      "parserValue": "2004480000000",
+      "published": false,
+      "reason": "Residue of a bad extraction run, not a fact. Each duplicates an already-decided row and differs from it only by a trailing full stop the broken sentence splitter retained. Verifying them double-counted four published figures."
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 88,
+      "script": "latin",
+      "evidence": "However, the Department agreed that the 69 Bid open date. 70 Paid amount ₹ 6,30,612, payable ₹ 1,67,502. 71 Bid open date. 72 Paid amount ₹ 6,30,612, payable ₹ 1,67,502. 73 Cu.",
+      "class": "duplicate-residue",
+      "parserValue": "63061200",
+      "published": false,
+      "reason": "Residue of a bad extraction run, not a fact. Each duplicates an already-decided row and differs from it only by a trailing full stop the broken sentence splitter retained. Verifying them double-counted four published figures."
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 88,
+      "script": "latin",
+      "evidence": "However, the Department agreed that the 69 Bid open date. 70 Paid amount ₹ 6,30,612, payable ₹ 1,67,502. 71 Bid open date. 72 Paid amount ₹ 6,30,612, payable ₹ 1,67,502. 73 Cu.",
+      "class": "duplicate-residue",
+      "parserValue": "16750200",
+      "published": false,
+      "reason": "Residue of a bad extraction run, not a fact. Each duplicates an already-decided row and differs from it only by a trailing full stop the broken sentence splitter retained. Verifying them double-counted four published figures."
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 190,
+      "script": "latin",
+      "evidence": "… documents submitted ( ```` in lakh) Excess payment (```` in lakh) 9 Financial assistance to student child of beneficiary for graduate courses in engineering - ` 60,000 per beneficiary Diploma courses- ` 20,000 per beneficiary 5.40 1.8 3.6 21 Financial assistance to student child of beneficiary for graduate courses in medical d …",
+      "class": "fragment",
+      "parserValue": null,
+      "published": false,
+      "reason": "No amount could be established, and each was read individually. Most are windows that end mid-figure, where the digits continue past the evidence the parser captured. The rest state a per-unit rate — ₹2,000 per beneficiary, ₹2,160 per child"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 190,
+      "script": "latin",
+      "evidence": "… s payment (```` in lakh) 9 Financial assistance to student child of beneficiary for graduate courses in engineering - ` 60,000 per beneficiary Diploma courses- ` 20,000 per beneficiary 5.40 1.8 3.6 21 Financial assistance to student child of beneficiary for graduate courses in medical degree - ` 1.00 lakh per beneficiary Gradua …",
+      "class": "fragment",
+      "parserValue": null,
+      "published": false,
+      "reason": "No amount could be established, and each was read individually. Most are windows that end mid-figure, where the digits continue past the evidence the parser captured. The rest state a per-unit rate — ₹2,000 per beneficiary, ₹2,160 per child"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 191,
+      "script": "latin",
+      "evidence": "… tor, District Rural Development Agency and District Executive officer as members and Deputy District Executive Officer of the Board as the Member Secretary. 42 `104 - ` 7.64 crore payable + interest of ` 18.13 crore (furnished by SMC) = ` 114.49 crore. 43 The beneficiary family (family comprising of husband, wife and unmarr …",
+      "class": "fragment",
+      "parserValue": "10400",
+      "published": false,
+      "reason": "A fragment of a figure, not a figure. '42 ₹104 - ₹7.64' is footnote residue; '₹267' is the head of ₹267.52 crore; '₹2' is the head of a malformed '₹2.67,52,53,533' whose own sentence then states ₹267.52 crore. None states an amount on its o"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 134,
+      "script": "latin",
+      "evidence": "Total of A+B+C +D = ` 2.67,52,53,533 i.e., ` 267.52 crore.",
+      "class": "fragment",
+      "parserValue": "267",
+      "published": false,
+      "reason": "A fragment of a figure, not a figure. '42 ₹104 - ₹7.64' is footnote residue; '₹267' is the head of ₹267.52 crore; '₹2' is the head of a malformed '₹2.67,52,53,533' whose own sentence then states ₹267.52 crore. None states an amount on its o"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 63,
+      "script": "mixed",
+      "evidence": "… 9 = ` 56,46,39,892; क. म8यम उ पBन गट- I: 490 सदनका × ` 38,46,110 = ` 188,45,94,158, ड. म8यम उ पBन गट-II: 11 सदनका × ` 39,73,865 = ` 4,37,12,517. एकूण अ+ब+क+ड = ` 267,52,53,777 jहणजेच., ` 267.52 कोट(.",
+      "class": "product-does-not-reconcile",
+      "parserValue": "267525377700",
+      "published": false,
+      "reason": "A product that does not equal its own printed multiplicands. The Marathi page states 278 × ₹20,31,079"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 63,
+      "script": "mixed",
+      "evidence": "… ी पुढे असेह( नमूद केले क, स8या थावर मालम ता ेात मागणी वाढत अस3याने उव5रत सदनकां#या व!साठU महाराOP गृहनमाण व 33 अ. आ,थकyOया दुबल घटक: 124 सदनका × ` 14,70,219 = ` 18,23,07,209; ब. अ3प उ पBन गट: 278 सदनका × ` 20,31,079 = ` 56,46,39,892; क. म8यम उ पBन गट- I: 490 सदनका × ` 38,46,110 = ` 188,45,94,158, ड. म8यम उ पBन गट-II: 11 सदनका × ` 3 …",
+      "class": "product-does-not-reconcile",
+      "parserValue": "18230720900",
+      "published": false,
+      "reason": "The document's two halves state different totals for one quantity. The Marathi page prints 124 सदनका × ₹14,70,219"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 63,
+      "script": "mixed",
+      "evidence": "… अस3याने उव5रत सदनकां#या व!साठU महाराOP गृहनमाण व 33 अ. आ,थकyOया दुबल घटक: 124 सदनका × ` 14,70,219 = ` 18,23,07,209; ब. अ3प उ पBन गट: 278 सदनका × ` 20,31,079 = ` 56,46,39,892; क. म8यम उ पBन गट- I: 490 सदनका × ` 38,46,110 = ` 188,45,94,158, ड. म8यम उ पBन गट-II: 11 सदनका × ` 39,73,865 = ` 4,37,12,517. एकूण अ+ब+क+ड = ` 267,52,53,777 jह …",
+      "class": "product-does-not-reconcile",
+      "parserValue": "56463989200",
+      "published": false,
+      "reason": "A product that does not equal its own printed multiplicands. The Marathi page states 278 × ₹20,31,079"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 63,
+      "script": "mixed",
+      "evidence": "… पBन गट: 278 सदनका × ` 20,31,079 = ` 56,46,39,892; क. म8यम उ पBन गट- I: 490 सदनका × ` 38,46,110 = ` 188,45,94,158, ड. म8यम उ पBन गट-II: 11 सदनका × ` 39,73,865 = ` 4,37,12,517. एकूण अ+ब+क+ड = ` 267,52,53,777 jहणजेच., ` 267.52 कोट(.",
+      "class": "product-does-not-reconcile",
+      "parserValue": "4371251700",
+      "published": false,
+      "reason": "A product that does not equal its own printed multiplicands. The Marathi page states 278 × ₹20,31,079"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 63,
+      "script": "mixed",
+      "evidence": "… ा दुबल घटक: 124 सदनका × ` 14,70,219 = ` 18,23,07,209; ब. अ3प उ पBन गट: 278 सदनका × ` 20,31,079 = ` 56,46,39,892; क. म8यम उ पBन गट- I: 490 सदनका × ` 38,46,110 = ` 188,45,94,158, ड. म8यम उ पBन गट-II: 11 सदनका × ` 39,73,865 = ` 4,37,12,517. एकूण अ+ब+क+ड = ` 267,52,53,777 jहणजेच., ` 267.52 कोट(.",
+      "class": "product-does-not-reconcile",
+      "parserValue": "188459415800",
+      "published": false,
+      "reason": "A product that does not equal its own printed multiplicands. The Marathi page states 278 × ₹20,31,079"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 130,
+      "script": "latin",
+      "evidence": "… ndemic, financial assistance of ` 2000 per beneficiary (first phase), ` 3000 per beneficiary (second phase) to whom assistance was given in the first phase and ` 1500 per beneficiary (third phase) to all active registered beneficiaries was made more than once to the same bank account numbers in respect of 24,347 cases, result …",
+      "class": "rate",
+      "parserValue": "150000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: per beneficiary, per child, per square metre, per tenement per month. Each was checked against its own figure rather than its window — a sentence holding both a total and a rate keeps the total. The ledger mo"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 130,
+      "script": "latin",
+      "evidence": "During Covid-19 pandemic, financial assistance of ` 2000 per beneficiary (first phase), ` 3000 per beneficiary (second phase) to whom assistance was given in the first phase and ` 1500 per beneficiary (third phase) to all active registered beneficiaries w …",
+      "class": "rate",
+      "parserValue": "300000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: per beneficiary, per child, per square metre, per tenement per month. Each was checked against its own figure rather than its window — a sentence holding both a total and a rate keeps the total. The ledger mo"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 181,
+      "script": "latin",
+      "evidence": "The per meal cost was ` 62.75, ` 62.73, and ` 62.70 out of which cost of distribution card system per meal was ` 5.64, ` 5.95 and ` 5.29 (inclusive of GST) as per the contract awarded to GCPL, IAPFPL and JKPL respectively. • As per the terms and conditions of the contract, the agencies …",
+      "class": "rate",
+      "parserValue": "595",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 181,
+      "script": "latin",
+      "evidence": "The per meal cost was ` 62.75, ` 62.73, and ` 62.70 out of which cost of distribution card system per meal was ` 5.64, ` 5.95 and ` 5.29 (inclusive of GST) as per the contract awarded to GC …",
+      "class": "rate",
+      "parserValue": "6275",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 181,
+      "script": "latin",
+      "evidence": "The per meal cost was ` 62.75, ` 62.73, and ` 62.70 out of which cost of distribution card system per meal was ` 5.64, ` 5.95 and ` 5.29 (inclusive of GST) as per the contract awarded to GCPL, IAPFPL and JKPL respectively. • As per the terms and conditions of the contract, the …",
+      "class": "rate",
+      "parserValue": "564",
+      "published": false,
+      "reason": "A per-meal cost, and the window's figure is a component of one: 'cost of distribution card system per meal was ₹5.64'. A rate, and the reading is a fragment of it."
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 182,
+      "script": "latin",
+      "evidence": "Based on the bids received, supply order for the distribution of 2.25 lakh safety kits (` 104.87 crore at the rate of ` 4,661 per kit plus GST) was placed (14 June 2018) with Indo Allied Protein Food Pvt Limited. 36 To be implemented within three weeks of issue of work orders. 37 ` 5.6 …",
+      "class": "rate",
+      "parserValue": "466100",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: ₹4,661 per kit, ₹1,500 per beneficiary, ₹1.00 lakh per beneficiary, ₹14,70,219 per tenement. The ledger models amounts and has no denominator to carry, so publishing any of these as a sum would misstate it."
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 186,
+      "script": "latin",
+      "evidence": "… e succeeding paragraphs: 6.6.1 Payment of financial Assistance of ` 2,000 per beneficiary Audit analysed the bank transactions data showing the disbursement of ` 2,000 per beneficiary which revealed the following:",
+      "class": "rate",
+      "parserValue": "200000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: per beneficiary, per child, per square metre, per tenement per month. Each was checked against its own figure rather than its window — a sentence holding both a total and a rate keeps the total. The ledger mo"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 186,
+      "script": "latin",
+      "evidence": "Audit observed cases of excess payment as discussed in the succeeding paragraphs: 6.6.1 Payment of financial Assistance of ` 2,000 per beneficiary Audit analysed the bank transactions data showing the disbursement of ` 2,000 per beneficiary which revealed the following:",
+      "class": "rate",
+      "parserValue": "200000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: per beneficiary, per child, per square metre, per tenement per month. Each was checked against its own figure rather than its window — a sentence holding both a total and a rate keeps the total. The ledger mo"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 188,
+      "script": "latin",
+      "evidence": "Thus, excess payment of ` 5.03 crore39 in the disbursement of financial assistance of ` 2000, ` 3000 and ` 1500 respectively, during COVID-19 due to disbursement of benefits more than once indicates lack of adequate scrutiny by the Board and non-reconc …",
+      "class": "rate",
+      "parserValue": "200000",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 188,
+      "script": "latin",
+      "evidence": "Audit noticed disbursement of ` 1,500 per beneficiary twice into the same account number (name of the holder of the account was the same) in respect of 4,336 cases resulting in excess payment of ` 6 …",
+      "class": "rate",
+      "parserValue": "150000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: ₹4,661 per kit, ₹1,500 per beneficiary, ₹1.00 lakh per beneficiary, ₹14,70,219 per tenement. The ledger models amounts and has no denominator to carry, so publishing any of these as a sum would misstate it."
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 190,
+      "script": "latin",
+      "evidence": "… ficiary Diploma courses- ` 20,000 per beneficiary 5.40 1.8 3.6 21 Financial assistance to student child of beneficiary for graduate courses in medical degree - ` 1.00 lakh per beneficiary Graduation/post- graduation courses other than medical and engineering - ` 25,000 per beneficiary 21 5.25 15.75 Total 19.35 Source: Documents u …",
+      "class": "rate",
+      "parserValue": "10000000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: ₹4,661 per kit, ₹1,500 per beneficiary, ₹1.00 lakh per beneficiary, ₹14,70,219 per tenement. The ledger models amounts and has no denominator to carry, so publishing any of these as a sum would misstate it."
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 192,
+      "script": "latin",
+      "evidence": "However, the fund at the rate of ` 2.00 lakh released for these 26 beneficiaries amounting to ` 52.00 lakh was not demanded by the Board/MHADA from the developer. • Audit noticed that out of 577 beneficia …",
+      "class": "rate",
+      "parserValue": "20000000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: per beneficiary, per child, per square metre, per tenement per month. Each was checked against its own figure rather than its window — a sentence holding both a total and a rate keeps the total. The ledger mo"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 35,
+      "script": "mixed",
+      "evidence": "… नरचना मंडळाने 29,003 सदनका असले3या 941 उपकर इमारती अ,धbFहत के3या आण 36,386 सदनका असले3या 454 इमारतींची पुनबाSधणी केल(. 5 राXय शासनाने निचत केलेल( 9त चौरस मीटर ` 3,000 आण 9त चौरस मीटर ` 4,000 ह( अनुमत कमाल मयादा अनु!मे 7 ऑfटोबर 2013 आण 7 ऑfटोबर 2020 पासून लागू केल( होती.",
+      "class": "rate",
+      "parserValue": "300000",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 41,
+      "script": "mixed",
+      "evidence": "… े उघड झाले क, माच 2022 पयSत 30 9करणांम8ये13 37 ते 342 मFहBयां#या कालावधीत पुनवकासाची कामे पूण झाल( न$हती. 12 363.59 चौरस मीटर x 2016-17 #या रेडी रेकनर दरानुसार ` 2,36,900 9त चौरस मीटर ` 8,61,34,471 jहणजेच, ` 8.61 कोट( 13 दोन 9करणांम8ये 30 मFहBयांचा कालावधी पूण झाला नाह(",
+      "class": "rate",
+      "parserValue": "23690000",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 53,
+      "script": "mixed",
+      "evidence": "… स आराखEयानुसार सुमारे 30 `कलोमीटर27 लांबी#या (सात प्यांत वभागले3या) क3याण 5रंगरोड#या बांधकामासाठU 26 18 nडसlबर 2018 पयSत: 'पुनबाSधणी केले3या इमारतींसाठU दरमहा ` 250 9त सदनका आण पंत9धान अनुदान 9क3प इमारतींसाठU दरमहा ` 180 9त सदनका; 19 nडसlबर 2018 पासून: पुनबाSधणी केले3या इमारतींसाठU दरवष@ 1 ए9लपासून लागू वाषक 10 टfके वाढ(सह …",
+      "class": "rate",
+      "parserValue": "25000",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 63,
+      "script": "mixed",
+      "evidence": "… 33 अ. आ,थकyOया दुबल घटक: 124 सदनका × ` 14,70,219 = ` 18,23,07,209; ब. अ3प उ पBन गट: 278 सदनका × ` 20,31,079 = ` 56,46,39,892; क. म8यम उ पBन गट- I: 490 सदनका × ` 38,46,110 = ` 188,45,94,158, ड. म8यम उ पBन गट-II: 11 सदनका × ` 39,73,865 = ` 4,37,12,517. एकूण अ+ब+क+ड = ` 267,52,53,777 jहणजेच., ` 267.52 कोट(.",
+      "class": "rate",
+      "parserValue": "384611000",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 126,
+      "script": "latin",
+      "evidence": "… g 66 buildings constructed out of Prime Ministers Grant Project (PMGP). 27 Up to 18 December 2018: ` 250 per tenement per month for reconstructed buildings and ` 180 per tenement per month for PMGP buildings; From 19 December 2018: ` 500 per tenement per month for reconstructed buildings with annual increase of 10 per cent w …",
+      "class": "rate",
+      "parserValue": "18000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: per beneficiary, per child, per square metre, per tenement per month. Each was checked against its own figure rather than its window — a sentence holding both a total and a rate keeps the total. The ledger mo"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 126,
+      "script": "latin",
+      "evidence": "… rvices from occupants of reconstructed buildings. 26 Including 66 buildings constructed out of Prime Ministers Grant Project (PMGP). 27 Up to 18 December 2018: ` 250 per tenement per month for reconstructed buildings and ` 180 per tenement per month for PMGP buildings; From 19 December 2018: ` 500 per tenement per month for …",
+      "class": "rate",
+      "parserValue": "25000",
+      "published": false,
+      "reason": "A per-unit rate, not an amount: per beneficiary, per child, per square metre, per tenement per month. Each was checked against its own figure rather than its window — a sentence holding both a total and a rate keeps the total. The ledger mo"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 134,
+      "script": "latin",
+      "evidence": "… ,219 = ` 18,23,07,156; B. LIG: 278 tenements × ` 20,31,079 = ` 56,46,39,962; C. MIG-I: 490 tenements × ` 38,46,110 = ` 188,45,93,900, D. MIG-II: 11 tenements × ` 39,73,865 = ` 4,37,12,515",
+      "class": "rate",
+      "parserValue": "397386500",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 134,
+      "script": "latin",
+      "evidence": "… der to the contractor. 35 A. EWS: 124 tenements × ` 14,70,219 = ` 18,23,07,156; B. LIG: 278 tenements × ` 20,31,079 = ` 56,46,39,962; C. MIG-I: 490 tenements × ` 38,46,110 = ` 188,45,93,900, D. MIG-II: 11 tenements × ` 39,73,865 = ` 4,37,12,515",
+      "class": "rate",
+      "parserValue": "384611000",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3851,
+      "pageNumber": 46,
+      "script": "latin",
+      "evidence": "We noticed that GMH Gwalior and Indore spent (during 2021-24) ₹ 65.4347 and ₹ 48 per patient per day respectively on food of IPD patients",
+      "class": "rate",
+      "parserValue": null,
+      "published": false,
+      "reason": "The source states finer than a paisa — ₹65.4347 per patient per day, ₹83.1802 per US dollar, ₹14,98,413.902 per km — so there is no exact reading to record. Each is also a rate rather than an amount. Kept unpublished rather than rounded."
+    },
+    {
+      "documentId": 3852,
+      "pageNumber": 133,
+      "script": "latin",
+      "evidence": "Financial support was to be given ` 2,000 per month to the children which was increased (April 2023) to ` 4,000",
+      "class": "rate",
+      "parserValue": "400000",
+      "published": false,
+      "reason": "A per-unit rate, read individually: per meal, per construction worker, per beneficiary, per tenement, per square metre, per tenement per month, and ex-gratia of ₹50,000 per death. Several are the multiplicand of a product whose total is kep"
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 27,
+      "script": "latin",
+      "evidence": "Additionally, 13 zonal laboratories have already been upgraded, and an IPMS portal is under development to monitor work progress. 10 Calculated at $ 1 = ₹ 83.1802 (based on exchange rate of December 2023)",
+      "class": "rate",
+      "parserValue": null,
+      "published": false,
+      "reason": "The source states finer than a paisa — ₹65.4347 per patient per day, ₹83.1802 per US dollar, ₹14,98,413.902 per km — so there is no exact reading to record. Each is also a rate rather than an amount. Kept unpublished rather than rounded."
+    },
+    {
+      "documentId": 3853,
+      "pageNumber": 157,
+      "script": "latin",
+      "evidence": "Thus, the quantity objected is half of the total quantity of WMM, i.e. half of 41,319.202 cum. 9 10.38 km at the rate of ₹ 14,98,413.902 per km of WMM",
+      "class": "rate",
+      "parserValue": null,
+      "published": false,
+      "reason": "The source states finer than a paisa — ₹65.4347 per patient per day, ₹83.1802 per US dollar, ₹14,98,413.902 per km — so there is no exact reading to record. Each is also a rate rather than an amount. Kept unpublished rather than rounded."
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 193,
+      "script": "latin",
+      "evidence": "The Board utilised only `4,253.77 (26.34 per cent) of the total available funds (i.e., `16,151.82 crore) on implementation of the schemes during 2017-18 to 2021-22",
+      "class": "scale-outside-bracket",
+      "parserValue": "425377",
+      "published": false,
+      "reason": "The scale word sits outside the reading, so each is wrong by seven orders of magnitude. The page states 'utilised only ₹4,253.77 … of the total available funds (i.e., ₹16,151.82 crore)' and 'shortfall of ₹11,553 (₹7,011+₹4,542) crore'. Read"
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 139,
+      "script": "latin",
+      "evidence": "… ears 31 Includes back to back loan in lieu of GST compensation shortfall of `4,542 crore. 32 Include Back to back loan in lieu of GST compensation shortfall of `11,553 (`7,011+`4,542) crore. 33 Include Back to back loan in lieu of GST compensation shortfall of `11,553 crore 34 Include Back to back loan in lieu of GST compensat …",
+      "class": "scale-outside-bracket",
+      "parserValue": "1155300",
+      "published": false,
+      "reason": "The scale word sits outside the reading, so each is wrong by seven orders of magnitude. The page states 'utilised only ₹4,253.77 … of the total available funds (i.e., ₹16,151.82 crore)' and 'shortfall of ₹11,553 (₹7,011+₹4,542) crore'. Read"
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 139,
+      "script": "latin",
+      "evidence": "… ncludes back to back loan in lieu of GST compensation shortfall of `4,542 crore. 32 Include Back to back loan in lieu of GST compensation shortfall of `11,553 (`7,011+`4,542) crore. 33 Include Back to back loan in lieu of GST compensation shortfall of `11,553 crore 34 Include Back to back loan in lieu of GST compensation sho …",
+      "class": "scale-outside-bracket",
+      "parserValue": null,
+      "published": false,
+      "reason": "The parser now refuses these rather than reading them as plain rupees: the page states 'shortfall of ₹11,553 (₹7,011+₹4,542) crore', so the scale word outside the bracket governs both amounts inside it. No value is offered, which is the cor"
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 139,
+      "script": "latin",
+      "evidence": "… back to back loan in lieu of GST compensation shortfall of `4,542 crore. 32 Include Back to back loan in lieu of GST compensation shortfall of `11,553 (`7,011+`4,542) crore. 33 Include Back to back loan in lieu of GST compensation shortfall of `11,553 crore 34 Include Back to back loan in lieu of GST compensation shortfall …",
+      "class": "scale-outside-bracket",
+      "parserValue": null,
+      "published": false,
+      "reason": "The parser now refuses these rather than reading them as plain rupees: the page states 'shortfall of ₹11,553 (₹7,011+₹4,542) crore', so the scale word outside the bracket governs both amounts inside it. No value is offered, which is the cor"
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 41,
+      "script": "devanagari",
+      "evidence": "… 0-21 ते 2024-25 या कालािधीत राज् याच् या एकूण महसुली र् मा पैकी करेतर महसुलाचा दहथसा पाच ते सात टक्के होता. 2024-25 र्द रम्याि झालेली िाढ ही शहरी विकास अंतगित (₹ 1,902 कोटी) आणण अलोह खनिकमि ि धातुकाम उद् योगाअंतगित ₹ 145 कोटी होती. ही िाढ प्र ामुख् यािे अ-लोहीय खनिकमि ि धातुकमि उद् योगांतगित 2286 2617 2430 2329 2809 0 500 1000 150 …",
+      "class": "sound",
+      "parserValue": "1902000000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 51,
+      "script": "devanagari",
+      "evidence": "… ण अर्ग्रमे 226.61 484.99 708.05 832.93 990.08 स्त् रोत : संबंचित िषाांचे वित्त ीय लेखे (स्त् रोत: संबंचित िषाांचे वित्तीय लेखे ) राज्याचा एकूण खचि 2020-21 मधील ₹ 3,42,638.31 कोटींिरू ि िाढूि 2024-25 मध्ये ₹ 6,06,809.56 कोटी झाला. खचािची रचिा सििसाधारण, सामास्र्क आणण आर्ििक सेिा या सिि िेरांमधील महसुली खचािचे थपष्ट्ट प्र ािल्य र्द शििते …",
+      "class": "sound",
+      "parserValue": "342638310000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 53,
+      "script": "devanagari",
+      "evidence": "… ्य लशिण (₹ 83,879.64 कोटी) आणण सामास्र्क सुरिा आणण कल्याण (₹ 45,760.13 कोटी) िर भरीि खचि झाला. मदहला कल्याणअंतगित 2023-24 मधील ₹261.78 कोटींिरूि 2024- 25 मध्ये ₹ 33,554.36 कोटी इतकी तीव्र िाढ 0% 10% 20% 30% 40% 50% 60% 70% 80% 90% 100% 110% 2020-21 2021-22 2022-23 2023-24 2024-25 33.4 34.8 32.0 31.5 30.1 39.3 40.8 40.1 42.6 44.2 20.7 …",
+      "class": "sound",
+      "parserValue": "33554360000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 55,
+      "script": "devanagari",
+      "evidence": "… सा केला र् ातो. 2020-21 आणण 2024-25 र्द रम्याि , महसुली र् मा ₹ 2,69,467.91 कोटींिरूि ₹ 4,81,906.43 कोटी (सुमारे 79 टक्क्यांिी िाढ) पयांत िाढली, तर िचििद्ध खचि ₹ 1,78,693.25 कोटींिरूि ₹ 2,49,696.74 कोटी (सुमारे 40 टक्क्यांिी िाढ) पयांत िाढला. महसुली र् मेमध्ये िचििद्ध खचािचा िाटा, र् री 2020-21 मधील 66.31 टक्क्यांिरूि 2024-25 मध्ये 51.8 …",
+      "class": "sound",
+      "parserValue": "178693250000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 60,
+      "script": "mixed",
+      "evidence": "प्रकरण I: राज्याच्या वित्तव्यिस्त्थेचा आढािा 37 ₹ 82,773.32 कोटींच्या भांडिली खचािव्यनतररक्त , राज्य शासिािे थिानिक थिराज्य संथिा आणण इतर संथिांिा भांडिली मालमत्त ा निलमितीसाठी अिुर्द ाि सहाय् य म् हणूि ₹ 2,851.55 कोटी हथतां …",
+      "class": "sound",
+      "parserValue": "82773320000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 75,
+      "script": "devanagari",
+      "evidence": "… संिंर्धत िषाितील वितरणाची निव्िळ आकडेिारी आहे # यामध् ये िथतु ि सेिा कर भरपाईच् या िर्दल् यात भारत सरकारकडूि प्र ाप् त झालेल् या लागोपाठ कर् ािचा (2020-21 साठी ₹ 11,977 कोटी आणण 2021-22 साठी ₹ 13,782.36 कोटी) समािेश आहे. भारत सरकारच् या वित्त मंरालयाच् या व् यय विभागािुसार, विशेष णखडकी अंतगित घेतलेले कर्ि (2020-21 साठी ₹ 11,977 कोट …",
+      "class": "sound",
+      "parserValue": "11977000000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 76,
+      "script": "mixed",
+      "evidence": "… त : वित्तीय लेखे 2024-25 आणण लेखापरीक्षणोत्तर विश्शलेषण तक्ता 1.30 मध्ये र्द शिविलेल्या व् यिहारांचा विचार केला तर िाथतविक महसूल तूट आणण वित्त ीय तूट अिुक्र मे ₹ 36,342.29 कोटी (थिूल राज् य उत् पन् िाच् या 0.80 टक्के ) आणण ₹ 1,44,926.46 कोटी (थिूल राज् य उत् पन् िाच् या 3.20 टक्के ) होईल. लेखापरीक्षणोत्तर - एकूण लोक ऋण महाराष्ट्र रार् …",
+      "class": "sound",
+      "parserValue": "36342290000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 77,
+      "script": "devanagari",
+      "evidence": "… 8,87,422 कोटी6 होते. अििसंकल्पीय कर्ािचा समािेश 6 िथतु ि सेिा कर िुकसािभरपाईच् या तुटीच् या िर्दल्यात 2020-21 आणण 2021-22 या कालािधीत केंद्र सरकारकडूि लागोपाठ ₹ 11,977 कोटी आणण ₹13,782.36 कोटी िगळता र्े राज्याला त् याच्या थरोतांकडूि भरायचे िाहीत",
+      "class": "sound",
+      "parserValue": "11977000000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 88,
+      "script": "mixed",
+      "evidence": "प्रकरण I: राज्याच्या वित्तव्यिस्त्थेचा आढािा 65 2024-25 मध्ये , राज्याचा ₹ 2,49,696.74 कोटींचा खचि होता, ज् यामध्ये िेति (₹ 1,37,979.17 कोटी), नििृत्त ीिेति (₹ 58,262.46 कोटी) आणण व् यार् र्दे यके (₹ 53,455.11 कोटी) यांचा समािेश होता, र् ो मह सुली र् …",
+      "class": "sound",
+      "parserValue": "249696740000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 97,
+      "script": "mixed",
+      "evidence": "… मधून समायोजजत केलेली िसूली विचारात न घेता एकूण आकडेिारी आहे.स्त्र ोत : ववतियोजि लेखे िर्ा 2024-25 मध्ये , महाराष्ट्र र् ासना ने अनुदान आणण विननयोजने शमळून एकूण ₹ 8,29,831.20 कोटीपैकी ₹ 6,61,548.43 कोटी खचा केले, पररणामी एकूण ₹ 1,68,282.77 कोटीची बचत झाली. ननव्िळ बचत ₹ 763.05 कोटी इतकी आधधक्याने भरून काढण्यात आली. ही बचत िर्ाभरा तील एकूण …",
+      "class": "sound",
+      "parserValue": "829831200000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 105,
+      "script": "devanagari",
+      "evidence": "… 7 56.88 3341.56 1068.79 िाय 02- पाणी पुरिठा ि स् िच् छता 6007.14 290.66 4690.90 1606.90 स्र ोत: 2024 -25 चे ववतियोजि लेखे अनुदान सी-07 अंतगात उपर्ीर्ाा मध्ये , ₹ 60 कोटींच् या मूळ तरतुदीच् या तुलनेत, 'राज्य जैिविविधता मंडळ बळकटीकरण' यासाठी ₹ 56.88 कोटींची पुरिणी मागणी प्र ाप् त झाली. मात्र , प्रत् यक्ष खचा केिळ ₹ 14.50 कोटी होत …",
+      "class": "sound",
+      "parserValue": "60000000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 108,
+      "script": "mixed",
+      "evidence": "… मंजूर न केल् यार् ी जोडण्यात आला. 2 2215 196(02)(01) मराठिाडा विभागाकररता एकाजत्मक जाळे पद्धतीने पाणी पुरिठा योजनेसाठी सहायक अनुदान 5.0 5.0 0 0 माचा 2025 मध्ये ₹ 5.00 कोटींची संपूणा तरतूद प्रत् यावपात करण्याचा संबंध महाराष्ट्र जीिन प्र ाधधकरणाकडून ननधीची मागणी न केल्यार्ी जोडण्यात आला . 3 2215 196(02)(02) नतलारी प्र कल्पािर आधारर …",
+      "class": "sound",
+      "parserValue": "5000000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 114,
+      "script": "mixed",
+      "evidence": "… ाविला आहे.स्र ोत: मालसक िागरी लेखे 2024-25 2024-25 मधील एकूण जमांची महहनाननहाय रचना महसुलाच् या ओघातील लक्ष णीय असमानता दर्ाि ते. माशसक जमा ₹ 32,241.87 कोटी ते ₹ 88,557.78 कोटी दरम्यान होती, िर्ााच्या र्े िटच्या नतमाहीत जमा झालेल्या िावर्ाक जमांचा एक मोठा भाग आहे. एकटया माचा 2025 मध् ये एकूण जमांपैकी 14.14 टक्के महसूल प्र ाप् त झाला, …",
+      "class": "sound",
+      "parserValue": "88557780000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 130,
+      "script": "mixed",
+      "evidence": "… ाषर राज्य रथते विकास महामांडळा िे घेतलेल्या कर्ायिरील ₹ 2,089.48 कोटी (2024-25 मध्ये ₹ 1456.48 कोटी आणि 2023-24 मध्ये ₹ 633 कोटी) आणि ₹ 315 कोटी (2024-25 मध्ये ₹ 250 कोटी आणि 2023-24 मध्ये ₹ 65 कोटी) व् यार् राज्य शासिािे फेडले. ही परतफेड प्र धाि शीषय 5054 - रथते आणि पुलाांिरील भाांडिली खचायच्या अांतगयत िोंर्दविण्यात आली , पररिा …",
+      "class": "sound",
+      "parserValue": "250000000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 133,
+      "script": "devanagari",
+      "evidence": "… शल्लक रकमेचे प्र माि र् ाथत र्द शयविण् यात आले, ज् यामुळे राज् याची खरी वित्तीय स् थिती विथकळीत झाली. तक्ता 3.4 मध्ये र्द शयविल् याप्रमािे , 2024-25 र्द रम्याि ₹ 11,703.01 कोटीच्या प्र ारांशभक शशल्लक असलेल्या ठेिीांिर हे अपररगचत र्द ानयत्ि निमायि झाले , ज् यामध्ये राज्य आपत्ती प्र नतसार्द/शमि निधीशी सांबांगधत सिायत मोठे ि भरलेले व् या …",
+      "class": "sound",
+      "parserValue": "11703010000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 135,
+      "script": "devanagari",
+      "evidence": "… थिापिात पारर्दशयकता आणि र् बाबर्दारी याांत कमीपिा येतो .खचय आणि िषयअखेरीच्या शशल्लक रकमेबाबत तप शशलाांच्या अभािी , (2023-24 र्द रम्याि सांकशलत केलेला भरीि उपकर ₹ 3808.75 कोटी) सामास्र् क सुरक्ष ा आणि कल् यािकारी योर्िाांसाठी प्र भािीपिे आणि िेळेिर िापरला गेला की िाही हे निस्श्चत करता येत िाही. यामुळे कायर्दे शीर र्दे खरेख कमकुित होत …",
+      "class": "sound",
+      "parserValue": "3808750000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 138,
+      "script": "mixed",
+      "evidence": "… नतिेदन पद्धती 111 उपलब्ध करूि र्देण् यात आले िव्हते. या आकडेिारीच्या अगधक तपासिीत असे निर्दशयिास आले की, हथताांतररत केलेल्या निधीपैकी , 33 विभागाांशी सांबांगधत ₹ 15,298.83 कोटी, 31 माचय 2025 पयांत आहरि आणि वितरि अगधकाराांच्या बँक खात् याांमध् ये अखगचयत राहहली, र् री तो शासकीय लेख्याांत खचय म् हिूि िोंर्दि ला गेला होता. पररिामी, वित्ती …",
+      "class": "sound",
+      "parserValue": "15298830000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 145,
+      "script": "devanagari",
+      "evidence": "… कूि एकबत्रत खचायच्या 2 (₹ 5,94,674.51 कोटी) 2.52 टक्के होते. लेखापरीक्षिािे गौि शीषय-800 अांतगयत िोंर्दिी केलेल्या नििडक 40 प्र करिाांची तपासिी केली ज् यात खचय ₹ 50 कोटीांपेक्षा र् ाथत होता. 10 प्र धाि शीषाांखालील 20 प्र करिाांमध्ये खचायचे िगीकरि त् या अांतगयत योग्य गौि शीषय उपलब् ध असूिही गौि शीषय-800-इतर खचय अांतगयत करण्यात आ …",
+      "class": "sound",
+      "parserValue": "50000000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 145,
+      "script": "devanagari",
+      "evidence": "… ामुळे राज्य लेख्याांची पारर्दशय कता आणि विश्िासाहयता कमी होते. 2024-25 साठी राज्य शासिाची महसुली तूट ₹ 29,994.76 कोटी होती, र् र आभासी िैयस्क्तक ठे ि खाती मधील ₹ 20,993.06 कोटीांची अखगचयत शशल्लक 31 माचय 2025 रोर्ी राज्याच्या एकबत्रत निधीत परत आिली असती , तर महसुली तूट ₹ 9,001.70 कोटी झाली असती. अशाप्रकारे , 31 माचय 2025 िांतर आभासी िै …",
+      "class": "sound",
+      "parserValue": "20993060000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 145,
+      "script": "devanagari",
+      "evidence": "… त निधीत परत आिली असती , तर महसुली तूट ₹ 9,001.70 कोटी झाली असती. अशाप्रकारे , 31 माचय 2025 िांतर आभासी िैयस्क्तक ठेि खात्या मध् ये रक् कम ठेिल् यािे महसुली तूट ₹ 20,993.06 कोटीांिी िाढली. शासिािे आभासी िैयस्क्तक ठे िी खात्याांच् या कामकार्ाचा आढािा घेऊ ि आभासी िैयस्क्तक ठे िी खात्याच्या चौकटीत राखूि ठेिलेल् या रकमेसह िषयअखेरीस अखगचयत …",
+      "class": "sound",
+      "parserValue": "20993060000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 159,
+      "script": "mixed",
+      "evidence": "… कबत्रत नतर्ोरीत परत आिली असती , तर महसुली तूट ₹ 9,001.70 कोटी असती. अशा प्र कारे , 31 माचय 2025 िांतर आभासी िैयस्क्तक ठेि खात्याांत रक्कम ठेिल्यािे मह सुली तूट ₹ 20,993.06 कोटीिी िाढली. • 31 माचय 2025 पयांत 26 थिायत्त सांथिाांचे 74 िावषयक लेखे लेखापरीक्षिासाठी भारताचे नियांत्रक ि लेखापरीक्षक याांच्याकडे सार्दर करण्यासाठी प्र लांबबत हो …",
+      "class": "sound",
+      "parserValue": "20993060000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 343,
+      "script": "latin",
+      "evidence": "State Finances Audit Report for the year 2024-25 56 In 2024-25, the State’s committed expenditure of ₹ 2,49,696.74 crore comprising salaries (₹ 1,37,979.17 crore), pensions (₹ 58,262.46 crore), and interest payments (₹ 53,455.11 crore), accounted for 51.81 per cent of the Revenue …",
+      "class": "sound",
+      "parserValue": "249696740000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 1,
+      "pageNumber": 358,
+      "script": "latin",
+      "evidence": "… ter Supply and Sanitation 6007.14 290.66 4690.90 1606.90 Source: Appropriation accounts 2024-25 In a subhead under Grant C-07, against an original provision of ₹ 60 crore, a supplementary demand of ₹ 56.88 crore was obtained for ‘Strengthening of the State Biodiversity Board’",
+      "class": "sound",
+      "parserValue": "60000000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 22,
+      "script": "mixed",
+      "evidence": "… चुकीच् या पद् ितीिे दर लागू केल् यामुळे मुंबई रानस हाबशर मलंक रोड ववकमसत करण् यासाठी मुंबई महािगर प्र देश ववकास प्र ाधिकरिाला केलेल्या शासकीय जममिीच्या वाटपावर ₹69.10 लाख भोगवटा शुल् काची कमी आकारिी झाली",
+      "class": "sound",
+      "parserValue": "691000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 39,
+      "script": "devanagari",
+      "evidence": "… तर प्र धान सचचि , वित्त विभाग आणण सचचि , शालेय मशक्षण विभाग या समितीचे सदस्य होते . 5 िर्ा -ननहाय झालेला खचा: 2018-19: ₹297.34 कोटी, 2019-20: ₹241.41 2020-21: ₹85.32 कोटी, 2021-22: ₹149.99 कोटी, 2022-23: ₹324.58 कोटी आणण 2023-24: ₹299.98 कोटी.",
+      "class": "sound",
+      "parserValue": "85320000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 56,
+      "script": "mixed",
+      "evidence": "… ररत केले गेले असले तरी, शाळाांना 22 िर्ा -ननहाय केलेला खचा: 2018-19: ₹297.34 कोटी, 2019-20: ₹241.41 कोटी, 2020-21: ₹85.32 कोटी, 2021-22: ₹149.99 कोटी, 2022-23: ₹324.58 कोटी आणण 2023-24: ₹299.98 कोटी",
+      "class": "sound",
+      "parserValue": "324580000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 58,
+      "script": "mixed",
+      "evidence": "… सी शाळाांच्या सिान स् तरािर ₹24.99 कोटी प्र दान केले होते . योजनेच्या िागादशाक तत्त्िाांिध्ये अननिासी शाळाांसाठी तरतूद नसल्याने अननिासी शाळाांना प्र दान केलेले ₹24.99 कोटी अननयमित26 होते. नऊ अननिासी शाळाांना ₹24.99 कोटी जारी केल्याने अचधक ननधी प्र दान केला गेला , कारण अननिासी शाळाांना तया प्र िाणात पररचालन खचा करािा लागत नाही. या …",
+      "class": "sound",
+      "parserValue": "24990000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 76,
+      "script": "mixed",
+      "evidence": "… ी टाकी इतयादीांचे काि आणण विद् युतीकरणाचे काि सािाजननक बाांधकाि विभागातफे दोन िेगिेगळ्या कांत्राटदाराांना देण्यात आले (जून 2023) होते. िुलाांच् या िसनतगृहासाठी ₹2.27 कोटी आणण िुलीांच् या िसनतगृहासाठी ₹2.28 कोटी खचा करूनही डडसेंबर 2024 पयांत दोन्ही कािे अपूणा रादहली. िसनतगृहाांचे बाांधकाि पूणा होण्याच्या अांनति श्स्् तीत आहे आणण …",
+      "class": "sound",
+      "parserValue": "2270000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 77,
+      "script": "devanagari",
+      "evidence": "… ऊ शकले नाही. नांतर श् जल्हा प्र शासनाने अनतक्रिण हटविले . कायाादेश जारी करूनही कािासाठी जिीन उपलब्ध न झाल्याने कांत्राटदाराने श् जल्हा न् यायालय , गोंददया ये्े ₹1.60 कोटी नुकसानभरपाईसाठी ररट याचचका (1/2018) दाखल केली होती (2018). सािाजननक बाांधकाि विभागाने केलेले (सप्टेंबर 2019) ननिेदन फेब्रु िारी 2021 िध् ये श् जल् हा न् यायालय …",
+      "class": "sound",
+      "parserValue": "1600000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 98,
+      "script": "mixed",
+      "evidence": "… ासाठी स् िीकारले. कायारत बायोिेदरक िमशनमशिाय सादर केलेले बायोिेदरक हजेरी पत्रक बनािट पध्दतीने तयार केल्याचे दशाविते अशाप्रकारे , 2019-20 ते 2023-24 या कालािधीत ₹16.69 लाख िानधन ि देखभाल भत्त ा देण् यात आलेल् या िसनतगृहाचा कारभार सांशयास् पद होता.",
+      "class": "sound",
+      "parserValue": "166900000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 103,
+      "script": "devanagari",
+      "evidence": "… ी, जिा झालेल्या शुल्कापैकी जिाबांदी आयुक् त आणण सांचालक, भूिी अमभलेख विभाग, पुणे याांचा दहस्सा तयाच्या िैयश्क्तक खातयात जिा करून आणण लागू असलेला शासकीय दहस्सा (₹5 प्र नत अमभलेख) योनय िुख् य शीर्ाांतगात शासकीय जिा लेखा प्र णालीद्िारे शासकीय खातयात जिा केला जाणार होता. लेखापरीक्षणात असे ननदशानास आले (सप्टेंबर 2024 आणण िे 20 …",
+      "class": "sound",
+      "parserValue": "500",
+      "published": true,
+      "reason": "read as rupees written out in full: the sentence states no scale word and the page carries no (₹ in crore/lakh) caption either, so no table scale governs it. The digits re-derive exactly from the evidence; the SCALE IS INFERRED from the abs"
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 109,
+      "script": "mixed",
+      "evidence": "… ्ये ददली होती. िगा IV, िगा III ि िगा II च् या ननिासस््ानाांचे काि 72 दोन रक्स आणण एक याांत्रत्रक लोडरसाठी (जेसीबी), दांडाची रक्कि : ₹ 2 लाख+₹ 2 लाख+₹ 7.5 लाख = ₹11.50 लाख",
+      "class": "sound",
+      "parserValue": "115000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 113,
+      "script": "devanagari",
+      "evidence": "… ववकासकाला अिेय लाभ झोपडपट्टी पुिवचसि योजिेसाठी एकूण मांजूर चटई क्षेत्र नििेशाांकाच्या चुकीच् या गणिेमुळे िोि ववकासकाांिा ₹6.29 कोटीांचे 3,159.31 चौरस मीटसच आणण ₹29.51 कोटीांचे 11,157.83 चौरस मीटसच अनतररक्त हस्ताांतरणीय ववकास हक्क िेण्यात आले. िहाराष्ट्र शासनाच्या गृहननिााण विभागाने पात्र झोपडपर्टटीिासीयाांना िोफत पुनिासन सदननका उ …",
+      "class": "sound",
+      "parserValue": "29510000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 123,
+      "script": "mixed",
+      "evidence": "… लब् ध ननधी ₹126.39 कोटी होता (केंद्राचा दहस्सा ₹96.39 कोटी आणण राज्याचा दहस्सा ₹30 कोटी). केंद्रीय सािाजननक बाांधकाि विभागाला ₹58.25 कोटी97 आणण HITES मलमिटेडला ₹68.14 कोटी98 ननधी देण्यात आला. 97 केंद्राचा दहस्सा ₹33.25 कोटी आणण राज्याचा दहस्सा ₹25 कोटी 98 केंद्राचा दहस्सा ₹63.14 कोटी आणण राज्याचा दहस्सा ₹5 कोटी",
+      "class": "sound",
+      "parserValue": "68140000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 125,
+      "script": "devanagari",
+      "evidence": "… सी-2 : 05 पदे, िररष्ट्ठ ननिासी-3 : 04 पदे 100 िगा अ: 03 पदे, िगा ब : 07 पदे, िगा क (ननयमित): 47 पदे, 101 229 िैद्यकीय उपकरणे स्् ावपत केली पण िापरात आणली नाही (₹35.33 कोटी) आणण 23 िैद्यकीय उपकरणे स्् ावपत करण्यात आली नाही (ककांित ₹3.75 कोटी)",
+      "class": "sound",
+      "parserValue": "35330000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 127,
+      "script": "devanagari",
+      "evidence": "… ा खचााचा दहशेब ठेिण्यासाठी 'साखर सांकुल-िटणािळ ननधी'नािाचे ताळेबांद आणण जिा ि खचा लेखे ही ठेिले होते. िाचा 2023 पयांत भाांडिली राखीि आणण अचधशेर् ननधीतील मशल्लक ₹28.28 कोटी होती तर गुांतिणूक (बँक िुदत ठेिीच्या स् िरूपात ) ₹24.47 कोटी होती. 2018-19 ते 2022-23 या कालािधीसाठी 'साखर सांकुल- िटणािळ ननधी' च् या पुढील तपासणीत असे आढळून आ …",
+      "class": "sound",
+      "parserValue": "28280000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 133,
+      "script": "mixed",
+      "evidence": "… काम सुरू असतािा अांिाजपत्र क स् तरावर सांरक्षक शभांती , पोहोच रस्ते याांसारख् या आवश् यक पायाभूत सुवविाांसाठी तरतुिी समाववष् ट ि केल् यामुळे सुवविा अपूणच राहूि ₹5.98 कोटी ककांमतीच् या गोिामाांचा वापर झाला िाही. लाभार्थयाांसाठी अन्न सुरक्ष ा आणण लश्क्ष्यत सािाजननक वितरण प्र णालीचे (टीपीडीएस) कायाक्षि सांचालन सुननश् चचत करण्यासाठी …",
+      "class": "sound",
+      "parserValue": "5980000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 141,
+      "script": "devanagari",
+      "evidence": "… दाजपत्रक सादर केले असले तरी प्र शासकीय आणण ताांत्रत्रक िान्यता मिळविण्याची कारिाई अद्याप सुरू होती (नोव्हेंबर 2025). पत्रकार भिनाचे बाांधकाि ऑक्टोबर 2020 िध्ये ₹2.43 कोटी खचा करून पूणा झाले असले तरी, मसडकोने िाचा 2022 पयांत भोगिटा प्र िाणपत्र देण्यास विलांब केल् यािुळे िालित्तेच् या िापराची तयारी लाांबणीिर पडली. तसेच, जुलै 2022 …",
+      "class": "sound",
+      "parserValue": "2430000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 239,
+      "script": "latin",
+      "evidence": "… ssioner to submit a proposal for the fees payable to Day boarding schools, which was not finalised (February 2024). 22 Year wise expenditure incurred: 2018-19: ₹297.34 crore, 2019-20: ₹241.41 crore, 2020-21: ₹85.32 crore, 2021-22: ₹ 149.99 crore, 2022-23: ₹324.58 crore and 2023-24: ₹299.98 crore. 23 In Day boarding school, students …",
+      "class": "sound",
+      "parserValue": "297340000000",
+      "published": true,
+      "reason": "the figure re-derives exactly from its own evidence; every other amount in that evidence is claimed by another fact on the same page; no criterion phrase governs it. Asserts only that this page states this amount."
+    },
+    {
+      "documentId": 3,
+      "pageNumber": 305,
+      "script": "latin",
+      "evidence": "In view of the poor response for bids and request made by RIL, MMRDA extended the contract of RIL from July 2019 till 30 June 2022 at monthly license fee of ₹17.50 lakh with 10 per cent escalation every year",
+      "class": "sound",
+      "parserValue": "175000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 4,
+      "pageNumber": 61,
+      "script": "devanagari",
+      "evidence": "… धकामाची तरतूि करण्र् ात आली होती. र् ा क् वाटयसयसाठी अंिास्जत खचय ₹ 47.12 लाख होता, ज्र् ापैकी ₹ 8.71 लाख अिा करण्र्ात आले , ज्र् ामुळे र् ा ननवासी क् वाटयसयवर ₹ 38.41 लाखांचे िानर्त्व ननमायि झाले , जे जेजेएम अंतगयत स् वीकार् य नव्हते. प्रत्र्क्ष पाहिीिरम्र्ान , छायाचचत्र 3 मध्र्े िाखव्र्ाप्रमािे , ननवासी क् वाटयसयचे बांधकाम पूिय …",
+      "class": "sound",
+      "parserValue": "384100000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 4,
+      "pageNumber": 61,
+      "script": "devanagari",
+      "evidence": "… लन करण्र् ाच्र् ा सूचना ननगयममत के्र्ा जातील. 3.4.3 िीज बबलांप्रनत अमान्य िरणा एमजेपी, ठािे आणि एमजेपी, जळगाव र् ांनी 1113 डब्ल्र्ु एसएसशी संबंर्धत वीज बबलांवर ₹ 1.13 कोटींची रक्कम भरली , जी जेजेएम ननधी र् ोजनेअंतगयत स् वीकार् य नव्हती. कार्य.अमभ. , एमजेपी, ठािे आणि कार्य.अमभ. , एमजेपी, जळगाव 13 जळगाव स् ज्हर्ातील नमशराबाि , करोड …",
+      "class": "sound",
+      "parserValue": "1130000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 4,
+      "pageNumber": 156,
+      "script": "latin",
+      "evidence": "The initial estimated (September 2020) expenditure for implementation of JJM in the State was ₹ 13,668.50 crore",
+      "class": "sound",
+      "parserValue": "13668500000000",
+      "published": true,
+      "reason": ""
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 27,
+      "script": "devanagari",
+      "evidence": "… हवामाि बदल, पाणीपुरवठा व स् वच्छता , माहहती तंत्रज्ञाि , गृह, कायदा व वविी व् यवहार यांच्या 307 कायाालयांच्या अशभलेख्यांच्या चाचणी तपासणीत 2503 निरीक्षणांमध्ये ₹ 11755.00 कोटींचे कमी मूल् यांकि/कमी आकारणी/ महसुलाची हािी, हे उघडकीस आले. वषाभरात, 2023-24 मध्ये लेखापरीक्षणात निदशािास आणलेल्या 148 निरीक्षणांमध्ये संबंधित ववभागांिी ₹ 667. …",
+      "class": "sound",
+      "parserValue": "11755000000000",
+      "published": true,
+      "reason": "read individually. The figure re-derives exactly from its own evidence with the unit the source states, no criterion governs it, and the page's text layer is sound. Flagged ambiguous only because a neighbouring amount in the window is claim"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 45,
+      "script": "devanagari",
+      "evidence": "… ममनीच्या बाबतीत , महा-कॅम् पा केवळ 2,65,465.94 हेक्टर िममनीवर काम करू र् कली आणण ननयोजित कामाांपैकी केवळ 47.37 टक्के कामाांचे लक्ष्य र् ाठले. आधथगक दृष् टीने , ` 3,094.72 कोटीांच् या ननयोजित खचागच् या तुलनेत महा-कॅम् पा ` 1,314.67 कोटी (ननयोजित खचागच्या केवळ 42.48 टक्के ) खचग करू र् कली , िे ननयोिनातील कमकुवतपणा आणण भरपाई वनीकरणच् या …",
+      "class": "sound",
+      "parserValue": "3094720000000",
+      "published": true,
+      "reason": "An amount stated with its own scale word — crore, lakh, कोटी — in the sentence that reports it, on a page whose font mapping dropped the rupee glyph and where that glyph was decoded per ADR-040. Each re-derives exactly from its own evidence"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 58,
+      "script": "mixed",
+      "evidence": "… 3 दरम्यान र् ोरेवाडा प्र ाणीसांग्रहालयात बचाव केंद्राच्या स् थापनेसाठी सीएएफ ननयम, 2018 चे उललांघन करून एफडीसीएमला ₹ 5.50 कोटी ववतररत केले. मर्वाय , एफडीसीएमने ₹ 5.50 कोटी खचग केले आणण महा-कॅम् पाला वापर प्र माणपत्र सादर केले. महा -कॅम् पा ननधीतून र् ोरेवाडा प्र ाणीसांग्र हालयाला ननधी देणे अननयममत होते कारण हा प्र कलप महाराष्र र् …",
+      "class": "sound",
+      "parserValue": "5500000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 59,
+      "script": "devanagari",
+      "evidence": "… फ अधधननयम, 2016 च् या कलम 26 आणण 30 अांतर्गत पररकजलपत केलयाप्रमाणे , र् ासकीय प्र नतभुतीमध् ये ककांवा अनुसूधचत बँकाांच् या मुदत ठेवीांमध् ये ₹ 2,184.19 कोटी ते ₹ 3,093.40 कोटी पयंतच् या मोठ् या प्र माणात अनतररक् त मर् ललक र्ुां तवण् यात अपयर्ी ठरलयाने , उपलब्लध ननधीचा वापर कमी झाला. परवानर्ी असलेलया र्ुां तवणूक मार् ांद् वारे उच् च प …",
+      "class": "sound",
+      "parserValue": "3093400000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 107,
+      "script": "devanagari",
+      "evidence": "… ी प्र माणणकरण लावण्यात येईल . ई. तसेच, पाणी कनेक्र्नच्या तपमर्लाांचा मास्टर तक्ता तपासलयावर, लेखापरीक्षणात असे आढळले कक, नोंदणी नसलेलया 6,471 पाणी कनेक्र्नसाठी ₹ 262.81 कोटी ददले र्े ले होते. र् ासनाने उत्तर ददले (िुलै 2025) कक, नोंदणी नसलेलया पाणी कनेक्र्नसाठी बबले तयार होण्यावर ननबंध घालण्यासाठी प्र माणणकरण लावले िाईल . फ. वाहने …",
+      "class": "sound",
+      "parserValue": "262810000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 107,
+      "script": "devanagari",
+      "evidence": "… वद् युत तपर् ील असलेलया मास् टर तक्त्याच् या पुढील ववश् लेषणात असे ननदर्गनास आले कक, मास्टर तक्त्या मध् ये नों दणी नसलेलया 25814 ववद् युत कनेक्र्नच्या सांदभागत ₹ 2123.73 कोटीचे प्र दान मांिूर करण् यात आले होते. र् ासनाने उत्तर ददले (िुलै 2025) कक, नों दणी नसलेलया ववद् युत कनेक्र् नसाठी बबले तयार होण्यावर ननबंध घालण्यासाठी प्र माणणकर …",
+      "class": "sound",
+      "parserValue": "2123730000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 120,
+      "script": "mixed",
+      "evidence": "(22 फेब्रु वारी 2019) ददली, ज् यासाठी मुख् य अमभयांता (मु.अमभ.), एमिेपी, पुणे याांनी ₹ 96.02 कोटीांची सुधाररत टीएस (12 सप्टेंबर 2017) ददली.",
+      "class": "sound",
+      "parserValue": "96020000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 120,
+      "script": "mixed",
+      "evidence": "… छता ववभाग 2.3 ₹ 94.39 कोटींचा वायफळ खचच ‘सांगली स् जल्् यातील आटपाडी तालुक् यातील 53 गावांना पाणी पुरवठा’ बाबतचा सववस् तर प्र कल् प अहवाल चुकीचा बनववल् यामुळे ₹ 94.39 कोटींचा वायफळ खचच आणण पाणी पुरवठा योजना भौनतकररत् या पूणच होऊनही सु न होणे महाराष्र र् ासनाच्या पाणी पुरवठा व स् वच्िता ववभार्ाने ‘साांर्ली जिलह्यातील आटपाडी तालुक् …",
+      "class": "sound",
+      "parserValue": "94390000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 121,
+      "script": "devanagari",
+      "evidence": "अहवाल क्र . 4 - माचच 2024 रोजी संपलेल् या कालाविीचा अनुपालन लेखापरीक्षा अहवाल 100 योिना भौनतकदृष््या ₹ 94.39 कोटीचा खचग केलयानांतर पूणग झाली (िून 2019). तथावप, सवग कामे पूणग होईपयंत, डीपीआरमध्ये वापरासाठी ववचारात घेतलेलया ववद्यमान पाईप्स चे 15 वषे आयुष् य पूणग झाले होते. च …",
+      "class": "sound",
+      "parserValue": "94390000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 124,
+      "script": "mixed",
+      "evidence": "… ्यासाठी 1300 केव् हीए पयंत वीिपुरवठा वाढवला र्े ला नसलयाने, दोन्ही पांप खरेदी केलयापासून ननजष्क्र य रादहले. यामुळे या दोन् ही पांपाांच्या खरेदी खचागपोटी झालेला ₹ 97.2834 लाखाांचा खचग ननष्फ ळ ठरला. हे ननदर् ग नास आणून ददलयावर, मुख् य अमभयांता, एमिेपी, ित्रपती सांभािीनर्र याांनी साांधर्तले (िुलै 2024) कक, या कायागलयाने थकबाकी भरण्यास …",
+      "class": "sound",
+      "parserValue": "972834000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 222,
+      "script": "latin",
+      "evidence": "… ❖ Incorrect routing of CA receipts through National CAMPA and non-receipt of interest of ₹ 40.80 crore. ❖ Non-investment of balance of CAMPA fund ranging from ₹ 2,184.19 crore to ₹ 3,093.40 crore. ❖ Non-functioning of the GB and insufficient meetings SC and EC. What do we recommend? ❖ Time-bound APO planning and synchronised fund rel …",
+      "class": "sound",
+      "parserValue": "2184190000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 237,
+      "script": "latin",
+      "evidence": "The reply is not acceptable as the expenditure was not eligible to be funded from CAMPA funds. 2.1.8.5 Irregular expenditure of ₹ 3.94 crore on construction of official and residential buildings in urban locations As per Rule 5 (3) (e) of the CAF Rules, 2018, not more than 20 per cent of NPV of fore …",
+      "class": "sound",
+      "parserValue": "3940000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3510,
+      "pageNumber": 238,
+      "script": "latin",
+      "evidence": "After the formation of SPV, all the expenses were to be borne by the SPV. Audit observed that Maha CAMPA disbursed ₹ 5.50 crore to FDCM during 2021-22 and 2022-23 for the establishment of Rescue Centre in Gorewada Zoo in violation of the CAF Rules, 2018",
+      "class": "sound",
+      "parserValue": "5500000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3511,
+      "pageNumber": 59,
+      "script": "devanagari",
+      "evidence": "… र ामीण रोजगार हमी योज िा यािरील संपादणूक लेखापरीक्ष ण) 30 • माचव 2024 च् या अखेरीस कुशल/अधव-कुशल कामगारांसाठी अकुशल मजुरी आणण साहहत्य /मजुरीच् या खचावची थकबाकी ₹ 1,736.63 कोटी (अकुशल मजुरी: ₹ 761.05 कोटी; कुशल/ननम-कुशल कामगारांसाठी साहहत्य /मजुरी: ₹ 975.58 कोटी) होती. अकुशल मजुरीप्रती प्र लंत्रबत दानयत्वाची कारणे कामगारांची चुकीची आण …",
+      "class": "sound",
+      "parserValue": "1736630000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3511,
+      "pageNumber": 86,
+      "script": "mixed",
+      "evidence": "… दहांगिी, शमझाापूर) मानवी/हस्तशलणखत हजेरीपटामध्ये नोंि असलेले 508 मनुष्यदिवस इलेतरॉननि हजेरीपटामध्ये 574 मनुष्यदिवस म् हिू न नोंिववण्यात आल्याने 102 िामगाराांना ₹ 15,807 चे अनतररतत प्र िान िरण्यात आले. • एिा हजेरीपटामध्ये (जजल्हा : छत्रपती सांभाजीनगर , ग्र ाम पांचायती : गेवराई िुबेर) हजेरीपटानुसार एि िामगार गैरहजर असला तरी तो इल …",
+      "class": "sound",
+      "parserValue": "1580700",
+      "published": true,
+      "reason": "read as rupees written out in full: the sentence states no scale word and the page carries no (₹ in crore/lakh) caption, so no table scale governs it. The digits re-derive exactly from the evidence; the SCALE IS INFERRED from the absence of"
+    },
+    {
+      "documentId": 3511,
+      "pageNumber": 106,
+      "script": "mixed",
+      "evidence": "… V - कामांची अंमलबजावणी 73 5.11.2 रेशीम शेतीचे काम जजल्हा : धाराभशव; त लुक : कळंब; ग्र म पांच यत : िेळक (धािोरा) कामाची जथिती : अधगवट सोडूि हदलेले; झालेला खचष : ₹ 2.35 लाख; क म सुरू केले ते वषग: 2022-23. 2022-23 मध्ये रेशीम पालनाच्या कामाला मुंजुरी िेण्यात आली. शेतकऱयाचे उत्पन्न वाढववणे हा या कामाचा उद्िेश होता. लाभार्थयाांनी तुत …",
+      "class": "sound",
+      "parserValue": "23500000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3511,
+      "pageNumber": 111,
+      "script": "devanagari",
+      "evidence": "… रण् यासाठी केंि सरकारकडे सातत्याने पाठपुरावा केला जातो. लेखापर क्ष णाच्या असे ननदर्तनास आले की , सप्पटेंबर 2025 पयांत 2019 -20 ते 2023-24 या कालाििीर्ी संबंधित ₹ 16.37 कोट ं चे 10,917 नाकारलेले व् यििार िाढले िोते. 2019-20 ते 2023-24 दरम्यान मुंजूर झालेल् या कामाुंपैकी, 19.57 टक्के कामे अपूणत िोती तर 27.62 टतके कामे सुरू ि झाल नव …",
+      "class": "sound",
+      "parserValue": "16370000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 191,
+      "script": "latin",
+      "evidence": "… strict Rural Development Agency and District Executive officer as members and Deputy District Executive Officer of the Board as the Member Secretary. 42 `104 - ` 7.64 crore payable + interest of ` 18.13 crore (furnished by SMC) = ` 114.49 crore. 43 The beneficiary family (family comprising of husband, wife and unmarried sons and/ …",
+      "class": "sound",
+      "parserValue": "7640000000",
+      "published": true,
+      "reason": "An amount stated with its own scale word — crore, lakh, कोटी — in the sentence that reports it, on a page whose font mapping dropped the rupee glyph and where that glyph was decoded per ADR-040. Each re-derives exactly from its own evidence"
+    },
+    {
+      "documentId": 3513,
+      "pageNumber": 29,
+      "script": "devanagari",
+      "evidence": "… वत आढळून आली ती प्र करणे खाली दिली आहेत. • डीएमएफटी भसांधुिुगयमध्र्े , 2016-17 ते 2022-23 िरम्र्ान , ₹ 32.72 कोटीांच्र्ा वसूल करण्र्ार्ोग्र् रकमेच्र् ा तु लनेत ₹ 7.23 कोटीांचे डीएमएफटी र् ोगिान प्र ाप्त झा ले. हे मुखर्तः र् ा वस्तु जस्थतीमु ळे होते की 2018-19 पासून डीएमएफटीच्र् ा वसू ल करण्र्ार्ोग्र् रकमेच्र्ा तु लनेत कोणतेही डीए …",
+      "class": "sound",
+      "parserValue": "7230000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3513,
+      "pageNumber": 65,
+      "script": "mixed",
+      "evidence": "… ीपीसीएलने अनुिमे ₹ 0.78 कोटी आणण ₹ 0.35 कोटी क्र कमतीचे प्र ौढ व् हेंदटलेटर आणण बॅररएदरक ऑपरेशन टेबल खरेिी केले व उवयररत वस् तू खरेिी केल्र्ा गेल्र्ा नाहीत आणण ₹ 0.75 कोटी रककम मेससय एचबीपीसीएलकडे र् वनावापर पडून आहे (नोव्हेंबर 2024) . लेखापरीक्षणात असे ननिशयनास आले की अांमलबजावणी र्ांत्र णे ने डीएमएफटी र् वतमाळला न खरेिी केलेल्र …",
+      "class": "sound",
+      "parserValue": "750000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3513,
+      "pageNumber": 65,
+      "script": "mixed",
+      "evidence": "₹ 4.00 कोटी पैकी, अांमलबजावणी र्ांत्र णे ने प्र ाथभमक आरोग्र् केंद्रातील र् वर्वध उपकरणाांच्र्ा खरेिीसाठी ₹ 2.28 कोटी आणण 11 रुग् णवादहका खरेिीसाठी (जून 2021) ₹ 1.41 कोटी …",
+      "class": "sound",
+      "parserValue": "4000000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3513,
+      "pageNumber": 66,
+      "script": "mixed",
+      "evidence": "… अांमलबजावणी 41 खचायला प्र शासकीर् मान्र्ता िेण्र्ात आली (04 डडसेंबर 2018) आणण अांमलबजावणी र्ांत्र णे ला िोन हप्त्र्ाांमध्र्े ₹ 0.18 कोटी (23 जानेवारी 2019 रोजी ₹ 0.04 कोटी आणण 28 मे 2019 रोजी ₹ 0.14 कोटी) जारी करण्र्ात आले. प्रत्र्क्ष मालमत्तेच्र् ा सांर्ु कत पडताळणी िरम्र् ान, लेखापरीक्ष णात ननिशयनास आले की मे 2019 पर्ंत ₹ 0.18 …",
+      "class": "sound",
+      "parserValue": "40000000",
+      "published": true,
+      "reason": "read individually. The figure re-derives exactly from its own evidence with the unit the source states, no criterion governs it, and the page's text layer is sound. Flagged ambiguous only because a neighbouring amount in the window is claim"
+    },
+    {
+      "documentId": 3513,
+      "pageNumber": 155,
+      "script": "latin",
+      "evidence": "DMFT Chandrapur, released the lumpsum payment of ₹ 5.70 crore (17 December 2019) and additional payment of ₹ 2.73 crore (15 June 2022) to IA. IA further placed the work order with M/s. HBPCL who in turn procured the material from M/s. Phillips India Limited",
+      "class": "sound",
+      "parserValue": "2730000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3514,
+      "pageNumber": 91,
+      "script": "latin",
+      "evidence": "Annual Technical Inspection Report (Local Bodies) for the year ended 31 March 2022 8 pending between one to two years, 315 UCs amounting to ` 699.76 crore (23.10 per cent) were pending for the period between three and five years and 161 UCs amounting to ` 317.17 crore (10.47 per cent) were pending for more than f …",
+      "class": "sound",
+      "parserValue": "699760000000",
+      "published": true,
+      "reason": "An amount stated with its own scale word — crore, lakh, कोटी — in the sentence that reports it, on a page whose font mapping dropped the rupee glyph and where that glyph was decoded per ADR-040. Each re-derives exactly from its own evidence"
+    },
+    {
+      "documentId": 3514,
+      "pageNumber": 93,
+      "script": "latin",
+      "evidence": "The annual accounts approved by the ZPs is certified by DLFAA. The certified annual 12 BG: ` 9085.20 crore and tied grant: ` 13,627.80 crore 13 Amravati, Beed, Chandrapur, Dhule, Gadchiroli, Latur, Nagpur, Nanded, Nandurbar, Nashik, Osmanabad, Palghar, Parbhani, Raigad, Sangli and Satara",
+      "class": "sound",
+      "parserValue": "13627800000000",
+      "published": true,
+      "reason": "An amount stated with its own scale word — crore, lakh, कोटी — in the sentence that reports it, on a page whose font mapping dropped the rupee glyph and where that glyph was decoded per ADR-040. Each re-derives exactly from its own evidence"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 101,
+      "script": "mixed",
+      "evidence": "… जेच 2028-29 पय8त ₹ 1,38,605.78 कोट2ंया याजासह 9हणजेच बाजारकजा4या 39.41 ट\\के रकमेची (₹ 1,98,142.74 कोट2) परतफेड करावी लागणार आहे. 2029-30 ते 2033-34 या कालावधीत ₹ 51,762.49 कोट2ंया याजासह, ₹ 2,42,070 कोट2ंचे बाजार कज4 देय असेल. 32083.00 76748.00 77390.65 101320.00 140750.00 74500.00 33459.71 58314.74 46831.33 31285.37 20477.12 7774.47 …",
+      "class": "sound",
+      "parserValue": "51762490000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 255,
+      "script": "latin",
+      "evidence": "… ed and inflexible expenditure as percentage of revenue expenditure decreased from 72.25 per cent in 2019-20 (₹ 2,16,973.32 crore) to 62.38 per cent in 2023-24 (₹ 2,77,178 crore)",
+      "class": "sound",
+      "parserValue": "277178000000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 303,
+      "script": "latin",
+      "evidence": "… ure on salaries and wages over the five-year period (2019-20 to 2023-24) increased by ₹ 33,063.58 crore (32.42 per cent) from ₹ 1,01,981.24 crore in 2019-20 to ₹ 1,35,044.82 crore in 2023-24",
+      "class": "sound",
+      "parserValue": "135044820000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 305,
+      "script": "latin",
+      "evidence": "… Husbandry, Dairy development and Fisheries department, spent a total amount of ₹ 15,561.84 crore as subsidies mainly for Namo Shetkari Mahasanman Nidhi Yojana (₹ 5,512 crore) and premium subsidy under Pradhanmantri Crop Insurance Scheme (₹ 5,154.32 crore). • The Transport Commissioner booked an expenditure of ₹ 3,960 crore as subsi …",
+      "class": "sound",
+      "parserValue": "5512000000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 305,
+      "script": "latin",
+      "evidence": "… of incentives6’ (₹ 5,700 crore), concession in energy tariff for industrial consumers (₹ 1,200 crore) and concession in energy tariff for powerloom consumers (₹ 1,982 crore). • Agriculture, Animal Husbandry, Dairy development and Fisheries department, spent a total amount of ₹ 15,561.84 crore as subsidies mainly for Namo Shetkari …",
+      "class": "sound",
+      "parserValue": "1982000000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 356,
+      "script": "latin",
+      "evidence": "… t of Maharashtra incurred expenditure of ₹ 5,82,296.66 crore against the total grants and appropriations of ₹ 7,26,220.25 crore resulting in overall savings of ₹ 1,43,923.59 crore",
+      "class": "sound",
+      "parserValue": "143923590000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 374,
+      "script": "latin",
+      "evidence": "… 342.46 1438 3674.60 Source: Finance Accounts 2023-24 Out of 1,198 AC bills amounting to ₹ 831.10 crore drawn during the year 2023-24, 244 AC bills amounting to ₹ 734.42 crore (88.37 per cent) were drawn in March 2024",
+      "class": "sound",
+      "parserValue": "734420000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 375,
+      "script": "latin",
+      "evidence": "… 24 108 (Source: Finance Accounts 2023-24) Chart 4.2 reveals that 65.34 per cent of the outstanding DCC bills pertain to Medical Education and Drugs Department (₹ 2,400.86 crore) and 20.58 per cent relate to Public Health Department (₹ 756.17 crore)",
+      "class": "sound",
+      "parserValue": "2400860000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 376,
+      "script": "latin",
+      "evidence": "During the year, 171 PD Accounts with an amount of ₹ 19.53 crore were closed and the funds were adjusted in the Consolidated Fund of the State",
+      "class": "sound",
+      "parserValue": "19530000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion phrase governs it, and its page's text layer is sound (glyph_substitution 0). Screened f"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 48,
+      "script": "mixed",
+      "evidence": "… lबर 2017). लेखापर(णा#या असे नदशनास आले क 43 पैक तीन वकासकांनी मुंबई इमारत दुQती व पुनरचना मंडळाची देय थकबाक भरल( होती. उव5रत 40 वकासकांची थकबाक माच 2022 अखेर(स ` 261.14 कोट( होती. 40 वकासकांकडून थकत ` 261.14 कोट(ंपैक 59 टfके (` 154.87 कोट() 18 वकासकांकडून थकत होते Xयांनी गे3या पाच वषाSपासून काह(ह( रfकम भरलेल( न$हती. तसेच, नवडले3या …",
+      "class": "sound",
+      "parserValue": "261140000000",
+      "published": true,
+      "reason": "An amount stated with its own scale word — crore, lakh, कोटी — in the sentence that reports it, on a page whose font mapping dropped the rupee glyph and where that glyph was decoded per ADR-040. Each re-derives exactly from its own evidence"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 62,
+      "script": "mixed",
+      "evidence": "… दनका बांध.यासाठU खरेद( केल( (ए9ल 2012). यानुसार, महाराOP गृहनमाण व े वकास 9ा,धकरणाने 1,423 सदनकां#या (10 दुकानांसह)32 बांधकामाचा समावेश असले3या गृहनमाण योजनेला ` 339.73 कोट(ंची 9शासकय माBयता Fदल( (जुलै 2013). हे काम कंाटदाराला मोया 9माणात एकरकमी ` 335.84 कोट( खच कLन 30 मFहने jहणजे 24 nडसlबर 2015 पयSत `कंवा यापूव@ पूण कर.या#या वFह …",
+      "class": "sound",
+      "parserValue": "339730000000",
+      "published": true,
+      "reason": "An amount stated with its own scale word — crore, lakh, कोटी — in the sentence that reports it, on a page whose font mapping dropped the rupee glyph and where that glyph was decoded per ADR-040. Each re-derives exactly from its own evidence"
+    },
+    {
+      "documentId": 3516,
+      "pageNumber": 62,
+      "script": "mixed",
+      "evidence": "… वेळेवर हतांत5रत हो.यावर प5रणाम झाला असला, तर( माच 2020 ते जून 2020 या कालावधीत अशा नधीचे 9माण 2018-19 ते 2020-21 दरjयान 9ाkत झाले3या एकूण ` 57.85 कोट( पैक केवळ ` 2.09 कोट( होते. यामुळे, शासनाचे उ तर वीकाराह नाह(. 2.5 नधी अडकून राहणे मागणीचे नधारण न करता महारा गृहनमाण व े! वकास ा#धकरणाने गृहनमाण योजना राबव2याने ```` 267.52 कोटचा …",
+      "class": "sound",
+      "parserValue": "2090000000",
+      "published": true,
+      "reason": "An amount stated with its own scale word — crore, lakh, कोटी — in the sentence that reports it, on a page whose font mapping dropped the rupee glyph and where that glyph was decoded per ADR-040. Each re-derives exactly from its own evidence"
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 102,
+      "script": "latin",
+      "evidence": "… lated to surrender of saving it was noticed that no amount of saving was surrendered during the financial year by the Department and a bulk amount of saving of ₹879.98 crore under various budget",
+      "class": "sound",
+      "parserValue": "879980000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3848,
+      "pageNumber": 131,
+      "script": "latin",
+      "evidence": "… money/stores, and the remaining 2966 cases involving ₹33.49 crore were pertaining to misappropriation/loss of Government material, whereas 1415 cases involving ₹6.24 crore pertaining to misappropriation/loss of Government material were pending for more than 25 years. 3.13 Follow-up Action on State Finances Audit Reports In every …",
+      "class": "sound",
+      "parserValue": "6240000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3849,
+      "pageNumber": 36,
+      "script": "latin",
+      "evidence": "This is attributed to negligible community contribution (₹ 27 lakh contributed against the collectable amount of ₹ 241.74 crore towards community contribution), as discussed in Paragraph 3.8.2",
+      "class": "sound",
+      "parserValue": "270000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3851,
+      "pageNumber": 98,
+      "script": "latin",
+      "evidence": "… tion of 35143 works under the category in the state. 18 of these works were suspended, 11 were cancelled and six were ongoing after incidence of expenditure of ₹ 13.90 lakh",
+      "class": "sound",
+      "parserValue": "139000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3854,
+      "pageNumber": 61,
+      "script": "latin",
+      "evidence": "… the estimate of works separately. 2.3 Undue benefit of ₹ 59.04 crore to the contractors The EE, Narmada Development Division 5, Katni allowed undue benefit of ₹ 59.04 crore to the contractors on account of (i) awarding work within the scope of the agreement to a new contractor, (ii) extra payment on the plea of Force Majeure and ( …",
+      "class": "sound",
+      "parserValue": "59040000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3854,
+      "pageNumber": 61,
+      "script": "latin",
+      "evidence": "… at selected reaches between RD 107.00 km and 111.80 km, was executed (March 2023) through another contractor (M/s Phaloudi Constructions) at contract amount of ₹ 9.76 crore",
+      "class": "sound",
+      "parserValue": "9760000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3854,
+      "pageNumber": 61,
+      "script": "latin",
+      "evidence": "An amount of ₹ 7.30 crore was clearly paid on account of price adjustment, even after completion of work and during O&M period resulting in excess payment to the contractor",
+      "class": "sound",
+      "parserValue": "7300000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3854,
+      "pageNumber": 77,
+      "script": "latin",
+      "evidence": "Accordingly, SD and RF of ₹ 4.41 lakh and ₹ 3.31 lakh respectively were leviable as per the rates specified in the Acts",
+      "class": "sound",
+      "parserValue": "44100000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3854,
+      "pageNumber": 79,
+      "script": "latin",
+      "evidence": "Thus, suspected tampering of registration records by the Service Providers resulted in short deposit of SD and RF by ₹ 14,82,807",
+      "class": "sound",
+      "parserValue": "148280700",
+      "published": true,
+      "reason": "read as rupees written out in full: no scale word, and the page carries no unit caption. The digits re-derive exactly from the evidence; the SCALE IS INFERRED from the absence of a declaration, not stated by the source. Screened for implaus"
+    },
+    {
+      "documentId": 3856,
+      "pageNumber": 66,
+      "script": "latin",
+      "evidence": "Further, stated that ₹ 2.33 crore out of ₹ 21.68 crore was surrendered to CTAD and therefore, it could not have been deposited in SNA. It was also ensured that the matter of unspent amount with Vanya Prakashan woul …",
+      "class": "sound",
+      "parserValue": "21680000000",
+      "published": true,
+      "reason": "the source states the unit; the figure re-derives exactly from its own evidence, every other amount in that evidence is a fact of its own, no criterion governs it, the page's text layer is sound, and it is not implausibly small without a ra"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 25,
+      "script": "mixed",
+      "evidence": "… 01 एK(ल 2017 रोजी नधीची आरंभीची gश%लक ₹ 5,857.29 कोट होती. 2017-18 पासून 2021-22 पयeत मंडळाची एकूण जमा ₹ 10,294.53 कोट होती, ;याम[ये ₹ 7,689.73 कोट उपकर संकलन, ₹ 2,571.90 कोट गुंतवणुकVवरल Qयाज, नHदणी शु%क, इतर जमा आण मागील वषा<चे समायोजन ₹ 32.90 कोट यांचा समावेश होता. 2017-18 ते 2021-22 दरGयान मंडळाचा एकूण महसुल खच< ₹ 4,482.22 कोट ह …",
+      "class": "unreadable-evidence",
+      "parserValue": "2571900000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 39,
+      "script": "mixed",
+      "evidence": "… ण रायगड. 16 नागपूर, मुंबई उपनगर, जालना, परभणी, वधाO, यवतमाळ, लातूर, गqbदया आ2ण कोFहापूर. 17 नागपूर ₹ 24.26 लाख, मुंबई उपनगर ₹ 4.88 लाख, जालना ₹ 5.33 लाख, परभणी ₹ 1.02 लाख, वधाO ₹ 4.13 लाख, यवतमाळ ₹ 2.63 लाख, लातूर ₹ 15.58 लाख, गqbदया ₹ 7.35 लाख आ2ण कोFहापूर ₹ 2.79 लाख",
+      "class": "unreadable-evidence",
+      "parserValue": "10200000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3512,
+      "pageNumber": 95,
+      "script": "mixed",
+      "evidence": "… प केलेल र!कम आHण वाटपाचा कालावधी 1 बीड 106 2.12 कोट (मे 2021 ते माच! 2022) 106 ₹ 1.69 कोट ऑ?टोबर 2021 आ9ण नो}ह0बर 2022 2 सोलापूर 321 6.42 कोट (फे~ुवर 2021) 278 ₹ 5.56 कोट मे 21 आ9ण ऑ?टोबर 2021 दरJयान 3 सोलापूर 235 4.70 कोट (नो}ह0बर 2021) 219 ₹ 1.75 कोट ए#<ल 2022 मBये 662 13.24 603 * <क'पाया बांधकामाया ट==यानुसार महाराEU गृहनमा!ण …",
+      "class": "unreadable-evidence",
+      "parserValue": "5560000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3514,
+      "pageNumber": 41,
+      "script": "mixed",
+      "evidence": "… 2 टNके) $वह5त वेळेत तर 13 (68 टNके) अहवाल कालमयाEदेनंतर जार5 करbयात आले होते. • जून 2022 पयvत दु$वEनयोग, अफरातफर Vकंवा अपहाराशी संबंधत, ₹ 1.25 कोट5ची 35 Tकरणे, ₹ 28.23 कोट5ची 1927 Tकरणे आ/ण ₹ 65 लाखाची 29 Tकरणे अनुyमे महानगरपा*लका, नगरप1रषदा व नगर पंचायतींम8ये थVकत होती. • थानक नधी लेखापर5Oण संचालनालयाने, वषE 2013-14 साठ_, वा$षEक …",
+      "class": "unreadable-evidence",
+      "parserValue": "28230000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 17,
+      "script": "mixed",
+      "evidence": "… .99 टQके) झाला आहे. साधनां-या मयादेपलकडे केले0या खचाचा प1रणाम महसुल: जमा आ!ण महसुल: खच यातील ऋण तफावतीमुळे महसुल: तूट नमाण होते. रायाची महसुल: तूट 2022-23 मधील ₹ 1,936.47 कोट: (थूल राय उपJनाया 0.05 टQके) वVन चालू वषात ₹ 13,754 कोट: (थूल राय उपJनाया 0.34 टQके) झाल: आहे. राय शासनाने भांडवल: खचावर ₹ 72,573.40 कोट: खच केले. 2023-24 मWये …",
+      "class": "unreadable-evidence",
+      "parserValue": "1936470000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 18,
+      "script": "mixed",
+      "evidence": "… ोट: ₹ 65 कोट:ंचे मुGल भरले. हमीं-या कारणातव आकिमक दा<यवे शासनाने ववध महामंडळे आ!ण इतरांनी घेतले,या कजाची हमी ^दल: होती, जी 2023-24 अखेर ₹ 85,896.94 कोट: (मुGल: ₹ 79,243.90 कोट:; याज: ₹ 6,653.04 कोट:) होती. व)धमंडळात सादर करiयात आले,या हमी ववरणपानुसार 2023-24 मWये ₹ 23,115.81 कोट:ंची हमी राय शासनाने ^दल: होती. वष 2023-24 मWये काह:ह: र …",
+      "class": "unreadable-evidence",
+      "parserValue": "79243900000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 60,
+      "script": "mixed",
+      "evidence": "करण II: रा7याची /व त8यव9था 33 वाढ2व जमा यामुळे ह2 वाढ ामुcयाने अ-लोह2य ख>नकम4 व धातुकम4 उयोगांतग4त (₹ 6,933.25 कोट2) झाल2. याज ा_तीचा एक मुख [ोत 9हणजे रा याया अ>तAर\\त रोख Pशलक रकमेया गुंतवणुकKतून Pमळणारे याज",
+      "class": "unreadable-evidence",
+      "parserValue": "6933250000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 76,
+      "script": "mixed",
+      "evidence": "… 4.14 4405.73 [ोत: संबंHधत वषा8चे वतीय लेखे वष4 2023-24 मCये रा&s2य >नवृतीवेतन णाल2 मधील एकूण योगदान ₹ 5,645.27 कोट2 {कम4चा`यांचे’ योगदान ₹ 2,447.61 कोट2 ( तर-1 ₹ 2,290.01 कोट2) आण शासनाचे योगदान ₹ 3,197.66 कोट2} होते. शासनाने लोक लेcयातील 8342-117 पAरभा षत अंशदान >नवृतीवेतन योजना’ या लेcयांतग4त ₹ 8,704.14 कोट2 ह तांतAरत केले. रा&s2य …",
+      "class": "unreadable-evidence",
+      "parserValue": "2290010000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 78,
+      "script": "mixed",
+      "evidence": "… गाने ₹ 2,606 कोट2ंचे अनुदान दले, यापैकK अनुसूHचत जाती व नवबौx लोकांसाठm असलेया घरकुल योजनेसाठm ₹ 1,357 कोट2ंचे अनुदान देhयात आले. • अjन व नागर2 पुरवयाने दलेया ₹ 2,956.97 कोट2ंया अनुदानात ामुcयाने अjनधाjय यवहारातील तूट भuन काढhयासाठm (₹ 1,069.55 कोट2), रा&s2य अjन सुरoा योजनEतग4त तूट भuन काढhयासाठm (₹ 831.47 कोट2) आण कE F2य आधारभूत t …",
+      "class": "unreadable-evidence",
+      "parserValue": "2956970000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 81,
+      "script": "mixed",
+      "evidence": "… वल योगदान कमी झायाने मCयम Pसंचनावर2ल भांडवल2 खचा4त ₹ 5,100 कोट2ंची घट झाल2. अjन साठवणूक आण गोदामांवर2ल भांडवल2 खचा4त लoणीय घट झाल2 कारण नागर2 पुरवयाअंतग4त खच4 ₹ 2,713.69 कोट2ंनी कमी झाला आण भांडवल2 लेcयांवर2ल वसुल2 आण जमा ₹ 3,833.59 कोट2ंनी वाढल2. 2.4.3.2 भांडवल- खचा3ची गुणव ता शासनाने चालू वषा4त केलेया गुंतवणुकKचे आण इतर भांडवल2 ख …",
+      "class": "unreadable-evidence",
+      "parserValue": "2713690000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 87,
+      "script": "mixed",
+      "evidence": "… ;;यापोट2 ₹ 2,841.60 कोट2 ा_त झाले. रा य शासनांचा वष4भरातील ह सा ₹ 947.20 कोट2 होता. रा य शासनाने ₹ 3,788.80 कोट2ंची (कE Fाचा ह सा ₹ 2,841.60 कोट2, रा याचा ह सा ₹ 947.20 कोट2) संपूण4 र\\कम मुcय शीष4 8121-122 रा य आपती >तसाद >नधीत ह तांतAरत केल2. या >नधीतून खच4 करhयात आले होते व यातून काह2ह2 र\\कम गुंत वल2 गेल2 नसयाने मुcय शीष4 2245 म …",
+      "class": "unreadable-evidence",
+      "parserValue": "947200000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 94,
+      "script": "mixed",
+      "evidence": "… कोणयाह2 >नकषांसाठm रा याचे कज4 मानले गेले नाह2 इयाद2 [ोत : संबंHधत वषा8चे वतीय लेखे रा याची एकूण दा>यवे 2019-20 मधील ₹ 4,79,899.14 कोट2वuन वाढून 2023-24 दर9यान ₹ 7,58,260.93 कोट2 झाल2, ह2 58 ट\\के झालेल2 वाढ ामुcयाने लोक ऋणात (₹ 2,50,560.62 कोट2) झालेल2 68.17 ट\\के आण लोक लेcयातील दा>यवांमCये (₹ 27,801.17 कोट2) झालेल2 24.75 ट\\के वाढ यामु …",
+      "class": "unreadable-evidence",
+      "parserValue": "758260930000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 114,
+      "script": "mixed",
+      "evidence": "… 1.70 कोट2 ा_त झाले असून, ₹ 2,228.26 कोट2 Pशलक आहेत. वत लेखा 2023-24 नुसार, ₹ 0.04 कोट2 हमी शुक मुcय शीष4 0075-108- हमी शुक अंतग4त एकe[त >नधीत जमा करhयात आले आण ₹ 3.72 कोट2 थेट साव4ज>नक खायातील हमी वमोचन (Aरडे9_शन) >नधीत जमा करhयात आले, ₹ 67.94 कोट2या हमी शुकाची Pशलक र\\कम एकe[त >नधीत tकंवा साव4ज>नक खायात जमा केल2 गेल2 नाह2 जी भार …",
+      "class": "unreadable-evidence",
+      "parserValue": "3720000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 117,
+      "script": "mixed",
+      "evidence": "… 2022-23 या तुलनेत 2023-24 मCये वत:चा कर महसूल ₹ 24,857.06 कोट2ने (8.96 ट\\के), करेतर महसूल ₹ 4,081.53 कोट2ने (24.33 ट\\के) आण कE F2य कर आण शुकांमCये रा याचा वाटा ₹ 11,348.78 कोट2ने (18.91 ट\\के) वाढला आहे, तर कE F शासनाकडून देhयात येणा`या सहाIयक अनुदानात ₹ 15,368.84 कोट2ंची (29.89 ट\\के) घट झाल2 आहे. • 2023-24 मCये महसुल2 खच4 (₹ 4,44,350 …",
+      "class": "unreadable-evidence",
+      "parserValue": "11348780000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 118,
+      "script": "mixed",
+      "evidence": "… 9.79 कोट2) वाढ झाल2 आहे. 2023-24 मCये ₹ 72,573.40 कोट2ंया एकूण भांडवल2 खचा4पैकK ₹ 26,374.51 कोट2 (36.34 ट\\के) र ते व पुलांवर, पाटबंधारे आण पूर >नयं[ण कामांसाठm ₹ 14,921.12 कोट2 (20.56 ट\\के), कृषी आण संलन सेवांसाठm ₹ 5,001.79 कोट2 (6.89 ट\\के) खच4 करhयात आले. • 31 माच4 2024 रोजी रा य शासनाने वैधा>नक महामंडळे, Mामीण बँका, संयु\\त टॉक कं …",
+      "class": "unreadable-evidence",
+      "parserValue": "14921120000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 129,
+      "script": "mixed",
+      "evidence": "… ोट8 कंवा यापे9ा जा त) मोठF बचत/अ त:रdत झाल8, 4याचे तपशील परशट 3.3 म]ये .दले आहेत. या 40 उप-शीषाtपैक 11 उप-शीषाtतग\"त तFता 3.6 म]ये स+व तर दश\"+व!यामाणे अं तम बचत ₹ 100 कोट8ंपे9ा जा त होती. तFता 3.6: अंQतम बचतीकडे (₹ 100 कोट3 आEण !याहून अ>धक) नेणारे अनावXयक पुन2वQनयोजन (₹ कोट3त) अनु. . अनुदान उप-शीष तपशील मूळ पुरवणी पुन2वQनयोजन एक …",
+      "class": "unreadable-evidence",
+      "parserValue": "100000000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 129,
+      "script": "mixed",
+      "evidence": "… \"मधून इतर समान शीषा\"म]ये पुन+व\" नयोजन मंजूर कZ शकतात. लेखापर89ण +व(लेषणात असे नदश\"नास आले क पुन+व\" नयोजन जा त माणात झाले आ?ण प:रणामी 40 उप-शीषाtतग\"त (येक करणात ₹ 10 कोट8 कंवा यापे9ा जा त) मोठF बचत/अ त:रdत झाल8, 4याचे तपशील परशट 3.3 म]ये .दले आहेत. या 40 उप-शीषाtपैक 11 उप-शीषाtतग\"त तFता 3.6 म]ये स+व तर दश\"+व!यामाणे अं तम बचत ₹ …",
+      "class": "unreadable-evidence",
+      "parserValue": "10000000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 134,
+      "script": "mixed",
+      "evidence": "… साधनां5या वाटपापासून वंCचत ठेवते आ?ण साव\"ज नक +वतावर कमजोर वैधा नक नयंGणाकडे नेते. 3.3.4.2 'Qनरंक' खच असलेल3 अनुदाने 2023-24 म]ये दोन अनुदानांतग\"त कर%यात आलेल8 ₹10 कोट8ंहून अCधक असलेल8 ₹ 502.48 कोट8ंची अथ\"संक!पीय तरतुद वष\"अखेर8स अखCच\"त रा.हल8. तपशील तFता 3.8 म]ये .दले आहेत. तFता 3.8: 'Qनरंक' खच असलेल3 अनुदाने (₹ कोट3त) अनु. अ …",
+      "class": "unreadable-evidence",
+      "parserValue": "10000000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 154,
+      "script": "mixed",
+      "evidence": "… ी' मधील रकमेवर Cयाजाची तरतूद करणे आण Cयाज देणे हे शासनाचे दायव आहे. 1 ए ल 2023 रोजी, 'Cयाज देणा=या ठेवी' मKये ₹ 61,029.16 कोट आण ‘Cयाज देणारे राखीव नधी’ यामKये ₹ 5,511.20 कोट, 4श:लक होते, <यावर शासनाने अनुRमे ₹ 2,913.60 कोट आण ₹ 500.74 कोट Cयाजाची तरतूद केल. तथा प, 'Cयाज दे2या=या ठेवी' आण 'Cयाज देणारे राखीव नधी' यां-या Cयाजा-या संदभ …",
+      "class": "unreadable-evidence",
+      "parserValue": "5511200000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 163,
+      "script": "mixed",
+      "evidence": "… ला. याचमाणे, 2023-24 मKये रा<य शासनाने 53 मु>य शीषाqशी संबंधत ₹ 5,307.62 कोटं-या जमेचे गौण शीषाqतगत “800-इतर जमा” अंतगत वगxकरण केले जे एकूण एकi7त महसुल जमे-या (₹ 5,57,326.18 कोट) 0.95 ट[के आहे. 2019-20 ते 2023-24 या कालावधीत एकूण एकi7त",
+      "class": "unreadable-evidence",
+      "parserValue": "557326180000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 172,
+      "script": "mixed",
+      "evidence": "… ल <याgवारे मंजुर देणारे ाधकरण ठरा वक अटंची पूतता के:याची खा7ी करतील. वरल कलमांतगत लेखापरfण करावया-या सं/था / नगम / ाधकरणे शोधून काढणे आवvयक आहे आण <या सं/थांना ₹ 25 लाख pकंवा यापेfा अधक अथसहाkय दे2यात आले यांना कोणया हेतूने मदत दे2यात आल व या सं/थांचा एकूण खच याची मा@हती शासकVय वभागमुखांनी दरवषx लेखापरfणास सादर करणे आवvयक आहे. …",
+      "class": "unreadable-evidence",
+      "parserValue": "250000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 175,
+      "script": "mixed",
+      "evidence": "… ा यन कर2यात आले:या 7ुट वषानुवष, कायम आहेत आण आम-या अहवालात नद व:या जात अस:याचे आम-या नदशनास आले आहे. 4.18 !नMकष • रा<य शासना-या 32 वभागांना दे2यात आले:या एकूण ₹ 36,756.09 कोट (10,793 उपयोगता माणप7े) अनुदानासंदभातील उपयोगता माणप7े सादर कर2यात आलेल नाहत. उपयोगता माणप7े नस:यामुळे ातकयाqनी अनुदान <या उ0ेशासाठ& @दले होते यासाठ& वापरले आ …",
+      "class": "unreadable-evidence",
+      "parserValue": "36756090000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 188,
+      "script": "mixed",
+      "evidence": "परशटे 155 परशट – 3.2 (संदभः प रछेद 3.3.1; पृठ 99) 2023-24 दरQयान अ7तरBत पुरवणी तरतुद&ंसह (₹ 10 कोट& आAण अधक) बंद झालेल& अनुदाने/4व7नयोजन (₹ कोट&त) अ",
+      "class": "unreadable-evidence",
+      "parserValue": "10000000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3515,
+      "pageNumber": 198,
+      "script": "mixed",
+      "evidence": "परशटे 165 परशट – 3.5 (संदभः प रछेद 3.3.4; पृठ 102) वष 2023-24 दरQयान मो_या ,माणात (₹ 100 कोट&पे-ा अधक बचत असलेले) अनुदाने/4व7नयोजन (₹ कोट&त) अनु S. अनुदान तपशील मूळ पुरवणी एकूण ,य- बचत ,या4पत ,या4पत रBकम वगळून बचत महसुल& (दतमत) 1. ए04 स0चवालय व संकJण स …",
+      "class": "unreadable-evidence",
+      "parserValue": "100000000000",
+      "published": false,
+      "reason": "withheld as a class: the evidence stored for this fact is unreadable. This PDF's font maps glyphs outside Unicode, so its text layer extracts as mojibake - Latin letters and symbols wedged into Devanagari words. Digits usually survive that;"
+    },
+    {
+      "documentId": 3849,
+      "pageNumber": 55,
+      "script": "latin",
+      "evidence": "… nal 10 per cent from the inclusive GST PAC. For original PAC of ` 100 Formula to be applied = 90 per cent of ₹100 = ₹ 90 Revised PAC = ` 90 For original PAC of ` 100 Formula applied = 90 per cent of ₹ 100; and then added 12 per cent GST i.e",
+      "class": "worked-example",
+      "parserValue": "10000",
+      "published": false,
+      "reason": "Not a sum anyone paid. Two state a policy ceiling — a repeat order limited to 50 per cent of the initial order 'or ₹10 crore whichever is less' — which is a criterion (ADR-025). The other four are the worked example of a formula: 'For origi"
+    },
+    {
+      "documentId": 3849,
+      "pageNumber": 55,
+      "script": "latin",
+      "evidence": "… then • Reduced an additional 10 per cent from the inclusive GST PAC. For original PAC of ` 100 Formula to be applied = 90 per cent of ₹100 = ₹ 90 Revised PAC = ` 90 For original PAC of ` 100 Formula applied = 90 per cent of ₹ 100; and then added 12 per cent GST i.e",
+      "class": "worked-example",
+      "parserValue": "9000",
+      "published": false,
+      "reason": "Not a sum anyone paid. Two state a policy ceiling — a repeat order limited to 50 per cent of the initial order 'or ₹10 crore whichever is less' — which is a criterion (ADR-025). The other four are the worked example of a formula: 'For origi"
+    },
+    {
+      "documentId": 3849,
+      "pageNumber": 55,
+      "script": "latin",
+      "evidence": "… om the PAC, then • Applied 12 per cent GST to the revised/reduced PAC, then • Reduced an additional 10 per cent from the inclusive GST PAC. For original PAC of ` 100 Formula to be applied = 90 per cent of ₹100 = ₹ 90 Revised PAC = ` 90 For original PAC of ` 100 Formula applied = 90 per cent of ₹ 100; and then added 12 per ce …",
+      "class": "worked-example",
+      "parserValue": "10000",
+      "published": false,
+      "reason": "Not a sum anyone paid. Two state a policy ceiling — a repeat order limited to 50 per cent of the initial order 'or ₹10 crore whichever is less' — which is a criterion (ADR-025). The other four are the worked example of a formula: 'For origi"
+    },
+    {
+      "documentId": 3849,
+      "pageNumber": 55,
+      "script": "latin",
+      "evidence": "₹ 90 * 112 per cent = ₹ 100.80 Reduction of 10 per cent of ₹ 100.80 = ₹ 90.72 Revised PAC = ` 90.72 Adoption of incorrect formula for calculation of PAC resulted in inflated PAC of ₹ 392.24 crore and ₹ 1,649.63 crore in Gopi Krishna and Rajghat MVS for invitat …",
+      "class": "worked-example",
+      "parserValue": "9072",
+      "published": false,
+      "reason": "Not a sum anyone paid. Two state a policy ceiling — a repeat order limited to 50 per cent of the initial order 'or ₹10 crore whichever is less' — which is a criterion (ADR-025). The other four are the worked example of a formula: 'For origi"
+    }
+  ]
+}
