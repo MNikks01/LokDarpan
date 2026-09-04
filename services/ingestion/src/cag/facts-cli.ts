@@ -34,8 +34,17 @@ async function main(): Promise<void> {
 
       process.stdout.write(
         `${doc.title.slice(0, 44).padEnd(44)} candidates=${String(candidates.length)} ` +
-          `new=${String(result.inserted)} kept-reviewed=${String(result.skippedAlreadyReviewed)}\n`,
+          `new=${String(result.inserted)} kept-reviewed=${String(result.skippedAlreadyReviewed)} ` +
+          `retired=${String(result.retired)} stranded=${String(result.strandedDecisions)}\n`,
       );
+      if (result.strandedDecisions > 0) {
+        // Not an error, and deliberately not fixed here: a decision belongs to
+        // the person who made it, and only a person may revise one.
+        process.stdout.write(
+          `  ${String(result.strandedDecisions)} decided facts are no longer produced by ` +
+            `this parser version. Review them with --revise.\n`,
+        );
+      }
     }
 
     // Said every run: candidates are not published facts, and nothing here has

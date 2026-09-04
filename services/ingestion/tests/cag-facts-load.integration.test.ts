@@ -104,7 +104,12 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
     it("inserts each candidate as unverified", async () => {
       const r = await loadFactCandidates(db(), documentId, [money, firm]);
-      expect(r).toEqual({ inserted: 2, skippedAlreadyReviewed: 0 });
+      expect(r).toEqual({
+        inserted: 2,
+        skippedAlreadyReviewed: 0,
+        retired: 0,
+        strandedDecisions: 0,
+      });
       expect(await statusOf()).toBe("unverified");
     });
 
@@ -128,7 +133,12 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
       const again = await loadFactCandidates(db(), documentId, [money]);
 
-      expect(again).toEqual({ inserted: 0, skippedAlreadyReviewed: 1 });
+      expect(again).toEqual({
+        inserted: 0,
+        skippedAlreadyReviewed: 1,
+        retired: 0,
+        strandedDecisions: 0,
+      });
       expect(await statusOf()).toBe("verified");
       expect(await countFacts()).toBe(1);
     });
@@ -197,7 +207,57 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(await loadFactCandidates(db(), documentId, [])).toEqual({
         inserted: 0,
         skippedAlreadyReviewed: 0,
+        retired: 0,
+        strandedDecisions: 0,
       });
+    });
+
+    // Fixing how a sentence is read must replace the old reading, not sit
+    // beside it. `₹ 20 ,564.71 कोटी` was stored unvalued until the digit group
+    // tolerated the text layer's injected space; the superseded row would
+    // otherwise have stayed in the queue asking a reviewer to supply a scale
+    // that is printed on the page.
+    it("retires an undecided candidate the parser no longer produces", async () => {
+      await loadFactCandidates(db(), documentId, [money]);
+
+      const reread = { ...money, normalisedValue: "20564710000000" };
+      const again = await loadFactCandidates(db(), documentId, [reread]);
+
+      expect(again.inserted).toBe(1);
+      expect(again.retired).toBe(1);
+      expect(again.strandedDecisions).toBe(0);
+      expect(await countFacts()).toBe(1);
+    });
+
+    // A decision belongs to the person who made it. The parser reports that it
+    // has stopped producing the candidate and changes nothing.
+    it("never retires a decided fact, and counts it as stranded", async () => {
+      await loadFactCandidates(db(), documentId, [money]);
+      await db().query(
+        `UPDATE document_fact SET verification_status = 'verified',
+                verified_by = 'reviewer@example.test', verified_at = now()
+          WHERE document_id = $1`,
+        [documentId],
+      );
+
+      const again = await loadFactCandidates(db(), documentId, []);
+
+      expect(again.retired).toBe(0);
+      expect(again.strandedDecisions).toBe(1);
+      expect(await statusOf()).toBe("verified");
+      expect(await countFacts()).toBe(1);
+    });
+
+    // Two amounts in one short sentence share an evidence window, so the value
+    // has to be part of a candidate's identity. Were it not, the second would
+    // look like a re-reading of the first and retire it.
+    it("keeps two figures that share an evidence window", async () => {
+      const other = { ...money, normalisedValue: "20000000000" };
+      const r = await loadFactCandidates(db(), documentId, [money, other]);
+
+      expect(r.inserted).toBe(2);
+      expect(r.retired).toBe(0);
+      expect(await countFacts()).toBe(2);
     });
   },
 );

@@ -1,6 +1,6 @@
 import { Money } from "@lokdarpan/money";
 
-import type { FactKind } from "../cag/facts";
+import { AMOUNT_IN, amountToPaise, type FactKind } from "../cag/facts";
 
 /**
  * Formatting for the review terminal.
@@ -14,6 +14,7 @@ import type { FactKind } from "../cag/facts";
 
 export interface ReviewCandidate {
   readonly id: number;
+  readonly documentId: number;
   readonly pageNumber: number;
   readonly kind: FactKind;
   readonly rawText: string;
@@ -84,6 +85,7 @@ export function describeCitation(c: ReviewCandidate): string {
 const CHECK_NOTE: Readonly<Record<string, string>> = {
   confirmed: "the sentence states this amount, and no other",
   ambiguous: "the sentence states several amounts, including this one",
+  confirmed_in_context: "the sentence states several amounts; the others are recorded separately",
   mismatch: "this amount is not derivable from the sentence - look closely",
   no_value: "the source stated no unit; supply the scale with [c]",
 };
@@ -117,6 +119,26 @@ export function presentCandidate(
  */
 export const PROMPT = "  [enter] skip   [v] verify   [r] reject   [c] correct   [q] quit  ";
 
+/**
+ * Where in the evidence this amount is stated.
+ *
+ * The stored value is paise — "12420874000000" — and the page says
+ * "₹ 1,24,208.74 कोटी". Searching the text for the paise string therefore never
+ * matched, and the window silently fell back to the first characters of the
+ * paragraph: on a page of overlapping windows that routinely showed a reviewer
+ * evidence which did not contain the figure they were approving. Re-deriving
+ * with the parser's own pattern finds the words the figure was read from.
+ *
+ * Returns -1 when the amount is not derivable from the text at all. That is a
+ * `mismatch`, which never reaches a page of this kind.
+ */
+function offsetOfAmount(flat: string, paise: string): number {
+  for (const m of flat.matchAll(AMOUNT_IN)) {
+    if (amountToPaise(m[1] ?? "", m[2])?.toString() === paise) return m.index;
+  }
+  return -1;
+}
+
 /** The evidence around the figure, trimmed to what fits on one line. */
 function around(text: string, value: string | null, width: number): string {
   const flat = text.replace(/\s+/g, " ").trim();
@@ -124,7 +146,7 @@ function around(text: string, value: string | null, width: number): string {
   // Centre the window on the figure. A window that starts at the beginning of
   // a long paragraph often does not contain the number being judged, which
   // would make the line unreadable as evidence.
-  const at = flat.indexOf(value.replace(/\.00$/, ""));
+  const at = offsetOfAmount(flat, value);
   if (at < 0) return flat.slice(0, width);
   const start = Math.max(0, at - Math.floor(width / 3));
   return (start > 0 ? "…" : "") + flat.slice(start, start + width);
@@ -133,20 +155,33 @@ function around(text: string, value: string | null, width: number): string {
 /**
  * A page of candidates, one line each.
  *
- * ONLY EVER USED FOR THE `confirmed` PARTITION
- * These are candidates whose figure re-derives exactly from their own evidence
- * and from no other reading of it. The reviewer is checking that the parser
- * took the right sentence, not adjudicating between several amounts — that is
- * a question a line can carry and a paragraph is not needed for.
+ * ONLY EVER USED FOR THE `confirmed` AND `confirmed_in_context` PARTITIONS
+ * In both, every amount the window states is accounted for: in `confirmed`
+ * because there is only one, in `confirmed_in_context` because each of the
+ * others is recorded as a fact of its own. The reviewer is checking that the
+ * parser took the right sentence, not adjudicating between several amounts —
+ * that is a question a line can carry and a paragraph is not needed for.
+ *
+ * The header says which of the two is on screen. A page of overlapping windows
+ * described as "no other reading" would overstate what arithmetic established,
+ * and a reviewer reads that line far more often than they read this file.
  *
  * The evidence is shown, not summarised. A page listing only values and page
  * numbers would be approval-without-reading with extra steps, and there would
  * be nothing for the reviewer to actually check.
  */
+const BATCH_NOTE: Readonly<Record<string, string>> = {
+  confirmed: "each figure below is stated by its own evidence and by no other reading of it",
+  confirmed_in_context:
+    "each figure below is stated by its own evidence; the other amounts in view " +
+    "are recorded as facts of their own",
+};
+
 export function presentBatch(
   candidates: readonly ReviewCandidate[],
   offset: number,
   total: number,
+  partition = "confirmed",
 ): string {
   const lines = candidates.map((c, i) => {
     // The same formatter the single-candidate view uses. A page rendering
@@ -160,7 +195,7 @@ export function presentBatch(
   });
   return (
     `${BOLD}${String(offset + 1)}–${String(offset + candidates.length)} of ${String(total)}${RESET}` +
-    `  ${DIM}each figure below is stated by its own evidence and by no other reading of it${RESET}\n\n` +
+    `  ${DIM}${BATCH_NOTE[partition] ?? BATCH_NOTE["confirmed"] ?? ""}${RESET}\n\n` +
     lines.join("\n\n")
   );
 }

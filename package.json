@@ -18,9 +18,13 @@
     "neutrality": "tsx packages/neutrality/src/cli.ts apps packages services",
     "dev": "pnpm --filter @lokdarpan/web dev",
     "dev:api": "pnpm --filter @lokdarpan/api dev",
-    "prepare": "husky"
+    "prepare": "husky",
+    "changeset": "changeset",
+    "changeset:status": "changeset status",
+    "changeset:version": "changeset version"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.1",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@eslint/js": "^9.39.5",
