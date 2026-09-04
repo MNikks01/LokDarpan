@@ -31,7 +31,7 @@
 | [`15-scalability/`](./15-scalability)               | The eight-phase village→nation plan                                                                                                              |
 | [`16-operations/`](./16-operations)                 | Runbooks and operational procedure _(to be populated)_                                                                                           |
 | [`17-legal/`](./17-legal)                           | **Binding** legal and ethical rules                                                                                                              |
-| [`adr/`](./adr)                                     | 32 decisions — **011–032 active (web, data and review); 001–010 deferred (mobile)**                                                              |
+| [`adr/`](./adr)                                     | 33 decisions — **011–033 active (web, data and review); 001–010 deferred (mobile)**                                                              |
 | [`wireframes/`](./wireframes)                       | Low-fidelity wireframes (mobile; desktop pass due in W3–W5)                                                                                      |
 | [`diagrams/`](./diagrams)                           | Architecture diagrams _(to be populated)_                                                                                                        |
 | [`decisions/`](./decisions)                         | Cross-cutting product decisions                                                                                                                  |
