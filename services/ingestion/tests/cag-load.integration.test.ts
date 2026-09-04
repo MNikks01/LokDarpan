@@ -49,7 +49,10 @@ const extracted: ExtractedDocument = {
       glyphSubstitution: null,
       width: 595.32,
       height: 841.92,
-      items: [],
+      items: [
+        { seq: 0, charStart: 0, charEnd: 26, x0: 72, y0: 700, x1: 210, y1: 709 },
+        { seq: 1, charStart: 26, charEnd: 39, x0: 210, y0: 700, x1: 268, y1: 709 },
+      ],
     },
     {
       pageNumber: 3,
@@ -157,6 +160,48 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await load();
       const r = await db().query<{ count: string }>(`SELECT count(*) FROM document`);
       expect(Number(r.rows[0]?.count)).toBe(1);
+    });
+
+    // Geometry is what turns a page citation into a region a reader can be
+    // shown. It is stored per item, so the check is that every item survives
+    // with the span and box it was given — an item dropped or renumbered
+    // silently moves a highlight onto a different figure.
+    it("stores the geometry a figure is located by", async () => {
+      await load();
+      const r = await db().query<{
+        seq: number;
+        char_start: number;
+        char_end: number;
+        x0: string;
+        x1: string;
+      }>(
+        `SELECT seq, char_start, char_end, x0, x1 FROM document_text_item
+          WHERE page_number = 2 ORDER BY seq`,
+      );
+      expect(r.rows).toHaveLength(2);
+      expect(r.rows[0]).toMatchObject({ seq: 0, char_start: 0, char_end: 26 });
+      expect(Number(r.rows[1]?.x0)).toBe(210);
+      expect(Number(r.rows[1]?.x1)).toBe(268);
+    });
+
+    it("leaves a page with no text layer with no items, rather than an empty box", async () => {
+      await load();
+      const r = await db().query(
+        `SELECT count(*)::int AS n FROM document_text_item WHERE page_number = 3`,
+      );
+      expect((r.rows[0] as { n: number }).n).toBe(0);
+    });
+
+    // Re-reading a document replaces its items wholesale. A merge would leave a
+    // page described half by one extraction and half by another, with offsets
+    // from each addressing a page text that only one of them produced.
+    it("replaces items on a re-read rather than accumulating them", async () => {
+      await load();
+      await load();
+      const r = await db().query(
+        `SELECT count(*)::int AS n FROM document_text_item WHERE page_number = 2`,
+      );
+      expect((r.rows[0] as { n: number }).n).toBe(2);
     });
 
     it("finds a page by its words", async () => {

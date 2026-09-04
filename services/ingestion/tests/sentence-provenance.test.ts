@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { boxAround, cleanWithItems } from "../src/cag/extract";
+import { boxAround, cleanWithItems, pageTextOf } from "../src/cag/extract";
 import { locatedSentencesOf, sentencesOf } from "../src/cag/facts";
 
 /**
@@ -143,6 +143,106 @@ describe("cleanup moves the offsets with the text", () => {
       { seq: 1, charStart: 1, charEnd: 3, x0: 10, y0: 0, x1: 20, y1: 5 },
     ];
     const cleaned = cleanWithItems(" ab", items);
+    expect(cleaned.content).toBe("ab");
+    expect(cleaned.items).toHaveLength(1);
+    expect(cleaned.items[0]?.seq).toBe(1);
+  });
+});
+
+describe("page text is rebuilt from the items it is addressed by", () => {
+  // The shape pdf.js reports: transform is [a, b, c, d, e, f], where e and f
+  // are the item's origin on the page.
+  const item = (
+    str: string,
+    x: number,
+    y: number,
+    opts: { hasEOL?: boolean; width?: number; height?: number } = {},
+  ): { str: string; transform: number[]; hasEOL?: boolean; width?: number; height?: number } => ({
+    str,
+    transform: [1, 0, 0, 1, x, y],
+    ...opts,
+  });
+
+  it("joins items in order and appends a newline only where one is reported", () => {
+    const { content } = pageTextOf([
+      item("Rs. ", 100, 700, { width: 20, height: 9 }),
+      item("45 lakh", 120, 700, { width: 40, height: 9, hasEOL: true }),
+      item("was paid", 100, 688, { width: 45, height: 9 }),
+    ]);
+    expect(content).toBe("Rs. 45 lakhwas paid".replace("lakhwas", "lakh\nwas"));
+  });
+
+  it("gives each item the span it occupies in that text", () => {
+    const { content, items } = pageTextOf([
+      item("Rs. ", 100, 700, { width: 20, height: 9 }),
+      item("45 lakh", 120, 700, { width: 40, height: 9 }),
+    ]);
+    for (const [i, got] of items.entries()) {
+      const source = ["Rs. ", "45 lakh"][i];
+      expect(content.slice(got.charStart, got.charEnd)).toBe(source);
+    }
+  });
+
+  it("keeps the newline outside the span of the item that ended the line", () => {
+    const { content, items } = pageTextOf([
+      item("first", 100, 700, { width: 25, height: 9, hasEOL: true }),
+      item("second", 100, 688, { width: 30, height: 9 }),
+    ]);
+    expect(content).toBe("first\nsecond");
+    expect(content.slice(items[0]?.charStart, items[0]?.charEnd)).toBe("first");
+    expect(content.slice(items[1]?.charStart, items[1]?.charEnd)).toBe("second");
+  });
+
+  it("reads the box from the transform's origin and the item's size", () => {
+    const { items } = pageTextOf([item("₹5", 120.5, 700.25, { width: 18, height: 9 })]);
+    expect(items[0]).toEqual({
+      seq: 0,
+      charStart: 0,
+      charEnd: 2,
+      x0: 120.5,
+      y0: 700.25,
+      x1: 138.5,
+      y1: 709.25,
+    });
+  });
+
+  it("treats a missing size as zero rather than guessing one", () => {
+    const { items } = pageTextOf([item("x", 10, 20)]);
+    expect(items[0]?.x1).toBe(10);
+    expect(items[0]?.y1).toBe(20);
+  });
+});
+
+describe("readings the text layer should not be trusted to give", () => {
+  it("treats a transform missing its origin as the page origin, not as absent", () => {
+    // pdf.js is expected to report six numbers. A short array is malformed
+    // input; falling back to 0 keeps the item addressable rather than dropping
+    // a figure because its position could not be read.
+    const { items } = pageTextOf([{ str: "x", transform: [1, 0, 0, 1], width: 5, height: 9 }]);
+    expect(items[0]).toMatchObject({ x0: 0, y0: 0, x1: 5, y1: 9 });
+  });
+
+  it("strips characters Postgres cannot hold and moves the offsets with them", () => {
+    // Written as a code point rather than a literal: a NUL in a source file is
+    // invisible to a reader and survives a copy-paste as something else.
+    const nul = String.fromCodePoint(0);
+    const raw = `ab${nul}cd`;
+    const items = [{ seq: 0, charStart: 0, charEnd: 5, x0: 0, y0: 0, x1: 10, y1: 5 }];
+    const cleaned = cleanWithItems(raw, items);
+
+    expect(cleaned.content).toBe("abcd");
+    expect(cleaned.content.slice(cleaned.items[0]?.charStart, cleaned.items[0]?.charEnd)).toBe(
+      "abcd",
+    );
+  });
+
+  it("drops an item that is nothing but characters Postgres cannot hold", () => {
+    const nul = String.fromCodePoint(0);
+    const items = [
+      { seq: 0, charStart: 0, charEnd: 1, x0: 0, y0: 0, x1: 10, y1: 5 },
+      { seq: 1, charStart: 1, charEnd: 3, x0: 10, y0: 0, x1: 20, y1: 5 },
+    ];
+    const cleaned = cleanWithItems(`${nul}ab`, items);
     expect(cleaned.content).toBe("ab");
     expect(cleaned.items).toHaveLength(1);
     expect(cleaned.items[0]?.seq).toBe(1);
