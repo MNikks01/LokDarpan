@@ -1,6 +1,8 @@
 # ADR-023 — `feature/*` → `main`: the `development` branch is retired
 
-**Status:** Accepted · 2026-08-28 · Amends [`013-branching-and-release.md`](./013-branching-and-release.md) §Decision. Every branch protection stands; only the target branch changes.
+**Status:** Superseded by [`032-development-is-reinstated.md`](./032-development-is-reinstated.md) (2026-09-04) · Accepted 2026-08-28 · Amended [`013-branching-and-release.md`](./013-branching-and-release.md) §Decision.
+
+> **Superseded.** `development` is reinstated and `feature/*` targets it again — see [`032`](./032-development-is-reinstated.md). The evidence below is not disputed and is the strongest argument against the flow now in force: the branch was retired because nothing integrated through it, and reinstating it does not by itself reinstate the practice.
 
 ## Context
 

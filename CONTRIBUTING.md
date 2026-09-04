@@ -19,32 +19,38 @@ A variance is a number. The platform never claims it was caused by theft, fraud,
 ## Branching — never push to `main`
 
 ```text
-feature/*  ──PR──>  main
+feature/*  ──PR──>  development  ──release PR──>  main
 ```
 
-`main` is protected: **no direct pushes**, and **all six CI checks must pass** before a merge is possible. A branch must also be current with `main`, and review conversations must be resolved.
+**Both branches are protected**: no direct pushes, and all six CI checks must pass before a merge is possible. A branch must be current with its base, and review conversations must be resolved. `development` additionally requires linear history; `main` takes merge commits so a release PR keeps its constituent commits.
 
-`development` is **retired** ([`adr/023`](./.docs/adr/023-features-target-main.md)) — do not branch from it or target it. It was an integration branch that nothing integrated through: seven consecutive PRs went straight to `main` without anyone deciding to skip it. Vercel builds a preview deployment for every pull request, so each change is soaked on its own real deployment before it merges, which is what `development` was there to provide.
+`development` was retired by [`adr/023`](./.docs/adr/023-features-target-main.md) and **reinstated by [`adr/032`](./.docs/adr/032-development-is-reinstated.md)** — branch from it, and target it.
+
+`023`'s reasoning has not been refuted and is worth reading before you skip the branch: it was retired because _nothing integrated through it_, seven consecutive PRs went straight to `main`, and nothing fails when a branch is simply not used. Reinstating it does not by itself reinstate the practice. **A PR that targets `main` and is not a release PR is the failure mode**, not a shortcut.
+
+`development` is an **integration and release gate, not a soak.** Vercel already builds a preview deployment for every pull request, so each change is soaked on its own real deployment before it merges.
 
 There is **no required approving review** while the project has a single maintainer — a solo maintainer cannot approve their own PR, and the requirement could only ever be met by bypassing every protection at once ([`adr/016`](./.docs/adr/016-review-requirement.md)). It returns to one the moment a second maintainer can approve. Everything else about the pull request is unchanged: it is still where CI runs and where the reasoning is recorded.
 
 ```bash
-git checkout main && git pull
+git checkout development && git pull
 git checkout -b feature/short-description
 # … work, commit …
 git push -u origin feature/short-description
-gh pr create --base main
+gh pr create --base development
 ```
 
 ### Releasing
 
-There is no release branch and no promotion step. `main` is what Vercel deploys, so **`main` must always be releasable** — which is the price of dropping the integration branch, and worth stating plainly rather than discovering.
+Promotion to `main` is a **release PR** from `development`, merged as a merge commit so the constituent commits survive. `main` is what Vercel deploys, so **`main` must always be releasable**.
+
+A fix that cannot wait for a release branches from `main` as `hotfix/*` and **must be merged back into `development`**, or the next release silently reintroduces the bug. This step is easy to forget and nothing enforces it.
 
 There is deliberately **no workflow** that opens pull requests on your behalf. GitHub gates "Actions may create pull requests" behind the same setting as "Actions may approve pull requests"; enabling it would let a workflow approve its own PR and bypass the review requirement. Least privilege wins over the convenience.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/); `commitlint` enforces this on `commit-msg`. Scopes: `web`, `api`, `money`, `neutrality`, `contracts`, `ingestion`, `docs`, `ci`, `deps`, `repo`.
 
-Rationale: [`.docs/adr/013-branching-and-release.md`](./.docs/adr/013-branching-and-release.md), as amended by [`.docs/adr/023-features-target-main.md`](./.docs/adr/023-features-target-main.md).
+Rationale: [`.docs/adr/013-branching-and-release.md`](./.docs/adr/013-branching-and-release.md) → amended by [`.docs/adr/023`](./.docs/adr/023-features-target-main.md) → reversed by [`.docs/adr/032`](./.docs/adr/032-development-is-reinstated.md). Read them in that order; `023` is the strongest argument against the flow now in force.
 
 ## Getting set up
 
