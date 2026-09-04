@@ -48,6 +48,7 @@ export default defineConfig({
         "services/ingestion/src/beams/actuals-cli.ts",
         "services/ingestion/src/cag/cli.ts",
         "services/ingestion/src/cag/facts-cli.ts",
+        "services/ingestion/src/cag/reprocess-cli.ts",
         "services/ingestion/src/review/cli.ts",
         "services/ingestion/src/review/triage-cli.ts",
         "services/ingestion/src/osm/cli.ts",

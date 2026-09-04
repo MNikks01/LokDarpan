@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { boxAround, cleanWithItems } from "../src/cag/extract";
 import { locatedSentencesOf, sentencesOf } from "../src/cag/facts";
 
 /**
@@ -84,5 +85,66 @@ describe("offsets address the page the evidence came from", () => {
     const start = second.source[at];
     if (start === undefined) throw new Error("expected an offset");
     expect(start).toBe(page.lastIndexOf("₹5 lakh"));
+  });
+});
+
+describe("a character range becomes a region", () => {
+  // Two items on one line, then one on the line below.
+  const items = [
+    { seq: 0, charStart: 0, charEnd: 5, x0: 100, y0: 700, x1: 140, y1: 709 },
+    { seq: 1, charStart: 5, charEnd: 12, x0: 140, y0: 700, x1: 200, y1: 709 },
+    { seq: 2, charStart: 13, charEnd: 20, x0: 100, y0: 688, x1: 170, y1: 697 },
+  ];
+
+  it("covers every item the range touches, and no others", () => {
+    expect(boxAround(items, 0, 5)).toEqual({ x0: 100, y0: 700, x1: 140, y1: 709 });
+    // A figure split across two items is covered by both — which the text layer
+    // does routinely, and is the case a single-item box would get wrong.
+    expect(boxAround(items, 3, 8)).toEqual({ x0: 100, y0: 700, x1: 200, y1: 709 });
+    expect(boxAround(items, 14, 16)).toEqual({ x0: 100, y0: 688, x1: 170, y1: 697 });
+  });
+
+  it("spans lines when the range does", () => {
+    expect(boxAround(items, 4, 15)).toEqual({ x0: 100, y0: 688, x1: 200, y1: 709 });
+  });
+
+  it("returns null rather than a box covering nothing", () => {
+    expect(boxAround(items, 12, 13)).toBeNull();
+    expect(boxAround([], 0, 5)).toBeNull();
+  });
+
+  it("treats the range as half-open, so an abutting item is not swept in", () => {
+    // Item 1 begins exactly where this range ends.
+    expect(boxAround(items, 0, 5)).toEqual({ x0: 100, y0: 700, x1: 140, y1: 709 });
+  });
+});
+
+describe("cleanup moves the offsets with the text", () => {
+  it("keeps items addressing the characters they held after a strip and trim", () => {
+    const raw = "  ab cd  ";
+    const items = [
+      { seq: 0, charStart: 2, charEnd: 4, x0: 0, y0: 0, x1: 10, y1: 5 },
+      { seq: 1, charStart: 5, charEnd: 7, x0: 10, y0: 0, x1: 20, y1: 5 },
+    ];
+    const cleaned = cleanWithItems(raw, items);
+
+    expect(cleaned.content).toBe("ab cd");
+    expect(cleaned.content.slice(cleaned.items[0]?.charStart, cleaned.items[0]?.charEnd)).toBe(
+      "ab",
+    );
+    expect(cleaned.content.slice(cleaned.items[1]?.charStart, cleaned.items[1]?.charEnd)).toBe(
+      "cd",
+    );
+  });
+
+  it("drops an item whose every character was trimmed away", () => {
+    const items = [
+      { seq: 0, charStart: 0, charEnd: 1, x0: 0, y0: 0, x1: 10, y1: 5 },
+      { seq: 1, charStart: 1, charEnd: 3, x0: 10, y0: 0, x1: 20, y1: 5 },
+    ];
+    const cleaned = cleanWithItems(" ab", items);
+    expect(cleaned.content).toBe("ab");
+    expect(cleaned.items).toHaveLength(1);
+    expect(cleaned.items[0]?.seq).toBe(1);
   });
 });
