@@ -69,15 +69,16 @@ export async function loadDocument(
   for (const page of extracted.pages) {
     await client.query(
       `INSERT INTO document_page (document_id, page_number, content, script, glyph_substitution,
-                                  width, height, rotation)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+                                  width, height, rotation, substituted_currency_marks)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        ON CONFLICT (document_id, page_number) DO UPDATE SET
          content            = EXCLUDED.content,
          script             = EXCLUDED.script,
          glyph_substitution = EXCLUDED.glyph_substitution,
          width              = EXCLUDED.width,
          height             = EXCLUDED.height,
-         rotation           = EXCLUDED.rotation`,
+         rotation           = EXCLUDED.rotation,
+         substituted_currency_marks = EXCLUDED.substituted_currency_marks`,
       [
         documentId,
         page.pageNumber,
@@ -87,6 +88,7 @@ export async function loadDocument(
         page.width,
         page.height,
         page.rotation,
+        page.substitutedCurrencyMarks,
       ],
     );
 

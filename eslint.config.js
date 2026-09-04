@@ -10,6 +10,9 @@ export default tseslint.config(
       "**/dist/**",
       "**/.next/**",
       "**/node_modules/**",
+      // The OCR service is Python; its virtualenv ships JavaScript that
+      // belongs to no TypeScript project and cannot be type-checked.
+      "**/.venv/**",
       "**/coverage/**",
       "graphify-out/**",
     ],

@@ -1,4 +1,4 @@
-import { AMOUNT_IN, amountToPaise } from "../cag/facts";
+import { AMOUNT_IN, AMOUNT_WITH_SUBSTITUTED_MARK, amountToPaise } from "../cag/facts";
 
 /**
  * Sorting money candidates by whether the parser's reading can be re-derived
@@ -82,9 +82,18 @@ export function selfCheck(input: CheckInput, claimedOnPage?: ReadonlySet<string>
   // reproduce that reading would report every one of those facts as a mismatch
   // — a defect flag on the exact candidates arithmetic agrees with. The two
   // readings never collide, being seven orders of magnitude apart.
-  for (const m of input.rawText.matchAll(AMOUNT_IN)) {
-    const paise = amountToPaise(m[1] ?? "", m[2], "rupees");
-    if (paise !== null) amounts.push(paise.toString());
+  //
+  // Both patterns, for the same reason. Some documents emit a backtick where the
+  // page prints ₹, and the parser decodes that on a page carrying several of
+  // them. A self-check blind to the decoding reported all 469 such facts as
+  // "the stored value appears nowhere in its own evidence" — a defect flag on
+  // every candidate of a class that is not defective, which is worse than no
+  // triage at all: it buries the real mismatches.
+  for (const pattern of [AMOUNT_IN, AMOUNT_WITH_SUBSTITUTED_MARK]) {
+    for (const m of input.rawText.matchAll(pattern)) {
+      const paise = amountToPaise(m[1] ?? "", m[2], "rupees");
+      if (paise !== null) amounts.push(paise.toString());
+    }
   }
 
   if (input.normalisedValue === null) {
