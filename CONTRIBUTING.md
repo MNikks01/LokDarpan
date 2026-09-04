@@ -44,7 +44,7 @@ gh pr create --base development
 
 Promotion to `main` is a **release PR** from `development`, merged as a merge commit so the constituent commits survive. `main` is what Vercel deploys, so **`main` must always be releasable**.
 
-`main` allows merge commits only; squash and rebase are disabled for it ([`adr/041`](./.docs/adr/041-the-merge-method-is-a-setting-not-a-checklist-line.md)). That is a repository setting rather than a rule you have to remember, because remembering it failed three times.
+`main` allows merge commits only, enforced by a repository ruleset scoped to that branch ([`adr/041`](./.docs/adr/041-the-merge-method-is-a-setting-not-a-checklist-line.md), corrected by [`adr/042`](./.docs/adr/042-a-repo-wide-setting-cannot-express-a-per-branch-rule.md)). It is configuration rather than a rule you have to remember, because remembering it failed three times. The repository-wide merge settings stay permissive on purpose: `development` requires linear history and so needs squash or rebase, and turning those off would deadlock every feature PR.
 
 **Immediately after the release merge, check the release merged the way it had to, then bring `development` level:**
 
