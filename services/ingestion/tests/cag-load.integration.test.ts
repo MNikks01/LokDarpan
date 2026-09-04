@@ -40,6 +40,7 @@ const extracted: ExtractedDocument = {
       glyphSubstitution: 0,
       width: 595.32,
       height: 841.92,
+      rotation: 0,
       items: [],
     },
     {
@@ -49,6 +50,7 @@ const extracted: ExtractedDocument = {
       glyphSubstitution: null,
       width: 595.32,
       height: 841.92,
+      rotation: 270,
       items: [
         { seq: 0, charStart: 0, charEnd: 26, x0: 72, y0: 700, x1: 210, y1: 709 },
         { seq: 1, charStart: 26, charEnd: 39, x0: 210, y0: 700, x1: 268, y1: 709 },
@@ -61,6 +63,7 @@ const extracted: ExtractedDocument = {
       glyphSubstitution: null,
       width: 595.32,
       height: 841.92,
+      rotation: 0,
       items: [],
     },
   ],
@@ -182,6 +185,18 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(r.rows[0]).toMatchObject({ seq: 0, char_start: 0, char_end: 26 });
       expect(Number(r.rows[1]?.x0)).toBe(210);
       expect(Number(r.rows[1]?.x1)).toBe(268);
+    });
+
+    it("records the page box in the space the coordinates are in", async () => {
+      await load();
+      const r = await db().query<{ width: string; height: string; rotation: number }>(
+        `SELECT width, height, rotation FROM document_page WHERE page_number = 2`,
+      );
+      // The rotation is recorded rather than applied: a reader turns the page,
+      // and a box that had been rotated to match an upright view would fall
+      // outside the very page it belongs to.
+      expect(r.rows[0]?.rotation).toBe(270);
+      expect(Number(r.rows[0]?.width)).toBeCloseTo(595.32, 2);
     });
 
     it("leaves a page with no text layer with no items, rather than an empty box", async () => {
