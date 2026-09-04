@@ -24,6 +24,12 @@ const money: FactCandidate = {
   extractionConfidence: 0.8,
 };
 
+/** The same figure, once the extractor can say where on the page it sits. */
+const moneyWithBox: FactCandidate = {
+  ...money,
+  box: { x0: 72, y0: 700, x1: 210, y1: 709 },
+};
+
 const firm: FactCandidate = {
   kind: "contractor_reference",
   pageNumber: 12,
@@ -101,6 +107,57 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       );
       return Number(r.rows[0]?.count);
     };
+
+    const boxOf = async (): Promise<{ x0: string | null } | undefined> => {
+      const r = await db().query<{ x0: string | null }>(
+        `SELECT bbox_x0 AS x0 FROM document_fact
+          WHERE document_id = $1 AND kind = 'monetary_amount'`,
+        [documentId],
+      );
+      return r.rows[0];
+    };
+
+    // A box is not part of a fact's identity and not part of what a person
+    // reviewed: it says where on the page a figure the reviewer already read is
+    // sitting. So it fills in whatever the row's status.
+    //
+    // This was first written to backfill only `unverified` rows, which left
+    // every decided fact — the only ones a reader can reach — as the ones with
+    // no region to show. Each status is checked here because that bug type-
+    // checked and passed every other test.
+    describe.each(["verified", "rejected", "corrected"])("a %s fact", (status) => {
+      it("gains its region without being re-offered or re-decided", async () => {
+        await loadFactCandidates(db(), documentId, [money]);
+        await db().query(
+          `UPDATE document_fact SET verification_status = $2, corrected_value = $3,
+                  verified_by = 'reviewer@example.test', verified_at = now()
+            WHERE document_id = $1 AND kind = 'monetary_amount'`,
+          [documentId, status, status === "corrected" ? "1" : null],
+        );
+        expect((await boxOf())?.x0).toBeNull();
+
+        const again = await loadFactCandidates(db(), documentId, [moneyWithBox]);
+
+        expect(again.inserted).toBe(0);
+        expect(again.located).toBe(1);
+        expect(Number((await boxOf())?.x0)).toBe(72);
+        expect(await statusOf()).toBe(status);
+      });
+    });
+
+    it("does not rewrite a box it has already recorded", async () => {
+      await loadFactCandidates(db(), documentId, [moneyWithBox]);
+      const again = await loadFactCandidates(db(), documentId, [moneyWithBox]);
+      expect(again.located).toBe(0);
+      expect(Number((await boxOf())?.x0)).toBe(72);
+    });
+
+    it("leaves a fact unlocated when the extractor could not place it", async () => {
+      await loadFactCandidates(db(), documentId, [money]);
+      const again = await loadFactCandidates(db(), documentId, [money]);
+      expect(again.located).toBe(0);
+      expect((await boxOf())?.x0).toBeNull();
+    });
 
     it("inserts each candidate as unverified", async () => {
       const r = await loadFactCandidates(db(), documentId, [money, firm]);
