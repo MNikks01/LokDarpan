@@ -25,7 +25,7 @@ import {
   withTenderCounts,
 } from "./tenders";
 import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
-import { useExplorerGeography, type RecordsState } from "./use-explorer-data";
+import { useExplorerGeography, type LevelCoverage, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
 
 const DRAWER_WIDTH = 428;
@@ -83,10 +83,14 @@ interface TenderLayer {
 function useTenderLayer(
   unitId: number | null,
   childBoundaries: FeatureCollection | null,
+  stateLgdCode: string | null,
 ): TenderLayer {
   const [department, setDepartment] = useState<string | null>(null);
   const [showingUnplaced, setShowingUnplaced] = useState(false);
-  const { overview, failed } = useTenderOverview(department);
+  // The state travels with the request so the panel can say whether tenders are
+  // collected for it at all. Without it the only available answer was a count,
+  // and a count cannot distinguish "none held" from "none advertised".
+  const { overview, failed } = useTenderOverview(department, stateLgdCode);
   const { tenders: unitTenders, loading: unitTendersLoading } = useTendersFor(unitId, department);
   // Fetched only once asked for: the panel states the count from the overview,
   // so the list itself is a second question the reader may never put.
@@ -124,6 +128,7 @@ export function ExploreShell({
   const {
     selectedState,
     units,
+    coverage,
     loadingChildren,
     childBoundaries,
     activeUnit,
@@ -133,7 +138,7 @@ export function ExploreShell({
     scopeLabel,
   } = useExplorerGeography(states, geo.stateCode, geo.unitId);
 
-  const tenderState = useTenderLayer(geo.unitId, childBoundaries);
+  const tenderState = useTenderLayer(geo.unitId, childBoundaries, geo.stateCode);
 
   const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
@@ -255,6 +260,8 @@ export function ExploreShell({
           selectedDocumentId={selectedDocumentId}
           outlineSource={outlineSource}
           tenderState={tenderState}
+          selectedState={selectedState}
+          coverage={coverage}
           activeUnit={activeUnit}
         />
 
@@ -358,6 +365,8 @@ function ExplorerRail({
   outlineSource,
   tenderState,
   activeUnit,
+  selectedState,
+  coverage,
 }: {
   readonly hidden: boolean;
   readonly states: readonly StateOption[];
@@ -372,12 +381,15 @@ function ExplorerRail({
   readonly outlineSource: OutlineSource;
   readonly tenderState: TenderLayer;
   readonly activeUnit: GeoUnit | null;
+  readonly selectedState: StateOption | null;
+  readonly coverage: readonly LevelCoverage[];
 }): React.JSX.Element {
   return (
     <div id="explorer-rail" className={cx(styles.rail, hidden && styles.railCollapsed)}>
       <FilterPanel
         states={states}
         units={units}
+        coverage={coverage}
         geo={geo}
         actions={actions}
         loading={loadingChildren}
@@ -390,6 +402,7 @@ function ExplorerRail({
         onSelectDepartment={tenderState.setDepartment}
         showingUnplaced={tenderState.showingUnplaced}
         onToggleUnplaced={tenderState.toggleUnplaced}
+        stateName={selectedState === null ? null : selectedState.name}
       />
       {tenderState.showingUnplaced && (
         <TenderList

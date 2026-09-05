@@ -29,8 +29,26 @@ function isAbort(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
+/**
+ * How complete our holdings are at one level inside the unit being browsed.
+ *
+ * Travels with the children so the list cannot be read as a census of the
+ * place. `not_collected` and an empty list are different claims: the first says
+ * nobody looked, the second says nothing was found, and only the first can be
+ * true while the places exist.
+ */
+export interface LevelCoverage {
+  readonly level: string;
+  readonly status: "complete" | "partial" | "not_collected";
+  readonly note: string | null;
+  readonly sourceId: string;
+  readonly checkedAt: string;
+  readonly inherited: boolean;
+}
+
 export interface ChildrenState {
   readonly units: readonly GeoUnit[];
+  readonly coverage: readonly LevelCoverage[];
   readonly loading: boolean;
   readonly failed: boolean;
 }
@@ -43,26 +61,36 @@ export interface ChildrenState {
  * back by level rather than assuming a fixed sequence.
  */
 export function useChildUnits(unitId: number | null): ChildrenState {
-  const [state, setState] = useState<ChildrenState>({ units: [], loading: false, failed: false });
+  const [state, setState] = useState<ChildrenState>({
+    units: [],
+    coverage: [],
+    loading: false,
+    failed: false,
+  });
 
   useEffect(() => {
     if (unitId === null) {
-      setState({ units: [], loading: false, failed: false });
+      setState({ units: [], coverage: [], loading: false, failed: false });
       return;
     }
     const controller = new AbortController();
-    setState({ units: [], loading: true, failed: false });
+    setState({ units: [], coverage: [], loading: true, failed: false });
 
-    readJson<{ data: { units: GeoUnit[] } }>(
+    readJson<{ data: { units: GeoUnit[]; coverage: LevelCoverage[] } }>(
       `/api/v1/geo/units/${String(unitId)}/children`,
       controller.signal,
     )
       .then((body) => {
-        setState({ units: body.data.units, loading: false, failed: false });
+        setState({
+          units: body.data.units,
+          coverage: body.data.coverage,
+          loading: false,
+          failed: false,
+        });
       })
       .catch((error: unknown) => {
         if (isAbort(error)) return;
-        setState({ units: [], loading: false, failed: true });
+        setState({ units: [], coverage: [], loading: false, failed: true });
       });
 
     return () => {
@@ -191,6 +219,8 @@ export function useRecords(lgdCode: string | null): RecordsState {
 export interface ExplorerGeography {
   readonly selectedState: StateOption | null;
   readonly units: readonly GeoUnit[];
+  /** What is known about how complete `units` is. Never inferred from its length. */
+  readonly coverage: readonly LevelCoverage[];
   readonly loadingChildren: boolean;
   readonly childBoundaries: FeatureCollection | null;
   readonly activeUnit: GeoUnit | null;
@@ -211,7 +241,7 @@ export function useExplorerGeography(
   );
 
   const parentUnitId = unitId ?? selectedState?.unitId ?? null;
-  const { units, loading: loadingChildren } = useChildUnits(parentUnitId);
+  const { units, coverage, loading: loadingChildren } = useChildUnits(parentUnitId);
   const childBoundaries = useChildBoundaries(parentUnitId);
   const detail = useUnit(unitId);
   const records = useRecords(stateCode);
@@ -219,6 +249,7 @@ export function useExplorerGeography(
   return {
     selectedState,
     units,
+    coverage,
     loadingChildren,
     childBoundaries,
     ...unpackDetail(detail),

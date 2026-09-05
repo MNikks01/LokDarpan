@@ -2,10 +2,11 @@
 
 import type React from "react";
 import { useMemo } from "react";
-import { LEVEL_LABEL, type GeoUnit } from "@lokdarpan/domain";
+import { LEVEL_LABEL, type AdminUnitLevel, type GeoUnit } from "@lokdarpan/domain";
 import type { StateOption } from "@/data/geography";
 import { Button, Select } from "@/components/ui";
 import type { ExplorerActions, GeoSelection } from "@/state/useExplorerState";
+import type { LevelCoverage } from "./use-explorer-data";
 import styles from "./explorer.module.css";
 
 /**
@@ -22,9 +23,43 @@ import styles from "./explorer.module.css";
  * serves state → district, district → taluka or municipal body, and taluka →
  * village, because each step asks one question: what is inside this?
  */
+/**
+ * What our holdings at a level do not cover.
+ *
+ * Pune district holds 14 talukas and no municipal body, and Pune Municipal
+ * Corporation plainly exists. Without this the selector shows fourteen areas and
+ * a reader takes that for the whole of Pune's local government.
+ *
+ * Only shortfalls are stated. Announcing that a complete level is complete would
+ * bury the one line that matters among two that do not.
+ */
+function CoverageNote({
+  coverage,
+}: {
+  readonly coverage: readonly LevelCoverage[];
+}): React.JSX.Element | null {
+  const short = coverage.filter((c) => c.status !== "complete");
+  if (short.length === 0) return null;
+
+  return (
+    <div style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", display: "grid", gap: 6 }}>
+      {short.map((c) => (
+        <p key={c.level} style={{ margin: 0 }}>
+          <span aria-hidden="true">▤ </span>
+          {c.status === "not_collected"
+            ? `${LEVEL_LABEL[c.level as AdminUnitLevel]} boundaries have not been collected.`
+            : `${LEVEL_LABEL[c.level as AdminUnitLevel]} coverage is incomplete.`}{" "}
+          {c.note ?? ""}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export function FilterPanel({
   states,
   units,
+  coverage,
   geo,
   actions,
   loading,
@@ -32,6 +67,7 @@ export function FilterPanel({
 }: {
   readonly states: readonly StateOption[];
   readonly units: readonly GeoUnit[];
+  readonly coverage: readonly LevelCoverage[];
   readonly geo: GeoSelection;
   readonly actions: ExplorerActions;
   readonly loading: boolean;
@@ -83,6 +119,8 @@ export function FilterPanel({
             }}
           />
 
+          <CoverageNote coverage={coverage} />
+
           {geo.unitId !== null && (
             <div style={{ justifySelf: "start" }}>
               <Button
@@ -113,6 +151,6 @@ export function FilterPanel({
 function placeholderFor(stateCode: string | null, loading: boolean, count: number): string {
   if (stateCode === null) return "Select a state first";
   if (loading) return "Loading…";
-  if (count === 0) return "No units are held inside this one";
+  if (count === 0) return "No areas are held inside this one";
   return "Select an area";
 }

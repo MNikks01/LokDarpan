@@ -31,6 +31,26 @@ import type pg from "pg";
  * state-sized viewport is a few hundred pixels wide, where 0.005° is well under
  * one pixel. The finer tolerance is used when a single unit fills the screen.
  */
+/**
+ * How complete our holdings are at one level.
+ *
+ * `not_collected` and an empty list are different claims. The first says nobody
+ * looked; the second says nothing was found. Only the first can be true at the
+ * same time as the places existing.
+ */
+export type CoverageStatus = "complete" | "partial" | "not_collected";
+
+export interface LevelCoverage {
+  readonly level: AdminUnitLevel;
+  readonly status: CoverageStatus;
+  /** Why, for anything short of complete. Shown to the reader as written. */
+  readonly note: string | null;
+  readonly sourceId: string;
+  readonly checkedAt: string;
+  /** The finding was recorded against an ancestor of the unit asked about. */
+  readonly inherited: boolean;
+}
+
 const TOLERANCE_OVERVIEW = 0.005;
 const TOLERANCE_DETAIL = 0.0005;
 
@@ -170,6 +190,58 @@ export class PostgresGeographyRepository implements GeographyRepository {
       [parentId],
     );
     return result.rows.map(toUnit);
+  }
+
+  /**
+   * What we know about how complete our holdings are inside this unit.
+   *
+   * Pune district holds 14 talukas and no urban local body. Pune Municipal
+   * Corporation plainly exists, so an interface that shows only the count is
+   * reporting our holdings and will be read as a statement about Pune. This is
+   * the record that lets it say which it means.
+   *
+   * Coverage is recorded against the state, because it is a property of a
+   * source's treatment of a level across the state rather than of one district:
+   * OpenStreetMap tags few of Maharashtra's municipal bodies everywhere, not
+   * specially in Pune. A district therefore inherits its state's finding, and
+   * the nearest ancestor carrying one wins so a future district-scoped
+   * assessment would override it.
+   */
+  async coverageIn(unitId: number): Promise<readonly LevelCoverage[]> {
+    const result = await this.db.query<{
+      level: AdminUnitLevel;
+      status: CoverageStatus;
+      note: string | null;
+      source_id: string;
+      checked_at: string;
+      depth: number;
+    }>(
+      `WITH RECURSIVE chain AS (
+         SELECT id, parent_id, 0 AS depth FROM admin_unit WHERE id = $1
+         UNION ALL
+         SELECT a.id, a.parent_id, c.depth + 1
+           FROM admin_unit a JOIN chain c ON a.id = c.parent_id
+       ),
+       found AS (
+         SELECT g.level, g.status, g.note, g.source_id, g.checked_at, c.depth,
+                row_number() OVER (PARTITION BY g.level ORDER BY c.depth) AS nearest
+           FROM geography_coverage g JOIN chain c ON c.id = g.admin_unit_id
+       )
+       SELECT level, status, note, source_id, checked_at, depth
+         FROM found WHERE nearest = 1
+        ORDER BY level`,
+      [unitId],
+    );
+
+    return result.rows.map((r) => ({
+      level: r.level,
+      status: r.status,
+      note: r.note,
+      sourceId: r.source_id,
+      checkedAt: r.checked_at,
+      /** True when the finding was recorded against an ancestor, not this unit. */
+      inherited: r.depth > 0,
+    }));
   }
 
   async unitById(id: number): Promise<GeoUnit | null> {

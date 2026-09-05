@@ -23,7 +23,8 @@
     "reprocess:cag": "tsx src/cag/reprocess-cli.ts",
     "ocr:manifest": "tsx src/ocr/manifest-cli.ts",
     "ocr:score": "tsx src/ocr/score-cli.ts",
-    "corpus:build": "tsx src/cag/corpus-cli.ts"
+    "corpus:build": "tsx src/cag/corpus-cli.ts",
+    "backfill:portal-states": "tsx src/gepnic/backfill-states.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",
