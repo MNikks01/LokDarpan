@@ -11,6 +11,7 @@ const fact = (over: Partial<PublishedFact> = {}): PublishedFact => ({
   pageNumber: 293,
   evidence: "in favour of M/s Joy Developers … for a contract value of 15.14 crore",
   value: "151400000.00",
+  perUnit: null,
   origin: "as_extracted",
   verifiedBy: "j.doe@example.org",
   verifiedAt: "2026-08-27T09:00:00.000Z",
@@ -127,5 +128,34 @@ describe("Scope", () => {
   it("never claims to summarise the document", () => {
     const shown = text(renderToStaticMarkup(<Scope view={view({ facts: [fact()] })} />));
     expect(shown).toContain("This is not a summary of the document");
+  });
+});
+
+describe("a rate is rendered with what it is per", () => {
+  it("shows the denominator beside the figure", () => {
+    // "₹1,500" beside a page citation is a claim the source never made.
+    // "₹1,500 per month" is the claim it did (ADR-044).
+    const html = renderToStaticMarkup(
+      <Value fact={fact({ value: "1500.00", perUnit: "month" })} />,
+    );
+    expect(html).toContain("per month");
+  });
+
+  it("uses the words the page uses, unabbreviated and unpluralised", () => {
+    const html = renderToStaticMarkup(
+      <Value fact={fact({ value: "48.00", perUnit: "IPD patient per day" })} />,
+    );
+    expect(html).toContain("per IPD patient per day");
+  });
+
+  it("says nothing extra when the figure is not a rate", () => {
+    const html = renderToStaticMarkup(<Value fact={fact()} />);
+    expect(html).not.toContain(" per ");
+  });
+
+  it("carries the denominator into the accessible label too", () => {
+    // A screen reader must not be told a rate is a sum either.
+    const html = renderToStaticMarkup(<Value fact={fact({ value: "15.00", perUnit: "record" })} />);
+    expect(html).toMatch(/title="[^"]*per record"/u);
   });
 });

@@ -32,6 +32,7 @@ interface FactRow {
   readonly page_number: number;
   readonly raw_text: string;
   readonly value: string | null;
+  readonly per_unit: string | null;
   readonly verification_status: string;
   readonly verified_by: string;
   readonly verified_at: string;
@@ -86,7 +87,7 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
     if (!mayRepublish(document.source_id)) return null;
 
     const facts = await this.db.query<FactRow>(
-      `SELECT id, kind, page_number, raw_text, value, verification_status,
+      `SELECT id, kind, page_number, raw_text, value, per_unit, verification_status,
               verified_by, verified_at
          FROM published_fact
         WHERE document_id = $1
@@ -185,6 +186,7 @@ function toFact(row: FactRow): PublishedFact | null {
     pageNumber: row.page_number,
     evidence: row.raw_text,
     value,
+    perUnit: row.per_unit,
     origin,
     verifiedBy: row.verified_by,
     verifiedAt: new Date(row.verified_at).toISOString(),

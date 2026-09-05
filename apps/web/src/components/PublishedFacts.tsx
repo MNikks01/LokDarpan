@@ -24,12 +24,25 @@ export function Value({ fact }: { readonly fact: PublishedFact }): React.JSX.Ele
     return <span style={{ fontWeight: 600, color: color.text.primary }}>{fact.value}</span>;
   }
   const money = Money.fromDecimalString(fact.value);
+  // A rate is rendered with its denominator or not at all. "₹1,500" beside a
+  // page citation is a claim the source never made; "₹1,500 per month" is the
+  // claim it did (ADR-044). The unit is read into `perUnit` and shown here in
+  // the words the page uses, never abbreviated or pluralised into something the
+  // document does not say.
+  const perUnit = fact.perUnit;
   return (
     <span
       style={{ fontWeight: 600, color: color.text.primary, ...figureFontFeatures }}
-      title={money.toAccessibleString()}
+      title={
+        perUnit === null
+          ? money.toAccessibleString()
+          : `${money.toAccessibleString()} per ${perUnit}`
+      }
     >
       {money.format()}
+      {perUnit === null ? null : (
+        <span style={{ fontWeight: 400, color: color.text.secondary }}> per {perUnit}</span>
+      )}
     </span>
   );
 }

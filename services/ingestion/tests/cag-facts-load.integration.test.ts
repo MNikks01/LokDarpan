@@ -23,6 +23,7 @@ const money: FactCandidate = {
   normalisedValue: "15140000000",
   extractionConfidence: 0.8,
   validation: { state: "needs_review", reason: "" },
+  perUnit: null,
 };
 
 /** The same figure, once the extractor can say where on the page it sits. */
@@ -38,6 +39,7 @@ const firm: FactCandidate = {
   normalisedValue: "Vijay Constructions",
   extractionConfidence: 0.7,
   validation: { state: "needs_review", reason: "" },
+  perUnit: null,
 };
 
 describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
