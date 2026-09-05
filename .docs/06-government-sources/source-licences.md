@@ -10,7 +10,21 @@ Every entry below was **fetched**, not recalled. No licence is recorded from mem
 
 ## The finding, stated first
 
-**Two of our three sources permit republication outright. The third — BEAMS, which supplies every monetary figure the site currently renders — requires written permission first.**
+**Two of our three sources permit republication outright. The third — BEAMS — requires written permission first.**
+
+**Resolved 5 September 2026, without asking.** Permission has not been sought and is not
+being sought for now, so **BEAMS figures are not rendered**. The department page is
+withheld behind `PUBLISH_BEAMS_FIGURES`, off unless explicitly set, and the withholding
+happens before the fetch so no treasury figure enters a response that might be cached.
+
+This withholds **display, not collection**. BEAMS is still ingested, and its figures are
+still what a CAG figure is checked against — a comparison a reader never sees still catches
+an error. The day permission is sought and granted, one environment variable publishes the
+page with no code change.
+
+The line above about BEAMS supplying "every monetary figure the site currently renders" is
+also now out of date: all 5,164 published facts come from CAG, which permits reproduction
+outright.
 
 | Source                     | Host                    | Republication                       | Attribution         |
 | -------------------------- | ----------------------- | ----------------------------------- | ------------------- |
