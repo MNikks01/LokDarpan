@@ -25,6 +25,15 @@ export interface PublishedFact {
   /** The published sentence, so a reader judges the claim in its own context. */
   readonly evidence: string;
   /**
+   * What the figure is *per*, worded as the source words it — "month",
+   * "record", "IPD patient per day" — or `null` where it is not a rate.
+   *
+   * A rate must never be rendered without this. ₹1,500 shown alone, beside a
+   * page citation, is a claim the source did not make; ₹1,500 per month is the
+   * claim it did. 118 figures were withheld for want of this field (ADR-044).
+   */
+  readonly perUnit: string | null;
+  /**
    * Money arrives as a decimal string of rupees, never a JSON number: a
    * national multi-year aggregate exceeds Number.MAX_SAFE_INTEGER and would
    * fail silently, producing a wrong government figure under a correct source

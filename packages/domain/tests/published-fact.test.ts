@@ -16,6 +16,7 @@ const fact = (
   id,
   kind: "monetary_amount",
   pageNumber,
+  perUnit: null,
   evidence: "a contract value of 15.14 crore",
   value: "151400000.00",
   origin: "as_extracted",

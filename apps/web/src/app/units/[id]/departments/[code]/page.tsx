@@ -6,6 +6,7 @@ import { Money } from "@lokdarpan/money";
 import type { DepartmentFinanceView, DepartmentYearFinance } from "@lokdarpan/domain";
 
 import { ApiError, getJson } from "@/lib/api";
+import { treasuryFiguresArePublishable } from "@/server/publishable";
 import { ProvenanceNote } from "@/components/Provenance";
 import { color, figureFontFeatures, radius, space } from "@/ui/tokens";
 
@@ -115,6 +116,9 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string; code: string }>;
 }): Promise<Metadata> {
+  // Nothing about a withheld page reaches a crawler either — not the department
+  // name, not the description naming the treasury system.
+  if (!treasuryFiguresArePublishable()) return { title: "Not available" };
   const { id, code } = await params;
   const view = await load(id, code);
   if (view === null) return { title: "Department not found" };
@@ -130,6 +134,12 @@ export default async function DepartmentPage({
 }: {
   params: Promise<{ id: string; code: string }>;
 }): Promise<React.JSX.Element> {
+  // These figures come from BEAMS, which permits reproduction only after
+  // written permission. It has not been sought, so the page is withheld — and
+  // withheld before the fetch, so no treasury figure is even retrieved into a
+  // response that might be cached. See `@/server/publishable`.
+  if (!treasuryFiguresArePublishable()) notFound();
+
   const { id, code } = await params;
   const view = await load(id, code);
   if (view === null) notFound();
