@@ -1,6 +1,6 @@
 {
   "name": "@lokdarpan/ingestion",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
@@ -22,7 +22,8 @@
     "link:figures": "tsx src/cag/figure-link-cli.ts",
     "reprocess:cag": "tsx src/cag/reprocess-cli.ts",
     "ocr:manifest": "tsx src/ocr/manifest-cli.ts",
-    "ocr:score": "tsx src/ocr/score-cli.ts"
+    "ocr:score": "tsx src/ocr/score-cli.ts",
+    "corpus:build": "tsx src/cag/corpus-cli.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",

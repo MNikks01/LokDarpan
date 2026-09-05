@@ -1,5 +1,12 @@
 # @lokdarpan/web
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [3511219]
+  - @lokdarpan/database@0.0.2
+
 ## 0.0.1
 
 ### Patch Changes

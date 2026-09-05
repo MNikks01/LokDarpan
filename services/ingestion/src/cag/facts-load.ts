@@ -80,9 +80,27 @@ interface Reconciled {
  */
 async function reconcile(
   client: SqlClient,
-  row: { id: string; status: string; parserVersion: string; needsBox: boolean },
+  row: {
+    id: string;
+    status: string;
+    parserVersion: string;
+    needsBox: boolean;
+    validationState: string | null;
+  },
   c: FactCandidate,
 ): Promise<Reconciled> {
+  // The verdict is not part of identity: it is what the field's rules say about
+  // a reading, not what the reading is. So it lands on rows already held,
+  // whatever their status — a reviewer returning to a decided fact should see
+  // what the rules now make of it, and a rule that changes should be visible on
+  // every fact it touches rather than only on ones extracted since.
+  if (row.validationState !== c.validation.state) {
+    await client.query(
+      `UPDATE document_fact SET validation_state = $2, validation_reason = $3 WHERE id = $1`,
+      [row.id, c.validation.state, c.validation.reason === "" ? null : c.validation.reason],
+    );
+  }
+
   // Geometry first, and whatever the row's status. A box is not part of
   // identity and not part of what a person reviewed — it says where on the page
   // a figure the reviewer already saw is sitting. Gating it behind `unverified`,
@@ -124,17 +142,34 @@ async function reconcile(
 async function heldByIdentity(
   client: SqlClient,
   documentId: number,
-): Promise<Map<string, { id: string; status: string; parserVersion: string; needsBox: boolean }>> {
+): Promise<
+  Map<
+    string,
+    {
+      id: string;
+      status: string;
+      parserVersion: string;
+      needsBox: boolean;
+      validationState: string | null;
+    }
+  >
+> {
   const held = await client.query(
     `SELECT id, page_number, kind, raw_text, normalised_value, verification_status,
-            parser_version, bbox_x0
+            parser_version, bbox_x0, validation_state
        FROM document_fact WHERE document_id = $1`,
     [documentId],
   );
 
   const existing = new Map<
     string,
-    { id: string; status: string; parserVersion: string; needsBox: boolean }
+    {
+      id: string;
+      status: string;
+      parserVersion: string;
+      needsBox: boolean;
+      validationState: string | null;
+    }
   >();
   for (const row of held.rows as {
     id: string;
@@ -145,6 +180,7 @@ async function heldByIdentity(
     verification_status: string;
     parser_version: string;
     bbox_x0: string | null;
+    validation_state: string | null;
   }[]) {
     const key = identity({
       pageNumber: row.page_number,
@@ -157,6 +193,7 @@ async function heldByIdentity(
       status: row.verification_status,
       parserVersion: row.parser_version,
       needsBox: row.bbox_x0 === null,
+      validationState: row.validation_state,
     });
   }
   return existing;
@@ -171,8 +208,9 @@ async function insertCandidate(
   await client.query(
     `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
                                 extraction_method, parser_version, extraction_confidence,
-                                bbox_x0, bbox_y0, bbox_x1, bbox_y1)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+                                bbox_x0, bbox_y0, bbox_x1, bbox_y1,
+                                validation_state, validation_reason)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
     [
       documentId,
       c.pageNumber,
@@ -186,6 +224,8 @@ async function insertCandidate(
       c.box?.y0 ?? null,
       c.box?.x1 ?? null,
       c.box?.y1 ?? null,
+      c.validation.state,
+      c.validation.reason === "" ? null : c.validation.reason,
     ],
   );
 }
