@@ -99,7 +99,12 @@ const RATE_LEADING = /\bper\s+\S{2,16}\s+(?:was|is|of|at|=)\s*$/iu;
  * decision applied where the sentence states it plainly.
  *
  * The list is narrower than it first was, and each removal was forced by a
- * published figure. "valuing" and "costing" describe what something was worth —
+ * published figure. "retaining" went the same way: "a challan showing
+ * remittance of ₹2.33 crore after retaining ₹0.02 crore" is a sum a body
+ * actually kept, and English does not distinguish that from a rule about
+ * keeping. The one rule it caught — a circular directing Boards to transfer
+ * balances after retaining ₹20 lakh — states its limit in words this list still
+ * holds. "valuing" and "costing" describe what something was worth —
  * "285 medical equipment costing ₹68.55 crore" is a sum, not a cut-off. Bare
  * "exceeding" describes a quantity as often as it bounds one: "liabilities
  * exceeding ₹27,184 crore" is a liability. And "less" alone matched the
@@ -109,7 +114,7 @@ const RATE_LEADING = /\bper\s+\S{2,16}\s+(?:was|is|of|at|=)\s*$/iu;
  * pointed the other way.
  */
 const THRESHOLD_BEFORE =
-  /\b(more than|not more than|not exceeding|up to|upto|not less than|less than|at least|in excess of|minimum of|maximum of|retain(?:ing|ed)?|ceiling|permissible limit)\s*(?:₹|`|´|Rs\.?)?\s*$/iu;
+  /\b(more than|not more than|not exceeding|up to|upto|not less than|less than|at least|in excess of|minimum of|maximum of|ceiling|permissible limit)\s*(?:₹|`|´|Rs\.?)?\s*$/iu;
 
 /**
  * The same rule, stated after the figure instead of before it.
@@ -118,9 +123,13 @@ const THRESHOLD_BEFORE =
  * जास्त". English audit prose puts the comparator either side; Marathi puts the
  * postposition पेक्षा — "than" — after. A figure followed by one of these is
  * the boundary of a set, and the set is what the sentence is about.
+ *
+ * The conjunction is required, not optional. Without it, "₹0.31 crore (₹4.00
+ * crore less ₹3.69 crore)" reads as a threshold when it is a subtraction, and
+ * a published figure is suppressed by a rule about a word.
  */
 const THRESHOLD_AFTER =
-  /^\s*(?:crore|lakh|thousand|कोटी|कोट\S*|लाख|हजार)?\s*(?:or|and|तसेच)?\s*(more|above|below|less|higher|lower|पेक्षा)\b/iu;
+  /^\s*(?:crore|lakh|thousand|कोटी|कोट\S*|लाख|हजार)?\s*(?:(?:or|and)\s+(?:more|above|below|less|higher|lower)|पेक्षा)\b/iu;
 
 /**
  * A multiplicand between a count and a product: `490 tenements × ₹38,46,110 =`.

@@ -14,7 +14,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/16";
+export const PARSER_VERSION = "cag-facts/17";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";

@@ -65,7 +65,7 @@ describe("a threshold in a rule is not a sum anyone paid", () => {
     ["works valuing more than ₹ 5.00 crore need pre-qualification", "₹ 5.00"],
     ["schemes with less than ₹ 400 crore of assistance were sampled", "₹ 400"],
     ["a work order of value not less than ₹ 80 crore is required", "₹ 80"],
-    ["the Boards transfer balances after retaining ₹ 20 lakh", "₹ 20"],
+    ["a work valuing not more than ₹ 50 lakh may be sanctioned", "₹ 50"],
     ["provisions (₹ 10 crore or more in each case) proved unnecessary", "₹ 10"],
     ["procurement of goods of estimated value of ₹ 25 lakh and above", "₹ 25"],
   ])("rejects %s", (evidence, figure) => {
@@ -77,6 +77,8 @@ describe("a threshold in a rule is not a sum anyone paid", () => {
     ["11,157.83 square meters valuing ₹ 29.51 crore were handed over", "₹ 29.51"],
     ["undischarged liabilities exceeding ₹ 27,184 crore were observed", "₹ 27,184"],
     ["the balance of ₹ 0.31 crore (₹ 4.00 crore less ₹ 3.69 crore) was unspent", "₹ 0.31"],
+    ["the balance of ₹ 0.31 crore (₹ 4.00 crore less ₹ 3.69 crore) was unspent", "₹ 4.00"],
+    ["a challan showing remittance of ₹ 2.33 crore after retaining ₹ 0.02 crore", "₹ 0.02"],
   ])("leaves alone the published figure %s", (evidence, figure) => {
     // Each of these was published, and an earlier draft of the rules rejected
     // it. "valuing" and "costing" describe what a thing was worth; "exceeding"
