@@ -1,8 +1,9 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { GeometryNotInstalledError, listStateOptions, stateOutlineSource } from "@/data/geography";
+import { geographyRepository } from "@/server/container";
 import { ExploreShell } from "@/components/explore/ExploreShell";
-import { parseExplorerState, toSearchParams } from "@/state/explorer-url";
+import { parseExplorerState, reconcile, toSearchParams } from "@/state/explorer-url";
 import { color } from "@/ui/tokens";
 
 export const metadata: Metadata = {
@@ -37,7 +38,15 @@ export default async function ExplorePage({
 
   // The selection is read from the request, so a shared deep link is rendered
   // server-side as the place it names rather than being corrected on the client.
-  const initialState = parseExplorerState(toSearchParams(await searchParams));
+  const requested = parseExplorerState(toSearchParams(await searchParams));
+  // Resolved on the server, so the first render is already coherent and no
+  // correction flashes on screen.
+  const initialState = reconcile(
+    requested,
+    requested.geo.unitId === null
+      ? null
+      : await geographyRepository().stateCodeOf(requested.geo.unitId),
+  );
 
   return <ExploreShell states={states} initialState={initialState} outlineSource={outlineSource} />;
 }
