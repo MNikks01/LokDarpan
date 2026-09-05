@@ -99,6 +99,10 @@ jobs:
         run: |
           PGPASSWORD=lokdarpan_ci_only psql -h localhost -U lokdarpan -d lokdarpan \
             -v ON_ERROR_STOP=1 -f database/scripts/create-local-reviewer-user.sql
+      - name: Provision the scheduler's ETL database user
+        run: |
+          PGPASSWORD=lokdarpan_ci_only psql -h localhost -U lokdarpan -d lokdarpan \
+            -v ON_ERROR_STOP=1 -f database/scripts/create-local-etl-user.sql
       - name: Unit + integration tests
         run: pnpm test
         env:
@@ -109,6 +113,7 @@ jobs:
           # Asserts the reviewer can record a decision but cannot rewrite what
           # the parser read. Unset, that boundary check silently skips.
           DATABASE_URL_REVIEWER: postgresql://lokdarpan_review:lokdarpan_local_only@localhost:5432/lokdarpan
+          DATABASE_URL_ETL: postgresql://lokdarpan_etl_user:lokdarpan_local_only@localhost:5432/lokdarpan
       - name: Coverage thresholds (domain + api)
         run: pnpm exec vitest run --coverage
         env:
@@ -118,6 +123,7 @@ jobs:
           DATABASE_URL: postgresql://lokdarpan:lokdarpan_ci_only@localhost:5432/lokdarpan
           DATABASE_URL_READONLY: postgresql://lokdarpan_api:lokdarpan_local_only@localhost:5432/lokdarpan
           DATABASE_URL_REVIEWER: postgresql://lokdarpan_review:lokdarpan_local_only@localhost:5432/lokdarpan
+          DATABASE_URL_ETL: postgresql://lokdarpan_etl_user:lokdarpan_local_only@localhost:5432/lokdarpan
 
   e2e:
     name: E2E
