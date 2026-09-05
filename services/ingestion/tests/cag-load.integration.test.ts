@@ -101,8 +101,19 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
     beforeEach(async () => {
       await db().query("BEGIN");
-      await db().query("DELETE FROM document_page");
-      await db().query("DELETE FROM document");
+      // TRUNCATE rather than DELETE, and inside the transaction the afterEach
+      // rolls back, so the real ledger is untouched.
+      //
+      // The assertions below count rows without naming a document, so the
+      // tables have to start empty. DELETE walked every row to do that, and
+      // `document_text_item` now holds 924,707 of them — the hook began timing
+      // out at ten seconds, and would have kept getting slower with each
+      // document ingested. A test whose setup cost grows with the corpus is a
+      // test that eventually fails for a reason that has nothing to do with
+      // what it checks.
+      await db().query(
+        "TRUNCATE document, document_page, document_text_item, document_fact CASCADE",
+      );
       await db().query(
         `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
        VALUES ($1,'cag',$2, now(), 10, 'cag/t') ON CONFLICT (sha256) DO NOTHING`,
