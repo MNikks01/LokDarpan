@@ -29,6 +29,24 @@ export interface DistrictTenderCount {
   readonly departments: readonly string[];
 }
 
+/**
+ * Whether tenders are collected for a state, which no count can answer.
+ *
+ * `not_collected` exists so that "we hold none" can never be rendered as "none
+ * were advertised". Those are different claims about a government, and only one
+ * of them is ours to make.
+ */
+export type CollectionStatus = "not_collected" | "collected" | "stale" | "failing";
+
+export interface StateCollection {
+  readonly stateLgdCode: string;
+  readonly status: CollectionStatus;
+  readonly portalCode: string | null;
+  readonly collectingSince: string | null;
+  readonly lastSuccessAt: string | null;
+  readonly lastCheckedAt: string | null;
+}
+
 export interface TenderOverview {
   readonly districts: readonly DistrictTenderCount[];
   readonly departments: readonly { readonly name: string; readonly tenderCount: number }[];
@@ -36,13 +54,26 @@ export interface TenderOverview {
     readonly portalCode: string;
     readonly collectingSince: string;
     readonly lastSuccessAt: string | null;
+    readonly lastCheckedAt: string | null;
+    readonly stateLgdCode: string | null;
   }[];
   readonly unplacedCount: number;
+  /** Present only when a state is selected. Null means the question was not asked. */
+  readonly collection: StateCollection | null;
 }
 
-const EMPTY: TenderOverview = { districts: [], departments: [], windows: [], unplacedCount: 0 };
+const EMPTY: TenderOverview = {
+  districts: [],
+  departments: [],
+  windows: [],
+  unplacedCount: 0,
+  collection: null,
+};
 
-export function useTenderOverview(department: string | null): {
+export function useTenderOverview(
+  department: string | null,
+  stateLgdCode: string | null = null,
+): {
   readonly overview: TenderOverview;
   readonly failed: boolean;
 } {
@@ -51,7 +82,10 @@ export function useTenderOverview(department: string | null): {
 
   useEffect(() => {
     const controller = new AbortController();
-    const query = department === null ? "" : `?department=${encodeURIComponent(department)}`;
+    const params = new URLSearchParams();
+    if (department !== null) params.set("department", department);
+    if (stateLgdCode !== null) params.set("state", stateLgdCode);
+    const query = params.size === 0 ? "" : `?${params.toString()}`;
     fetch(`/api/v1/tenders/overview${query}`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
       .then((body: { data: TenderOverview }) => {
@@ -68,7 +102,7 @@ export function useTenderOverview(department: string | null): {
     return () => {
       controller.abort();
     };
-  }, [department]);
+  }, [department, stateLgdCode]);
 
   return { overview, failed };
 }
@@ -107,6 +141,101 @@ function formatDate(iso: string): string {
   });
 }
 
+/**
+ * What the panel says when nothing is collected for the selected state.
+ *
+ * Its own component so the count cannot be rendered beside it. "0 tenders" and
+ * this sentence are answers to different questions, and showing both would let
+ * a reader take the number as the finding and this as a footnote.
+ */
+function NotCollected({ stateName }: { readonly stateName: string }): React.JSX.Element {
+  return (
+    <>
+      <p style={{ fontSize: 12.5, margin: 0 }}>
+        <span aria-hidden="true">▤ </span>
+        Tender data is not currently collected for {stateName}.
+      </p>
+      <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>
+        This describes what LokDarpan holds, not what has been advertised. No count is shown for{" "}
+        {stateName}, since none would be a measurement of the state rather than of our collection.
+      </p>
+    </>
+  );
+}
+
+/**
+ * How many open tenders the shading accounts for.
+ *
+ * Only ever rendered for a state that is collected. For one that is not, the
+ * sum is zero and means nothing about the state, which is why it is computed
+ * inside the branch that may show it rather than beside the branch that must
+ * not.
+ */
+function shadedCount(overview: TenderOverview): number {
+  return overview.districts.reduce((sum, d) => sum + d.tenderCount, 0);
+}
+
+/**
+ * Tenders held whose issuing district could not be established.
+ *
+ * Stated rather than hidden: an unplaced tender is a real advertisement by a
+ * real government office, and dropping it because the map has nowhere to draw
+ * it would quietly shrink the total a reader is shown.
+ */
+function Unplaced({
+  count,
+  showing,
+  onToggle,
+}: {
+  readonly count: number;
+  readonly showing: boolean;
+  readonly onToggle: () => void;
+}): React.JSX.Element | null {
+  if (count === 0) return null;
+  return (
+    <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>
+      <span aria-hidden="true">▤ </span>
+      {count} further {count === 1 ? "tender names" : "tenders name"} no district we hold, so{" "}
+      {count === 1 ? "it is" : "they are"} not shaded here.{" "}
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={showing}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          font: "inherit",
+          color: "var(--ld-accent)",
+          textDecoration: "underline",
+          cursor: "pointer",
+        }}
+      >
+        {showing ? "Hide them" : "Show them"}
+      </button>
+    </p>
+  );
+}
+
+/** How out of date a collected state's figures are, in the panel's own words. */
+function Freshness({
+  collection,
+}: {
+  readonly collection: StateCollection;
+}): React.JSX.Element | null {
+  if (collection.status === "collected" || collection.status === "not_collected") return null;
+  return (
+    <p style={{ fontSize: 11.5, color: "var(--ld-text-secondary)", margin: "6px 0 0" }}>
+      <span aria-hidden="true">▤ </span>
+      {collection.status === "failing"
+        ? "The most recent collection attempt did not complete. The tenders shown are the last that were collected successfully."
+        : "These tenders were last collected more than two days ago."}
+      {collection.lastSuccessAt !== null &&
+        ` Last successful collection ${formatDate(collection.lastSuccessAt)}.`}
+    </p>
+  );
+}
+
 export function TendersPanel({
   overview,
   failed,
@@ -114,6 +243,7 @@ export function TendersPanel({
   onSelectDepartment,
   showingUnplaced,
   onToggleUnplaced,
+  stateName,
 }: {
   readonly overview: TenderOverview;
   readonly failed: boolean;
@@ -121,6 +251,8 @@ export function TendersPanel({
   readonly onSelectDepartment: (department: string | null) => void;
   readonly showingUnplaced: boolean;
   readonly onToggleUnplaced: () => void;
+  /** The selected state, for a sentence that names it. Null before one is chosen. */
+  readonly stateName: string | null;
 }): React.JSX.Element {
   const onChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -129,8 +261,14 @@ export function TendersPanel({
     [onSelectDepartment],
   );
 
-  const shaded = overview.districts.reduce((sum, d) => sum + d.tenderCount, 0);
-  const collected = overview.windows[0];
+  const { collection } = overview;
+  // The window for the state on screen, not whichever row came back first. The
+  // panel previously took `windows[0]` and dated every state's figures by one
+  // arbitrary portal's last success.
+  const collected = overview.windows.find(
+    (w) => collection !== null && w.portalCode === collection.portalCode,
+  );
+  const notCollected = collection !== null && collection.status === "not_collected";
 
   return (
     <div className={styles.panel}>
@@ -142,6 +280,8 @@ export function TendersPanel({
             <span aria-hidden="true">▤ </span>
             Tender information is unavailable right now.
           </p>
+        ) : notCollected ? (
+          <NotCollected stateName={stateName ?? "this state"} />
         ) : (
           <>
             <p style={{ fontSize: 12, color: "var(--ld-text-secondary)", margin: "0 0 10px" }}>
@@ -171,35 +311,19 @@ export function TendersPanel({
             </select>
 
             <p style={{ fontSize: 12, margin: "10px 0 0" }}>
-              <strong>{shaded}</strong> open {shaded === 1 ? "tender" : "tenders"} across{" "}
+              <strong>{shadedCount(overview)}</strong> open{" "}
+              {shadedCount(overview) === 1 ? "tender" : "tenders"} across{" "}
               {overview.districts.length}{" "}
               {overview.districts.length === 1 ? "district" : "districts"}.
             </p>
 
-            {overview.unplacedCount > 0 && (
-              <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>
-                <span aria-hidden="true">▤ </span>
-                {overview.unplacedCount} further{" "}
-                {overview.unplacedCount === 1 ? "tender names" : "tenders name"} no district we
-                hold, so {overview.unplacedCount === 1 ? "it is" : "they are"} not shaded here.{" "}
-                <button
-                  type="button"
-                  onClick={onToggleUnplaced}
-                  aria-expanded={showingUnplaced}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    font: "inherit",
-                    color: "var(--ld-accent)",
-                    textDecoration: "underline",
-                    cursor: "pointer",
-                  }}
-                >
-                  {showingUnplaced ? "Hide them" : "Show them"}
-                </button>
-              </p>
-            )}
+            <Unplaced
+              count={overview.unplacedCount}
+              showing={showingUnplaced}
+              onToggle={onToggleUnplaced}
+            />
+
+            {collection !== null && <Freshness collection={collection} />}
 
             {collected !== undefined && (
               <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>

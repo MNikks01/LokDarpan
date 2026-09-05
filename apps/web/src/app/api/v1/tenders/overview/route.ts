@@ -15,20 +15,39 @@ export const dynamic = "force-dynamic";
  * `?department=` narrows the counts. The department list is deliberately NOT
  * narrowed with them, so the filter still offers every other choice once one
  * has been made.
+ *
+ * `?state=<lgd code>` adds `collection`, which answers a question no count can:
+ * whether tenders are collected for that state at all. Maharashtra holds none,
+ * and the panel reported "0 tenders" — a true count and a false statement,
+ * because no Maharashtra portal is collected, so the zero describes our reach
+ * and reads as the government's silence.
+ *
+ * The state is identified by its LGD code, the identity the rest of the ledger
+ * resolves against, never by name.
  */
 export function GET(request: Request): Promise<Response> {
   return respond(request, async () => {
-    const requested = new URL(request.url).searchParams.get("department");
+    const params = new URL(request.url).searchParams;
+    const requested = params.get("department");
     const department = requested === null || requested === "" ? undefined : requested;
+    // Validated as the shape an LGD code takes rather than trusted: it reaches a
+    // query, and a state code is digits.
+    const requestedState = params.get("state");
+    const stateLgdCode =
+      requestedState !== null && /^\d{1,7}$/u.test(requestedState) ? requestedState : null;
     const repository = tenderRepository();
 
-    const [districts, departments, windows, unplacedCount] = await Promise.all([
+    const [districts, departments, windows, unplacedCount, collection] = await Promise.all([
       repository.countsByDistrict(department),
       repository.departments(),
       repository.collectionWindows(),
       repository.unplacedCount(),
+      stateLgdCode === null ? Promise.resolve(null) : repository.collectionForState(stateLgdCode),
     ]);
 
-    return { data: { districts, departments, windows, unplacedCount }, datasetVersion: 0 };
+    return {
+      data: { districts, departments, windows, unplacedCount, collection },
+      datasetVersion: 0,
+    };
   });
 }

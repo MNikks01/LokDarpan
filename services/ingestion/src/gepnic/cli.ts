@@ -110,6 +110,8 @@ interface PortalOutcome {
   readonly advertised: number;
   readonly inserted: number;
   readonly updated: number;
+  /** Of the updated, how many the portal actually changed. */
+  readonly changed: number;
   readonly placed: number;
   readonly failed: number;
   /** Set when the portal could not be collected at all. */
@@ -130,6 +132,7 @@ async function collectPortal(client: pg.Client, target: Target): Promise<PortalO
     advertised: 0,
     inserted: 0,
     updated: 0,
+    changed: 0,
     placed: 0,
     failed: 0,
   };
@@ -174,6 +177,7 @@ async function collectPortal(client: pg.Client, target: Target): Promise<PortalO
     advertised: tenders.length,
     inserted: result.inserted,
     updated: result.updated,
+    changed: result.changed,
     placed: result.placed,
     failed: result.failed.length,
     refusal: null,
@@ -184,9 +188,13 @@ function line(outcome: PortalOutcome): string {
   if (outcome.refusal !== null) {
     return `  ${outcome.portal.padEnd(14)} ${outcome.refusal}\n`;
   }
+  // `changed` is reported beside `new` because a run in which every tender was
+  // seen and none had changed is a healthy run, and it otherwise looks identical
+  // to a run that collected nothing.
   return (
     `  ${outcome.portal.padEnd(14)} ${String(outcome.advertised).padStart(3)} advertised · ` +
     `${String(outcome.inserted).padStart(3)} new · ` +
+    `${String(outcome.changed).padStart(3)} changed · ` +
     `${String(outcome.placed).padStart(3)} placed\n`
   );
 }

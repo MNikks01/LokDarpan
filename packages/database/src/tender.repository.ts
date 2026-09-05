@@ -47,7 +47,51 @@ export interface CollectionWindow {
   readonly portalCode: string;
   readonly collectingSince: string;
   readonly lastSuccessAt: string | null;
+  /** When collection was last attempted, successful or not. */
+  readonly lastCheckedAt: string | null;
+  /** LGD code of the state this portal publishes for; null until next collected. */
+  readonly stateLgdCode: string | null;
 }
+
+/**
+ * Whether tender data is collected for a state, which is not the same question
+ * as how many tenders it has.
+ *
+ * `not_collected` is the one that matters. Maharashtra holds no tenders, and the
+ * explorer reported that as "0 tenders" — a true count and a false statement,
+ * because no Maharashtra portal is collected at all, so the zero describes our
+ * reach and reads as the government's silence. A count may never be evidence of
+ * absence; only this can say which kind of nothing is on screen.
+ */
+export type CollectionStatus =
+  /** No portal is collected for this state. Says nothing about what exists. */
+  | "not_collected"
+  /** Collected, and the last attempt succeeded recently. */
+  | "collected"
+  /** Collected before, but not successfully for longer than expected. */
+  | "stale"
+  /** Attempted more recently than it last succeeded: the attempts are failing. */
+  | "failing";
+
+export interface StateCollection {
+  readonly stateLgdCode: string;
+  readonly status: CollectionStatus;
+  /** Null when nothing is collected for this state. */
+  readonly portalCode: string | null;
+  readonly collectingSince: string | null;
+  readonly lastSuccessAt: string | null;
+  readonly lastCheckedAt: string | null;
+}
+
+/**
+ * How long a successful collection stays current.
+ *
+ * The GePNIC landing page is polled daily, so two days without a success is the
+ * first interval that cannot be one missed run. Deliberately generous: calling
+ * fresh data stale costs a reader nothing, and calling stale data fresh is the
+ * failure this project exists to avoid.
+ */
+const STALE_AFTER_HOURS = 48;
 
 /**
  * Only tenders still open are counted.
@@ -212,15 +256,77 @@ export class PostgresTenderRepository {
       portal_code: string;
       collecting_since: string;
       last_success_at: string | null;
+      last_checked_at: string | null;
+      state_lgd_code: string | null;
     }>(
-      `SELECT portal_code, collecting_since::text AS collecting_since, last_success_at
+      `SELECT portal_code, collecting_since::text AS collecting_since, last_success_at,
+              last_checked_at, state_lgd_code
          FROM tender_collection_window ORDER BY portal_code`,
     );
     return result.rows.map((r) => ({
       portalCode: r.portal_code,
       collectingSince: r.collecting_since,
       lastSuccessAt: r.last_success_at,
+      lastCheckedAt: r.last_checked_at,
+      stateLgdCode: r.state_lgd_code,
     }));
+  }
+
+  /**
+   * Whether a state's tenders are collected at all, and how that is going.
+   *
+   * Derived from what the window rows say rather than stored as a flag. A state
+   * is `not_collected` because nothing claims to collect it — not because
+   * somebody remembered to set a column, which is a claim that can go stale on
+   * its own.
+   */
+  async collectionForState(stateLgdCode: string): Promise<StateCollection> {
+    const result = await this.db.query<{
+      portal_code: string;
+      collecting_since: string;
+      last_success_at: string | null;
+      last_checked_at: string | null;
+      stale: boolean;
+    }>(
+      `SELECT portal_code, collecting_since::text AS collecting_since,
+              last_success_at, last_checked_at,
+              (last_success_at IS NULL
+                 OR last_success_at < now() - ($2 || ' hours')::interval) AS stale
+         FROM tender_collection_window
+        WHERE state_lgd_code = $1
+        ORDER BY last_success_at DESC NULLS LAST
+        LIMIT 1`,
+      [stateLgdCode, String(STALE_AFTER_HOURS)],
+    );
+
+    const row = result.rows[0];
+    if (row === undefined) {
+      return {
+        stateLgdCode,
+        status: "not_collected",
+        portalCode: null,
+        collectingSince: null,
+        lastSuccessAt: null,
+        lastCheckedAt: null,
+      };
+    }
+
+    // Checked later than it last succeeded means the most recent attempt did
+    // not complete. That is a different thing from old data, and it is the one
+    // an operator has to act on.
+    const attemptedSinceSuccess =
+      row.last_checked_at !== null &&
+      (row.last_success_at === null ||
+        new Date(row.last_checked_at) > new Date(row.last_success_at));
+
+    return {
+      stateLgdCode,
+      status: attemptedSinceSuccess ? "failing" : row.stale ? "stale" : "collected",
+      portalCode: row.portal_code,
+      collectingSince: row.collecting_since,
+      lastSuccessAt: row.last_success_at,
+      lastCheckedAt: row.last_checked_at,
+    };
   }
 
   /** How many open tenders we hold but could not place. Shown, never hidden. */
