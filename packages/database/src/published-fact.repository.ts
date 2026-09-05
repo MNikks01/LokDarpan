@@ -114,20 +114,47 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
   }
 
   async listDocuments(): Promise<readonly DocumentSummary[]> {
-    return this.queryDocuments(null);
-  }
-
-  async listDocumentsForUnit(lgdCode: string): Promise<readonly DocumentSummary[]> {
-    return this.queryDocuments(lgdCode);
+    return this.queryDocuments();
   }
 
   /**
-   * One query for both listings, scoped by LGD code when one is given.
+   * The documents filed against exactly this unit.
+   *
+   * **Exact, and deliberately not inherited.** A district does not show its
+   * state's reports. Every audit report we hold is filed at state level by the
+   * publisher's own filter, so inheriting would put thirty state-wide reports
+   * under all thirty-six districts and let a reader take them for findings about
+   * the district they had selected.
+   *
+   * Keyed on `admin_unit.id`, not on the LGD code this used to take. LGD codes
+   * are per-register and collide across levels — code 27 is Maharashtra the
+   * state and also a district elsewhere — so the old query could return another
+   * state's district records for a state's own code.
+   */
+  async listDocumentsForUnit(adminUnitId: number): Promise<readonly DocumentSummary[]> {
+    return this.queryDocuments({ adminUnitId });
+  }
+
+  /**
+   * Documents no unit could be established for.
+   *
+   * None exist today and the listing exists anyway: a document whose geography
+   * is unresolved is still a real report by a real authority, and it has to stay
+   * reachable rather than vanish because no page claims it.
+   */
+  async listUnattributedDocuments(): Promise<readonly DocumentSummary[]> {
+    return this.queryDocuments({ unattributed: true });
+  }
+
+  /**
+   * One query for every listing.
    *
    * The unit is joined through `document.admin_unit_id` — the link the
    * ingestion recorded — and never inferred from the title.
    */
-  private async queryDocuments(lgdCode: string | null): Promise<readonly DocumentSummary[]> {
+  private async queryDocuments(
+    scope: { adminUnitId?: number; unattributed?: boolean } = {},
+  ): Promise<readonly DocumentSummary[]> {
     const result = await this.db.query<{
       id: string;
       title: string;
@@ -136,8 +163,9 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
       awaiting_review: string;
       unit_name: string | null;
       unit_level: string | null;
+      geography_source: string | null;
     }>(
-      `SELECT d.id, d.title, d.issuing_authority,
+      `SELECT d.id, d.title, d.issuing_authority, d.geography_source,
               u.name_en AS unit_name, u.level::text AS unit_level,
               (SELECT count(*) FROM published_fact p WHERE p.document_id = d.id
               ) AS published_facts,
@@ -146,9 +174,10 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
               ) AS awaiting_review
          FROM document d
          LEFT JOIN admin_unit u ON u.id = d.admin_unit_id
-        WHERE $1::text IS NULL OR u.lgd_code = $1
+        WHERE ($1::bigint IS NULL OR d.admin_unit_id = $1)
+          AND ($2::boolean IS NOT TRUE OR d.admin_unit_id IS NULL)
         ORDER BY d.title`,
-      [lgdCode],
+      [scope.adminUnitId ?? null, scope.unattributed ?? false],
     );
     return result.rows.map((r) => ({
       documentId: Number(r.id),
@@ -158,6 +187,7 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
       awaitingReview: Number(r.awaiting_review),
       adminUnitName: r.unit_name,
       adminUnitLevel: r.unit_level,
+      geographySource: r.geography_source,
     }));
   }
 }
