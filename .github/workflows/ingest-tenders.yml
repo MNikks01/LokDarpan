@@ -1,0 +1,70 @@
+# Daily GEP-NIC tender collection.
+#
+# WHY A WORKFLOW AND NOT A HOST
+# The web tier deploys to Vercel and the database is Neon, and
+# `.docs/16-operations/deployment-vercel.md` §4 rules out running ETL from Vercel:
+# it needs a write credential, and that must not sit beside the public site.
+# Nothing else in this repository establishes a host, and GitHub Actions is the
+# one scheduler it already runs. See `.docs/16-operations/collection-schedule.md`.
+#
+# WHAT THIS DOES NOT DO
+# It invokes the existing command and nothing more. No ingestion logic lives
+# here: a scheduler that reimplements the job is a second job to keep correct.
+name: Ingest tenders
+
+on:
+  schedule:
+    # 20:00 UTC — 01:30 IST, the quietest hour for the portals being polled.
+    # A daily cadence is what `tender-collection-cadence.md` establishes and what
+    # the 48-hour staleness threshold is set against.
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+
+# Read-only. The job clones the repository and talks to a database; it has no
+# reason to write to the repository, open anything, or mint a package.
+permissions:
+  contents: read
+
+# A scheduler-level guard only. The authoritative protection against two sweeps
+# running at once is the PostgreSQL advisory lock the command takes for itself —
+# this cannot see a sweep started from a laptop, and GitHub's queueing means a
+# run held here still starts once the first finishes.
+concurrency:
+  group: ingest-gepnic
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "9.12.0"
+
+jobs:
+  gepnic:
+    name: GEP-NIC sweep
+    runs-on: ubuntu-latest
+    # Twenty portals, five seconds apart, each fetching a landing page and its
+    # detail pages. Generous, and finite: a sweep that hangs must not hold the
+    # advisory lock all day.
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      # The credential reaches this step and no other. Nothing echoes it: the
+      # command reads it from the environment, and every log line the sweep
+      # writes names portals and counts.
+      #
+      # Exit codes, which decide whether this run is red:
+      #   0  every portal collected, or some refused while others collected
+      #   69 every portal refused — nothing was collected
+      #   75 another sweep holds the lock; this one did nothing
+      #   78 DATABASE_URL absent or empty
+      #   64 usage
+      #   77 a publisher's robots.txt forbids us, and we stopped
+      - name: Collect
+        run: pnpm --filter @lokdarpan/ingestion ingest:gepnic --all
+        env:
+          DATABASE_URL: ${{ secrets.INGEST_DATABASE_URL }}
