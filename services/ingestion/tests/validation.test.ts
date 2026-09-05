@@ -40,14 +40,26 @@ describe("a field declares how carefully it must be read", () => {
   });
 });
 
-describe("a rate is not an amount", () => {
+describe("a rate carries its denominator or is refused", () => {
+  // This changed with ADR-044 and migration 0020. A rate used to be refused
+  // outright, because the ledger had nowhere to put what it was per. It now has
+  // one, so the test is no longer "is a rate rejected" but "can it say what it
+  // is per" — and only then may it be offered.
   it.each([
-    ["financial assistance of ₹ 2,000 per beneficiary was paid", "₹ 2,000"],
-    ["dues of ₹ 250 per tenement per month were outstanding", "₹ 250"],
-    ["a benefit of ₹ 1,500 per month reached the account", "₹ 1,500"],
+    ["financial assistance of ₹ 2,000 per beneficiary was paid", "₹ 2,000", "beneficiary"],
+    ["dues of ₹ 250 per tenement per month were outstanding", "₹ 250", "tenement per month"],
+    ["a benefit of ₹ 1,500 per month reached the account", "₹ 1,500", "month"],
+  ])("offers %o for review, carrying its unit", (evidence, figure, unit) => {
+    const at = evidence.indexOf(figure);
+    const verdict = validate({ kind: "monetary_amount", evidence, at, length: figure.length });
+    expect(verdict.state).toBe("needs_review");
+    expect(verdict.perUnit).toBe(unit);
+  });
+
+  it.each([
     ["the amounts were paid at the rate of ₹ 60,000 to each student", "₹ 60,000"],
     ["cost of the card system per meal was ₹ 5.64 including GST", "₹ 5.64"],
-  ])("rejects %s", (evidence, figure) => {
+  ])("refuses %o, whose denominator cannot be read forward", (evidence, figure) => {
     expect(stateOf(evidence, figure)).toBe("rejected");
   });
 
@@ -55,8 +67,22 @@ describe("a rate is not an amount", () => {
     // "₹104.87 crore at the rate of ₹4,661 per kit" holds a sum and a rate. A
     // window-wide search calls both rates and throws away the sum.
     const evidence = "supply order (₹ 104.87 crore at the rate of ₹ 4,661 per kit) was placed";
-    expect(stateOf(evidence, "₹ 104.87")).toBe("needs_review");
-    expect(stateOf(evidence, "₹ 4,661")).toBe("rejected");
+    const total = validate({
+      kind: "monetary_amount",
+      evidence,
+      at: evidence.indexOf("₹ 104.87"),
+      length: "₹ 104.87".length,
+    });
+    expect(total.state).toBe("needs_review");
+    expect(total.perUnit).toBeUndefined();
+
+    const rate = validate({
+      kind: "monetary_amount",
+      evidence,
+      at: evidence.indexOf("₹ 4,661"),
+      length: "₹ 4,661".length,
+    });
+    expect(rate.perUnit).toBe("kit");
   });
 });
 
@@ -118,5 +144,63 @@ describe("a refusal always says why", () => {
     const verdict = validate(reading("a sum of ₹ 40.80 crore was released", "₹ 40.80"));
     expect(verdict.state).toBe("needs_review");
     expect(verdict.reason).toBe("");
+  });
+});
+
+describe("a rate is publishable exactly when it can say what it is per", () => {
+  const unitFor = (evidence: string, figure: string): string | null | undefined => {
+    const at = evidence.indexOf(figure);
+    return validate({ kind: "monetary_amount", evidence, at, length: figure.length }).perUnit;
+  };
+
+  it.each([
+    ["a financial benefit of ₹ 1,500 per month through DBT", "₹ 1,500", "month"],
+    ["₹5,000 per annum for medical students", "₹5,000", "annum"],
+    ["a fee of ₹15 per record was charged for downloads", "₹15", "record"],
+    ["prescribed ₹ 48 per IPD patient per day for food", "₹ 48", "IPD patient per day"],
+    ["recovery of ₹ 65 per Cu.M. of the quantity", "₹ 65", "Cu.M."],
+    ["the rate of Guarantee fee is ₹ 2 per ₹100 of the amount", "₹ 2", "₹100"],
+  ])("reads the denominator of %o", (evidence, figure, expected) => {
+    expect(unitFor(evidence, figure)).toBe(expected);
+  });
+
+  it.each([
+    // The sentence resumes; the unit is one word, not a clause.
+    ["a benefit of ₹ 1,500 per month since April was paid", "₹ 1,500", "month"],
+    ["₹ 100 per annum electricity charges were levied", "₹ 100", "annum"],
+    ["at ₹ 16,000 per sqm x 80% of the area", "₹ 16,000", "sqm"],
+    ["₹ 4,661 per kit plus GST was ordered", "₹ 4,661", "kit"],
+    ["Breakfast @ ₹ 3 per beneficiary Quantity in grams", "₹ 3", "beneficiary"],
+  ])("stops where the unit stops in %o", (evidence, figure, expected) => {
+    expect(unitFor(evidence, figure)).toBe(expected);
+  });
+
+  it("refuses a unit the evidence window cut off", () => {
+    // "₹100 per Cu…" is "per Cu.M." on the page, and Cu is not a cubic metre. A
+    // denominator that cannot be seen to end is not read, and the figure is
+    // refused rather than published per a fragment.
+    const evidence = "deduction at the rate of ₹ 100 per Cu";
+    const at = evidence.indexOf("₹ 100");
+    const verdict = validate({ kind: "monetary_amount", evidence, at, length: "₹ 100".length });
+    expect(verdict.perUnit).toBeUndefined();
+    expect(verdict.state).toBe("rejected");
+  });
+
+  it("refuses a rate whose denominator sits where it cannot be read", () => {
+    // "at the rate of ₹60,000" states a rate; which noun it is per lives
+    // elsewhere in the sentence, and guessing would be inventing it.
+    const evidence = "amounts were paid at the rate of ₹ 60,000 and ₹ 1.00 lakh for students";
+    const at = evidence.indexOf("₹ 60,000");
+    const verdict = validate({ kind: "monetary_amount", evidence, at, length: "₹ 60,000".length });
+    expect(verdict.state).toBe("rejected");
+    expect(verdict.perUnit).toBeUndefined();
+  });
+
+  it("leaves a plain amount without a denominator", () => {
+    const evidence = "a sum of ₹ 40.80 crore was released to the department";
+    const at = evidence.indexOf("₹ 40.80");
+    expect(
+      validate({ kind: "monetary_amount", evidence, at, length: "₹ 40.80".length }).perUnit,
+    ).toBeUndefined();
   });
 });

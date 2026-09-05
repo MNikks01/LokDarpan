@@ -14,7 +14,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/17";
+export const PARSER_VERSION = "cag-facts/22";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -39,6 +39,14 @@ export interface FactCandidate {
    * should settle by unpublishing government figures.
    */
   readonly validation: Verdict;
+  /**
+   * What this figure is per, worded as the page words it, or `null`.
+   *
+   * A rate is publishable exactly when it carries this. Where the sentence
+   * states a rate whose denominator cannot be read forward from the figure, the
+   * validator refuses the reading rather than offering a number with no unit.
+   */
+  readonly perUnit: string | null;
   /**
    * Where on the page the figure itself sits — not the evidence window round
    * it. Absent when the page's text items were not supplied, which is every
@@ -604,12 +612,15 @@ function matchesIn(
       // A decoded mark sits below a stated one at every tier. The glyph was
       // read from the page rather than from the text layer, and a reader is
       // entitled to know the difference before the figure is published.
-      validation: validate({
-        kind: "monetary_amount",
-        evidence: sentence,
-        at: m.index,
-        length: m[0].length,
-      }),
+      ...(() => {
+        const verdict = validate({
+          kind: "monetary_amount",
+          evidence: sentence,
+          at: m.index,
+          length: m[0].length,
+        });
+        return { validation: verdict, perUnit: verdict.perUnit ?? null };
+      })(),
       extractionConfidence: markWasDecoded
         ? m[2] !== undefined
           ? 0.5
@@ -643,6 +654,7 @@ function contractorsIn(sentence: string, pageNumber: number): FactCandidate[] {
         at: m.index,
         length: m[0].length,
       }),
+      perUnit: null,
       pageNumber,
       rawText: contextAround(sentence, m.index, m.index + m[0].length),
       normalisedValue: firm,
@@ -665,6 +677,7 @@ function officersIn(sentence: string, pageNumber: number): FactCandidate[] {
         at: m.index,
         length: m[0].length,
       }),
+      perUnit: null,
       pageNumber,
       rawText: contextAround(sentence, m.index, m.index + m[0].length),
       normalisedValue: office === "" ? role : `${role}, ${office}`,

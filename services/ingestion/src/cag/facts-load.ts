@@ -86,6 +86,7 @@ async function reconcile(
     parserVersion: string;
     needsBox: boolean;
     validationState: string | null;
+    perUnit: string | null;
   },
   c: FactCandidate,
 ): Promise<Reconciled> {
@@ -94,10 +95,16 @@ async function reconcile(
   // whatever their status — a reviewer returning to a decided fact should see
   // what the rules now make of it, and a rule that changes should be visible on
   // every fact it touches rather than only on ones extracted since.
-  if (row.validationState !== c.validation.state) {
+  if (row.validationState !== c.validation.state || row.perUnit !== c.perUnit) {
     await client.query(
-      `UPDATE document_fact SET validation_state = $2, validation_reason = $3 WHERE id = $1`,
-      [row.id, c.validation.state, c.validation.reason === "" ? null : c.validation.reason],
+      `UPDATE document_fact SET validation_state = $2, validation_reason = $3, per_unit = $4
+        WHERE id = $1`,
+      [
+        row.id,
+        c.validation.state,
+        c.validation.reason === "" ? null : c.validation.reason,
+        c.perUnit,
+      ],
     );
   }
 
@@ -151,12 +158,13 @@ async function heldByIdentity(
       parserVersion: string;
       needsBox: boolean;
       validationState: string | null;
+      perUnit: string | null;
     }
   >
 > {
   const held = await client.query(
     `SELECT id, page_number, kind, raw_text, normalised_value, verification_status,
-            parser_version, bbox_x0, validation_state
+            parser_version, bbox_x0, validation_state, per_unit
        FROM document_fact WHERE document_id = $1`,
     [documentId],
   );
@@ -169,6 +177,7 @@ async function heldByIdentity(
       parserVersion: string;
       needsBox: boolean;
       validationState: string | null;
+      perUnit: string | null;
     }
   >();
   for (const row of held.rows as {
@@ -181,6 +190,7 @@ async function heldByIdentity(
     parser_version: string;
     bbox_x0: string | null;
     validation_state: string | null;
+    per_unit: string | null;
   }[]) {
     const key = identity({
       pageNumber: row.page_number,
@@ -194,6 +204,7 @@ async function heldByIdentity(
       parserVersion: row.parser_version,
       needsBox: row.bbox_x0 === null,
       validationState: row.validation_state,
+      perUnit: row.per_unit,
     });
   }
   return existing;
@@ -209,8 +220,8 @@ async function insertCandidate(
     `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
                                 extraction_method, parser_version, extraction_confidence,
                                 bbox_x0, bbox_y0, bbox_x1, bbox_y1,
-                                validation_state, validation_reason)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+                                validation_state, validation_reason, per_unit)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
     [
       documentId,
       c.pageNumber,
@@ -226,6 +237,7 @@ async function insertCandidate(
       c.box?.y1 ?? null,
       c.validation.state,
       c.validation.reason === "" ? null : c.validation.reason,
+      c.perUnit,
     ],
   );
 }
@@ -237,13 +249,32 @@ export async function loadFactCandidates(
 ): Promise<FactLoadResult> {
   const existing = await heldByIdentity(client, documentId);
 
-  const produced = new Set(candidates.map(identity));
+  // Two refused figures in one sentence share an identity: it is
+  // [page, kind, evidence, value], and a page that declares its own scale
+  // refuses both "₹2" and "₹100" in "the rate of Guarantee fee is ₹2 per ₹100",
+  // giving both a null value and the same key.
+  //
+  // One identity is one row, so one of the two readings must be the one stored.
+  // The reading that carries a denominator is kept: it says strictly more about
+  // the same evidence, and letting the other overwrite it silently dropped
+  // "per ₹100" from a figure a reviewer had already corrected by hand.
+  const byIdentity = new Map<string, FactCandidate>();
+  for (const c of candidates) {
+    const key = identity(c);
+    const held = byIdentity.get(key);
+    if (held === undefined || (held.perUnit === null && c.perUnit !== null)) {
+      byIdentity.set(key, c);
+    }
+  }
+  const deduped = [...byIdentity.values()];
+
+  const produced = new Set(deduped.map(identity));
   let inserted = 0;
   let skippedAlreadyReviewed = 0;
   let refreshed = 0;
   let located = 0;
 
-  for (const c of candidates) {
+  for (const c of deduped) {
     const row = existing.get(identity(c));
 
     if (row !== undefined) {
