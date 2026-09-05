@@ -248,5 +248,124 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         expect(await versions()).toBe(before);
       });
     });
+
+    /**
+     * PostgreSQL keeps microseconds; a JavaScript `Date` keeps milliseconds.
+     *
+     * ADR-049 recorded this as a known limitation of the trigger: a caller that
+     * read a closing date back and wrote it again unchanged would hand back
+     * 12:00:00.123 where 12:00:00.123789 was stored, and the ledger would record
+     * a government office moving a deadline it never touched.
+     *
+     * The obvious fix — declaring the column timestamptz(3) — is wrong, and one
+     * of these tests is why: that cast ROUNDS .123789 to .124 while the driver
+     * TRUNCATES it to .123, leaving the two unequal and the spurious version
+     * intact.
+     */
+    describe("a timestamp that lost precision in transit has not changed", () => {
+      const MICROSECONDS = "2026-11-04 09:30:00.123789+05:30";
+      let preciseId = 0;
+
+      const versionsOf = async (id: number): Promise<number> => {
+        const result = await pool?.query<{ count: string }>(
+          `SELECT count(*)::text AS count FROM tender_version WHERE tender_id = $1`,
+          [id],
+        );
+        return Number(result?.rows[0]?.count ?? "0");
+      };
+
+      const storedText = async (id: number): Promise<string> => {
+        const result = await pool?.query<{ at: string }>(
+          `SELECT closing_at::text AS at FROM tender WHERE id = $1`,
+          [id],
+        );
+        return result?.rows[0]?.at ?? "";
+      };
+
+      beforeAll(async () => {
+        const created = await pool?.query<{ id: string }>(
+          `INSERT INTO tender (portal_code, portal_tender_id, tender_reference, title,
+                               closing_at, bid_opening_at, first_seen_at, last_seen_at,
+                               source_sha256, dataset_version_id, extraction_confidence)
+           VALUES ('zz-collected', 'precision-1', 'REF/P', 'Precision',
+                   TIMESTAMPTZ '${MICROSECONDS}', TIMESTAMPTZ '${MICROSECONDS}',
+                   now(), now(), $1, $2, 0.95)
+           RETURNING id`,
+          [ARTIFACT, versionId],
+        );
+        preciseId = Number(created?.rows[0]?.id);
+      });
+
+      it("writes no version when a millisecond-truncated reading is written back", async () => {
+        const before = await versionsOf(preciseId);
+        // Exactly what a caller gets from the driver and hands straight back.
+        const read = await pool?.query<{ closing_at: Date }>(
+          `SELECT closing_at FROM tender WHERE id = $1`,
+          [preciseId],
+        );
+        const asJsDate = read?.rows[0]?.closing_at;
+        expect(asJsDate?.getMilliseconds()).toBe(123);
+
+        await pool?.query(`UPDATE tender SET closing_at = $2, last_seen_at = now() WHERE id = $1`, [
+          preciseId,
+          asJsDate,
+        ]);
+        expect(await versionsOf(preciseId)).toBe(before);
+      });
+
+      it("keeps the microseconds the database was given", async () => {
+        // A comparison that merely ignored the difference would have let the
+        // round trip quietly shorten the stored value.
+        expect(await storedText(preciseId)).toContain(".123789");
+      });
+
+      it("writes no version when the bid opening date makes the same round trip", async () => {
+        const before = await versionsOf(preciseId);
+        const read = await pool?.query<{ bid_opening_at: Date }>(
+          `SELECT bid_opening_at FROM tender WHERE id = $1`,
+          [preciseId],
+        );
+        await pool?.query(
+          `UPDATE tender SET bid_opening_at = $2, last_seen_at = now() WHERE id = $1`,
+          [preciseId, read?.rows[0]?.bid_opening_at],
+        );
+        expect(await versionsOf(preciseId)).toBe(before);
+        const kept = await pool?.query<{ at: string }>(
+          `SELECT bid_opening_at::text AS at FROM tender WHERE id = $1`,
+          [preciseId],
+        );
+        expect(kept?.rows[0]?.at).toContain(".123789");
+      });
+
+      // The guard must not become so lenient that a real change slips through.
+      it("still writes a version when the change is a whole millisecond", async () => {
+        const before = await versionsOf(preciseId);
+        await pool?.query(
+          `UPDATE tender SET closing_at = TIMESTAMPTZ '2026-11-04 09:30:00.124789+05:30',
+                             last_seen_at = now() WHERE id = $1`,
+          [preciseId],
+        );
+        expect(await versionsOf(preciseId)).toBe(before + 1);
+      });
+
+      it("still writes a version when a timestamp is withdrawn altogether", async () => {
+        const before = await versionsOf(preciseId);
+        await pool?.query(
+          `UPDATE tender SET closing_at = NULL, last_seen_at = now() WHERE id = $1`,
+          [preciseId],
+        );
+        expect(await versionsOf(preciseId)).toBe(before + 1);
+      });
+
+      it("still writes a version when a timestamp first appears", async () => {
+        const before = await versionsOf(preciseId);
+        await pool?.query(
+          `UPDATE tender SET closing_at = TIMESTAMPTZ '2026-12-01 10:00:00+05:30',
+                             last_seen_at = now() WHERE id = $1`,
+          [preciseId],
+        );
+        expect(await versionsOf(preciseId)).toBe(before + 1);
+      });
+    });
   },
 );
