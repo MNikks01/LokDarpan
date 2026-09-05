@@ -505,3 +505,41 @@ describe("a decimal point split from its fraction", () => {
     expect(found?.normalisedValue).toBe("10000");
   });
 });
+
+describe("a scale word in a script the parser does not read", () => {
+  // Tamil Nadu publishes Tamil and English as separate PDFs. The Tamil text
+  // layer arrives either in visual glyph order — ணைாடி where Unicode spells
+  // கோடி — or as mojibake mixing Tamil with Latin-1: ேகா}. Digits survive both;
+  // the word does not. Read as rupees, the state's revenue receipts shrink by
+  // seven orders of magnitude.
+  it("refuses a figure whose next word it cannot read", () => {
+    for (const text of [
+      "மாநிைத்தின் பமாத்த வருவாய் ₹2,43,749.34 ணைாடி ஆை இருந்தது",
+      "ெமாÚத உÚதரவாதÕகã ₹1,22,269.91 ேகா} ஆ¤Ý",
+    ]) {
+      const found = extractFacts([{ pageNumber: 1, content: text }]).find(
+        (f) => f.kind === "monetary_amount",
+      );
+      expect(found?.normalisedValue).toBeNull();
+    }
+  });
+
+  // Devanagari is a script the parser does read, so an ordinary word after a
+  // figure is not evidence of a lost unit — it is a sentence continuing.
+  it("still reads a figure followed by a word it does read", () => {
+    const [found] = extractFacts([
+      { pageNumber: 1, content: "एकूण ₹ 54,33,780 रुपये वसूल करण्यात आले." },
+    ]);
+    expect(found?.normalisedValue).toBe("543378000");
+  });
+
+  // Punctuation is not a word. Matching it would retire published figures.
+  it("still reads a figure followed by punctuation", () => {
+    for (const text of ["a grant of ₹ 1,00,000 — paid in March", "arrears of ₹ 2,500 … in all"]) {
+      const found = extractFacts([{ pageNumber: 1, content: text }]).find(
+        (f) => f.kind === "monetary_amount",
+      );
+      expect(found?.normalisedValue).not.toBeNull();
+    }
+  });
+});

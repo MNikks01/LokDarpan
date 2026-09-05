@@ -45,11 +45,24 @@ export type HttpLike = (
 
 const REPORT_HREF = /href=["']([^"']*download_audit_report[^"']*)["']/giu;
 
+/**
+ * Turns an href back into the URL the server will answer to.
+ *
+ * Numeric entities are decoded generally rather than one at a time. The named
+ * list was `&amp;`, `&#38;`, `&quot;` and missed `&#039;` — so a report titled
+ * "CAG's Report on Compliance Audit" produced a URL containing the literal
+ * characters `&#039;` and returned HTTP 404. An apostrophe in a filename is
+ * ordinary; the next one will be an entity nobody listed either.
+ */
 function decodeEntities(html: string): string {
   return html
+    .replace(/&#(\d{1,7});/gu, (_, code: string) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]{1,6});/giu, (_, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 16)),
+    )
     .replace(/&amp;/gu, "&")
-    .replace(/&#38;/gu, "&")
-    .replace(/&quot;/gu, '"');
+    .replace(/&quot;/gu, '"')
+    .replace(/&apos;/gu, "'");
 }
 
 /**
