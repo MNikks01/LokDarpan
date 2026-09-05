@@ -1,5 +1,13 @@
 # @lokdarpan/api
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [ffa8dfc]
+  - @lokdarpan/database@0.1.0
+  - @lokdarpan/domain@0.1.0
+
 ## 0.0.2
 
 ### Patch Changes

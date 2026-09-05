@@ -1,8 +1,8 @@
-# @lokdarpan/web
+# @lokdarpan/domain
 
-## 0.0.3
+## 0.1.0
 
-### Patch Changes
+### Minor Changes
 
 - ffa8dfc: Give a rate its denominator, and restore the figures that can now state one.
 
@@ -38,27 +38,3 @@
   "₹2 per ₹100" and gives both a null value. The reading without a denominator was
   overwriting the one with. Candidates are now deduplicated per identity,
   preferring the reading that carries a denominator.
-
-- Updated dependencies [ffa8dfc]
-  - @lokdarpan/database@0.1.0
-  - @lokdarpan/domain@0.1.0
-
-## 0.0.2
-
-### Patch Changes
-
-- Updated dependencies [3511219]
-  - @lokdarpan/database@0.0.2
-
-## 0.0.1
-
-### Patch Changes
-
-- Updated dependencies [f714c0e]
-- Updated dependencies [5ad02db]
-- Updated dependencies [e6b2d88]
-- Updated dependencies [926e4a8]
-- Updated dependencies [6f02caa]
-- Updated dependencies [0e4349a]
-  - @lokdarpan/contracts@0.1.0
-  - @lokdarpan/database@0.0.1

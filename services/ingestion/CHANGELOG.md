@@ -1,5 +1,80 @@
 # @lokdarpan/ingestion
 
+## 0.3.0
+
+### Minor Changes
+
+- ffa8dfc: Give a rate its denominator, and restore the figures that can now state one.
+
+  ADR-044 withheld 118 published rates because `document_fact` had no denominator,
+  so a page rendered ₹15 where the source says ₹15 per record. It named the
+  reversal condition exactly — a unit on the schema, rendered or nothing — and this
+  is that work.
+
+  Migration 0020 adds `per_unit`, exposed through `published_fact`, carried on the
+  domain type, and rendered beside the figure in the words the page uses. The
+  accessible label says it too: a screen reader must not be told a rate is a sum
+  either.
+
+  The denominator is read forward from the amount and never inferred. "at the rate
+  of ₹60,000" states a rate whose unit sits elsewhere in the sentence, and choosing
+  which noun it belongs to would be inventing a denominator for a government
+  figure. Such rates stay refused.
+
+  Where the reading stops was set by real captures, each now a test: a capitalised
+  word after a lowercase one opens something new ("per beneficiary **Quantity** in
+  grams"); past the first word only a measure noun continues a unit ("per month
+  **since** April"); after a second "per" exactly one word ("per IPD patient per day
+  **respectively**"); a denominator may itself be money ("₹2 per ₹100"); and a unit
+  the evidence window cut off is not read at all — "₹100 per Cu…" is "per Cu.M." on
+  the page, and Cu is not a cubic metre.
+
+  Of the 118, **64 are restored** and 54 stay withheld. Published facts rise 5,029 →
+  5,088, of which 60 now say what they are per, and no published rate lacks a
+  denominator.
+
+  Also fixes a defect this exposed: two figures in one sentence can share an
+  identity, since a page declaring its own scale refuses both "₹2" and "₹100" in
+  "₹2 per ₹100" and gives both a null value. The reading without a denominator was
+  overwriting the one with. Candidates are now deduplicated per identity,
+  preferring the reading that carries a denominator.
+
+### Patch Changes
+
+- f8f896e: Withhold rates and criteria the ledger cannot state, and narrow two more rules.
+
+  ADR-043 left 137 published figures the validator disputed, 118 of them rates,
+  because whether a rate belongs is a scope question rather than one a regular
+  expression should settle. Twenty were then read with citations, and they are not
+  one thing: unit prices (₹15 per record, ₹65 per cubic metre), entitlements per
+  person per period (₹1,500 per month, ₹48 per IPD patient per day), and two that
+  were simply wrong — one took the _denominator_ of "the rate of Guarantee fee is
+  ₹2 per ₹100" as its figure.
+
+  `document_fact` carries no unit, so a page renders ₹15 where the source says ₹15
+  per record. A figure that cannot say what it is per misstates itself, so the 118
+  are withdrawn — along with 17 criteria the same sweep exposed and ADR-025 already
+  governs: savings thresholds for an audit comment, delegation limits, stamp-duty
+  caps, and Rule 162's ₹25 lakh tender ceiling.
+
+  A withdrawal, not a deletion: evidence, region and reason stay on every row, so
+  restoring them once a unit exists on the schema is a query rather than a
+  re-review.
+
+  Published facts fall 5,164 → 5,029, 4,435 counted once after linkage. **The
+  validator now disagrees with no published figure at all.**
+
+  Reading the residue forced two more rules out, the fourth and fifth removed under
+  pressure from a real figure. A comparator now needs its conjunction, because
+  "₹4.00 crore less ₹3.69 crore" is a subtraction and not a threshold. And
+  "retaining" is dropped entirely: "remittance of ₹2.33 crore after retaining ₹0.02
+  crore" is a sum a body kept, and English does not distinguish that from a rule
+  about keeping.
+
+- Updated dependencies [ffa8dfc]
+  - @lokdarpan/database@0.1.0
+  - @lokdarpan/domain@0.1.0
+
 ## 0.2.0
 
 ### Minor Changes
