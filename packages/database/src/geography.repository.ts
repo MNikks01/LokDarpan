@@ -244,6 +244,37 @@ export class PostgresGeographyRepository implements GeographyRepository {
     }));
   }
 
+  /**
+   * The LGD code of the state a unit sits in, or null where there is none.
+   *
+   * The explorer's URL carries a state and a unit independently, so a shared or
+   * edited link can name a state and a unit in a different one. Nothing checked
+   * that: `?state=27&unit=<a Kerala district>` rendered the state selector as
+   * Maharashtra, framed the map on Kerala, and drew Kerala's breadcrumb under a
+   * Maharashtra heading. Every part was individually correct and the page as a
+   * whole said something false.
+   *
+   * Walks the recorded parent chain rather than testing geometry: a unit belongs
+   * to the state that the directory places it under, and a containment test
+   * would answer a different question at every border.
+   *
+   * A unit that is itself a state answers with its own code, so the check needs
+   * no special case for selecting a state directly.
+   */
+  async stateCodeOf(unitId: number): Promise<string | null> {
+    const result = await this.db.query<{ lgd_code: string | null }>(
+      `WITH RECURSIVE chain AS (
+         SELECT id, parent_id, level, lgd_code FROM admin_unit WHERE id = $1
+         UNION ALL
+         SELECT a.id, a.parent_id, a.level, a.lgd_code
+           FROM admin_unit a JOIN chain c ON a.id = c.parent_id
+       )
+       SELECT lgd_code FROM chain WHERE level = 'state' LIMIT 1`,
+      [unitId],
+    );
+    return result.rows[0]?.lgd_code ?? null;
+  }
+
   async unitById(id: number): Promise<GeoUnit | null> {
     const result = await this.db.query<UnitRow>(
       `SELECT ${UNIT_COLUMNS}
