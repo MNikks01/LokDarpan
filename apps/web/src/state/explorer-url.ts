@@ -57,6 +57,31 @@ export function parseExplorerState(params: URLSearchParams): ExplorerState {
   };
 }
 
+/**
+ * A selection naming one state and a unit inside another is not a selection.
+ *
+ * The two travel independently in the query string, so an edited or truncated
+ * link can pair them freely. Nothing checked it: `?state=27&unit=<a Kerala
+ * district>` rendered the selector as Maharashtra, framed the map on Kerala and
+ * drew Kerala's breadcrumb under a Maharashtra heading — every part correct on
+ * its own, and the page as a whole saying something false.
+ *
+ * The state is kept and the unit dropped, never the reverse. The state is the
+ * coarser claim and the one a reader almost certainly meant; taking the unit's
+ * state instead would move someone who mistyped an id into a different state
+ * without saying so.
+ *
+ * `actualStateCode` is the state the unit really sits in, or null where the unit
+ * does not exist or has no state above it. Both are grounds to drop it: a unit
+ * that cannot be placed cannot be shown under a state.
+ */
+export function reconcile(state: ExplorerState, actualStateCode: string | null): ExplorerState {
+  const { stateCode, unitId } = state.geo;
+  if (stateCode === null || unitId === null) return state;
+  if (actualStateCode === stateCode) return state;
+  return { ...state, geo: { stateCode, unitId: null } };
+}
+
 /** Defaults are omitted, so a plain `/explore` stays a clean URL. */
 export function toQueryString(state: ExplorerState): string {
   const params = new URLSearchParams();

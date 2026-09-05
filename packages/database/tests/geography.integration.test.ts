@@ -256,5 +256,64 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     it("ignores a search term too short to mean anything", async () => {
       expect(await repository?.search("T", 10)).toEqual([]);
     });
+
+    /**
+     * 0025 recorded district, taluka and local-body coverage and left villages
+     * out. Forty are held, all inside one district, against a state with more
+     * than forty thousand — so a taluka showing no village would be read as a
+     * statement about the taluka rather than about a query nobody has run.
+     */
+    it("states how complete every level held for Maharashtra is", async () => {
+      const maharashtra = await pool?.query<{ id: string }>(
+        `SELECT id FROM admin_unit WHERE level = 'state' AND lgd_code = '27'`,
+      );
+      const id = Number(maharashtra?.rows[0]?.id);
+      if (!Number.isInteger(id)) return; // Maharashtra is not ingested here.
+
+      const missing = await pool?.query<{ level: string }>(
+        `WITH RECURSIVE tree AS (
+           SELECT id, level FROM admin_unit WHERE id = $1
+           UNION ALL SELECT a.id, a.level FROM admin_unit a JOIN tree t ON a.parent_id = t.id)
+         SELECT DISTINCT t.level::text AS level FROM tree t
+          WHERE t.level::text <> 'state'
+            AND t.level::text NOT IN (
+              SELECT level::text FROM geography_coverage WHERE admin_unit_id = $1)`,
+        [id],
+      );
+      expect(missing?.rows.map((r) => r.level)).toEqual([]);
+    });
+
+    /**
+     * The explorer's URL carries a state and a unit independently, so a link can
+     * pair a state with a unit inside another one. This is the lookup that lets
+     * the pairing be rejected before anything renders.
+     */
+    describe("which state a unit sits in", () => {
+      it("answers with the state above a nested unit", async () => {
+        const nagpur = await pool?.query<{ id: string }>(
+          `SELECT id FROM admin_unit WHERE level = 'district' AND name_en = 'Nagpur'
+             AND parent_id = (SELECT id FROM admin_unit WHERE level='state' AND lgd_code='27')`,
+        );
+        const id = Number(nagpur?.rows[0]?.id);
+        if (!Number.isInteger(id)) return; // Maharashtra is not ingested here.
+        expect(await repository?.stateCodeOf(id)).toBe("27");
+      });
+
+      it("answers with its own code when the unit is itself a state", async () => {
+        const state = await pool?.query<{ id: string }>(
+          `SELECT id FROM admin_unit WHERE level='state' AND lgd_code='27'`,
+        );
+        const id = Number(state?.rows[0]?.id);
+        if (!Number.isInteger(id)) return;
+        // No special case is needed for selecting a state directly.
+        expect(await repository?.stateCodeOf(id)).toBe("27");
+      });
+
+      // A unit that cannot be placed cannot be shown under a state, and the
+      // caller drops it rather than guessing.
+      it("answers null for a unit that does not exist", async () => {
+        expect(await repository?.stateCodeOf(999_999_999)).toBeNull();
+      });
+    });
   },
 );

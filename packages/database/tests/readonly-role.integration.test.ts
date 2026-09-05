@@ -113,5 +113,69 @@ describe.skipIf(READONLY_URL === undefined || READONLY_URL === "")(
         rolcreaterole: false,
       });
     });
+
+    /**
+     * The tables this milestone added, under the role production connects as.
+     *
+     * Grants reach them through `ALTER DEFAULT PRIVILEGES` rather than a
+     * statement naming them, so nothing in a migration says these three are
+     * readable — the guarantee is a default set once in 0002 and inherited ever
+     * since. Development and every other test connect as the owner, so a
+     * regression here would first be seen in production.
+     */
+    describe("the tables added since 0002", () => {
+      it("can read tender history", async () => {
+        await expect(db().query("SELECT count(*) FROM tender_version")).resolves.toBeDefined();
+      });
+
+      it("can read ingestion runs", async () => {
+        await expect(db().query("SELECT count(*) FROM ingestion_run")).resolves.toBeDefined();
+      });
+
+      it("can read geography coverage", async () => {
+        await expect(db().query("SELECT count(*) FROM geography_coverage")).resolves.toBeDefined();
+      });
+
+      it("can read a collection window's state and freshness", async () => {
+        await expect(
+          db().query(
+            "SELECT portal_code, state_lgd_code, last_checked_at, last_success_at FROM tender_collection_window",
+          ),
+        ).resolves.toBeDefined();
+      });
+
+      it("cannot forge a tender's history", async () => {
+        await refuses(
+          "insert tender_version",
+          `INSERT INTO tender_version (tender_id, tender_reference, title, source_sha256,
+                                       dataset_version_id, first_seen_at, last_seen_at)
+           VALUES (1, 'X', 'X', repeat('0', 64), 1, now(), now())`,
+        );
+      });
+
+      // A reader who could write a run could claim a collection that never
+      // happened, which is the one thing the run table exists to prevent.
+      it("cannot claim an ingestion run", async () => {
+        await refuses(
+          "insert ingestion_run",
+          "INSERT INTO ingestion_run (source_id) VALUES ('forged')",
+        );
+      });
+
+      it("cannot assert coverage it did not measure", async () => {
+        await refuses(
+          "insert geography_coverage",
+          `INSERT INTO geography_coverage (admin_unit_id, level, status, source_id)
+           VALUES (1, 'village', 'complete', 'forged')`,
+        );
+      });
+
+      it("cannot rewrite when a source was last collected", async () => {
+        await refuses(
+          "update tender_collection_window",
+          "UPDATE tender_collection_window SET last_success_at = now()",
+        );
+      });
+    });
   },
 );

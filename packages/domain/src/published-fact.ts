@@ -118,15 +118,25 @@ export interface PublishedFactRepository {
   documentFacts(documentId: number): Promise<DocumentFactsView | null>;
   listDocuments(): Promise<readonly DocumentSummary[]>;
   /**
-   * Documents whose `admin_unit_id` resolves to this LGD code.
+   * Documents filed against exactly this unit, by `admin_unit.id`.
    *
    * The join is on the recorded link, never on the title. Three of the reports
    * held are named for the CAG office that issued them — "Nagpur Report No. 2"
    * — while their recorded unit is Maharashtra. Reading a place out of a title
    * would manufacture a district association no document states, which is the
    * linkage-confidence failure the contract exists to prevent.
+   *
+   * **Exact, never inherited.** A district does not show its state's reports.
+   * Every report held is filed at state level, so inheriting would put thirty
+   * state-wide reports under all thirty-six districts and let a reader take them
+   * for findings about the district they selected.
+   *
+   * The id rather than the LGD code: LGD codes are per-register and collide
+   * across levels, so a state's own code also names a district elsewhere.
    */
-  listDocumentsForUnit(lgdCode: string): Promise<readonly DocumentSummary[]>;
+  listDocumentsForUnit(adminUnitId: number): Promise<readonly DocumentSummary[]>;
+  /** Documents no unit could be established for. Kept reachable, never hidden. */
+  listUnattributedDocuments(): Promise<readonly DocumentSummary[]>;
 }
 
 export interface DocumentSummary {
@@ -138,6 +148,14 @@ export interface DocumentSummary {
   /** The unit the document is recorded against, or null if none is recorded. */
   readonly adminUnitName: string | null;
   readonly adminUnitLevel: string | null;
+  /**
+   * How the unit was arrived at, or null where none was established.
+   *
+   * `publisher_filter` is the publisher's own classification of its own report —
+   * evidence that it is a Maharashtra report, and evidence of nothing narrower.
+   * A reader is entitled to know which kind of claim the placement is.
+   */
+  readonly geographySource: string | null;
 }
 
 /**

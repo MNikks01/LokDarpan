@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   EMPTY_EXPLORER_STATE,
   parseExplorerState,
+  reconcile,
   toQueryString,
   toSearchParams,
 } from "./explorer-url";
@@ -86,5 +87,41 @@ describe("writing the link back", () => {
     });
     expect(query).toContain("unit=3599");
     expect(query).not.toContain("505");
+  });
+});
+
+describe("a state and a unit in a different state are not a selection", () => {
+  const selection = (stateCode: string | null, unitId: number | null) => ({
+    geo: { stateCode, unitId },
+    selectedDocumentId: null,
+  });
+
+  it("keeps a unit that sits in the selected state", () => {
+    expect(reconcile(selection("27", 3599), "27")).toEqual(selection("27", 3599));
+  });
+
+  // The regression: ?state=27&unit=<a Kerala district> rendered the selector as
+  // Maharashtra and framed the map on Kerala.
+  it("drops a unit belonging to another state, keeping the state", () => {
+    expect(reconcile(selection("27", 9999), "32")).toEqual(selection("27", null));
+  });
+
+  it("drops a unit that cannot be placed at all", () => {
+    expect(reconcile(selection("27", 9999), null)).toEqual(selection("27", null));
+  });
+
+  // Dropping the state instead would move a reader who mistyped an id into a
+  // different state without saying so.
+  it("never replaces the selected state with the unit's own", () => {
+    const result = reconcile(selection("27", 4242), "32");
+    expect(result.geo.stateCode).toBe("27");
+  });
+
+  it("leaves a selection with no unit alone", () => {
+    expect(reconcile(selection("27", null), null)).toEqual(selection("27", null));
+  });
+
+  it("leaves a selection with no state alone", () => {
+    expect(reconcile(selection(null, 3599), "27")).toEqual(selection(null, 3599));
   });
 });

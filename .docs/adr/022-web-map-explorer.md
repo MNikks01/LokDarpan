@@ -43,6 +43,7 @@ State is mirrored with `history.replaceState`, **not** `router.replace`: the con
 ## Consequences
 
 - The renderer's cost is isolated to one route: `/explore` is ~291 kB first-load JS, every other page stays at ~105 kB. The document pages are unaffected.
+  - **Measured again on 5 September 2026: `/explore` is 409 kB first-load, the other routes 102 kB.** The isolation held; the route itself grew by ~118 kB as the explorer gained the tender layer, the coverage notices and the records panel. Recorded rather than optimised: the figure is a budget only once someone states what the budget is, and no reader-facing symptom has been observed. If it is ever cut, the first thing to measure is whether MapLibre can be loaded on interaction rather than on render.
 - `<Figure>`'s provenance requirement is enforced on the map surface too — the drawer renders contract and tender values through it, so a figure without a source cannot be shown.
 - Status presentation is guarded by a test (`apps/web/src/ui/status.test.ts`): no red at any stage, and every stage carries a distinct dash pattern as well as a colour, so the map survives monochrome and colour-vision deficiency.
 - Pointer events hit an invisible 20 px line layer rather than the 3.4 px drawn line, and one hit test resolves works above districts above states. A per-layer handler arrangement let the district polygon overwrite the road's own hover, so the reader saw the district name while pointing at a work.
