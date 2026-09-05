@@ -12,6 +12,12 @@ describe("scriptOf", () => {
     expect(scriptOf("Report No. 4 - Compliance Audit")).toBe("latin");
     expect(scriptOf("अनुपालन लेखापरीक्षा अहवाल")).toBe("devanagari");
     expect(scriptOf("महाराष्ट्र शासन Government of Maharashtra")).toBe("mixed");
+
+    // Tamil Nadu publishes Tamil and English as separate files. A page of Tamil
+    // carries a page number and the odd roman numeral, so asking only whether
+    // Latin is present labelled 730 pages of Tamil as English.
+    expect(scriptOf("மாநிைத்தின் பமாத்த வருவாய் வரவு")).toBe("tamil");
+    expect(scriptOf("இணக்ைத் தணிக்கை xvi Compliance Audit")).toBe("mixed");
   });
 
   it("reports a page with no text as none, not as empty Latin", () => {
@@ -168,5 +174,39 @@ describe("CagClient.listStates", () => {
       respondWith(`<select name="state[]" id="state"></select>`),
     );
     await expect(client.listStates()).rejects.toThrow(/no options/);
+  });
+});
+
+describe("an href becomes a URL the server answers to", () => {
+  const listing = (href: string): string =>
+    `<html><body><a href="${href}">report</a></body></html>`;
+
+  const linksFrom = async (href: string): Promise<string[]> => {
+    const client = new CagClient("https://x.test", stub(200, listing(href), "text/html"));
+    return (await client.listStateReports()).map((r) => r.url);
+  };
+
+  it("decodes an apostrophe written as a numeric entity", async () => {
+    // "CAG's Report on Compliance Audit" is an ordinary filename, and the
+    // listing writes the apostrophe as &#039;. Left undecoded it produced a URL
+    // containing those six literal characters and returned HTTP 404 — which
+    // then ended the whole ingest run.
+    const urls = await linksFrom(
+      "/webroot/uploads/download_audit_report/2025/CAG&#039;s-Report-1-of-2025.pdf",
+    );
+    expect(urls[0]).toContain("CAG's-Report-1-of-2025.pdf");
+    expect(urls[0]).not.toContain("&#039;");
+  });
+
+  it("decodes entities by number rather than from a list of names", async () => {
+    const urls = await linksFrom(
+      "/webroot/uploads/download_audit_report/2025/a&#045;b&#46;pdf-download_audit_report",
+    );
+    expect(urls[0]).toContain("a-b.pdf");
+  });
+
+  it("still decodes the named entities it always did", async () => {
+    const urls = await linksFrom("/webroot/uploads/download_audit_report/2025/a&amp;b&apos;c.pdf");
+    expect(urls[0]).toContain("a&b'c.pdf");
   });
 });

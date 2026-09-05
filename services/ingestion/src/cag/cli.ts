@@ -29,6 +29,55 @@ function arg(name: string): string | undefined {
     .join("=");
 }
 
+/**
+ * The state whose reports to fetch, spelled as the CAG filter spells it.
+ *
+ * The id is looked up from the page rather than held here, and an unrecognised
+ * name lists what is on offer instead of silently fetching the default state's
+ * reports under another state's name.
+ */
+async function resolveState(
+  client: CagClient,
+  wanted: string | undefined,
+): Promise<{ id: number; name: string }> {
+  if (wanted === undefined) return { id: MAHARASHTRA_STATE_ID, name: "Maharashtra" };
+  const states = await client.listStates();
+  const match = states.find((s) => s.name.toLowerCase() === wanted.toLowerCase());
+  if (match === undefined) {
+    process.stderr.write(
+      `The CAG filter offers no state called "${wanted}". It offers:\n` +
+        states.map((s) => `  ${s.name}`).join("\n") +
+        "\n",
+    );
+    process.exit(64);
+  }
+  return { id: match.id, name: match.name };
+}
+
+/**
+ * Fetches one report, or reports that it could not be and returns null.
+ *
+ * One report that will not fetch does not end the run. The listing is a page of
+ * links to a government host, and a single dead one — a moved file, a typo in a
+ * filename — should cost that report and nothing else. Said out loud rather than
+ * swallowed: a run that quietly ingested nine of ten would be worse than one
+ * that failed loudly.
+ */
+async function retrieve(
+  client: CagClient,
+  report: { title: string; url: string },
+): Promise<Awaited<ReturnType<CagClient["fetchReport"]>> | null> {
+  try {
+    return await client.fetchReport(report.url);
+  } catch (error) {
+    process.stdout.write(
+      `${report.title.slice(0, 52).padEnd(52)} NOT RETRIEVED — ` +
+        `${error instanceof Error ? error.message : String(error)}\n`,
+    );
+    return null;
+  }
+}
+
 async function main(): Promise<void> {
   const connectionString = process.env["DATABASE_URL"];
   if (connectionString === undefined || connectionString === "") {
@@ -39,27 +88,8 @@ async function main(): Promise<void> {
   const limit = Number(process.argv[2] ?? "3");
   const client = new CagClient();
 
-  // `--state="Madhya Pradesh"`, spelled as the CAG filter spells it. The id is
-  // looked up from the page rather than held here, and an unrecognised name
-  // lists what is on offer instead of silently fetching the default state's
-  // reports under another state's name.
-  const wanted = arg("state");
-  let stateId = MAHARASHTRA_STATE_ID;
-  let stateName = "Maharashtra";
-  if (wanted !== undefined) {
-    const states = await client.listStates();
-    const match = states.find((s) => s.name.toLowerCase() === wanted.toLowerCase());
-    if (match === undefined) {
-      process.stderr.write(
-        `The CAG filter offers no state called "${wanted}". It offers:\n` +
-          states.map((s) => `  ${s.name}`).join("\n") +
-          "\n",
-      );
-      process.exit(64);
-    }
-    stateId = match.id;
-    stateName = match.name;
-  }
+  // `--state="Madhya Pradesh"`.
+  const { id: stateId, name: stateName } = await resolveState(client, arg("state"));
 
   const reports = await client.listStateReports(stateId);
   process.stdout.write(`discovered ${String(reports.length)} ${stateName} reports\n`);
@@ -93,6 +123,7 @@ async function main(): Promise<void> {
     const held = await db.query(`SELECT source_url FROM source_artifact WHERE source_id = 'cag'`);
     const alreadyHeld = new Set((held.rows as { source_url: string }[]).map((r) => r.source_url));
     const refetch = process.argv.includes("--refetch");
+    let failed = 0;
 
     for (const report of reports.slice(0, limit)) {
       if (!refetch && alreadyHeld.has(report.url)) {
@@ -102,7 +133,12 @@ async function main(): Promise<void> {
         continue;
       }
 
-      const fetched = await client.fetchReport(report.url);
+      const fetched = await retrieve(client, report);
+      if (fetched === null) {
+        failed += 1;
+        await sleep(POLITE_DELAY_MS);
+        continue;
+      }
 
       // Original bytes stored before anything is parsed. Re-extraction with a
       // better parser must stay possible from what was actually retrieved.
@@ -141,6 +177,12 @@ async function main(): Promise<void> {
           `pages=${String(result.pages)} no-text=${String(result.pagesWithoutText)}\n`,
       );
       await sleep(POLITE_DELAY_MS);
+    }
+    if (failed > 0) {
+      process.stdout.write(
+        `\n${String(failed)} report(s) could not be retrieved and were skipped. ` +
+          `The rest are ingested; nothing partial was stored.\n`,
+      );
     }
   } finally {
     await db.end();
