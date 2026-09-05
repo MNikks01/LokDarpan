@@ -167,13 +167,18 @@ export interface RecordsState {
 }
 
 /**
- * Documents recorded against a unit, by LGD code.
+ * Documents filed against the selected unit, by `admin_unit.id`.
  *
- * Keyed on the LGD code because that is what `document.admin_unit_id` resolves
- * to, and because the map's state codes are LGD codes — so a selection
- * addresses the ledger directly with no name matching in between.
+ * Keyed on the unit the reader is actually looking at, not on the state they
+ * are inside. Before this, every level asked for the state's records, so a
+ * district and a municipal corporation showed the same thirty state-wide audit
+ * reports and a reader could only read that as findings about the place they
+ * had selected.
+ *
+ * The id rather than the LGD code: codes are per-register and collide across
+ * levels, so a state's own code also names a district elsewhere.
  */
-export function useRecords(lgdCode: string | null): RecordsState {
+export function useRecords(unitId: number | null): RecordsState {
   const [state, setState] = useState<RecordsState>({
     documents: [],
     loading: false,
@@ -181,7 +186,7 @@ export function useRecords(lgdCode: string | null): RecordsState {
   });
 
   useEffect(() => {
-    if (lgdCode === null) {
+    if (unitId === null) {
       setState({ documents: [], loading: false, failed: false });
       return;
     }
@@ -189,7 +194,7 @@ export function useRecords(lgdCode: string | null): RecordsState {
     setState({ documents: [], loading: true, failed: false });
 
     readJson<{ data: { documents: DocumentSummary[] } }>(
-      `/api/v1/documents?unit=${encodeURIComponent(lgdCode)}`,
+      `/api/v1/documents?unit=${String(unitId)}`,
       controller.signal,
     )
       .then((body) => {
@@ -203,7 +208,7 @@ export function useRecords(lgdCode: string | null): RecordsState {
     return () => {
       controller.abort();
     };
-  }, [lgdCode]);
+  }, [unitId]);
 
   return state;
 }
@@ -244,7 +249,7 @@ export function useExplorerGeography(
   const { units, coverage, loading: loadingChildren } = useChildUnits(parentUnitId);
   const childBoundaries = useChildBoundaries(parentUnitId);
   const detail = useUnit(unitId);
-  const records = useRecords(stateCode);
+  const records = useRecords(parentUnitId);
 
   return {
     selectedState,

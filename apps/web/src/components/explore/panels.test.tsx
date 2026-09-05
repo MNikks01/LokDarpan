@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { FilterPanel } from "./FilterPanel";
+import { RecordsPanel } from "./RecordsPanel";
 import { TendersPanel, type StateCollection, type TenderOverview } from "./tenders";
 import type { LevelCoverage } from "./use-explorer-data";
 
@@ -173,5 +174,62 @@ describe("an area list is not a census of the place", () => {
     ]);
     expect(markup).not.toContain("incomplete");
     expect(markup).not.toContain("have not been collected");
+  });
+});
+
+const recordsPanel = (documents: React.ComponentProps<typeof RecordsPanel>["documents"]): string =>
+  renderToStaticMarkup(
+    <RecordsPanel
+      scopeLabel="Nagpur"
+      documents={documents}
+      loading={false}
+      failed={false}
+      selectedDocumentId={null}
+      onSelect={noop}
+      hasPlace
+    />,
+  );
+
+describe("holding no record for a place is not a finding about the place", () => {
+  // Before this, every level asked for its state's records, so Nagpur showed
+  // Maharashtra's thirty audit reports and a reader could only read them as
+  // findings about Nagpur.
+  it("names the area and says nothing is attributed to it", () => {
+    const markup = recordsPanel([]);
+    expect(markup).toContain("No records are currently attributed to Nagpur");
+  });
+
+  it("says the sentence is about our holdings, not about the area", () => {
+    const markup = recordsPanel([]);
+    expect(markup).toContain("not what has been audited or spent in this area");
+  });
+
+  it("never states that the area has no audits", () => {
+    const markup = recordsPanel([]);
+    expect(markup).not.toMatch(/no audits?\b/iu);
+    expect(markup).not.toMatch(/nothing (has been|was) audited/iu);
+  });
+
+  // The issuing office is the trap the attribution rule exists for, and the
+  // panel says so where a reader meets the empty list.
+  it("explains that an issuing office is not the area audited", () => {
+    expect(recordsPanel([])).toContain("the office that issued a report is not the area it audits");
+  });
+
+  it("still lists records where there are some", () => {
+    const markup = recordsPanel([
+      {
+        documentId: 1,
+        title: "A report about this district",
+        issuingAuthority: "Some authority",
+        publishedFacts: 3,
+        awaitingReview: 0,
+        adminUnitName: "Nagpur",
+        adminUnitLevel: "district",
+        geographySource: "publisher_filter",
+      },
+    ]);
+    expect(markup).toContain("A report about this district");
+    expect(markup).not.toContain("No records are currently attributed");
   });
 });
