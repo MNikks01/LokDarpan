@@ -1,5 +1,88 @@
 # @lokdarpan/ingestion
 
+## 0.2.0
+
+### Minor Changes
+
+- 0b05eca: Pin the parser against every reading a person has ruled on.
+
+  Working the last review queue surfaced five distinct classes of wrong reading —
+  per-unit rates, thresholds in rules, fragments of larger figures, worked examples
+  of a formula, and a scale word sitting outside its bracket. Four were caught only
+  because someone read them. The fifth was already in the ledger, wrong by seven
+  orders of magnitude.
+
+  `corpus:build` turns the decided facts into a committed corpus of 183 cases, each
+  a real page of a real audit report carrying the outcome a reviewer recorded and
+  the reason they gave. Nothing in it is invented: the readings that reached this
+  ledger wrongly were all shapes nobody had thought of, so a corpus written from
+  imagination would have missed every one.
+
+  A case must be self-contained. Some of the parser's judgements are page-scoped —
+  whether a caption declares a scale, whether the font mapping dropped the rupee
+  glyph — so a fact whose evidence window cannot reproduce its own reading is not a
+  case; it is a page. 278 were excluded on that ground rather than propped up with
+  synthetic context, which would have tested the prop.
+
+  The corpus separates what the parser catches from what only a person catches. Of
+  93 withheld cases, **7 the parser refuses outright and 86 it still offers** — a
+  measurement of how much of this ledger's correctness rests on human judgement.
+  If the parser later learns to refuse one of those classes, the assertion fails
+  and the corpus is rebuilt, which is the intended way to find out that it
+  improved.
+
+  Writing it corrected an overclaim. The scale-outside-bracket guard cannot catch
+  every case: `₹4,253.77 (26.34 per cent) of the total available funds (i.e.,
+₹16,151.82 crore)` puts the scale word in a different bracket, and only the
+  parallel between the two figures gives it away. The invariant the corpus asserts
+  is that none of that class reaches a reader — not that the parser refuses them
+  all.
+
+- 3511219: Make validation field-aware, and let it advise rather than decide.
+
+  A field now declares whether it is critical, and the rules follow. `FIELDS` is
+  exhaustive by type, so adding a `FactKind` without saying how carefully it must
+  be read is a compile error — it caught `work_reference` while this was being
+  written. Money is critical; a contractor or officer reading is not, because it is
+  never published.
+
+  `validate` returns `accepted`, `needs_review` or `rejected`, deliberately
+  separate from the four states a person records. `rejected` never means "probably
+  wrong": it means the sentence states what the number is, and it is not an amount
+  — a rate per unit, a threshold in a rule, the multiplicand of a product, an
+  illustration in a formula.
+
+  The need was measured, not assumed. Working the last queue, a person rejected 85
+  well-formed figures by reading them; the parser had offered every one with a
+  value.
+
+  **The verdict changes nothing.** It does not clear the value or withhold the
+  fact. Migration 0019 records it, with a constraint that a refusal must say why,
+  and it refreshes onto rows already held so a rule that changes is visible on
+  every fact it touches. Re-extraction produced no new candidates, no retirements
+  and an unchanged queue.
+
+  Advisory because the sweep across all 5,102 published figures said so. The first
+  draft rejected 173 of them, and reading those showed the rules were wrong:
+  "costing ₹68.55 crore" is a sum, "valuing ₹29.51 crore" is a sum, "liabilities
+  exceeding ₹27,184 crore" is a liability, and bare "less" matched the subtraction
+  in "₹0.31 crore (₹4.00 crore less ₹3.69 crore)". Each removal is now a test
+  asserting the figure survives.
+
+  That leaves 137 published figures the rules disagree with, **113 of them rates** —
+  "₹1,500 per month", "₹3,650 per square meter". This ledger publishes rates as
+  amounts in 113 places and withheld 60 on the same grounds last week. The standard
+  has not been applied evenly, which is a question about what the ledger models and
+  not one a regular expression should settle by unpublishing a government figure.
+
+  Worth recording: the regression corpus reported zero false positives for the
+  first draft. The full sweep found 173. A regression net is not a validation set.
+
+### Patch Changes
+
+- Updated dependencies [3511219]
+  - @lokdarpan/database@0.0.2
+
 ## 0.1.0
 
 ### Minor Changes
