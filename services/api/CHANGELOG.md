@@ -1,5 +1,18 @@
 # @lokdarpan/api
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [fa620ba]
+- Updated dependencies [844bb2d]
+- Updated dependencies [cc475cd]
+- Updated dependencies [328b3b4]
+- Updated dependencies [d355358]
+- Updated dependencies [db1f218]
+  - @lokdarpan/database@0.2.0
+  - @lokdarpan/domain@0.2.0
+
 ## 0.0.3
 
 ### Patch Changes
