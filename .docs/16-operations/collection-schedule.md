@@ -2,6 +2,11 @@
 
 **Updated:** 5 September 2026 · **Workflow:** [`.github/workflows/ingest-tenders.yml`](../../.github/workflows/ingest-tenders.yml) · **Related:** [`adr/048`](../adr/048-a-count-is-not-a-claim-about-the-world.md) (freshness), [`deployment-vercel.md`](./deployment-vercel.md)
 
+**Not set up yet?** [`provisioning-scheduled-ingestion.md`](./provisioning-scheduled-ingestion.md)
+is the step-by-step walkthrough: creating the database, the ETL credential, the
+GitHub secret, and the first manual run. This file describes the schedule once
+that is done.
+
 ## Schedule
 
 |           |                                                                                   |
