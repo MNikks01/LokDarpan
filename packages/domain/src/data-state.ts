@@ -39,7 +39,7 @@ export interface DataState {
   readonly lastCheckedAt: string | null;
   /** Collection is forward-only: records from before this date are not held. */
   readonly collectingSince: string | null;
-  /** How `partial` is known, in the words recorded with it. Null otherwise. */
+  /** What the shortfall is and how it is known, in the words recorded with it. Null when nothing is short. */
   readonly note: string | null;
   /** Registry ids of the sources this state describes (see `source-licence.ts`). */
   readonly sourceIds: readonly string[];
@@ -150,7 +150,12 @@ export interface LevelCoverageInput {
  * so there is no expected interval against which to call them current or stale.
  */
 export function levelCoverageState(input: LevelCoverageInput): DataState {
-  const base = { ...EMPTY, lastCheckedAt: input.checkedAt, sourceIds: [input.sourceId] };
+  const base = {
+    ...EMPTY,
+    lastCheckedAt: input.checkedAt,
+    sourceIds: [input.sourceId],
+    note: input.status === "complete" ? null : input.note,
+  };
   if (input.status === "not_collected") {
     return { ...base, collection: "not_collected", freshness: "unknown", completeness: "unknown" };
   }
@@ -159,6 +164,5 @@ export function levelCoverageState(input: LevelCoverageInput): DataState {
     collection: "collected",
     freshness: "unknown",
     completeness: input.status,
-    note: input.status === "partial" ? input.note : null,
   };
 }

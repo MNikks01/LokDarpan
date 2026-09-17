@@ -416,6 +416,7 @@ function ExplorerRail({
           heading={`Tenders from offices in ${activeUnit.name}`}
           tenders={tenderState.unitTenders}
           loading={tenderState.unitTendersLoading}
+          collectingSince={tenderState.overview.collectionState?.collectingSince ?? null}
         />
       )}
       <BoundarySources units={units} outlineSource={outlineSource} />

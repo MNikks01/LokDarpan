@@ -7,6 +7,7 @@ import type { StateOption } from "@/data/geography";
 import { Button, Select } from "@/components/ui";
 import type { ExplorerActions, GeoSelection } from "@/state/useExplorerState";
 import type { LevelCoverage } from "./use-explorer-data";
+import { boundaryCopy } from "@/copy/data-state";
 import styles from "./explorer.module.css";
 
 /**
@@ -38,7 +39,9 @@ function CoverageNote({
 }: {
   readonly coverage: readonly LevelCoverage[];
 }): React.JSX.Element | null {
-  const short = coverage.filter((c) => c.status !== "complete");
+  const short = coverage.filter(
+    (c) => c.state.collection === "not_collected" || c.state.completeness === "partial",
+  );
   if (short.length === 0) return null;
 
   return (
@@ -46,10 +49,10 @@ function CoverageNote({
       {short.map((c) => (
         <p key={c.level} style={{ margin: 0 }}>
           <span aria-hidden="true">▤ </span>
-          {c.status === "not_collected"
-            ? `${LEVEL_LABEL[c.level as AdminUnitLevel]} boundaries have not been collected.`
-            : `${LEVEL_LABEL[c.level as AdminUnitLevel]} coverage is incomplete.`}{" "}
-          {c.note ?? ""}
+          {c.state.collection === "not_collected"
+            ? boundaryCopy.notCollected(c.level as AdminUnitLevel)
+            : boundaryCopy.partial(c.level as AdminUnitLevel)}{" "}
+          {c.state.note ?? ""}
         </p>
       ))}
     </div>

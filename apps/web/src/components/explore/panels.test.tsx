@@ -1,9 +1,10 @@
+import { levelCoverageState, tenderCollectionState } from "@lokdarpan/domain";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { FilterPanel } from "./FilterPanel";
 import { RecordsPanel } from "./RecordsPanel";
-import { TendersPanel, type StateCollection, type TenderOverview } from "./tenders";
+import { TenderList, TendersPanel, type StateCollection, type TenderOverview } from "./tenders";
 import type { LevelCoverage } from "./use-explorer-data";
 
 /**
@@ -24,14 +25,19 @@ const collection = (over: Partial<StateCollection> = {}): StateCollection => ({
   ...over,
 });
 
-const overview = (over: Partial<TenderOverview> = {}): TenderOverview => ({
-  districts: [],
-  departments: [],
-  windows: [],
-  unplacedCount: 0,
-  collection: collection(),
-  ...over,
-});
+/** An overview whose `collectionState` always agrees with its `collection`, as the API's does. */
+const overview = (over: Partial<TenderOverview> = {}): TenderOverview => {
+  const stateCollection = over.collection === undefined ? collection() : over.collection;
+  return {
+    districts: [],
+    departments: [],
+    windows: [],
+    unplacedCount: 0,
+    ...over,
+    collection: stateCollection,
+    collectionState: stateCollection === null ? null : tenderCollectionState(stateCollection),
+  };
+};
 
 const noop = (): void => undefined;
 
@@ -92,7 +98,7 @@ describe("a state nobody collects is not a state with no tenders", () => {
     expect(markup).not.toContain("not currently collected");
   });
 
-  it("says so when a collected state's figures have gone stale", () => {
+  it("says when a collected state's figures were last collected, not a fixed interval", () => {
     const markup = tenderPanel({
       collection: collection({
         status: "stale",
@@ -101,19 +107,57 @@ describe("a state nobody collects is not a state with no tenders", () => {
         lastCheckedAt: "2026-08-01T00:00:00.000Z",
       }),
     });
-    expect(markup).toContain("more than two days ago");
+    expect(markup).toContain("last collected on 1 Aug 2026");
+    expect(markup).not.toContain("two days");
+  });
+
+  // A portal registered but never collected successfully holds no data to be stale.
+  it("says there is no record of checking when collection has never succeeded", () => {
+    const markup = tenderPanel({
+      collection: collection({ status: "stale", portalCode: "kerala", lastSuccessAt: null }),
+    });
+    expect(markup).toContain("no record of checking its e-procurement portal for Maharashtra");
+    expect(markup).not.toMatch(/\b0\b\s*(open\s*)?tenders?/u);
+  });
+
+  it("reports a failed request as a fault here, not a statement about a portal", () => {
+    const markup = renderToStaticMarkup(
+      <TendersPanel
+        overview={overview()}
+        failed
+        department={null}
+        onSelectDepartment={noop}
+        showingUnplaced={false}
+        onToggleUnplaced={noop}
+        stateName="Kerala"
+      />,
+    );
+    expect(markup).toContain("could not be loaded just now");
+    expect(markup).toContain("not a statement about any portal");
+    expect(markup).not.toContain("unavailable");
+  });
+
+  it("dates an empty list by when collection began, rather than calling it recent", () => {
+    const markup = renderToStaticMarkup(
+      <TenderList heading="Tenders" tenders={[]} loading={false} collectingSince="2026-08-20" />,
+    );
+    expect(markup).toContain("Tenders from before 20 Aug 2026 are not held");
+    expect(markup).not.toContain("recently");
   });
 });
 
-const coverage = (over: Partial<LevelCoverage> = {}): LevelCoverage => ({
-  level: "urban_local_body",
-  status: "partial",
-  note: "OpenStreetMap tags 18 of an estimated 270.",
-  sourceId: "openstreetmap-overpass",
-  checkedAt: "2026-09-05T00:00:00.000Z",
-  inherited: true,
-  ...over,
-});
+const coverage = (over: Partial<Omit<LevelCoverage, "state">> = {}): LevelCoverage => {
+  const level = {
+    level: "urban_local_body",
+    status: "partial" as const,
+    note: "OpenStreetMap tags 18 of an estimated 270.",
+    sourceId: "openstreetmap-overpass",
+    checkedAt: "2026-09-05T00:00:00.000Z",
+    inherited: true,
+    ...over,
+  };
+  return { ...level, state: levelCoverageState(level) };
+};
 
 const filterPanel = (levels: readonly LevelCoverage[]): string =>
   renderToStaticMarkup(
@@ -149,9 +193,10 @@ const filterPanel = (levels: readonly LevelCoverage[]): string =>
 describe("an area list is not a census of the place", () => {
   // Pune holds 14 talukas and no municipal body, and Pune Municipal Corporation
   // plainly exists. Without this the selector is read as Pune's local government.
-  it("says local-body coverage is incomplete rather than leaving a silence", () => {
+  it("says not every municipal body is held, rather than leaving a silence", () => {
     const markup = filterPanel([coverage()]);
-    expect(markup).toContain("coverage is incomplete");
+    expect(markup).toContain("Not every municipal body is held.");
+    expect(markup).not.toContain("incomplete");
     expect(markup).toContain("18 of an estimated 270");
   });
 
@@ -172,8 +217,13 @@ describe("an area list is not a census of the place", () => {
     const markup = filterPanel([
       coverage({ level: "sub_district", status: "complete", note: "All 355 held." }),
     ]);
-    expect(markup).not.toContain("incomplete");
+    expect(markup).not.toContain("is held.");
     expect(markup).not.toContain("have not been collected");
+  });
+
+  it("keeps a Gram Panchayat a proper noun inside the sentence", () => {
+    const markup = filterPanel([coverage({ level: "gram_panchayat" })]);
+    expect(markup).toContain("Not every Gram Panchayat is held.");
   });
 });
 
