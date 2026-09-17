@@ -1,3 +1,4 @@
+import { tenderCollectionState } from "@lokdarpan/domain";
 import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
@@ -45,7 +46,16 @@ export function GET(request: Request): Promise<Response> {
         tenders.unplacedCount(),
         stateLgdCode === null ? Promise.resolve(null) : tenders.collectionForState(stateLgdCode),
       ]);
-      return { districts, departments, windows, unplacedCount, collection };
+      return {
+        districts,
+        departments,
+        windows,
+        unplacedCount,
+        collection,
+        // The same facts as `collection`, in the shared data-state model (ADR-054).
+        // `collection` stays for one release while the panels move over.
+        collectionState: collection === null ? null : tenderCollectionState(collection),
+      };
     });
   });
 }
