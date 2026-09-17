@@ -22,3 +22,19 @@ export type {
 export { attributionFor, awaitingPermission, licenceFor, mayRepublish } from "./source-licence";
 export type { Republication, SourceLicence } from "./source-licence";
 export * from "./geography";
+export {
+  displayStateOf,
+  levelCoverageState,
+  mayShowCounts,
+  tenderCollectionState,
+} from "./data-state";
+export type {
+  Collection,
+  Completeness,
+  DataState,
+  DisplayState,
+  Freshness,
+  LevelCoverageInput,
+  TenderCollectionInput,
+  Transport,
+} from "./data-state";
