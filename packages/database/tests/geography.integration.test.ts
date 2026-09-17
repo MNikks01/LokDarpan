@@ -196,6 +196,21 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       }
     });
 
+    it("places each name inside its own unit and sizes the unit in square metres", async () => {
+      const collection = await repository?.boundariesOfChildren(ids.district);
+      expect(collection?.features.length).toBeGreaterThan(0);
+      for (const feature of collection?.features ?? []) {
+        const [lng, lat] = feature.properties.labelPoint;
+        const inside = await pool?.query<{ inside: boolean }>(
+          `SELECT ST_Contains(geometry, ST_SetSRID(ST_MakePoint($2, $3), 4326)) AS inside
+             FROM admin_unit_boundary WHERE admin_unit_id = $1`,
+          [feature.properties.unitId, lng, lat],
+        );
+        expect(inside?.rows[0]?.inside).toBe(true);
+        expect(feature.properties.areaM2).toBeGreaterThan(0);
+      }
+    });
+
     it("bounds a viewport query by the box and by the limit", async () => {
       // Viewport-scoped reads are the reason this is not "fetch every boundary
       // and filter in the browser".

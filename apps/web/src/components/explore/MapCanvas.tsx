@@ -364,9 +364,10 @@ export function MapCanvas({
     };
   }, [ready]);
 
+  const selectedUnitId = activeUnit?.id ?? null;
   const labels = useMemo(
-    () => labelsFor(stateCode, states, childBoundaries),
-    [childBoundaries, stateCode, states],
+    () => labelsFor(stateCode, states, childBoundaries, selectedUnitId),
+    [childBoundaries, selectedUnitId, stateCode, states],
   );
 
   useEffect(() => {
@@ -450,91 +451,65 @@ export function MapCanvas({
 }
 
 /**
- * Which places are named, and how loudly.
+ * Which places are named.
  *
  * One level at a time. Showing state names over a district view produces a map
  * where the labels compete with each other instead of describing what the
- * reader is looking at. Below state level the anchors come from the boundaries
- * themselves, so a level nobody anticipated still gets labelled.
+ * reader is looking at. Below state level the anchors and sizes come from the
+ * ledger itself (migration 0032), so a name sits inside its place and a level
+ * nobody anticipated still gets labelled.
+ *
+ * Only selection, level and size reach the labels. Which name wins an overlap
+ * is never decided by anything a place's records say.
  */
 function labelsFor(
   stateCode: string | null,
   states: readonly StateOption[],
   children: FeatureCollection | null,
+  selectedUnitId: number | null,
 ): readonly PlaceLabel[] {
   if (stateCode === null) {
     return states.map((s) => ({
       id: `state-${s.code}`,
       text: s.name,
       lngLat: s.labelPoint,
-      priority: s.labelWeight,
+      level: "state",
+      // Area of the state's largest ring, from the boundary manifest. Only
+      // compared with other states, so its unit does not matter.
+      size: s.labelWeight,
+      selected: false,
       tone: "primary" as const,
     }));
   }
   if (children === null) return [];
 
   return children.features.flatMap((feature) => {
-    const anchor = centroidOf(feature.geometry);
     const properties = feature.properties ?? {};
     const name: unknown = properties["name"];
-    if (anchor === null || typeof name !== "string") return [];
+    const unitId: unknown = properties["unitId"];
+    const level: unknown = properties["level"];
+    const labelPoint = pointOf(properties["labelPoint"]);
+    const areaM2: unknown = properties["areaM2"];
+    // No stored anchor means no name, rather than a guessed position. The ledger
+    // computes one for every boundary, so this is a defect to surface, not a case.
+    if (typeof name !== "string" || typeof unitId !== "number" || labelPoint === null) return [];
     return [
       {
-        id: `unit-${String(properties["unitId"] ?? name)}`,
+        id: `unit-${String(unitId)}`,
         text: name,
-        lngLat: anchor,
-        // Bigger areas win a collision, measured from the geometry itself.
-        priority: extentOf(feature.geometry),
+        lngLat: labelPoint,
+        level: typeof level === "string" ? level : "unknown",
+        size: typeof areaM2 === "number" ? areaM2 : 0,
+        selected: unitId === selectedUnitId,
         tone: "primary" as const,
       },
     ];
   });
 }
 
-/** Every coordinate in a geometry, however deeply nested. */
-function* positions(geometry: unknown): Generator<readonly [number, number]> {
-  if (!Array.isArray(geometry)) return;
-  if (typeof geometry[0] === "number" && typeof geometry[1] === "number") {
-    yield [geometry[0], geometry[1]];
-    return;
-  }
-  for (const part of geometry) yield* positions(part);
-}
-
-function coordsOf(geometry: unknown): readonly (readonly [number, number])[] {
-  if (typeof geometry !== "object" || geometry === null) return [];
-  const coordinates = (geometry as { coordinates?: unknown }).coordinates;
-  return [...positions(coordinates)];
-}
-
-function centroidOf(geometry: unknown): readonly [number, number] | null {
-  const points = coordsOf(geometry);
-  if (points.length === 0) return null;
-  let west = Infinity;
-  let south = Infinity;
-  let east = -Infinity;
-  let north = -Infinity;
-  for (const [lng, lat] of points) {
-    west = Math.min(west, lng);
-    south = Math.min(south, lat);
-    east = Math.max(east, lng);
-    north = Math.max(north, lat);
-  }
-  return [(west + east) / 2, (south + north) / 2];
-}
-
-function extentOf(geometry: unknown): number {
-  const points = coordsOf(geometry);
-  if (points.length === 0) return 0;
-  let west = Infinity;
-  let south = Infinity;
-  let east = -Infinity;
-  let north = -Infinity;
-  for (const [lng, lat] of points) {
-    west = Math.min(west, lng);
-    south = Math.min(south, lat);
-    east = Math.max(east, lng);
-    north = Math.max(north, lat);
-  }
-  return (east - west) * (north - south);
+function pointOf(value: unknown): readonly [number, number] | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const lng: unknown = value[0];
+  const lat: unknown = value[1];
+  return typeof lng === "number" && typeof lat === "number" ? [lng, lat] : null;
 }

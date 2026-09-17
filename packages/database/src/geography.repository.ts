@@ -322,7 +322,12 @@ export class PostgresGeographyRepository implements GeographyRepository {
                   'name', u.name_en,
                   'level', u.level::text,
                   'sourceKind', b.source_kind::text,
-                  'sourceName', b.source_name
+                  'sourceName', b.source_name,
+                  'labelPoint', jsonb_build_array(
+                    round(ST_X(b.label_point)::numeric, $3),
+                    round(ST_Y(b.label_point)::numeric, $3)
+                  ),
+                  'areaM2', round(b.area_m2)
                 ),
                 'geometry', ST_AsGeoJSON(ST_SimplifyPreserveTopology(b.geometry, $2), $3)::jsonb
               ) AS feature
