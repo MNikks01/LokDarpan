@@ -1,3 +1,5 @@
+import { fetchWithLimits, type FetchLimits, type Http } from "../net/fetch-with-limits";
+import { CAG_PAGE, CAG_REPORT } from "../net/limits";
 import { sha256Of } from "../raw-store";
 
 const USER_AGENT = "LokDarpan/0.1 (+https://github.com/MNikks01/LokDarpan)";
@@ -38,10 +40,7 @@ export interface ReportLink {
   readonly title: string;
 }
 
-export type HttpLike = (
-  url: string,
-  init: { headers: Record<string, string> },
-) => Promise<Response>;
+export type HttpLike = Http;
 
 const REPORT_HREF = /href=["']([^"']*download_audit_report[^"']*)["']/giu;
 
@@ -89,15 +88,24 @@ export class CagClient {
     private readonly http: HttpLike = fetch,
   ) {}
 
-  private async request(url: string): Promise<FetchedDocument> {
-    const response = await this.http(url, { headers: { "user-agent": USER_AGENT } });
-    const body = Buffer.from(await response.arrayBuffer());
+  private async request(
+    url: string,
+    limits: FetchLimits,
+    accept?: (response: Response) => void,
+  ): Promise<FetchedDocument> {
+    const response = await fetchWithLimits({
+      url,
+      init: { headers: { "user-agent": USER_AGENT } },
+      limits,
+      http: this.http,
+      ...(accept === undefined ? {} : { accept }),
+    });
     return {
       url,
       status: response.status,
       contentType: response.headers.get("content-type"),
-      body,
-      sha256: sha256Of(body),
+      body: response.body,
+      sha256: sha256Of(response.body),
     };
   }
 
@@ -111,7 +119,7 @@ export class CagClient {
    * looser parse would offer "Defence" as a state and fetch nothing.
    */
   async listStates(): Promise<StateOption[]> {
-    const page = await this.request(`${this.baseUrl}/en/audit-report?gt=49`);
+    const page = await this.request(`${this.baseUrl}/en/audit-report?gt=49`, CAG_PAGE);
     if (page.status !== 200) {
       throw new Error(`CAG audit-report page returned HTTP ${String(page.status)}.`);
     }
@@ -136,7 +144,7 @@ export class CagClient {
 
   async listStateReports(stateId = MAHARASHTRA_STATE_ID): Promise<ReportLink[]> {
     const url = `${this.baseUrl}/en/audit-report?gt=49&state%5B0%5D=${String(stateId)}`;
-    const page = await this.request(url);
+    const page = await this.request(url, CAG_PAGE);
     if (page.status !== 200) {
       throw new Error(`CAG report listing returned HTTP ${String(page.status)}.`);
     }
@@ -163,17 +171,21 @@ export class CagClient {
     return links;
   }
 
+  /**
+   * One report PDF. Status and type are checked from the headers, before the
+   * body is read: an error page is refused without being downloaded.
+   */
   async fetchReport(url: string): Promise<FetchedDocument> {
-    const doc = await this.request(url);
-    if (doc.status !== 200) {
-      throw new Error(`CAG report returned HTTP ${String(doc.status)} for ${url}.`);
-    }
-    // A report served as HTML is an error page, not a document. Storing it
-    // would put a "not found" page into the evidence chain.
-    const type = doc.contentType ?? "";
-    if (!type.includes("pdf")) {
-      throw new Error(`Expected a PDF from ${url} but the server sent "${type}".`);
-    }
-    return doc;
+    return this.request(url, CAG_REPORT, (response) => {
+      if (response.status !== 200) {
+        throw new Error(`CAG report returned HTTP ${String(response.status)} for ${url}.`);
+      }
+      // A report served as HTML is an error page, not a document. Storing it
+      // would put a "not found" page into the evidence chain.
+      const type = response.headers.get("content-type") ?? "";
+      if (!type.includes("pdf")) {
+        throw new Error(`Expected a PDF from ${url} but the server sent "${type}".`);
+      }
+    });
   }
 }
