@@ -100,7 +100,7 @@ describe("tenderCollectionState", () => {
 });
 
 describe("levelCoverageState", () => {
-  it("keeps the note only where it explains a partial holding", () => {
+  it("keeps the note wherever it explains a shortfall, and drops it for a complete level", () => {
     const partial = levelCoverageState({
       status: "partial",
       note: "Forty villages are held, all within Nagpur district.",
@@ -122,11 +122,12 @@ describe("levelCoverageState", () => {
   it("marks a level nobody collected as not collected, with no completeness claim", () => {
     const state = levelCoverageState({
       status: "not_collected",
-      note: null,
+      note: "No ward register has been collected.",
       sourceId: "lgd",
       checkedAt: "2026-09-01T00:00:00Z",
     });
     expect(state.collection).toBe("not_collected");
+    expect(state.note).toBe("No ward register has been collected.");
     expect(mayShowCounts(state)).toBe(false);
   });
 });

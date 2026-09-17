@@ -3,6 +3,8 @@
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import type { FeatureCollection } from "geojson";
+import { displayStateOf, type DataState } from "@lokdarpan/domain";
+import { notChecked, tenderCopy } from "@/copy/data-state";
 import styles from "./explorer.module.css";
 
 /**
@@ -60,6 +62,8 @@ export interface TenderOverview {
   readonly unplacedCount: number;
   /** Present only when a state is selected. Null means the question was not asked. */
   readonly collection: StateCollection | null;
+  /** The same facts in the shared data-state model (ADR-054). What the panel reads. */
+  readonly collectionState: DataState | null;
 }
 
 const EMPTY: TenderOverview = {
@@ -68,6 +72,7 @@ const EMPTY: TenderOverview = {
   windows: [],
   unplacedCount: 0,
   collection: null,
+  collectionState: null,
 };
 
 export function useTenderOverview(
@@ -153,11 +158,10 @@ function NotCollected({ stateName }: { readonly stateName: string }): React.JSX.
     <>
       <p style={{ fontSize: 12.5, margin: 0 }}>
         <span aria-hidden="true">▤ </span>
-        Tender data is not currently collected for {stateName}.
+        {tenderCopy.notCollected(stateName)}
       </p>
       <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>
-        This describes what LokDarpan holds, not what has been advertised. No count is shown for{" "}
-        {stateName}, since none would be a measurement of the state rather than of our collection.
+        {tenderCopy.notCollectedMeaning(stateName)}
       </p>
     </>
   );
@@ -217,22 +221,92 @@ function Unplaced({
   );
 }
 
-/** How out of date a collected state's figures are, in the panel's own words. */
-function Freshness({
-  collection,
-}: {
-  readonly collection: StateCollection;
-}): React.JSX.Element | null {
-  if (collection.status === "collected" || collection.status === "not_collected") return null;
+/**
+ * How out of date a collected state's figures are.
+ *
+ * Only `failing` and `stale` say anything. A stale state that has never once
+ * succeeded is not stale data — there is none — and the panel says it has no
+ * record of checking instead.
+ */
+function Freshness({ state }: { readonly state: DataState }): React.JSX.Element | null {
+  const style = { fontSize: 11.5, color: "var(--ld-text-secondary)", margin: "6px 0 0" };
+  if (state.freshness === "failing") {
+    return (
+      <p style={style}>
+        <span aria-hidden="true">▤ </span>
+        {tenderCopy.failing}
+        {state.lastSuccessAt !== null && tenderCopy.lastSuccess(formatDate(state.lastSuccessAt))}
+      </p>
+    );
+  }
+  if (state.freshness === "stale" && state.lastSuccessAt !== null) {
+    return (
+      <p style={style}>
+        <span aria-hidden="true">▤ </span>
+        {tenderCopy.stale(formatDate(state.lastSuccessAt))}
+      </p>
+    );
+  }
+  return null;
+}
+
+/** A collected portal with no successful collection on record, or a state with no record at all. */
+function neverChecked(state: DataState | null): boolean {
+  if (state === null) return false;
   return (
-    <p style={{ fontSize: 11.5, color: "var(--ld-text-secondary)", margin: "6px 0 0" }}>
-      <span aria-hidden="true">▤ </span>
-      {collection.status === "failing"
-        ? "The most recent collection attempt did not complete. The tenders shown are the last that were collected successfully."
-        : "These tenders were last collected more than two days ago."}
-      {collection.lastSuccessAt !== null &&
-        ` Last successful collection ${formatDate(collection.lastSuccessAt)}.`}
-    </p>
+    displayStateOf(state, "ok") === "unknown" ||
+    (state.freshness === "stale" && state.lastSuccessAt === null)
+  );
+}
+
+/**
+ * What the panel says instead of any count, when a count would be untrue or
+ * unavailable. Null when counts may be shown.
+ */
+function withheldNotice(
+  failed: boolean,
+  state: DataState | null,
+  stateName: string | null,
+): React.JSX.Element | null {
+  if (failed) {
+    return (
+      <p style={{ fontSize: 12.5, color: "var(--ld-text-secondary)", margin: 0 }} role="alert">
+        <span aria-hidden="true">▤ </span>
+        {tenderCopy.unavailable}
+      </p>
+    );
+  }
+  if (state?.collection === "not_collected") {
+    return <NotCollected stateName={stateName ?? "this state"} />;
+  }
+  if (stateName !== null && neverChecked(state)) {
+    return (
+      <p style={{ fontSize: 12.5, margin: 0 }}>
+        <span aria-hidden="true">▤ </span>
+        {notChecked("its e-procurement portal", stateName)}
+      </p>
+    );
+  }
+  return null;
+}
+
+/** How current the held tenders are, and the date collection began. */
+function CollectionFooter({
+  state,
+}: {
+  readonly state: DataState | null;
+}): React.JSX.Element | null {
+  if (state === null) return null;
+  return (
+    <>
+      <Freshness state={state} />
+      {state.collectingSince !== null && (
+        <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>
+          <span aria-hidden="true">▤ </span>
+          {tenderCopy.window(formatDate(state.collectingSince))}
+        </p>
+      )}
+    </>
   );
 }
 
@@ -261,28 +335,18 @@ export function TendersPanel({
     [onSelectDepartment],
   );
 
-  const { collection } = overview;
-  // The window for the state on screen, not whichever row came back first. The
-  // panel previously took `windows[0]` and dated every state's figures by one
-  // arbitrary portal's last success.
-  const collected = overview.windows.find(
-    (w) => collection !== null && w.portalCode === collection.portalCode,
-  );
-  const notCollected = collection !== null && collection.status === "not_collected";
+  // The collection window comes from the state on screen's own collection
+  // state — never whichever window row came back first, which once dated every
+  // state's figures by one arbitrary portal.
+  const { collectionState } = overview;
+  const notice = withheldNotice(failed, collectionState, stateName);
 
   return (
     <div className={styles.panel}>
       <div className={styles.panelBody}>
         <h2 className={styles.panelTitle}>Open tenders</h2>
 
-        {failed ? (
-          <p style={{ fontSize: 12.5, color: "var(--ld-text-secondary)", margin: 0 }}>
-            <span aria-hidden="true">▤ </span>
-            Tender information is unavailable right now.
-          </p>
-        ) : notCollected ? (
-          <NotCollected stateName={stateName ?? "this state"} />
-        ) : (
+        {notice ?? (
           <>
             <p style={{ fontSize: 12, color: "var(--ld-text-secondary)", margin: "0 0 10px" }}>
               Shading counts tenders advertised by government offices <strong>located in</strong>{" "}
@@ -323,15 +387,7 @@ export function TendersPanel({
               onToggle={onToggleUnplaced}
             />
 
-            {collection !== null && <Freshness collection={collection} />}
-
-            {collected !== undefined && (
-              <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>
-                <span aria-hidden="true">▤ </span>
-                Collected since {formatDate(collected.collectingSince)}. Tenders advertised before
-                that date were published but are not held.
-              </p>
-            )}
+            <CollectionFooter state={collectionState} />
           </>
         )}
       </div>
@@ -427,12 +483,15 @@ export function TenderList({
   heading,
   tenders,
   loading,
+  collectingSince = null,
 }: {
   /** Stated by the caller, because a placed list and an unplaced one are
    *  different claims and neither should be phrased as the other. */
   readonly heading: string;
   readonly tenders: readonly TenderSummary[];
   readonly loading: boolean;
+  /** When collection began for the state on screen, so an empty list can say what it cannot cover. */
+  readonly collectingSince?: string | null;
 }): React.JSX.Element {
   return (
     <div className={styles.panel}>
@@ -444,8 +503,8 @@ export function TenderList({
         {!loading && tenders.length === 0 && (
           <p style={{ fontSize: 12.5, color: "var(--ld-text-secondary)", margin: 0 }}>
             <span aria-hidden="true">▤ </span>
-            No open tender is held here. Collection began recently, so this is a statement about
-            what we hold, not about what was advertised.
+            {tenderCopy.emptyHere}
+            {collectingSince !== null && tenderCopy.notHeldBefore(formatDate(collectingSince))}
           </p>
         )}
 

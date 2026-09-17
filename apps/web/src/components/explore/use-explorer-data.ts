@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { DocumentSummary, GeoUnit } from "@lokdarpan/domain";
+import type { DataState, DocumentSummary, GeoUnit } from "@lokdarpan/domain";
 import type { StateOption } from "@/data/geography";
 import type { FeatureCollection } from "geojson";
 
@@ -44,6 +44,8 @@ export interface LevelCoverage {
   readonly sourceId: string;
   readonly checkedAt: string;
   readonly inherited: boolean;
+  /** The same facts in the shared data-state model (ADR-054). What the panels read. */
+  readonly state: DataState;
 }
 
 export interface ChildrenState {
