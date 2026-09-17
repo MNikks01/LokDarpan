@@ -44,6 +44,8 @@
 
 **Building the website** → `01-product/sprint-plan.md` → `decisions/web-first-pivot.md` → `02-architecture/web-architecture.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
 
+**Working on the map or ingestion safety** → `decisions/gods-eye-view-adoption.md` → `adr/022` → `adr/052`
+
 **Working on data** → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md`
 
 **Reviewing for neutrality** → `17-legal/legal-ethical-rules.md` → `01-product/design-system.md` §Neutrality primitives → `01-product/screen-inventory.md` §Screens that must not exist → `14-testing/testing-strategy.md` §6
