@@ -1,3 +1,5 @@
+import { fetchWithLimits, type Http } from "../net/fetch-with-limits.js";
+import { LGD_PAGE } from "../net/limits.js";
 import { sha256Of } from "../raw-store.js";
 
 /**
@@ -15,10 +17,7 @@ export interface FetchedPage {
   readonly sha256: string;
 }
 
-export type HttpLike = (
-  url: string,
-  init: { headers: Record<string, string> },
-) => Promise<Response>;
+export type HttpLike = Http;
 
 const CSRF_TOKEN = /OWASP_CSRFTOKEN=([A-Z0-9-]+)/u;
 
@@ -36,13 +35,18 @@ export class LgdClient {
     const headers: Record<string, string> = { "user-agent": USER_AGENT };
     if (this.cookie !== "") headers["cookie"] = this.cookie;
 
-    const response = await this.http(url, { headers });
+    const response = await fetchWithLimits({
+      url,
+      init: { headers },
+      limits: LGD_PAGE,
+      http: this.http,
+    });
     const setCookie = response.headers.get("set-cookie");
     if (setCookie !== null && setCookie !== "") {
       this.cookie = setCookie.split(";")[0] ?? "";
     }
 
-    const body = Buffer.from(await response.arrayBuffer());
+    const body = response.body;
     return {
       url,
       status: response.status,

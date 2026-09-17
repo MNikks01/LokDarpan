@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
 
+import { fetchWithLimits, textOf } from "../net/fetch-with-limits";
+import { OVERPASS_QUERY, OVERPASS_STATUS } from "../net/limits";
+
 /**
  * The Overpass client.
  *
@@ -160,8 +163,12 @@ export async function waitForSlot(
   for (let attempt = 0; attempt < attempts; attempt++) {
     let delay: number;
     try {
-      const response = await fetch(statusUrl, { headers: { "user-agent": USER_AGENT } });
-      delay = response.ok ? slotDelayMs(await response.text()) : 60_000;
+      const response = await fetchWithLimits({
+        url: statusUrl,
+        init: { headers: { "user-agent": USER_AGENT } },
+        limits: OVERPASS_STATUS,
+      });
+      delay = response.status === 200 ? slotDelayMs(textOf(response)) : 60_000;
     } catch {
       delay = 60_000;
     }
@@ -175,22 +182,27 @@ export async function runQuery(
   endpoint = DEFAULT_ENDPOINT,
 ): Promise<FetchedArtifact> {
   const retrievedAt = new Date().toISOString();
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "content-type": "text/plain",
-      "user-agent": USER_AGENT,
+  const response = await fetchWithLimits({
+    url: endpoint,
+    init: {
+      method: "POST",
+      headers: {
+        "content-type": "text/plain",
+        "user-agent": USER_AGENT,
+      },
+      body: query,
     },
-    body: query,
+    limits: OVERPASS_QUERY,
+    // Refused from the status line: an error answer is classified, not downloaded.
+    accept: (r) => {
+      if (r.ok) return;
+      if (r.status === 429) throw new OverpassRateLimited();
+      if (r.status >= 500) throw new OverpassUnavailable(r.status);
+      throw new Error(`Overpass returned ${String(r.status)}`);
+    },
   });
 
-  if (!response.ok) {
-    if (response.status === 429) throw new OverpassRateLimited();
-    if (response.status >= 500) throw new OverpassUnavailable(response.status);
-    throw new Error(`Overpass returned ${String(response.status)}`);
-  }
-
-  const body = await response.text();
+  const body = textOf(response);
   return {
     body,
     sha256: createHash("sha256").update(body).digest("hex"),

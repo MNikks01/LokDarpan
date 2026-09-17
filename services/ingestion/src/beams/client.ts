@@ -1,3 +1,5 @@
+import { fetchWithLimits, type Http } from "../net/fetch-with-limits";
+import { BEAMS_EXPORT } from "../net/limits";
 import { sha256Of } from "../raw-store";
 
 const USER_AGENT = "LokDarpan/0.1 (+https://github.com/MNikks01/LokDarpan)";
@@ -12,10 +14,7 @@ export interface FetchedExport {
   readonly sha256: string;
 }
 
-export type HttpLike = (
-  url: string,
-  init: { headers: Record<string, string> },
-) => Promise<Response>;
+export type HttpLike = Http;
 
 /**
  * BEAMS returns an empty body — not an error — to a drill-down or export
@@ -36,12 +35,17 @@ export class BeamsClient {
     if (this.cookie !== "") headers["cookie"] = this.cookie;
     if (referer !== undefined) headers["referer"] = referer;
 
-    const response = await this.http(url, { headers });
+    const response = await fetchWithLimits({
+      url,
+      init: { headers },
+      limits: BEAMS_EXPORT,
+      http: this.http,
+    });
     const setCookie = response.headers.get("set-cookie");
     if (setCookie !== null && setCookie !== "") {
       this.cookie = setCookie.split(";")[0] ?? "";
     }
-    const body = Buffer.from(await response.arrayBuffer());
+    const body = response.body;
     return {
       url,
       status: response.status,

@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
 
+import { fetchWithLimits, textOf } from "../net/fetch-with-limits";
+import { GEPNIC_PAGE, ROBOTS_TXT } from "../net/limits";
+
 /**
  * Fetching from a GePNIC deployment, politely and only where permitted.
  *
@@ -127,10 +130,12 @@ export class PortalSession {
     baseUrl: string,
   ): Promise<{ readonly session: PortalSession; readonly landing: FetchedArtifact }> {
     const host = new URL(baseUrl).origin;
-    const robots = await fetch(`${host}/robots.txt`, {
-      headers: { "user-agent": USER_AGENT, "accept-language": ACCEPT_LANGUAGE },
+    const robots = await fetchWithLimits({
+      url: `${host}/robots.txt`,
+      init: { headers: { "user-agent": USER_AGENT, "accept-language": ACCEPT_LANGUAGE } },
+      limits: ROBOTS_TXT,
     });
-    if (!permitsCrawling(await robots.text(), robots.status)) {
+    if (!permitsCrawling(textOf(robots), robots.status)) {
       throw new CrawlNotPermitted(host);
     }
 
@@ -139,7 +144,7 @@ export class PortalSession {
     return { session, landing };
   }
 
-  private storeCookies(response: Response): void {
+  private storeCookies(response: { readonly headers: Headers }): void {
     // `getSetCookie` keeps multiple Set-Cookie headers apart; joining them into
     // one string and splitting on commas corrupts any cookie carrying a date.
     for (const header of response.headers.getSetCookie()) {
@@ -151,16 +156,23 @@ export class PortalSession {
 
   async get(url: string): Promise<FetchedArtifact> {
     const cookie = [...this.cookies].map(([k, v]) => `${k}=${v}`).join("; ");
-    const response = await fetch(url, {
-      headers: {
-        "user-agent": USER_AGENT,
-        "accept-language": ACCEPT_LANGUAGE,
-        ...(cookie === "" ? {} : { cookie }),
-        ...(url.endsWith("/nicgep/app") ? {} : { referer: `${this.baseUrl}/nicgep/app` }),
+    const response = await fetchWithLimits({
+      url,
+      init: {
+        headers: {
+          "user-agent": USER_AGENT,
+          "accept-language": ACCEPT_LANGUAGE,
+          ...(cookie === "" ? {} : { cookie }),
+          ...(url.endsWith("/nicgep/app") ? {} : { referer: `${this.baseUrl}/nicgep/app` }),
+        },
+      },
+      limits: GEPNIC_PAGE,
+      // A failed page is refused from its status, before its body is read.
+      accept: (r) => {
+        if (!r.ok) throw new Error(`${url} returned ${String(r.status)}`);
       },
     });
-    if (!response.ok) throw new Error(`${url} returned ${String(response.status)}`);
     this.storeCookies(response);
-    return digest(await response.text(), url);
+    return digest(textOf(response), url);
   }
 }
