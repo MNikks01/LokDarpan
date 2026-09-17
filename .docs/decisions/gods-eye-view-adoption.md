@@ -60,19 +60,19 @@ budget, the map aggregates by administrative unit and says so. It never picks a 
 
 Order matters: phases 1 and 2 come first because later phases key on what they produce.
 
-| Phase | Change                                                                                               | ADR      | Status                                                                           |
-| ----- | ---------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| 0     | This document; ADR-022 addendum for the drift in finding 2                                           | 022 add. | Done                                                                             |
-| 1     | `fetchWithLimits` in `services/ingestion/src/net/`, used by every collector                          | 052      | Limits done; retries, conditional GET, disk streaming, redirect policy to follow |
-| 2     | Real `datasetVersion` on every explorer route; `asOf` is when that version was opened                | 053      | Done — see ADR-053 for the open question on unit views                           |
-| 3     | Label arbitration; `label_point` and `area_m2` stored per boundary                                   | 057      | Done                                                                             |
-| 4     | `DataState` model and reviewed panel wording (done); `SourceDescriptor` built on `source-licence.ts` | 054, 055 | Source descriptors next                                                          |
-| 5     | One level endpoint; browser resource cache keyed by version                                          | —        | Planned                                                                          |
-| 6     | Layer registry and binder                                                                            | 058      | Planned                                                                          |
-| 7     | URL carries layers, filters, selection and an optional version pin                                   | 061      | Planned                                                                          |
-| 8     | Performance harness and enforced budgets                                                             | 062      | Planned                                                                          |
-| 9     | Records layers with an aggregate-first budget — waits on a licensed coordinate source                | 056, 060 | Blocked                                                                          |
-| —     | Import-direction rules A–F, after phase 2                                                            | 059      | Planned                                                                          |
+| Phase | Change                                                                                           | ADR      | Status                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------- |
+| 0     | This document; ADR-022 addendum for the drift in finding 2                                       | 022 add. | Done                                                                             |
+| 1     | `fetchWithLimits` in `services/ingestion/src/net/`, used by every collector                      | 052      | Limits done; retries, conditional GET, disk streaming, redirect policy to follow |
+| 2     | Real `datasetVersion` on every explorer route; `asOf` is when that version was opened            | 053      | Done — see ADR-053 for the open question on unit views                           |
+| 3     | Label arbitration; `label_point` and `area_m2` stored per boundary                               | 057      | Done                                                                             |
+| 4     | `DataState` model and reviewed wording; source terms recorded and returned as `SourceDescriptor` | 054, 055 | Done — tender terms decision open                                                |
+| 5     | One level endpoint; browser resource cache keyed by version                                      | —        | Planned                                                                          |
+| 6     | Layer registry and binder                                                                        | 058      | Planned                                                                          |
+| 7     | URL carries layers, filters, selection and an optional version pin                               | 061      | Planned                                                                          |
+| 8     | Performance harness and enforced budgets                                                         | 062      | Planned                                                                          |
+| 9     | Records layers with an aggregate-first budget — waits on a licensed coordinate source            | 056, 060 | Blocked                                                                          |
+| —     | Import-direction rules A–F, after phase 2                                                        | 059      | Planned                                                                          |
 
 Small, independent fixes that can land at any point: stop `MapCanvas` reframing the camera when its
 container resizes; load MapLibre after hydration; update the hover tooltip at most once per frame.
@@ -88,6 +88,13 @@ container resizes; load MapLibre after hydration; update the hover tooltip at mo
 
 ## Open items
 
+- **Tenders are listed under terms that require permission (decide first).** All 21 collected
+  GePNIC portals permit reproduction only "after taking proper permission from the respective
+  Organisation / Department" (Madhya Pradesh: in writing), which is the clause BEAMS figures are
+  withheld under. Tender titles, values and organisation chains are listed on the explorer. Linking
+  to a portal needs no permission. Options: withhold tender content and link to the portal instead;
+  request permission per department; take legal advice on whether the policy reaches published
+  notices; or keep them listed pending that advice. Evidence: `source-licences.md` §5, ADR-055.
 - **GePNIC and Overpass response sizes are unmeasured.** The local raw store holds CAG, BEAMS and
   LGD only (largest: CAG 28.8 MB, BEAMS 1.0 MB, LGD 135 KB), and the ledger was not reachable from
   the review environment. Their caps start as generous ceilings and are revisited from the sizes

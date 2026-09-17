@@ -1,4 +1,4 @@
-import { levelCoverageState } from "@lokdarpan/domain";
+import { describeSources, levelCoverageState } from "@lokdarpan/domain";
 import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
@@ -31,9 +31,12 @@ export function GET(
         geography.coverageIn(unitId),
       ]);
       // Each level's coverage also carries its shared data state (ADR-054).
+      const levels = coverage.map((level) => ({ ...level, state: levelCoverageState(level) }));
       return {
         units,
-        coverage: coverage.map((level) => ({ ...level, state: levelCoverageState(level) })),
+        coverage: levels,
+        // The terms each coverage source is held under (ADR-055).
+        sources: describeSources(levels.flatMap((level) => level.state.sourceIds)),
       };
     });
   });

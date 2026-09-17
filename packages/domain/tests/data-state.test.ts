@@ -6,7 +6,7 @@ import {
   mayShowCounts,
   tenderCollectionState,
   type DataState,
-} from "./data-state";
+} from "../src/data-state";
 
 const collected = tenderCollectionState({
   status: "collected",
