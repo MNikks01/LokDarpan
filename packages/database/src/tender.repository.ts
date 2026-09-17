@@ -1,4 +1,4 @@
-import type pg from "pg";
+import type { Queryable } from "./published-fact.repository";
 
 /**
  * Tenders, as the explorer reads them.
@@ -127,7 +127,8 @@ interface TenderRow {
 }
 
 export class PostgresTenderRepository {
-  constructor(private readonly db: pg.Pool) {}
+  /** A pool, or a client inside `readLedger`'s snapshot. */
+  constructor(private readonly db: Queryable) {}
 
   /**
    * Open tenders per district, for shading the map.

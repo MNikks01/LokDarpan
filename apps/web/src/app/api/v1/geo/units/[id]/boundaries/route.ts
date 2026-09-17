@@ -1,4 +1,4 @@
-import { geographyRepository } from "@/server/container";
+import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
@@ -17,10 +17,10 @@ export function GET(
   return respond(request, async () => {
     const { id } = await context.params;
     const unitId = Number(id);
-    if (!Number.isInteger(unitId) || unitId < 1) {
-      return { data: { type: "FeatureCollection", features: [] }, datasetVersion: 0 };
-    }
-    const collection = await geographyRepository().boundariesOfChildren(unitId);
-    return { data: collection, datasetVersion: 0 };
+    return inLedger(async ({ geography }) =>
+      !Number.isInteger(unitId) || unitId < 1
+        ? { type: "FeatureCollection", features: [] }
+        : geography.boundariesOfChildren(unitId),
+    );
   });
 }

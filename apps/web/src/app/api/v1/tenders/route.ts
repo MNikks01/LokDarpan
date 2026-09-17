@@ -1,4 +1,4 @@
-import { tenderRepository } from "@/server/container";
+import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
@@ -19,12 +19,12 @@ export function GET(request: Request): Promise<Response> {
     const unitId = unitParam === null ? Number.NaN : Number(unitParam);
     const department = params.get("department");
 
-    const tenders = await tenderRepository().listTenders({
-      ...(Number.isInteger(unitId) && unitId > 0 ? { adminUnitId: unitId } : {}),
-      ...(department === null || department === "" ? {} : { department }),
-      unplacedOnly: params.get("unplaced") === "true",
-    });
-
-    return { data: { tenders }, datasetVersion: 0 };
+    return inLedger(async ({ tenders }) => ({
+      tenders: await tenders.listTenders({
+        ...(Number.isInteger(unitId) && unitId > 0 ? { adminUnitId: unitId } : {}),
+        ...(department === null || department === "" ? {} : { department }),
+        unplacedOnly: params.get("unplaced") === "true",
+      }),
+    }));
   });
 }

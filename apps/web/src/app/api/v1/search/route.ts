@@ -1,4 +1,4 @@
-import { geographyRepository } from "@/server/container";
+import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,8 @@ const LIMIT = 12;
 export function GET(request: Request): Promise<Response> {
   return respond(request, async () => {
     const term = new URL(request.url).searchParams.get("q") ?? "";
-    const results = await geographyRepository().search(term, LIMIT);
-    return { data: { results }, datasetVersion: 0 };
+    return inLedger(async ({ geography }) => ({
+      results: await geography.search(term, LIMIT),
+    }));
   });
 }

@@ -1,4 +1,4 @@
-import { tenderRepository } from "@/server/container";
+import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
@@ -35,19 +35,17 @@ export function GET(request: Request): Promise<Response> {
     const requestedState = params.get("state");
     const stateLgdCode =
       requestedState !== null && /^\d{1,7}$/u.test(requestedState) ? requestedState : null;
-    const repository = tenderRepository();
-
-    const [districts, departments, windows, unplacedCount, collection] = await Promise.all([
-      repository.countsByDistrict(department),
-      repository.departments(),
-      repository.collectionWindows(),
-      repository.unplacedCount(),
-      stateLgdCode === null ? Promise.resolve(null) : repository.collectionForState(stateLgdCode),
-    ]);
-
-    return {
-      data: { districts, departments, windows, unplacedCount, collection },
-      datasetVersion: 0,
-    };
+    // One snapshot for all five reads: the counts, the unplaced total and the
+    // collection status are only truthful together if they describe one state.
+    return inLedger(async ({ tenders }) => {
+      const [districts, departments, windows, unplacedCount, collection] = await Promise.all([
+        tenders.countsByDistrict(department),
+        tenders.departments(),
+        tenders.collectionWindows(),
+        tenders.unplacedCount(),
+        stateLgdCode === null ? Promise.resolve(null) : tenders.collectionForState(stateLgdCode),
+      ]);
+      return { districts, departments, windows, unplacedCount, collection };
+    });
   });
 }

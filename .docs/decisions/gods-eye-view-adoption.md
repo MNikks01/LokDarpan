@@ -64,7 +64,7 @@ Order matters: phases 1 and 2 come first because later phases key on what they p
 | ----- | ------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------- |
 | 0     | This document; ADR-022 addendum for the drift in finding 2                            | 022 add. | Done                                                                             |
 | 1     | `fetchWithLimits` in `services/ingestion/src/net/`, used by every collector           | 052      | Limits done; retries, conditional GET, disk streaming, redirect policy to follow |
-| 2     | Real `datasetVersion` on every explorer route; `asOf` is retrieval time               | 053      | Planned                                                                          |
+| 2     | Real `datasetVersion` on every explorer route; `asOf` is when that version was opened | 053      | Done — see ADR-053 for the open question on unit views                           |
 | 3     | Label arbitration; `label_point` and `area_m2` stored per boundary                    | 057      | Planned                                                                          |
 | 4     | `DataState` and `SourceDescriptor` contracts                                          | 054, 055 | Planned                                                                          |
 | 5     | One level endpoint; browser resource cache keyed by version                           | —        | Planned                                                                          |
@@ -94,5 +94,9 @@ container resizes; load MapLibre after hydration; update the hover tooltip at mo
   the new fetch layer logs.
 - **Indic text shaping in MapLibre** must be verified against the pinned v5 before phase 3. If
   symbol layers shape Devanagari correctly, they replace DOM labels and most of phase 3 falls away.
+- **Unit views and the single-version rule.** `UnitService` refuses a payload whose rows come from
+  more than one load, and geography is loaded per district, so `/api/v1/units` fails as soon as
+  units span loads. Decide whether unit views keep strict row versions or report the watermark
+  (ADR-053).
 - **Pinned links cannot reconstruct old boundaries.** `admin_unit_boundary` is keyed by unit, so an
   old geometry is overwritten. Phase 7 either versions boundary rows or says so on the page.

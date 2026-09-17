@@ -1,5 +1,5 @@
 import { AppError } from "@lokdarpan/errors";
-import { geographyRepository } from "@/server/container";
+import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
@@ -14,14 +14,15 @@ export function GET(
     const unitId = Number(id);
     if (!Number.isInteger(unitId) || unitId < 1) throw new AppError("NOT_FOUND", `No unit ${id}`);
 
-    const repository = geographyRepository();
-    const unit = await repository.unitById(unitId);
-    if (unit === null) throw new AppError("NOT_FOUND", `No unit ${id}`);
+    return inLedger(async ({ geography }) => {
+      const unit = await geography.unitById(unitId);
+      if (unit === null) throw new AppError("NOT_FOUND", `No unit ${id}`);
 
-    const [ancestors, geometry] = await Promise.all([
-      repository.ancestorsOf(unitId),
-      repository.boundaryOf(unitId),
-    ]);
-    return { data: { unit, ancestors, geometry }, datasetVersion: 0 };
+      const [ancestors, geometry] = await Promise.all([
+        geography.ancestorsOf(unitId),
+        geography.boundaryOf(unitId),
+      ]);
+      return { unit, ancestors, geometry };
+    });
   });
 }
