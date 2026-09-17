@@ -7,6 +7,7 @@ import { PostgresAdminUnitRepository } from "@lokdarpan/database/repository";
 import { PostgresGeographyRepository } from "@lokdarpan/database/geography";
 import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-fact";
 import { PostgresTenderRepository } from "@lokdarpan/database/tender";
+import { readLedger, versionOpenedAt } from "@lokdarpan/database/ledger";
 import pg from "pg";
 import { UnitService } from "@lokdarpan/domain";
 
@@ -98,4 +99,42 @@ export function geographyRepository(): PostgresGeographyRepository {
 export function tenderRepository(): PostgresTenderRepository {
   tenders ??= new PostgresTenderRepository(pool());
   return tenders;
+}
+
+/** Read-side repositories bound to one ledger snapshot. */
+export interface LedgerRepositories {
+  readonly geography: PostgresGeographyRepository;
+  readonly tenders: PostgresTenderRepository;
+  readonly facts: PostgresPublishedFactRepository;
+}
+
+export interface VersionedResult<T> {
+  readonly data: T;
+  readonly datasetVersion: number;
+  readonly asOf: string | null;
+}
+
+/**
+ * Run a handler's reads against one consistent ledger state, and report which.
+ *
+ * Every query inside `read` sees the same snapshot as the version it is
+ * reported with, so a load that commits mid-request cannot put rows from one
+ * state under the version of another (.docs/adr/053-every-explorer-payload-states-its-dataset-version.md).
+ */
+export async function inLedger<T>(
+  read: (repositories: LedgerRepositories) => Promise<T>,
+): Promise<VersionedResult<T>> {
+  const { value, ledger } = await readLedger(pool(), (db) =>
+    read({
+      geography: new PostgresGeographyRepository(db),
+      tenders: new PostgresTenderRepository(db),
+      facts: new PostgresPublishedFactRepository(db),
+    }),
+  );
+  return { data: value, datasetVersion: ledger.datasetVersion, asOf: ledger.asOf };
+}
+
+/** When a dataset version was opened, for responses that name one from their rows. */
+export function datasetVersionOpenedAt(datasetVersion: number): Promise<string | null> {
+  return versionOpenedAt(pool(), datasetVersion);
 }

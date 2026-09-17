@@ -26,6 +26,7 @@
     "./department-finance": "./src/department-finance.repository.ts",
     "./published-fact": "./src/published-fact.repository.ts",
     "./geography": "./src/geography.repository.ts",
-    "./tender": "./src/tender.repository.ts"
+    "./tender": "./src/tender.repository.ts",
+    "./ledger": "./src/ledger.ts"
   }
 }

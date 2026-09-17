@@ -1,4 +1,4 @@
-import { geographyRepository } from "@/server/container";
+import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
@@ -23,14 +23,13 @@ export function GET(
   return respond(request, async () => {
     const { id } = await context.params;
     const unitId = Number(id);
-    if (!Number.isInteger(unitId) || unitId < 1) {
-      return { data: { units: [], coverage: [] }, datasetVersion: 0 };
-    }
-    const repository = geographyRepository();
-    const [units, coverage] = await Promise.all([
-      repository.childrenOf(unitId),
-      repository.coverageIn(unitId),
-    ]);
-    return { data: { units, coverage }, datasetVersion: 0 };
+    return inLedger(async ({ geography }) => {
+      if (!Number.isInteger(unitId) || unitId < 1) return { units: [], coverage: [] };
+      const [units, coverage] = await Promise.all([
+        geography.childrenOf(unitId),
+        geography.coverageIn(unitId),
+      ]);
+      return { units, coverage };
+    });
   });
 }

@@ -8,7 +8,7 @@ import type {
 } from "@lokdarpan/domain";
 import { LEVEL_LABEL } from "@lokdarpan/domain";
 import { displayTitle } from "@lokdarpan/domain";
-import type pg from "pg";
+import type { Queryable } from "./published-fact.repository";
 
 /**
  * Geography, read from PostGIS.
@@ -128,7 +128,8 @@ function toUnit(row: UnitRow): GeoUnit {
 }
 
 export class PostgresGeographyRepository implements GeographyRepository {
-  constructor(private readonly db: pg.Pool) {}
+  /** A pool, or a client inside `readLedger`'s snapshot. */
+  constructor(private readonly db: Queryable) {}
 
   /**
    * The units inside a place, found geographically rather than by `parent_id`.
