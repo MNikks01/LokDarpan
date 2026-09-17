@@ -1,4 +1,4 @@
-import { tenderCollectionState } from "@lokdarpan/domain";
+import { describeSources, tenderCollectionState } from "@lokdarpan/domain";
 import { inLedger } from "@/server/container";
 import { respond } from "@/server/respond";
 
@@ -46,6 +46,7 @@ export function GET(request: Request): Promise<Response> {
         tenders.unplacedCount(),
         stateLgdCode === null ? Promise.resolve(null) : tenders.collectionForState(stateLgdCode),
       ]);
+      const collectionState = collection === null ? null : tenderCollectionState(collection);
       return {
         districts,
         departments,
@@ -54,7 +55,14 @@ export function GET(request: Request): Promise<Response> {
         collection,
         // The same facts as `collection`, in the shared data-state model (ADR-054).
         // `collection` stays for one release while the panels move over.
-        collectionState: collection === null ? null : tenderCollectionState(collection),
+        collectionState,
+        // The terms each portal's material is held under (ADR-055). For the whole
+        // country, every collected portal contributes to the counts.
+        sources: describeSources(
+          collectionState === null
+            ? windows.map((w) => `gepnic-${w.portalCode}`)
+            : collectionState.sourceIds,
+        ),
       };
     });
   });

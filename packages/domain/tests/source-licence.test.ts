@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   attributionFor,
   awaitingPermission,
+  describeSources,
   licenceFor,
   mayRepublish,
 } from "../src/source-licence";
@@ -31,6 +32,26 @@ describe("mayRepublish", () => {
   it("refuses a source nobody has recorded terms for", () => {
     expect(mayRepublish("mahatenders")).toBe(false);
     expect(mayRepublish("")).toBe(false);
+  });
+
+  // Found while building source descriptors: every collected tender portal
+  // publishes the BEAMS clause. Recording it withholds nothing by itself; the
+  // tender path does not consult this registry yet (source-licences.md §5).
+  it("records the tender portals as requiring permission, for any portal", () => {
+    expect(mayRepublish("gepnic")).toBe(false);
+    expect(mayRepublish("gepnic-kerala")).toBe(false);
+    expect(licenceFor("gepnic-madhyaprades")?.caveat).toContain("written permission");
+  });
+
+  it("permits OpenStreetMap under its licence, and carries the share-alike condition", () => {
+    expect(mayRepublish("openstreetmap-overpass")).toBe(true);
+    expect(attributionFor("openstreetmap-overpass")).toBe("© OpenStreetMap contributors");
+    expect(licenceFor("openstreetmap")?.caveat).toContain("same license");
+  });
+
+  it("does not let a hyphenated id borrow a licence it has no family for", () => {
+    expect(licenceFor("mahatenders-portal")).toBeNull();
+    expect(mayRepublish("cagx-reports")).toBe(false);
   });
 
   it("never reads a publisher's silence as consent", () => {
@@ -80,6 +101,34 @@ describe("the registry itself", () => {
   });
 
   it("lists what is held back, so an operator can act on it", () => {
-    expect(awaitingPermission().map((l) => l.sourceId)).toEqual(["beams", "pmgsy"]);
+    expect(awaitingPermission().map((l) => l.sourceId)).toEqual(["beams", "pmgsy", "gepnic"]);
+  });
+});
+
+describe("describeSources", () => {
+  it("states each source's terms as recorded, including when they require permission", () => {
+    const [portal] = describeSources(["gepnic-kerala"]);
+    expect(portal).toMatchObject({
+      sourceId: "gepnic-kerala",
+      republication: "permission_required",
+      termsVerifiedOn: "2026-09-17",
+    });
+    expect(portal?.termsUrl).toContain("page=Disclaimer");
+  });
+
+  it("marks an unrecorded source unknown, never permitted", () => {
+    const [unknown] = describeSources(["mahatenders"]);
+    expect(unknown).toMatchObject({
+      republication: "unknown",
+      publisher: "Source not recorded",
+      termsUrl: null,
+    });
+  });
+
+  it("lists each source once", () => {
+    expect(describeSources(["cag", "gepnic-kerala", "cag"]).map((d) => d.sourceId)).toEqual([
+      "cag",
+      "gepnic-kerala",
+    ]);
   });
 });

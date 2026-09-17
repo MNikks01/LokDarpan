@@ -19,8 +19,15 @@ export type {
   PublishedFactKind,
   PublishedFactRepository,
 } from "./published-fact";
-export { attributionFor, awaitingPermission, licenceFor, mayRepublish } from "./source-licence";
-export type { Republication, SourceLicence } from "./source-licence";
+export {
+  attributionFor,
+  awaitingPermission,
+  describeSource,
+  describeSources,
+  licenceFor,
+  mayRepublish,
+} from "./source-licence";
+export type { Republication, SourceDescriptor, SourceLicence } from "./source-licence";
 export * from "./geography";
 export {
   displayStateOf,
