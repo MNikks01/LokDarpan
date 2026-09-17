@@ -48,3 +48,21 @@ State is mirrored with `history.replaceState`, **not** `router.replace`: the con
 - Status presentation is guarded by a test (`apps/web/src/ui/status.test.ts`): no red at any stage, and every stage carries a distinct dash pattern as well as a colour, so the map survives monochrome and colour-vision deficiency.
 - Pointer events hit an invisible 20 px line layer rather than the 3.4 px drawn line, and one hit test resolves works above districts above states. A per-layer handler arrangement let the district polygon overwrite the road's own hover, so the reader saw the district name while pointing at a work.
 - The works list is not a convenience: it is the non-map route to every record on screen, required because map interaction must never be the only way to reach information.
+
+## Addendum · 2026-09-17 — the works layer is gone, and why
+
+The Consequences above describe a works layer: a 20 px invisible hit line and a single hit test
+resolving "works above districts above states". **Neither exists in the code today.** PR #43 (`3620bd2`,
+"run the explorer on the records actually held") removed the works layer on purpose. No register of
+individual works has been located for any area, and a layer fed demo geometry would make a blank
+map look like a populated one (`apps/web/src/map/style.ts`, `overlayLayers`). The hit test now walks
+area fills, then state fills.
+
+The removal was right. What this addendum corrects is the record: a reader of this ADR would expect
+a works layer, and the 400-feature cap in `.docs/wireframes/04-explore-map.md` would read as a
+limit on something drawn. It is a limit on nothing yet.
+
+Both rules carry forward unchanged for the day a licensed register with published coordinates
+exists. Line and point layers get a wide invisible hit layer, and hit order is explicit. How those
+features are budgeted is governed by `.docs/decisions/gods-eye-view-adoption.md`, which records
+the rule that what is drawn is never chosen by what is ranked.
