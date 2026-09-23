@@ -132,12 +132,13 @@ otherwise interpret.
 **Expected output** ends with:
 
 ```
-applying 0031_an_etl_role_that_only_ingests.sql … ok
-31 migration(s) applied
+applying 0033_a_level_is_simplified_once.sql … ok
+33 migration(s) applied
 ```
 
-If it says fewer than 31, you are on an older branch. Check out the branch that
-contains the scheduler and run it again.
+If it says fewer than 33, you are on an older checkout. Pull `main` and run it
+again. The explorer's level endpoint reads the column 0033 adds, so a database
+without it fails that endpoint.
 
 **Verify** — in the Neon SQL Editor:
 
@@ -146,7 +147,7 @@ SELECT count(*) AS migrations FROM schema_migration;
 SELECT unnest(enum_range(NULL::ingestion_run_status))::text AS status;
 ```
 
-You want `31`, and the four statuses `running, succeeded, failed, skipped`.
+You want `33`, and the four statuses `running, succeeded, failed, skipped`.
 
 ---
 
