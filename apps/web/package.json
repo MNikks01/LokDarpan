@@ -11,7 +11,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "geo:fetch": "tsx scripts/fetch-boundaries.ts",
-    "geo:basemap": "tsx scripts/fetch-basemap.ts"
+    "geo:basemap": "tsx scripts/fetch-basemap.ts",
+    "perf:bytes": "tsx perf/bytes.ts",
+    "perf:runtime": "tsx perf/runtime.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",

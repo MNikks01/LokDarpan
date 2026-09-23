@@ -4,7 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { Map as MapLibreMap, addProtocol } from "maplibre-gl";
 import { Protocol } from "pmtiles";
-import type { GeoJSONSource, MapMouseEvent } from "maplibre-gl";
+import type { GeoJSONSource, MapMouseEvent, MapSourceDataEvent } from "maplibre-gl";
 import type React from "react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { DataState, GeoUnit, SourceDescriptor } from "@lokdarpan/domain";
@@ -16,6 +16,8 @@ import { GeometryUnavailableError, fetchStateOutlines } from "@/map/geometry-sou
 import { basemapAvailable, basemapUrl, buildStyle } from "@/map/style";
 import { createBinder, type Binder, type MapPort } from "@/map/engine/binder";
 import type { MapInput } from "@/map/layers/types";
+import { CHILD_SOURCE } from "@/map/layers/child-boundaries";
+import { MARK, mark } from "@/lib/perf-marks";
 import { createPlaceLabelLayer, type PlaceLabel, type PlaceLabelLayer } from "@/map/place-labels";
 import type { LayerVisibility } from "@/map/layers/visibility";
 import { MapOverlays, MapUnavailable } from "./MapOverlays";
@@ -171,6 +173,7 @@ export function MapCanvas({
 
       const style = buildStyle({ basemap });
       if (cancelled()) return;
+      mark(MARK.mapInit);
 
       const map = new MapLibreMap({
         container,
@@ -202,6 +205,7 @@ export function MapCanvas({
 
       await whenLoaded(map);
       if (cancelled()) return;
+      mark(MARK.mapLoad);
 
       const outlines = await fetchStateOutlines();
       if (cancelled()) return;
@@ -314,6 +318,29 @@ export function MapCanvas({
     if (!ready) return;
     binderRef.current?.update(input);
   }, [input, ready]);
+
+  // For the performance harness: when a level's boundaries have been drawn —
+  // the first frame rendered after their source finished loading. Not `idle`:
+  // that also waits for the camera's flight and every base-map tile, and timed
+  // those instead of the boundaries.
+  useEffect(() => {
+    const map = mapRef.current;
+    const features = childBoundaries?.features.length ?? 0;
+    if (map === null || !ready || features === 0) return;
+    const onRender = (): void => {
+      mark(MARK.boundariesDrawn, { features });
+    };
+    const onData = (event: MapSourceDataEvent): void => {
+      if (event.sourceId !== CHILD_SOURCE || !event.isSourceLoaded) return;
+      map.off("sourcedata", onData);
+      void map.once("render", onRender);
+    };
+    map.on("sourcedata", onData);
+    return () => {
+      map.off("sourcedata", onData);
+      map.off("render", onRender);
+    };
+  }, [childBoundaries, ready]);
 
   /* --------------------------------------------------------------- labels */
   const labelLayerRef = useRef<PlaceLabelLayer | null>(null);

@@ -70,9 +70,9 @@ Order matters: phases 1 and 2 come first because later phases key on what they p
 | 5     | One level endpoint; browser resource cache keyed by version                                      | 064      | Done — panels still read separately; the cache corrects a mixed page, not more           |
 | 6     | Layer registry and binder                                                                        | 058      | Done — layers still receive data from the shell; they do not fetch their own             |
 | 7     | URL carries layers, filters, selection and an optional version pin                               | 061      | Done — a pin names its version and says when the ledger has moved on; it does not replay |
-| 8     | Performance harness and enforced budgets                                                         | 062      | Planned                                                                                  |
+| 8     | Performance harness and enforced budgets                                                         | 062      | Done — bytes gate CI; runtime warns. Level API and first draw over target                |
 | 9     | Records layers with an aggregate-first budget — waits on a licensed coordinate source            | 063, 060 | Blocked                                                                                  |
-| —     | Import-direction rules A–F, after phase 2                                                        | 059      | Planned                                                                                  |
+| —     | Import-direction rules A–F, after phase 2                                                        | 059      | Done — six rules hold; rule B (copy in components) still open                            |
 
 Small, independent fixes that can land at any point: stop `MapCanvas` reframing the camera when its
 container resizes; load MapLibre after hydration; update the hover tooltip at most once per frame.

@@ -64,6 +64,11 @@ jobs:
           fi
           echo "no fixture data in static bundle"
 
+      # ADR-062. Bytes are deterministic, so they gate; runtime is measured by
+      # `perf:runtime` against a real server and only warns.
+      - name: G7 · Explorer initial JS within its ceiling
+        run: pnpm --filter @lokdarpan/web perf:bytes
+
   test:
     name: Unit + Integration
     runs-on: ubuntu-latest
