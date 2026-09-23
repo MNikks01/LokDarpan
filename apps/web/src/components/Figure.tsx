@@ -1,6 +1,6 @@
 import type React from "react";
 import type { Provenance, Figure as FigureData } from "@lokdarpan/contracts";
-import { Money } from "@lokdarpan/money";
+import { formatAmount, formatAmountSpoken } from "@lokdarpan/money";
 import { color, figureFontFeatures } from "@/ui/tokens";
 
 /**
@@ -51,7 +51,6 @@ export function Figure({ label, data, emphasis = "md" }: FigureProps): React.JSX
     );
   }
 
-  const money = Money.fromDecimalString(data.amountInr);
   const p = data.provenance;
   const note = confidenceNote(p);
   const size = emphasis === "lg" ? 28 : emphasis === "md" ? 20 : 15;
@@ -67,11 +66,11 @@ export function Figure({ label, data, emphasis = "md" }: FigureProps): React.JSX
           ...figureFontFeatures,
         }}
         // Screen reader hears the value AND its source AND its confidence.
-        aria-label={`${label}: ${money.toAccessibleString()}. Source: ${p.sourceName}. ${
+        aria-label={`${label}: ${formatAmountSpoken(data.amountInr)}. Source: ${p.sourceName}. ${
           note ?? "High confidence."
         } Data as of ${p.retrievedAt.slice(0, 10)}.`}
       >
-        {money.format()}
+        {formatAmount(data.amountInr)}
       </div>
       <a
         href={`/source/${String(p.sourceDocumentId)}${p.page === null ? "" : `?page=${String(p.page)}`}`}

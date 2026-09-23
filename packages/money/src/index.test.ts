@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Money } from "./index";
+import { Money, formatAmount, formatAmountSpoken } from "./index";
 
 describe("Money.fromDecimalString", () => {
   it("parses whole and fractional rupees", () => {
@@ -125,5 +125,26 @@ describe("serialisation", () => {
     const m = Money.fromDecimalString("90000000.00");
     expect(JSON.parse(JSON.stringify({ amount: m })).amount).toBe("90000000.00");
     expect(typeof JSON.parse(JSON.stringify({ amount: m })).amount).toBe("string");
+  });
+});
+
+describe("formatting a server amount without holding a Money", () => {
+  it("formats a decimal string exactly as Money would", () => {
+    for (const decimal of ["0.00", "1500.00", "592000.00", "12345678901.50", "-2500000.00"]) {
+      expect(formatAmount(decimal)).toBe(Money.fromDecimalString(decimal).format());
+      expect(formatAmount(decimal, "en", "full")).toBe(
+        Money.fromDecimalString(decimal).format("en", "full"),
+      );
+    }
+  });
+
+  it("speaks the unit for a screen reader", () => {
+    expect(formatAmountSpoken("1500.00")).toBe(
+      Money.fromDecimalString("1500.00").toAccessibleString(),
+    );
+  });
+
+  it("refuses what Money refuses", () => {
+    expect(() => formatAmount("1e5")).toThrow();
   });
 });
