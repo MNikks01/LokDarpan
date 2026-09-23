@@ -3,7 +3,6 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { FeatureCollection } from "geojson";
 import type { GeoUnit, SearchResult } from "@lokdarpan/domain";
 import type { StateOption } from "@/data/geography";
 import { Button, controlStyles } from "@/components/ui";
@@ -11,22 +10,35 @@ import { cx } from "@/ui/cx";
 import { useExplorerState, type ExplorerState } from "@/state/useExplorerState";
 import { Breadcrumb } from "./Breadcrumb";
 import { FilterPanel } from "./FilterPanel";
-import { MapCanvas, type MapHandle } from "./MapCanvas";
+import { CopyViewLink, PinNotice } from "./ViewLink";
+import { MARK, mark } from "@/lib/perf-marks";
+import dynamic from "next/dynamic";
+import type { MapCanvasProps, MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
 import { SearchDialog } from "./SearchDialog";
 import { BoundarySources } from "./BoundarySources";
-import {
-  TenderList,
-  TendersPanel,
-  useTenderOverview,
-  useTendersFor,
-  withTenderCounts,
-} from "./tenders";
-import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
-import { useExplorerGeography, type RecordsState } from "./use-explorer-data";
+import { TenderList, TendersPanel, useTenderOverview, useTendersFor } from "./tenders";
+import { useExplorerGeography, type LevelCoverage, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
+
+/**
+ * The map, loaded after the page is interactive (ADR-062).
+ *
+ * MapLibre was 266 KB of the explorer's ~405 KB of initial JavaScript, and the
+ * rail — the list-first path to every place, which needs no map — waited for
+ * all of it before it would answer a tap. Split out, the rail hydrates first
+ * and the renderer arrives behind it. Never server-rendered: it needs WebGL.
+ *
+ * Starting the download when this module runs, instead of at render, was
+ * measured and not kept: it saved ~300 ms on a throttled phone and cost ~500 ms
+ * on a desktop, where evaluating the renderer competed with hydration (ADR-062).
+ */
+const MapCanvas = dynamic(() => import("./MapCanvas").then((module) => module.MapCanvas), {
+  ssr: false,
+  loading: () => <div className={styles.map} aria-busy="true" />,
+});
 
 const DRAWER_WIDTH = 428;
 /** Matches `.rail` in explorer.module.css, plus its 12px gutters. */
@@ -41,6 +53,8 @@ export interface OutlineSource {
 export interface ExploreShellProps {
   readonly states: readonly StateOption[];
   readonly initialState: ExplorerState;
+  /** When the dataset version a pinned link names was opened. Null without a pin. */
+  readonly pinnedAt: string | null;
   /** Credit for the country-view outlines. ODbL requires it be shown. */
   readonly outlineSource: OutlineSource;
 }
@@ -63,9 +77,9 @@ interface TenderLayer {
   readonly failed: boolean;
   readonly department: string | null;
   readonly setDepartment: (department: string | null) => void;
-  readonly shadedBoundaries: FeatureCollection | null;
-  readonly unitTenders: ReturnType<typeof useTendersFor>["tenders"];
-  readonly unitTendersLoading: boolean;
+  /** What the map's tender layer needs to decide whether it may draw. */
+  readonly mapTenders: MapCanvasProps["tenders"];
+  readonly unitTenders: ReturnType<typeof useTendersFor>;
   readonly showingUnplaced: boolean;
   readonly toggleUnplaced: () => void;
   readonly unplacedTenders: ReturnType<typeof useTendersFor>["tenders"];
@@ -75,39 +89,54 @@ interface TenderLayer {
  * The tender layer's state, gathered so the shell keeps orchestrating rather
  * than accumulating one feature's bookkeeping.
  *
- * The counts ride along inside the boundary features the map already draws, so
- * there is no second source and no feature-state to keep in step. Selecting a
- * unit lists its tenders through the explorer's existing click routing, which
- * means a shaded district is clickable without a separate target to discover.
+ * The counts reach the map as feature-state on the boundaries it already draws
+ * (ADR-065), so they never re-send the geometry. Selecting a unit lists its
+ * tenders through the explorer's existing click routing, which means a shaded
+ * district is clickable without a separate target to discover.
  */
 function useTenderLayer(
   unitId: number | null,
-  childBoundaries: FeatureCollection | null,
+  stateLgdCode: string | null,
+  // In the URL (ADR-061), so a shared link keeps the narrowing.
+  {
+    department,
+    setDepartment,
+  }: {
+    readonly department: string | null;
+    readonly setDepartment: (department: string | null) => void;
+  },
 ): TenderLayer {
-  const [department, setDepartment] = useState<string | null>(null);
   const [showingUnplaced, setShowingUnplaced] = useState(false);
-  const { overview, failed } = useTenderOverview(department);
-  const { tenders: unitTenders, loading: unitTendersLoading } = useTendersFor(unitId, department);
+  // The state travels with the request so the panel can say whether tenders are
+  // collected for it at all. Without it the only available answer was a count,
+  // and a count cannot distinguish "none held" from "none advertised".
+  const { overview, failed } = useTenderOverview(department, stateLgdCode);
+  const unitTenders = useTendersFor(unitId, department);
   // Fetched only once asked for: the panel states the count from the overview,
   // so the list itself is a second question the reader may never put.
-  const { tenders: unplacedTenders } = useTendersFor(null, department, showingUnplaced);
+  const { tenders: unplacedTenders } = useTendersFor(
+    null,
+    department,
+    showingUnplaced,
+    stateLgdCode,
+  );
   const toggleUnplaced = useCallback(() => {
     setShowingUnplaced((showing) => !showing);
   }, []);
 
-  const shadedBoundaries = useMemo(
-    () => withTenderCounts(childBoundaries, overview.districts),
-    [childBoundaries, overview.districts],
+  const { sources, collectionState, districts } = overview;
+  const mapTenders = useMemo(
+    () => (failed ? null : { sources, state: collectionState, counts: districts }),
+    [collectionState, districts, failed, sources],
   );
 
   return {
     overview,
     failed,
+    mapTenders,
     department,
     setDepartment,
-    shadedBoundaries,
     unitTenders,
-    unitTendersLoading,
     showingUnplaced,
     toggleUnplaced,
     unplacedTenders,
@@ -117,13 +146,20 @@ function useTenderLayer(
 export function ExploreShell({
   states,
   initialState,
+  pinnedAt,
   outlineSource,
 }: ExploreShellProps): React.JSX.Element {
-  const { geo, selectedDocumentId, actions } = useExplorerState(initialState);
+  const explorer = useExplorerState(initialState);
+
+  useEffect(() => {
+    mark(MARK.hydrated);
+  }, []);
+  const { geo, selectedDocumentId, layers, department, pinnedVersion, actions } = explorer;
 
   const {
     selectedState,
     units,
+    coverage,
     loadingChildren,
     childBoundaries,
     activeUnit,
@@ -133,9 +169,11 @@ export function ExploreShell({
     scopeLabel,
   } = useExplorerGeography(states, geo.stateCode, geo.unitId);
 
-  const tenderState = useTenderLayer(geo.unitId, childBoundaries);
+  const tenderState = useTenderLayer(geo.unitId, geo.stateCode, {
+    department,
+    setDepartment: actions.selectDepartment,
+  });
 
-  const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
@@ -205,11 +243,14 @@ export function ExploreShell({
           setSearchOpen(true);
         }}
       />
-      <p className={styles.notice}>
-        <span aria-hidden="true">◆</span>
-        Official records only. Every figure shown has been checked by a person against the page it
-        was read from.
-      </p>
+      <div>
+        <p className={styles.notice}>
+          <span aria-hidden="true">◆</span>
+          Official records only. Every figure shown has been checked by a person against the page it
+          was read from.
+        </p>
+        <PinNotice pinnedVersion={pinnedVersion} pinnedAt={pinnedAt} />
+      </div>
 
       <div className={styles.stage}>
         <MapCanvas
@@ -217,7 +258,8 @@ export function ExploreShell({
           stateBbox={selectedState?.bbox ?? null}
           activeUnit={activeUnit}
           activeGeometry={activeGeometry}
-          childBoundaries={tenderState.shadedBoundaries}
+          childBoundaries={childBoundaries}
+          tenders={tenderState.mapTenders}
           states={states}
           layers={layers}
           insets={insets}
@@ -255,6 +297,8 @@ export function ExploreShell({
           selectedDocumentId={selectedDocumentId}
           outlineSource={outlineSource}
           tenderState={tenderState}
+          selectedState={selectedState}
+          coverage={coverage}
           activeUnit={activeUnit}
         />
 
@@ -272,10 +316,9 @@ export function ExploreShell({
             onToggleLayersOpen={() => {
               setLayersOpen((open) => !open);
             }}
-            onToggleLayer={(key) => {
-              setLayers((previous) => ({ ...previous, [key]: !previous[key] }));
-            }}
+            onToggleLayer={actions.toggleLayer}
           />
+          <CopyViewLink state={explorer} />
         </div>
 
         <SearchDialog
@@ -358,6 +401,8 @@ function ExplorerRail({
   outlineSource,
   tenderState,
   activeUnit,
+  selectedState,
+  coverage,
 }: {
   readonly hidden: boolean;
   readonly states: readonly StateOption[];
@@ -372,12 +417,15 @@ function ExplorerRail({
   readonly outlineSource: OutlineSource;
   readonly tenderState: TenderLayer;
   readonly activeUnit: GeoUnit | null;
+  readonly selectedState: StateOption | null;
+  readonly coverage: readonly LevelCoverage[];
 }): React.JSX.Element {
   return (
     <div id="explorer-rail" className={cx(styles.rail, hidden && styles.railCollapsed)}>
       <FilterPanel
         states={states}
         units={units}
+        coverage={coverage}
         geo={geo}
         actions={actions}
         loading={loadingChildren}
@@ -390,6 +438,7 @@ function ExplorerRail({
         onSelectDepartment={tenderState.setDepartment}
         showingUnplaced={tenderState.showingUnplaced}
         onToggleUnplaced={tenderState.toggleUnplaced}
+        stateName={selectedState === null ? null : selectedState.name}
       />
       {tenderState.showingUnplaced && (
         <TenderList
@@ -401,8 +450,12 @@ function ExplorerRail({
       {activeUnit !== null && (
         <TenderList
           heading={`Tenders from offices in ${activeUnit.name}`}
-          tenders={tenderState.unitTenders}
-          loading={tenderState.unitTendersLoading}
+          tenders={tenderState.unitTenders.tenders}
+          loading={tenderState.unitTenders.loading}
+          detailsWithheld={tenderState.unitTenders.detailsWithheld}
+          heldCount={tenderState.unitTenders.heldCount}
+          portalUrl={tenderState.unitTenders.portalUrl}
+          collectingSince={tenderState.overview.collectionState?.collectingSince ?? null}
         />
       )}
       <BoundarySources units={units} outlineSource={outlineSource} />

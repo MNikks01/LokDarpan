@@ -7,8 +7,8 @@ import { PostgresAdminUnitRepository } from "@lokdarpan/database/repository";
 import { PostgresGeographyRepository } from "@lokdarpan/database/geography";
 import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-fact";
 import { PostgresTenderRepository } from "@lokdarpan/database/tender";
+import { readLedger, versionOpenedAt } from "@lokdarpan/database/ledger";
 import pg from "pg";
-import { UnitService } from "@lokdarpan/domain";
 
 /**
  * Composition for the serverless runtime.
@@ -23,7 +23,6 @@ import { UnitService } from "@lokdarpan/domain";
  * pool built on every invocation would open a new connection each time and
  * exhaust a free-tier Postgres in minutes.
  */
-let repository: PostgresAdminUnitRepository | undefined;
 let facts: PostgresPublishedFactRepository | undefined;
 let geography: PostgresGeographyRepository | undefined;
 let tenders: PostgresTenderRepository | undefined;
@@ -50,32 +49,9 @@ export function pool(): pg.Pool {
   return sharedPool;
 }
 
-export function unitService(): UnitService {
-  repository ??= new PostgresAdminUnitRepository({
-    connectionString: databaseUrl(),
-    runtime: "serverless",
-  });
-  // Contract violations are counted by the platform's log-derived metrics here:
-  // an in-process counter cannot survive an isolate that is frozen between
-  // invocations (.docs/adr/018-telemetry-without-identifiers.md, and see
-  // .docs/adr/020-vercel-deployment.md for why /metrics is not served).
-  return new UnitService(repository, (kind) => {
-    process.stdout.write(
-      `${JSON.stringify({
-        level: "error",
-        message: "contract_violation",
-        kind,
-        service: "web",
-        env: process.env["VERCEL_ENV"] ?? "development",
-        time: new Date().toISOString(),
-      })}\n`,
-    );
-  });
-}
-
 /**
  * Reads only the `published_fact` view, so nothing unreviewed can be served.
- * Shares the isolate's pool for the same reason the unit repository does.
+ * Shares the isolate's pool: a pool per invocation exhausts a small Postgres.
  */
 export function publishedFactRepository(): PostgresPublishedFactRepository {
   facts ??= new PostgresPublishedFactRepository(pool());
@@ -98,4 +74,44 @@ export function geographyRepository(): PostgresGeographyRepository {
 export function tenderRepository(): PostgresTenderRepository {
   tenders ??= new PostgresTenderRepository(pool());
   return tenders;
+}
+
+/** Read-side repositories bound to one ledger snapshot. */
+export interface LedgerRepositories {
+  readonly units: PostgresAdminUnitRepository;
+  readonly geography: PostgresGeographyRepository;
+  readonly tenders: PostgresTenderRepository;
+  readonly facts: PostgresPublishedFactRepository;
+}
+
+export interface VersionedResult<T> {
+  readonly data: T;
+  readonly datasetVersion: number;
+  readonly asOf: string | null;
+}
+
+/**
+ * Run a handler's reads against one consistent ledger state, and report which.
+ *
+ * Every query inside `read` sees the same snapshot as the version it is
+ * reported with, so a load that commits mid-request cannot put rows from one
+ * state under the version of another (.docs/adr/053-every-explorer-payload-states-its-dataset-version.md).
+ */
+export async function inLedger<T>(
+  read: (repositories: LedgerRepositories) => Promise<T>,
+): Promise<VersionedResult<T>> {
+  const { value, ledger } = await readLedger(pool(), (db) =>
+    read({
+      units: new PostgresAdminUnitRepository({ db }),
+      geography: new PostgresGeographyRepository(db),
+      tenders: new PostgresTenderRepository(db),
+      facts: new PostgresPublishedFactRepository(db),
+    }),
+  );
+  return { data: value, datasetVersion: ledger.datasetVersion, asOf: ledger.asOf };
+}
+
+/** When a dataset version was opened, for responses that name one from their rows. */
+export function datasetVersionOpenedAt(datasetVersion: number): Promise<string | null> {
+  return versionOpenedAt(pool(), datasetVersion);
 }

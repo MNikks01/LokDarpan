@@ -4,7 +4,7 @@ import type { DependencyContainer } from "tsyringe";
 import { CONFIG, type Config } from "../config/index.js";
 import { LOGGER, type Logger } from "../logging/logger.js";
 import { toEnvelope, AppError } from "@lokdarpan/errors";
-import type { UnitService } from "@lokdarpan/domain";
+import { newestDatasetVersion, type UnitService } from "@lokdarpan/domain";
 import { UNIT_SERVICE } from "../modules/units/unit.module.js";
 import { METRICS, routePattern, type MetricsRegistry } from "@lokdarpan/observability";
 import { ProjectService } from "../modules/projects/project.service.js";
@@ -106,10 +106,15 @@ async function handle(
   if (unit?.[1] !== undefined) {
     const data = await container.resolve<UnitService>(UNIT_SERVICE).getUnit(unit[1]);
     // The dataset version comes from the data, not from configuration: the
-    // envelope must state the vintage of what it actually contains.
+    // envelope must state the vintage of what it actually contains. This
+    // service has no ledger snapshot, so it names the newest load in the
+    // payload; each unit carries its own (ADR-053).
     return {
       data,
-      meta: { datasetVersion: data.datasetVersion, asOf: new Date().toISOString() },
+      meta: {
+        datasetVersion: newestDatasetVersion([data.unit, ...data.children]),
+        asOf: new Date().toISOString(),
+      },
     };
   }
 
@@ -119,7 +124,7 @@ async function handle(
     const data = await container.resolve<UnitService>(UNIT_SERVICE).listByLevel(level);
     return {
       data,
-      meta: { datasetVersion: data.datasetVersion, asOf: new Date().toISOString() },
+      meta: { datasetVersion: newestDatasetVersion(data.units), asOf: new Date().toISOString() },
     };
   }
 

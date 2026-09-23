@@ -8,7 +8,7 @@ import type {
 } from "@lokdarpan/domain";
 import { LEVEL_LABEL } from "@lokdarpan/domain";
 import { displayTitle } from "@lokdarpan/domain";
-import type pg from "pg";
+import type { Queryable } from "./published-fact.repository";
 
 /**
  * Geography, read from PostGIS.
@@ -31,7 +31,29 @@ import type pg from "pg";
  * state-sized viewport is a few hundred pixels wide, where 0.005° is well under
  * one pixel. The finer tolerance is used when a single unit fills the screen.
  */
-const TOLERANCE_OVERVIEW = 0.005;
+/**
+ * How complete our holdings are at one level.
+ *
+ * `not_collected` and an empty list are different claims. The first says nobody
+ * looked; the second says nothing was found. Only the first can be true at the
+ * same time as the places existing.
+ */
+export type CoverageStatus = "complete" | "partial" | "not_collected";
+
+export interface LevelCoverage {
+  readonly level: AdminUnitLevel;
+  readonly status: CoverageStatus;
+  /** Why, for anything short of complete. Shown to the reader as written. */
+  readonly note: string | null;
+  readonly sourceId: string;
+  readonly checkedAt: string;
+  /** The finding was recorded against an ancestor of the unit asked about. */
+  readonly inherited: boolean;
+}
+
+// The overview tolerance (0.005°) is not here: a whole level is drawn from
+// `geometry_overview`, simplified once when the boundary was written
+// (migration 0033). Only a single unit's outline is simplified per request.
 const TOLERANCE_DETAIL = 0.0005;
 
 /**
@@ -108,7 +130,8 @@ function toUnit(row: UnitRow): GeoUnit {
 }
 
 export class PostgresGeographyRepository implements GeographyRepository {
-  constructor(private readonly db: pg.Pool) {}
+  /** A pool, or a client inside `readLedger`'s snapshot. */
+  constructor(private readonly db: Queryable) {}
 
   /**
    * The units inside a place, found geographically rather than by `parent_id`.
@@ -147,7 +170,7 @@ export class PostgresGeographyRepository implements GeographyRepository {
 
     const result = await this.db.query<UnitRow>(
       `WITH parent AS (
-         SELECT geometry FROM admin_unit_boundary WHERE admin_unit_id = $1
+         SELECT geometry, area_m2 FROM admin_unit_boundary WHERE admin_unit_id = $1
        )
        SELECT ${UNIT_COLUMNS}
          FROM admin_unit u
@@ -155,10 +178,15 @@ export class PostgresGeographyRepository implements GeographyRepository {
          CROSS JOIN parent p
         WHERE u.id <> $1
           AND b.geometry && p.geometry
+          -- A unit is never inside a smaller one. Without this, a state whose
+          -- interior point happened to fall in one of its own districts was
+          -- listed as that district's child: 79 such pairs in the ledger.
+          AND b.area_m2 < p.area_m2
           -- A boundary that merely brushes a neighbour is not inside it. The
-          -- surface point lies on the polygon by construction, so this is exact
-          -- for well-formed geometry and cheap once the index has cut the set.
-          AND ST_Contains(p.geometry, ST_PointOnSurface(b.geometry))
+          -- label point is the centre of the child's largest inscribed circle,
+          -- so it lies inside the child by construction, and it is stored
+          -- (migration 0032) rather than computed per child per request.
+          AND ST_Contains(p.geometry, b.label_point)
         ORDER BY
           CASE u.level
             WHEN 'district' THEN 2 WHEN 'sub_district' THEN 3
@@ -170,6 +198,89 @@ export class PostgresGeographyRepository implements GeographyRepository {
       [parentId],
     );
     return result.rows.map(toUnit);
+  }
+
+  /**
+   * What we know about how complete our holdings are inside this unit.
+   *
+   * Pune district holds 14 talukas and no urban local body. Pune Municipal
+   * Corporation plainly exists, so an interface that shows only the count is
+   * reporting our holdings and will be read as a statement about Pune. This is
+   * the record that lets it say which it means.
+   *
+   * Coverage is recorded against the state, because it is a property of a
+   * source's treatment of a level across the state rather than of one district:
+   * OpenStreetMap tags few of Maharashtra's municipal bodies everywhere, not
+   * specially in Pune. A district therefore inherits its state's finding, and
+   * the nearest ancestor carrying one wins so a future district-scoped
+   * assessment would override it.
+   */
+  async coverageIn(unitId: number): Promise<readonly LevelCoverage[]> {
+    const result = await this.db.query<{
+      level: AdminUnitLevel;
+      status: CoverageStatus;
+      note: string | null;
+      source_id: string;
+      checked_at: string;
+      depth: number;
+    }>(
+      `WITH RECURSIVE chain AS (
+         SELECT id, parent_id, 0 AS depth FROM admin_unit WHERE id = $1
+         UNION ALL
+         SELECT a.id, a.parent_id, c.depth + 1
+           FROM admin_unit a JOIN chain c ON a.id = c.parent_id
+       ),
+       found AS (
+         SELECT g.level, g.status, g.note, g.source_id, g.checked_at, c.depth,
+                row_number() OVER (PARTITION BY g.level ORDER BY c.depth) AS nearest
+           FROM geography_coverage g JOIN chain c ON c.id = g.admin_unit_id
+       )
+       SELECT level, status, note, source_id, checked_at, depth
+         FROM found WHERE nearest = 1
+        ORDER BY level`,
+      [unitId],
+    );
+
+    return result.rows.map((r) => ({
+      level: r.level,
+      status: r.status,
+      note: r.note,
+      sourceId: r.source_id,
+      checkedAt: r.checked_at,
+      /** True when the finding was recorded against an ancestor, not this unit. */
+      inherited: r.depth > 0,
+    }));
+  }
+
+  /**
+   * The LGD code of the state a unit sits in, or null where there is none.
+   *
+   * The explorer's URL carries a state and a unit independently, so a shared or
+   * edited link can name a state and a unit in a different one. Nothing checked
+   * that: `?state=27&unit=<a Kerala district>` rendered the state selector as
+   * Maharashtra, framed the map on Kerala, and drew Kerala's breadcrumb under a
+   * Maharashtra heading. Every part was individually correct and the page as a
+   * whole said something false.
+   *
+   * Walks the recorded parent chain rather than testing geometry: a unit belongs
+   * to the state that the directory places it under, and a containment test
+   * would answer a different question at every border.
+   *
+   * A unit that is itself a state answers with its own code, so the check needs
+   * no special case for selecting a state directly.
+   */
+  async stateCodeOf(unitId: number): Promise<string | null> {
+    const result = await this.db.query<{ lgd_code: string | null }>(
+      `WITH RECURSIVE chain AS (
+         SELECT id, parent_id, level, lgd_code FROM admin_unit WHERE id = $1
+         UNION ALL
+         SELECT a.id, a.parent_id, a.level, a.lgd_code
+           FROM admin_unit a JOIN chain c ON a.id = c.parent_id
+       )
+       SELECT lgd_code FROM chain WHERE level = 'state' LIMIT 1`,
+      [unitId],
+    );
+    return result.rows[0]?.lgd_code ?? null;
   }
 
   async unitById(id: number): Promise<GeoUnit | null> {
@@ -218,15 +329,20 @@ export class PostgresGeographyRepository implements GeographyRepository {
                   'name', u.name_en,
                   'level', u.level::text,
                   'sourceKind', b.source_kind::text,
-                  'sourceName', b.source_name
+                  'sourceName', b.source_name,
+                  'labelPoint', jsonb_build_array(
+                    round(ST_X(b.label_point)::numeric, $2),
+                    round(ST_Y(b.label_point)::numeric, $2)
+                  ),
+                  'areaM2', round(b.area_m2)
                 ),
-                'geometry', ST_AsGeoJSON(ST_SimplifyPreserveTopology(b.geometry, $2), $3)::jsonb
+                'geometry', ST_AsGeoJSON(b.geometry_overview, $2)::jsonb
               ) AS feature
          FROM admin_unit u
          JOIN admin_unit_boundary b ON b.admin_unit_id = u.id
         WHERE u.parent_id = $1
         ORDER BY u.name_en`,
-      [parentId, TOLERANCE_OVERVIEW, COORDINATE_DIGITS],
+      [parentId, COORDINATE_DIGITS],
     );
     return { type: "FeatureCollection", features: result.rows.map((r) => r.feature) };
   }

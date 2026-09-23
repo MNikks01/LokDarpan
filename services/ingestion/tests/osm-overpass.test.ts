@@ -4,6 +4,7 @@ import {
   OSM_LICENCE,
   boundariesInRelationQuery,
   findRelationQuery,
+  slotDelayMs,
   readElements,
   type FetchedArtifact,
 } from "../src/osm/overpass";
@@ -82,5 +83,52 @@ describe("attribution travels with the data", () => {
   it("names the contributors and the licence the ingest must record", () => {
     expect(OSM_ATTRIBUTION).toContain("OpenStreetMap");
     expect(OSM_LICENCE).toContain("ODbL");
+  });
+});
+
+/**
+ * Overpass publishes its own availability. Guessing an interval instead is what
+ * this replaced: ten seconds between districts got the client a 429 on the
+ * eighth, because the limit is a small number of concurrent slots rather than a
+ * rate, and a heavy query holds one for as long as it runs.
+ */
+describe("reading Overpass's status page", () => {
+  it("proceeds at once when a slot is free", () => {
+    const status = [
+      "Connected as: 3834801528",
+      "Current time: 2026-09-05T07:48:52Z",
+      "Rate limit: 2",
+      "2 slots available now.",
+    ].join("\n");
+    expect(slotDelayMs(status)).toBe(0);
+  });
+
+  it("waits for the soonest slot when none is free", () => {
+    const status = [
+      "Rate limit: 2",
+      "Slot available after: 2026-09-05T07:50:12Z, in 39 seconds.",
+      "Slot available after: 2026-09-05T07:51:02Z, in 89 seconds.",
+    ].join("\n");
+    // A second past the stated time, so the slot has actually opened.
+    expect(slotDelayMs(status)).toBe(40_000);
+  });
+
+  // The page is generated between the slot freeing and the client reading it,
+  // so the countdown can already have passed. Negative is "go now", not a wait
+  // of minus one second.
+  it("treats an elapsed countdown as no wait", () => {
+    expect(slotDelayMs("Slot available after: 2026-09-05T07:50:12Z, in -3 seconds.")).toBe(1_000);
+  });
+
+  // Zero free slots is a wait, not a green light: the number is present, and the
+  // naive read of "N slots available" would match it.
+  it("does not read zero free slots as permission", () => {
+    expect(slotDelayMs("0 slots available now.")).toBe(60_000);
+  });
+
+  // An unrecognised page is not permission to proceed at speed. The status
+  // format carries no version, so a change to it must fail safe.
+  it("waits conservatively when the page cannot be read", () => {
+    expect(slotDelayMs("<html>maintenance</html>")).toBe(60_000);
   });
 });

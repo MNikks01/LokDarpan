@@ -1,5 +1,6 @@
 import type pg from "pg";
 
+import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run";
 import { normalise, type TenderDetail } from "./detail";
 import type { FetchedArtifact } from "./fetch";
 import type { ParsedTender } from "./landing";
@@ -29,9 +30,21 @@ export interface LoadOptions {
 
 export interface LoadResult {
   readonly inserted: number;
+  /** Existing tenders seen again, whether or not anything about them differed. */
   readonly updated: number;
+  /**
+   * Existing tenders whose source-controlled fields actually changed — the ones
+   * that produced a `tender_version`.
+   *
+   * Counted separately from `updated` because a run in which every tender was
+   * seen and none had changed is a healthy run, and it is indistinguishable
+   * from a run that collected nothing unless the two are counted apart.
+   */
+  readonly changed: number;
   readonly placed: number;
   readonly failed: readonly { readonly portalTenderId: string; readonly reason: string }[];
+  /** The run this load is recorded under. */
+  readonly ingestionRunId: number;
 }
 
 /**
@@ -185,77 +198,234 @@ const UPSERT = `
     -- this tender, and rewriting it would erase the collection history.
   RETURNING (xmax = 0) AS inserted`;
 
+/**
+ * The floor on the data, moved after a successful load.
+ *
+ * Without a window a reader cannot tell "nothing was advertised" from "we were
+ * not looking yet", and the second reads as the first. `collecting_since` is set
+ * once and never moved.
+ *
+ * `state_lgd_code` is written on every run rather than backfilled: the portal's
+ * own code is not evidence of which state it serves.
+ */
+async function recordSuccessfulCollection(
+  db: pg.Client,
+  portalCode: string,
+  stateLgdCode: string,
+): Promise<void> {
+  await db.query(
+    `INSERT INTO tender_collection_window
+       (portal_code, collecting_since, last_success_at, last_checked_at, state_lgd_code)
+     VALUES ($1, CURRENT_DATE, now(), now(), $2)
+     ON CONFLICT (portal_code) DO UPDATE SET
+       last_success_at = now(),
+       last_checked_at = now(),
+       state_lgd_code = EXCLUDED.state_lgd_code`,
+    [portalCode, stateLgdCode],
+  );
+}
+
+/**
+ * The artefact these tenders were read from, and the vintage they belong to.
+ *
+ * Both are written before any tender, so every row a load produces can point
+ * back at the bytes it came from.
+ */
+async function openArtifactAndVersion(db: pg.Client, options: LoadOptions): Promise<string> {
+  const { portalCode, artifact } = options;
+  await db.query(
+    `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path)
+     VALUES ($1, $2, $3, $4, 200, 'text/html', $5, $6)
+     ON CONFLICT (sha256) DO NOTHING`,
+    [
+      artifact.sha256,
+      `gepnic-${portalCode}`,
+      artifact.sourceUrl,
+      artifact.retrievedAt,
+      artifact.byteSize,
+      `gepnic/${portalCode}/${artifact.sha256}.html`,
+    ],
+  );
+
+  const version = await db.query<{ id: string }>(
+    `INSERT INTO dataset_version (description) VALUES ($1) RETURNING id`,
+    [options.datasetDescription],
+  );
+  const datasetVersionId = version.rows[0]?.id;
+  if (datasetVersionId === undefined) throw new Error("could not open a dataset version");
+  return datasetVersionId;
+}
+
+/**
+ * One tender, inside its own savepoint.
+ *
+ * Postgres aborts the whole transaction on the first failed statement, so
+ * without a savepoint per tender one malformed row loses the entire day's
+ * collection under an error naming none of them.
+ */
+async function writeOne(
+  db: pg.Client,
+  record: TenderRecord,
+  districts: ReadonlyMap<string, number>,
+  context: { portalCode: string; sha256: string; datasetVersionId: string },
+): Promise<{ readonly inserted: boolean; readonly placed: boolean }> {
+  await db.query("SAVEPOINT tender");
+  try {
+    const place = placementFor(record.detail, districts);
+    const row = await db.query<{ inserted: boolean }>(UPSERT, parameters(record, place, context));
+    await db.query("RELEASE SAVEPOINT tender");
+    return { inserted: row.rows[0]?.inserted === true, placed: place.adminUnitId !== null };
+  } catch (error: unknown) {
+    await db.query("ROLLBACK TO SAVEPOINT tender");
+    throw error;
+  }
+}
+
+/**
+ * Every tender in the run, each in its own savepoint.
+ *
+ * Separated from `loadTenders` so that the transaction's shape — open a run,
+ * write, close it — reads in one screen, and so the counting lives beside the
+ * writing it counts.
+ */
+async function writeAll(
+  db: pg.Client,
+  records: readonly TenderRecord[],
+  districts: ReadonlyMap<string, number>,
+  context: { portalCode: string; sha256: string; datasetVersionId: string },
+): Promise<{
+  readonly inserted: number;
+  readonly updated: number;
+  readonly placed: number;
+  readonly failed: readonly { readonly portalTenderId: string; readonly reason: string }[];
+}> {
+  let inserted = 0;
+  let updated = 0;
+  let placed = 0;
+  const failed: { portalTenderId: string; reason: string }[] = [];
+
+  for (const record of records) {
+    try {
+      const one = await writeOne(db, record, districts, context);
+      if (one.placed) placed++;
+      if (one.inserted) inserted++;
+      else updated++;
+    } catch (error: unknown) {
+      // `writeOne` has already rewound to its savepoint, so the transaction is
+      // usable and this records what was lost rather than repairing anything.
+      failed.push({
+        portalTenderId: record.listed.portalTenderId,
+        reason: error instanceof Error ? (error.message.split("\n")[0] ?? "unknown") : "unknown",
+      });
+    }
+  }
+
+  return { inserted, updated, placed, failed };
+}
+
+interface Tally {
+  readonly seen: number;
+  readonly inserted: number;
+  /** Existing rows touched, whether or not anything differed. */
+  readonly updated: number;
+  /** Of those, the ones that produced a version. */
+  readonly changed: number;
+  readonly placed: number;
+  readonly rejected: number;
+}
+
+/**
+ * What a run saw, in the terms `ingestion_run` records.
+ *
+ * `unchanged` is derived rather than counted per row, so the loop stays one
+ * statement per tender. It is the figure most easily left out and the most
+ * useful: a run where every tender was seen and none had changed is healthy, and
+ * without it that is indistinguishable from a run that collected nothing.
+ */
+function countsOf(tally: Tally): RunCounts {
+  return {
+    seen: tally.seen,
+    inserted: tally.inserted,
+    updated: tally.changed,
+    unchanged: tally.updated - tally.changed,
+    rejected: tally.rejected,
+    // Held, valid, and not attributable to a district. Never a rejection.
+    unresolved: tally.inserted + tally.updated - tally.placed,
+    errors: tally.rejected,
+  };
+}
+
 export async function loadTenders(db: pg.Client, options: LoadOptions): Promise<LoadResult> {
   const { portalCode, stateLgdCode, records, artifact } = options;
   const failed: { portalTenderId: string; reason: string }[] = [];
   let inserted = 0;
   let updated = 0;
   let placed = 0;
+  let changed = 0;
+
+  // Opened before the transaction and closed after it, on purpose: a failed
+  // load must roll the ledger back and must not roll back the account of the
+  // failure. See `ingestion-run.ts`.
+  const ingestionRunId = await openRun(db, `gepnic-${portalCode}`);
+
+  // The attempt is recorded whether or not it succeeds, and only for a portal
+  // already being collected. Inserting a window here would set
+  // `collecting_since` for a portal whose first run failed, which would claim
+  // collection began on a day nothing was collected.
+  await db.query(
+    `UPDATE tender_collection_window SET last_checked_at = now() WHERE portal_code = $1`,
+    [portalCode],
+  );
+
+  const counts = (): RunCounts =>
+    countsOf({ seen: records.length, inserted, updated, changed, placed, rejected: failed.length });
 
   await db.query("BEGIN");
   try {
-    await db.query(
-      `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path)
-       VALUES ($1, $2, $3, $4, 200, 'text/html', $5, $6)
-       ON CONFLICT (sha256) DO NOTHING`,
-      [
-        artifact.sha256,
-        `gepnic-${portalCode}`,
-        artifact.sourceUrl,
-        artifact.retrievedAt,
-        artifact.byteSize,
-        `gepnic/${portalCode}/${artifact.sha256}.html`,
-      ],
+    // How much history existed before this run, so the versions the trigger
+    // writes during it can be counted without asking per tender.
+    const before = await db.query<{ high: string | null }>(
+      `SELECT max(id)::text AS high FROM tender_version`,
     );
-
-    const version = await db.query<{ id: string }>(
-      `INSERT INTO dataset_version (description) VALUES ($1) RETURNING id`,
-      [options.datasetDescription],
-    );
-    const datasetVersionId = version.rows[0]?.id;
-    if (datasetVersionId === undefined) throw new Error("could not open a dataset version");
+    const highWaterMark = before.rows[0]?.high ?? "0";
+    const datasetVersionId = await openArtifactAndVersion(db, options);
 
     const districts = await districtsOfState(db, stateLgdCode);
 
-    for (const record of records) {
-      // A savepoint per tender, because Postgres aborts the whole transaction
-      // on the first failed statement: without it one malformed row loses the
-      // entire day's collection under an error naming none of them.
-      await db.query("SAVEPOINT tender");
-      try {
-        const place = placementFor(record.detail, districts);
-        const row = await db.query<{ inserted: boolean }>(
-          UPSERT,
-          parameters(record, place, { portalCode, sha256: artifact.sha256, datasetVersionId }),
-        );
-        if (place.adminUnitId !== null) placed++;
-        if (row.rows[0]?.inserted === true) inserted++;
-        else updated++;
-        await db.query("RELEASE SAVEPOINT tender");
-      } catch (error: unknown) {
-        await db.query("ROLLBACK TO SAVEPOINT tender");
-        failed.push({
-          portalTenderId: record.listed.portalTenderId,
-          reason: error instanceof Error ? (error.message.split("\n")[0] ?? "unknown") : "unknown",
-        });
-      }
-    }
+    const written = await writeAll(db, records, districts, {
+      portalCode,
+      sha256: artifact.sha256,
+      datasetVersionId,
+    });
+    inserted = written.inserted;
+    updated = written.updated;
+    placed = written.placed;
+    failed.push(...written.failed);
 
-    // The floor on the data. Without it a reader cannot tell "nothing was
-    // advertised" from "we were not looking yet", and the second reads as the
-    // first. `collecting_since` is set once and never moved.
-    await db.query(
-      `INSERT INTO tender_collection_window (portal_code, collecting_since, last_success_at)
-       VALUES ($1, CURRENT_DATE, now())
-       ON CONFLICT (portal_code) DO UPDATE SET last_success_at = now()`,
-      [portalCode],
+    // How many versions the trigger wrote during this run — that is, how many
+    // tenders the portal actually changed. Counted once against a high-water
+    // mark rather than per tender, so the loop stays one statement each.
+    const versions = await db.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM tender_version WHERE id > $1::bigint`,
+      [highWaterMark],
     );
+    changed = Number(versions.rows[0]?.count ?? "0");
+
+    await recordSuccessfulCollection(db, portalCode, stateLgdCode);
 
     await db.query("COMMIT");
   } catch (error: unknown) {
     await db.query("ROLLBACK");
+    // The ledger keeps what it had; the run says what happened. Counts are not
+    // zeroed — a run that read four hundred records before failing saw four
+    // hundred, and reporting none would state the failure as an absence.
+    await failRun(db, ingestionRunId, error instanceof Error ? error.message : String(error), {
+      ...counts(),
+      errors: Math.max(1, failed.length),
+    });
     throw error;
   }
 
-  return { inserted, updated, placed, failed };
+  await completeRun(db, ingestionRunId, counts());
+  return { inserted, updated, changed, placed, failed, ingestionRunId };
 }

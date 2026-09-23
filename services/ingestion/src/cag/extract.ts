@@ -1,6 +1,6 @@
 import { getDocumentProxy } from "unpdf";
 
-export type PageScript = "latin" | "devanagari" | "mixed" | "none";
+export type PageScript = "latin" | "devanagari" | "tamil" | "mixed" | "none";
 
 /**
  * One text item as pdf.js reported it, with where it sits in the page's text
@@ -76,6 +76,7 @@ export interface ExtractedDocument {
 const UNSTORABLE = /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/gu;
 
 const DEVANAGARI = /[ऀ-ॿ]/u;
+const TAMIL = /[\u0B80-\u0BFF]/u;
 
 /**
  * A Latin letter or ASCII symbol touching a Devanagari character.
@@ -259,14 +260,22 @@ const LATIN_LETTER = /\p{Script=Latin}/u;
  * exactly like an empty document — which is what happened on the first attempt
  * to assess this source. Knowing which pages are which prevents a reader, or a
  * later extraction pass, from drawing that conclusion.
+ *
+ * Tamil Nadu publishes the two languages as separate files rather than as two
+ * halves of one, and its Tamil pages carry just enough Latin — page numbers,
+ * roman numerals, an acronym — that asking only "is there Latin here?" answers
+ * yes and labels the page English. A script is therefore named when it is
+ * present, and `mixed` is reserved for a page that genuinely runs two.
  */
 export function scriptOf(text: string): PageScript {
   const trimmed = text.trim();
   if (trimmed === "") return "none";
   const hasDevanagari = DEVANAGARI.test(trimmed);
+  const hasTamil = TAMIL.test(trimmed);
   const hasLatin = LATIN_LETTER.test(trimmed);
-  if (hasDevanagari && hasLatin) return "mixed";
-  if (hasDevanagari) return "devanagari";
+  if (hasDevanagari && hasTamil) return "mixed";
+  if (hasDevanagari) return hasLatin ? "mixed" : "devanagari";
+  if (hasTamil) return hasLatin ? "mixed" : "tamil";
   if (hasLatin) return "latin";
   return "none";
 }

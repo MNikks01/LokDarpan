@@ -4,6 +4,9 @@ import { parseDetail } from "./detail";
 import { CrawlNotPermitted, PortalSession, isStaleSession } from "./fetch";
 import { parseLanding } from "./landing";
 import { districtsOfState, loadTenders, type TenderRecord } from "./load";
+import { GEPNIC_SWEEP_LOCK, sweepLockHolder, takeSweepLock } from "../advisory-lock";
+import { openRun } from "../ingestion-run";
+import { EXIT_ALL_REFUSED, sweepExitCode, type PortalOutcome } from "./outcome";
 import { PORTALS, portalByCode } from "./portals";
 
 /**
@@ -30,6 +33,13 @@ function arg(name: string): string | undefined {
 const EXIT_MISCONFIGURED = 78;
 const EXIT_USAGE = 64;
 const EXIT_NOT_PERMITTED = 77;
+/**
+ * Another sweep is already running, so this one did nothing.
+ *
+ * `EX_TEMPFAIL`: not a fault, and not a success either. The next scheduled run
+ * will find the lock free.
+ */
+const EXIT_ALREADY_RUNNING = 75;
 
 /** Courtesy gap between detail fetches. */
 const PAUSE_MS = 1_500;
@@ -105,17 +115,6 @@ function resolveTarget(): Target {
   return { portalCode, baseUrl, stateLgdCode };
 }
 
-interface PortalOutcome {
-  readonly portal: string;
-  readonly advertised: number;
-  readonly inserted: number;
-  readonly updated: number;
-  readonly placed: number;
-  readonly failed: number;
-  /** Set when the portal could not be collected at all. */
-  readonly refusal: string | null;
-}
-
 /**
  * Collect one portal.
  *
@@ -130,6 +129,7 @@ async function collectPortal(client: pg.Client, target: Target): Promise<PortalO
     advertised: 0,
     inserted: 0,
     updated: 0,
+    changed: 0,
     placed: 0,
     failed: 0,
   };
@@ -174,6 +174,7 @@ async function collectPortal(client: pg.Client, target: Target): Promise<PortalO
     advertised: tenders.length,
     inserted: result.inserted,
     updated: result.updated,
+    changed: result.changed,
     placed: result.placed,
     failed: result.failed.length,
     refusal: null,
@@ -184,11 +185,36 @@ function line(outcome: PortalOutcome): string {
   if (outcome.refusal !== null) {
     return `  ${outcome.portal.padEnd(14)} ${outcome.refusal}\n`;
   }
+  // `changed` is reported beside `new` because a run in which every tender was
+  // seen and none had changed is a healthy run, and it otherwise looks identical
+  // to a run that collected nothing.
   return (
     `  ${outcome.portal.padEnd(14)} ${String(outcome.advertised).padStart(3)} advertised · ` +
     `${String(outcome.inserted).padStart(3)} new · ` +
+    `${String(outcome.changed).padStart(3)} changed · ` +
     `${String(outcome.placed).padStart(3)} placed\n`
   );
+}
+
+/**
+ * Records a sweep that stopped because another held the lock.
+ *
+ * A skipped sweep touches no portal and so leaves no per-portal run behind.
+ * Without this row a scheduled run that did nothing would be indistinguishable
+ * from one that never fired — which is the confusion `ingestion_run` exists to
+ * remove. `skipped` is its own status because the sweep neither failed nor
+ * collected; see migration 0030.
+ */
+async function recordSkip(client: pg.Client): Promise<void> {
+  const holder = await sweepLockHolder(client);
+  const where = holder === null ? "" : ` (backend ${String(holder)})`;
+  const runId = await openRun(client, "gepnic-sweep");
+  await client.query(
+    `UPDATE ingestion_run SET status = 'skipped', completed_at = now(), note = $2
+      WHERE id = $1`,
+    [runId, `another sweep holds advisory lock ${String(GEPNIC_SWEEP_LOCK)}${where}`],
+  );
+  process.stderr.write(`Another sweep is already running${where}. Nothing was collected.\n`);
 }
 
 async function main(): Promise<void> {
@@ -209,6 +235,16 @@ async function main(): Promise<void> {
 
   const client = new pg.Client({ connectionString });
   await client.connect();
+
+  // Taken on this client and held for the whole sweep, so the server releases it
+  // if the process dies. See `advisory-lock.ts`.
+  const lock = await takeSweepLock(client);
+  if (lock === null) {
+    await recordSkip(client);
+    await client.end();
+    process.exit(EXIT_ALREADY_RUNNING);
+  }
+
   const outcomes: PortalOutcome[] = [];
   try {
     for (const [index, target] of targets.entries()) {
@@ -219,6 +255,7 @@ async function main(): Promise<void> {
       process.stdout.write(line(outcome));
     }
   } finally {
+    await lock.release();
     await client.end();
   }
 
@@ -241,6 +278,17 @@ async function main(): Promise<void> {
     // map, and the operator has to know which one.
     process.stdout.write(`${String(refused.length)} not collected:\n`);
     for (const o of refused) process.stdout.write(line(o));
+  }
+
+  // A sweep in which every portal refused collected nothing, and the process
+  // has to say so. Some refusing and some succeeding stays a success: that is a
+  // gap in coverage, which the summary names and `tender_collection_window`
+  // records per portal, not a failed run.
+  if (sweepExitCode(outcomes) === EXIT_ALL_REFUSED) {
+    process.stderr.write(
+      `All ${String(outcomes.length)} portal(s) refused or failed. Nothing was collected.\n`,
+    );
+    process.exit(EXIT_ALL_REFUSED);
   }
 }
 

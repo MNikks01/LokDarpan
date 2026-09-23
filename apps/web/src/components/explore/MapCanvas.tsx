@@ -2,25 +2,24 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { Map as MapLibreMap, addProtocol } from "maplibre-gl";
+import { Map as MapLibreMap, addProtocol, getVersion, setWorkerUrl } from "maplibre-gl";
 import { Protocol } from "pmtiles";
-import type { GeoJSONSource, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
+import type { GeoJSONSource, MapMouseEvent, MapSourceDataEvent } from "maplibre-gl";
 import type React from "react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { GeoUnit } from "@lokdarpan/domain";
-import { LEVEL_LABEL } from "@lokdarpan/domain";
 import type { BBox, FeatureCollection } from "geojson";
 import { INDIA_BBOX } from "@/domain/geography";
 import type { StateOption } from "@/data/geography";
 import { CAMERA_MS, fitTo, framePadding } from "@/map/camera";
-import {
-  EMPTY_COLLECTION,
-  GeometryUnavailableError,
-  fetchStateOutlines,
-} from "@/map/geometry-source";
-import { LAYER, SOURCE, basemapAvailable, basemapUrl, buildStyle } from "@/map/style";
+import { GeometryUnavailableError, fetchStateOutlines } from "@/map/geometry-source";
+import { basemapAvailable, basemapUrl, buildStyle } from "@/map/style";
+import { createBinder, type Binder, type MapPort } from "@/map/engine/binder";
+import type { MapInput } from "@/map/layers/types";
+import { CHILD_SOURCE } from "@/map/layers/child-boundaries";
+import { MARK, mark } from "@/lib/perf-marks";
 import { createPlaceLabelLayer, type PlaceLabel, type PlaceLabelLayer } from "@/map/place-labels";
-import type { LayerVisibility } from "./layer-visibility";
+import type { LayerVisibility } from "@/map/layers/visibility";
 import { MapOverlays, MapUnavailable } from "./MapOverlays";
 import type { HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
@@ -37,6 +36,8 @@ export interface MapCanvasProps {
   readonly activeUnit: GeoUnit | null;
   readonly activeGeometry: unknown;
   readonly childBoundaries: FeatureCollection | null;
+  /** What the tender shading is drawn from, and on what terms. Null before it loads. */
+  readonly tenders: MapInput["tenders"];
   readonly states: readonly StateOption[];
   readonly layers: LayerVisibility;
   readonly insets: { readonly left: number; readonly right: number };
@@ -62,15 +63,35 @@ function registerPmtilesProtocol(): void {
   pmtilesRegistered = true;
 }
 
-/** A ledger level rendered for a reader, falling back to the raw value. */
-function levelLabel(level: string): string {
-  return (LEVEL_LABEL as Readonly<Record<string, string | undefined>>)[level] ?? level;
+/**
+ * Where MapLibre's worker is served from: copied into `public/` at build by
+ * `scripts/copy-maplibre-worker.ts`, under this MapLibre's own version. Left to
+ * itself, MapLibre 6 looks for the worker beside its bundled module, which under
+ * Next is a `file://` URL, and the map never loads.
+ */
+let workerConfigured = false;
+function configureWorker(): void {
+  if (workerConfigured) return;
+  setWorkerUrl(`/maplibre/${getVersion()}/maplibre-gl-worker.mjs`);
+  workerConfigured = true;
 }
 
-function setSourceData(map: MapLibreMap, id: string, data: unknown): void {
-  const source = map.getSource(id);
-  // `setData` returns the source for chaining; nothing here needs the return.
-  if (source !== undefined) (source as GeoJSONSource).setData(data as FeatureCollection);
+/** The calls the layer binder makes, bound to one map. */
+function portOf(map: MapLibreMap): MapPort {
+  return {
+    getSource: (id) => map.getSource<GeoJSONSource>(id),
+    getLayer: (id) => map.getLayer(id),
+    setLayoutProperty: (layerId, name, value) => map.setLayoutProperty(layerId, name, value),
+    setFilter: (layerId, filter) => map.setFilter(layerId, filter),
+    queryRenderedFeatures: (point, options) =>
+      map.queryRenderedFeatures([point.x, point.y], options),
+    setFeatureState: (target, state) => {
+      map.setFeatureState(target, state);
+    },
+    removeFeatureState: (target, key) => {
+      map.removeFeatureState(target, key);
+    },
+  };
 }
 
 /**
@@ -98,10 +119,12 @@ function whenLoaded(map: MapLibreMap): Promise<void> {
 /**
  * The map.
  *
- * Draws three things: state outlines, the boundaries of whatever level is being
- * drilled into, and the selected unit. It does not know what those levels are —
- * "children" is one source fed by the ledger, so a district of talukas and a
- * taluka of villages render through the same path with no per-level code.
+ * What it draws is the layer registry's business (`map/layers/registry.ts`,
+ * ADR-058); this component owns the renderer's lifecycle, the pointer, the
+ * camera and the place names, and hands everything else to the binder as one
+ * `MapInput`. It does not know what levels are being drawn — "children" is one
+ * source fed by the ledger, so a district of talukas and a taluka of villages
+ * render through the same path with no per-level code.
  *
  * Geometry is handed to MapLibre and never diffed by React.
  */
@@ -111,6 +134,7 @@ export function MapCanvas({
   activeUnit,
   activeGeometry,
   childBoundaries,
+  tenders,
   states,
   layers,
   insets,
@@ -121,6 +145,8 @@ export function MapCanvas({
 }: MapCanvasProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const binderRef = useRef<Binder | null>(null);
+  const [stateOutlines, setStateOutlines] = useState<FeatureCollection | null>(null);
   const [ready, setReady] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [hover, setHover] = useState<HoverTarget | null>(null);
@@ -151,6 +177,7 @@ export function MapCanvas({
     // `pmtiles://` URLs through it, and a style referencing one without the
     // protocol registered fails with an unhelpful network error.
     registerPmtilesProtocol();
+    configureWorker();
 
     const start = async (): Promise<void> => {
       // A style that names a missing extract renders nothing and says nothing,
@@ -163,6 +190,7 @@ export function MapCanvas({
 
       const style = buildStyle({ basemap });
       if (cancelled()) return;
+      mark(MARK.mapInit);
 
       const map = new MapLibreMap({
         container,
@@ -194,10 +222,12 @@ export function MapCanvas({
 
       await whenLoaded(map);
       if (cancelled()) return;
+      mark(MARK.mapLoad);
 
       const outlines = await fetchStateOutlines();
       if (cancelled()) return;
-      setSourceData(map, SOURCE.states, outlines);
+      binderRef.current = createBinder(portOf(map));
+      setStateOutlines(outlines);
       mapRef.current = map;
       setReady(true);
     };
@@ -220,6 +250,7 @@ export function MapCanvas({
       holder.cancelled = true;
       holder.instance?.remove();
       mapRef.current = null;
+      binderRef.current = null;
       setReady(false);
     };
   }, []);
@@ -230,55 +261,37 @@ export function MapCanvas({
     if (map === null || !ready) return;
     const canvas = map.getCanvas();
 
-    /**
-     * ONE hit test, not one listener per layer. Per-layer handlers all fire for
-     * the same pointer and the last to run wins, so the state polygon underneath
-     * an area was overwriting the area's own hover.
-     */
-    const topmost = (point: MapMouseEvent["point"]): MapGeoJSONFeature | null => {
-      for (const id of [LAYER.childFill, LAYER.stateFill]) {
-        if (map.getLayer(id) === undefined) continue;
-        const [hit] = map.queryRenderedFeatures(point, { layers: [id] });
-        if (hit !== undefined) return hit;
-      }
-      return null;
-    };
-
     // Feature-state hover, so the fill lifts under the pointer without React
     // re-rendering the map on every mouse move.
-    let hovered: string | number | undefined;
+    let hovered: { source: string; id: string | number } | undefined;
     const clearHover = (): void => {
       if (hovered !== undefined) {
-        map.setFeatureState({ source: SOURCE.children, id: hovered }, { hover: false });
+        map.setFeatureState(hovered, { hover: false });
         hovered = undefined;
       }
     };
 
     const onMove = (event: MapMouseEvent): void => {
-      const feature = topmost(event.point);
-      if (feature === null) {
+      const hit = binderRef.current?.hitAt(event.point) ?? null;
+      if (hit === null) {
         clearHover();
         canvas.style.cursor = "";
         setHover(null);
         return;
       }
-      if (feature.source === SOURCE.children && feature.id !== hovered) {
+      const { feature } = hit;
+      if (!hit.hover) {
         clearHover();
-        hovered = feature.id;
-        if (hovered !== undefined) {
-          map.setFeatureState({ source: SOURCE.children, id: hovered }, { hover: true });
+      } else if (feature.source !== hovered?.source || feature.id !== hovered.id) {
+        clearHover();
+        if (feature.id !== undefined) {
+          hovered = { source: feature.source, id: feature.id };
+          map.setFeatureState(hovered, { hover: true });
         }
       }
       canvas.style.cursor = "pointer";
       const { x, y } = event.point;
-      const level: unknown = feature.properties["level"];
-      setHover({
-        kind: "area",
-        title: String(feature.properties["name"] ?? feature.properties["stateName"] ?? ""),
-        subtitle: typeof level === "string" ? levelLabel(level) : "State",
-        x,
-        y,
-      });
+      setHover({ kind: "area", title: hit.title, subtitle: hit.subtitle, x, y });
     };
 
     const onLeave = (): void => {
@@ -288,15 +301,10 @@ export function MapCanvas({
     };
 
     const onClick = (event: MapMouseEvent): void => {
-      const feature = topmost(event.point);
-      if (feature === null) return;
-      const unitId: unknown = feature.properties["unitId"];
-      if (typeof unitId === "number") {
-        callbacks.current.onSelectUnit(unitId);
-        return;
-      }
-      const code: unknown = feature.properties["stateCode"];
-      if (typeof code === "string") callbacks.current.onSelectState(code);
+      const selection = binderRef.current?.hitAt(event.point)?.selection ?? null;
+      if (selection === null) return;
+      if (selection.kind === "unit") callbacks.current.onSelectUnit(selection.id);
+      else callbacks.current.onSelectState(selection.code);
     };
 
     map.on("mousemove", onMove);
@@ -310,45 +318,46 @@ export function MapCanvas({
     };
   }, [ready]);
 
-  /* ------------------------------------------------------------ geometry */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    setSourceData(map, SOURCE.children, childBoundaries ?? EMPTY_COLLECTION);
-  }, [childBoundaries, ready]);
+  /* --------------------------------------------------------------- layers */
+  const input = useMemo<MapInput>(
+    () => ({
+      stateCode,
+      stateOutlines,
+      childBoundaries,
+      activeGeometry,
+      tenders,
+      visibility: layers,
+    }),
+    [activeGeometry, childBoundaries, layers, stateCode, stateOutlines, tenders],
+  );
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    setSourceData(
-      map,
-      SOURCE.active,
-      activeGeometry === null || activeGeometry === undefined
-        ? EMPTY_COLLECTION
-        : { type: "Feature", properties: {}, geometry: activeGeometry },
-    );
-  }, [activeGeometry, ready]);
+    if (!ready) return;
+    binderRef.current?.update(input);
+  }, [input, ready]);
 
+  // For the performance harness: when a level's boundaries have been drawn —
+  // the first frame rendered after their source finished loading. Not `idle`:
+  // that also waits for the camera's flight and every base-map tile, and timed
+  // those instead of the boundaries.
   useEffect(() => {
     const map = mapRef.current;
-    if (map === null || !ready) return;
-    map.setFilter(LAYER.stateFillActive, ["==", ["get", "stateCode"], stateCode ?? "__none__"]);
-  }, [ready, stateCode]);
-
-  /* ------------------------------------------------------ layer visibility */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    const show = (id: string, visible: boolean): void => {
-      if (map.getLayer(id) !== undefined) {
-        map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
-      }
+    const features = childBoundaries?.features.length ?? 0;
+    if (map === null || !ready || features === 0) return;
+    const onRender = (): void => {
+      mark(MARK.boundariesDrawn, { features });
     };
-    show(LAYER.stateLine, layers.states);
-    show(LAYER.stateFill, layers.states);
-    show(LAYER.childFill, layers.areas);
-    show(LAYER.childLine, layers.areas);
-  }, [layers, ready]);
+    const onData = (event: MapSourceDataEvent): void => {
+      if (event.sourceId !== CHILD_SOURCE || !event.isSourceLoaded) return;
+      map.off("sourcedata", onData);
+      void map.once("render", onRender);
+    };
+    map.on("sourcedata", onData);
+    return () => {
+      map.off("sourcedata", onData);
+      map.off("render", onRender);
+    };
+  }, [childBoundaries, ready]);
 
   /* --------------------------------------------------------------- labels */
   const labelLayerRef = useRef<PlaceLabelLayer | null>(null);
@@ -364,9 +373,10 @@ export function MapCanvas({
     };
   }, [ready]);
 
+  const selectedUnitId = activeUnit?.id ?? null;
   const labels = useMemo(
-    () => labelsFor(stateCode, states, childBoundaries),
-    [childBoundaries, stateCode, states],
+    () => labelsFor(stateCode, states, childBoundaries, selectedUnitId),
+    [childBoundaries, selectedUnitId, stateCode, states],
   );
 
   useEffect(() => {
@@ -450,91 +460,65 @@ export function MapCanvas({
 }
 
 /**
- * Which places are named, and how loudly.
+ * Which places are named.
  *
  * One level at a time. Showing state names over a district view produces a map
  * where the labels compete with each other instead of describing what the
- * reader is looking at. Below state level the anchors come from the boundaries
- * themselves, so a level nobody anticipated still gets labelled.
+ * reader is looking at. Below state level the anchors and sizes come from the
+ * ledger itself (migration 0032), so a name sits inside its place and a level
+ * nobody anticipated still gets labelled.
+ *
+ * Only selection, level and size reach the labels. Which name wins an overlap
+ * is never decided by anything a place's records say.
  */
 function labelsFor(
   stateCode: string | null,
   states: readonly StateOption[],
   children: FeatureCollection | null,
+  selectedUnitId: number | null,
 ): readonly PlaceLabel[] {
   if (stateCode === null) {
     return states.map((s) => ({
       id: `state-${s.code}`,
       text: s.name,
       lngLat: s.labelPoint,
-      priority: s.labelWeight,
+      level: "state",
+      // Area of the state's largest ring, from the boundary manifest. Only
+      // compared with other states, so its unit does not matter.
+      size: s.labelWeight,
+      selected: false,
       tone: "primary" as const,
     }));
   }
   if (children === null) return [];
 
   return children.features.flatMap((feature) => {
-    const anchor = centroidOf(feature.geometry);
     const properties = feature.properties ?? {};
     const name: unknown = properties["name"];
-    if (anchor === null || typeof name !== "string") return [];
+    const unitId: unknown = properties["unitId"];
+    const level: unknown = properties["level"];
+    const labelPoint = pointOf(properties["labelPoint"]);
+    const areaM2: unknown = properties["areaM2"];
+    // No stored anchor means no name, rather than a guessed position. The ledger
+    // computes one for every boundary, so this is a defect to surface, not a case.
+    if (typeof name !== "string" || typeof unitId !== "number" || labelPoint === null) return [];
     return [
       {
-        id: `unit-${String(properties["unitId"] ?? name)}`,
+        id: `unit-${String(unitId)}`,
         text: name,
-        lngLat: anchor,
-        // Bigger areas win a collision, measured from the geometry itself.
-        priority: extentOf(feature.geometry),
+        lngLat: labelPoint,
+        level: typeof level === "string" ? level : "unknown",
+        size: typeof areaM2 === "number" ? areaM2 : 0,
+        selected: unitId === selectedUnitId,
         tone: "primary" as const,
       },
     ];
   });
 }
 
-/** Every coordinate in a geometry, however deeply nested. */
-function* positions(geometry: unknown): Generator<readonly [number, number]> {
-  if (!Array.isArray(geometry)) return;
-  if (typeof geometry[0] === "number" && typeof geometry[1] === "number") {
-    yield [geometry[0], geometry[1]];
-    return;
-  }
-  for (const part of geometry) yield* positions(part);
-}
-
-function coordsOf(geometry: unknown): readonly (readonly [number, number])[] {
-  if (typeof geometry !== "object" || geometry === null) return [];
-  const coordinates = (geometry as { coordinates?: unknown }).coordinates;
-  return [...positions(coordinates)];
-}
-
-function centroidOf(geometry: unknown): readonly [number, number] | null {
-  const points = coordsOf(geometry);
-  if (points.length === 0) return null;
-  let west = Infinity;
-  let south = Infinity;
-  let east = -Infinity;
-  let north = -Infinity;
-  for (const [lng, lat] of points) {
-    west = Math.min(west, lng);
-    south = Math.min(south, lat);
-    east = Math.max(east, lng);
-    north = Math.max(north, lat);
-  }
-  return [(west + east) / 2, (south + north) / 2];
-}
-
-function extentOf(geometry: unknown): number {
-  const points = coordsOf(geometry);
-  if (points.length === 0) return 0;
-  let west = Infinity;
-  let south = Infinity;
-  let east = -Infinity;
-  let north = -Infinity;
-  for (const [lng, lat] of points) {
-    west = Math.min(west, lng);
-    south = Math.min(south, lat);
-    east = Math.max(east, lng);
-    north = Math.max(north, lat);
-  }
-  return (east - west) * (north - south);
+function pointOf(value: unknown): readonly [number, number] | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const lng: unknown = value[0];
+  const lat: unknown = value[1];
+  return typeof lng === "number" && typeof lat === "number" ? [lng, lat] : null;
 }

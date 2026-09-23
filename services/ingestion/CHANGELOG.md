@@ -1,5 +1,174 @@
 # @lokdarpan/ingestion
 
+## 0.5.0
+
+### Minor Changes
+
+- 0f4227c: Bound every collector's downloads by size and time.
+
+  CAG, LGD, BEAMS, GePNIC and Overpass read whole responses with no limit on size and no deadline.
+  A host serving an endless body or holding a connection open could exhaust the scheduled sweep's
+  memory or keep it running until the runner killed it, and a killed runner leaves no
+  `ingestion_run` record of why.
+
+  All five now fetch through `fetchWithLimits`, which enforces a decoded-byte limit, a deadline for
+  headers, a limit on silence between chunks and a total deadline, and names the limit it reached.
+  Decoded bytes are counted because Node undoes gzip before the body is read: a 199 KiB gzip
+  response expanding to 200 MiB was stopped at a 16 MiB limit when tested.
+
+  A CAG report is now refused from its status and content type before the body is downloaded, so
+  an HTML error page is no longer fetched in full to discover it is not a PDF. Overpass errors are
+  classified from the status line in the same way.
+
+  Limits come from the raw store's largest artefacts: CAG reports 128 MiB, BEAMS 4 MiB, LGD 1 MiB.
+  GePNIC and Overpass were not measurable locally and have generous ceilings until their sizes are
+  logged. No figure, parser or stored artefact changes for a response within its limits.
+
+### Patch Changes
+
+- 65f19bd: Link to tender portals instead of reproducing their tenders.
+
+  All 21 collected GePNIC portals permit reproduction only with the issuing department's permission,
+  which has not been sought (ADR-055, ADR-056). Tender titles, references, values, EMDs, organisation
+  chains and locations are no longer shown, and `/api/v1/tenders` no longer reads them unless
+  `PUBLISH_TENDER_DETAILS` is `true`. District shading and counts remain.
+
+  A selected place now shows how many open tenders are held, why details are not shown, and a link
+  to its state's portal, which the portals' terms allow. The unplaced-tenders list can no longer be
+  opened while details are withheld. The portal table moves from the collector to
+  `@lokdarpan/domain` so the explorer can link to it; the collector re-exports it unchanged.
+
+  New sentences, for review:
+
+  - "{n} open tenders are held for offices here."
+  - "Tender details are not shown. The state portals permit reproducing them only with the issuing
+    department's permission, which LokDarpan has not sought."
+  - "Read these tenders on the state's e-procurement portal" (link)
+  - "Their details are not shown, for the same reason as other tenders." (after the unplaced count)
+
+- Updated dependencies [744bdda]
+- Updated dependencies [b04aadb]
+- Updated dependencies [c472e32]
+- Updated dependencies [469deb8]
+- Updated dependencies [79e0920]
+- Updated dependencies [52a6d22]
+- Updated dependencies [59de13e]
+- Updated dependencies [4a831f0]
+- Updated dependencies [65f19bd]
+- Updated dependencies [03e5402]
+  - @lokdarpan/database@0.3.0
+  - @lokdarpan/contracts@0.2.0
+  - @lokdarpan/money@0.1.0
+  - @lokdarpan/domain@0.3.0
+
+## 0.4.0
+
+### Minor Changes
+
+- fa620ba: Stop a count from standing in for a claim about a government, and stop a tender
+  from forgetting what it used to say.
+
+  Maharashtra held no tenders and the panel said "0 tenders" — a true count and a
+  false statement, since no Maharashtra portal is collected at all. Pune district
+  holds 14 talukas and no municipal body, and the area selector could only be read
+  as a statement about Pune. Both surfaces now record absence as its own fact:
+  `geography_coverage` says whether a level is complete, partial or uncollected
+  and why, and tender collection status is derived per state from the collection
+  window rather than inferred from a total.
+
+  `tender` was written by an upsert, so a closing date moved from 18 to
+  25 September left no trace of the 18th. A trigger now keeps every superseded
+  reading, following the pattern migration 0009 established for review decisions:
+  append-only, written by the database, and only when a field the source controls
+  actually changes. Re-ingesting identical data creates no version. The tender row
+  stays the current reading, so nothing downstream reconstructs anything.
+
+  `ingestion_run` records each execution with its status, timing and counts,
+  opened before the load's transaction and closed after it, so a failed run rolls
+  the ledger back without rolling back the account of the failure. Freshness now
+  distinguishes when a record was seen, when the source was checked, and when
+  collection last succeeded.
+
+  No Maharashtra tender data is collected, invented or implied by any of this.
+
+- dc931e5: Complete Maharashtra's geography to taluka and local-body level, and make the
+  OpenStreetMap connector able to ingest a state without being blocked.
+
+  `ingest:osm-boundaries --within=<unit>` walks a unit's children, querying one
+  district at a time — the pattern `overpass.ts` already described but nothing
+  implemented. Parentage comes from which query returned a unit, so no second,
+  weaker answer has to be derived from geometry.
+
+  Fixed pauses between queries failed twice, both times losing the whole state:
+  Overpass grants a small number of concurrent slots rather than limiting a rate,
+  so the eighth district was refused at ten seconds apart, and one large district's
+  gateway timeout ended the run for the 28 after it. The connector now reads
+  Overpass's own `/api/status` before each query and treats both a refusal and a
+  server error as a decline — retried, then named in a summary, costing that
+  district rather than the state.
+
+  Maharashtra now holds 36 districts, 355 talukas (353 carrying LGD codes) and 18
+  urban local bodies, all with boundaries. OpenStreetMap tags few of Maharashtra's
+  ~270 local bodies and none with an LGD code; that gap is recorded in
+  `.docs/06-government-sources/gis/maharashtra-local-body-coverage.md` rather than
+  left to be discovered.
+
+- 328b3b4: Schedule the GEP-NIC sweep daily, under a credential that can only ingest.
+
+  A sweep exited 0 whatever happened. Refusals were counted and named in the
+  summary and never reached the exit code, so a day on which every portal refused
+  looked to a scheduler exactly like a day on which everything worked. A sweep in
+  which every attempted portal refused now exits 69; some refusing while others
+  collect stays a success, because those records are real and a workflow that went
+  red for one portal in twenty would stop being read.
+
+  `lokdarpan_etl` is the role the scheduler runs as, derived by reading every
+  statement the pipeline issues rather than by removing privileges from ownership.
+  It may read the hierarchy and tender history, and write tenders, their collection
+  windows and ingestion runs. It cannot change the schema, create objects, or write
+  tender history directly — that is the SECURITY DEFINER trigger's job, and
+  granting it here would have defeated the point of making it one.
+
+  One sweep at a time, enforced by a PostgreSQL advisory lock on key 437642, taken
+  on the connection that runs the sweep so the server releases it when the process
+  dies. No stale lock, no timeout. A sweep that cannot take it records an
+  `ingestion_run` with the new `skipped` status, naming the backend that holds it,
+  and exits 75 — neither a failure nor a success, which the previous three statuses
+  could not express.
+
+  Maharashtra tender ingestion remains `not_collected`. Scheduling changes what the
+  other twenty states report; it does not make Maharashtra data available.
+
+- d355358: Refuse a figure whose scale word is in a script the parser cannot read.
+
+  Tamil Nadu's reports are published as separate Tamil and English PDFs. The Tamil
+  text layer arrives either in visual glyph order (`ணைாடி` where Unicode spells
+  `கோடி`) or as mojibake (`ேகா}`), and both keep the digits while destroying the
+  word beside them: the state's revenue receipts, `₹2,43,749.34` crore, were read
+  as `₹2,43,749`.
+
+  An unqualified amount whose next word is in neither English nor Devanagari is
+  now refused rather than read as rupees. Verified against every decision already
+  recorded — the same facts are stranded with the rule and without it, and the
+  published ledger is unchanged.
+
+  `page_script` gains `tamil`; 730 pages of Tamil had been stored as English
+  since those pages carry page numbers and roman numerals.
+
+  Also: an HTML entity in a report link is decoded (`&#039;` in "CAG's Report" made
+  one URL unfetchable), and one report that will not fetch no longer ends the run.
+
+### Patch Changes
+
+- Updated dependencies [fa620ba]
+- Updated dependencies [844bb2d]
+- Updated dependencies [cc475cd]
+- Updated dependencies [328b3b4]
+- Updated dependencies [d355358]
+- Updated dependencies [db1f218]
+  - @lokdarpan/database@0.2.0
+  - @lokdarpan/domain@0.2.0
+
 ## 0.3.0
 
 ### Minor Changes

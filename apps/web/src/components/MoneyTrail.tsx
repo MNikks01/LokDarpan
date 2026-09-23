@@ -1,6 +1,6 @@
 import type React from "react";
 import type { FinanceChain } from "@lokdarpan/contracts";
-import { Money } from "@lokdarpan/money";
+import { formatAmount } from "@lokdarpan/money";
 import { Figure } from "./Figure";
 import { color } from "@/ui/tokens";
 
@@ -63,7 +63,7 @@ function VarianceRow({
         {minuend} − {subtrahend}
       </div>
       <div style={{ fontSize: 15, color: color.text.primary, fontVariantNumeric: "tabular-nums" }}>
-        = {Money.fromDecimalString(varianceInr).format()}
+        = {formatAmount(varianceInr)}
       </div>
       {/* The denominator is stated in words — never a bare "11.1%". */}
       <div style={{ fontSize: 13, color: color.text.secondary }}>
@@ -75,8 +75,7 @@ function VarianceRow({
 
 export function MoneyTrail({ finance }: { readonly finance: FinanceChain }): React.JSX.Element {
   const status = STATUS_COPY[finance.status];
-  const shown = (f: FinanceChain["allocated"]) =>
-    f.present ? Money.fromDecimalString(f.amountInr).format() : "—";
+  const shown = (f: FinanceChain["allocated"]) => (f.present ? formatAmount(f.amountInr) : "—");
 
   return (
     <section aria-label="Money trail">

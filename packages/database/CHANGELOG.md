@@ -1,5 +1,253 @@
 # @lokdarpan/database
 
+## 0.3.0
+
+### Minor Changes
+
+- 744bdda: Name the real dataset version on every explorer response.
+
+  The seven explorer routes returned `datasetVersion: 0`, and every response's `asOf` was the time
+  it was served. Neither described the data, so nothing could tell which state of the ledger a page
+  came from.
+
+  A response's version is now the newest dataset version committed when it was read, and `asOf` is
+  when that version was opened. Each route reads inside one read-only snapshot
+  (`readLedger`), so a load that commits mid-request cannot put rows from one state under the version
+  of another. Routes whose version comes from their rows keep it, and now report that version's date
+  instead of the time of the request.
+
+  `EnvelopeMetaSchema.asOf` may be `null`, only for a ledger no load has written to.
+
+- c472e32: Draw a level from outlines simplified when they were loaded, and shade tenders without re-sending
+  the level (ADR-065).
+
+  Migration 0033 stores `geometry_overview`, each boundary simplified once. The level endpoint for
+  Madhya Pradesh falls from ~580 ms to ~62 ms. Containment now tests the stored label point and
+  requires a child to be smaller than its parent. That removes 79 pairs where a state or district was
+  listed as the child of one of its own smaller units.
+
+  Tender counts reach the map as feature-state, so the level's geometry is sent once per visit and a
+  department change moves only numbers.
+
+- 79e0920: Draw each place's name inside the place, and stop names flickering.
+
+  Names were anchored at the middle of a unit's bounding box, which for a coastal district or a
+  crescent-shaped taluka can be in the sea or a neighbouring unit, and overlaps were ranked by
+  bounding-box area in square degrees. Migration 0032 adds `label_point`, the centre of the largest
+  circle inside the unit, and `area_m2` as generated columns, and boundary features now carry both.
+
+  Placement is decided by a neutral arbiter: selection, administrative level, and area bucketed by
+  powers of two, with nothing from a place's records. A just-shown name holds for 600 ms and a hidden
+  one waits 400 ms, so names no longer flicker at the edge of a collision. Collision tests use a
+  spatial grid, and names are measured in one batch.
+
+  Names stay as DOM text because MapLibre 5.24 cannot shape Devanagari, Tamil or other Indic scripts.
+  Their visibility is written inside the marker, because MapLibre resets a marker's own opacity on
+  every move, which had redrawn hidden names on top of each other.
+
+- 4a831f0: Scope the tender panel to the selected state.
+
+  With a state selected, `/api/v1/tenders/overview` returned the country's district counts,
+  departments and unplaced total. The panel under Odisha said "12 open tenders across 6 districts"
+  when all twelve were in Madhya Pradesh, Uttarakhand, Jharkhand and Kerala. District counts are now
+  limited to districts inside the state. The departments, the unplaced total and the unplaced list
+  (`/api/v1/tenders?unplaced=true&state=`) are limited to the state's own portals, since an unplaced
+  tender has no district to go by. With no state selected, nothing changes.
+
+  A collected state with nothing to shade no longer reads "0 open tenders across 0 districts".
+
+  New sentence, for review:
+
+  - "No open tender is held for offices in a district of {state}. This describes what LokDarpan holds,
+    not what was advertised."
+
+- 65f19bd: Link to tender portals instead of reproducing their tenders.
+
+  All 21 collected GePNIC portals permit reproduction only with the issuing department's permission,
+  which has not been sought (ADR-055, ADR-056). Tender titles, references, values, EMDs, organisation
+  chains and locations are no longer shown, and `/api/v1/tenders` no longer reads them unless
+  `PUBLISH_TENDER_DETAILS` is `true`. District shading and counts remain.
+
+  A selected place now shows how many open tenders are held, why details are not shown, and a link
+  to its state's portal, which the portals' terms allow. The unplaced-tenders list can no longer be
+  opened while details are withheld. The portal table moves from the collector to
+  `@lokdarpan/domain` so the explorer can link to it; the collector re-exports it unchanged.
+
+  New sentences, for review:
+
+  - "{n} open tenders are held for offices here."
+  - "Tender details are not shown. The state portals permit reproducing them only with the issuing
+    department's permission, which LokDarpan has not sought."
+  - "Read these tenders on the state's e-procurement portal" (link)
+  - "Their details are not shown, for the same reason as other tenders." (after the unplaced count)
+
+- 03e5402: Serve unit views whose units came from several loads (ADR-053 addendum).
+
+  `UnitService` no longer refuses a payload that spans loads. Geography is loaded district by district,
+  so it refused every real state. The web routes read inside the ledger snapshot and report its
+  watermark, and each unit keeps its own `provenance.datasetVersion`. `singleDatasetVersion` and
+  `ViolationSink` are removed; `newestDatasetVersion` replaces them for callers with no snapshot.
+  `PostgresAdminUnitRepository` accepts a snapshot client.
+
+### Patch Changes
+
+- Updated dependencies [b04aadb]
+- Updated dependencies [469deb8]
+- Updated dependencies [79e0920]
+- Updated dependencies [52a6d22]
+- Updated dependencies [59de13e]
+- Updated dependencies [65f19bd]
+- Updated dependencies [03e5402]
+  - @lokdarpan/money@0.1.0
+  - @lokdarpan/domain@0.3.0
+
+## 0.2.0
+
+### Minor Changes
+
+- fa620ba: Stop a count from standing in for a claim about a government, and stop a tender
+  from forgetting what it used to say.
+
+  Maharashtra held no tenders and the panel said "0 tenders" — a true count and a
+  false statement, since no Maharashtra portal is collected at all. Pune district
+  holds 14 talukas and no municipal body, and the area selector could only be read
+  as a statement about Pune. Both surfaces now record absence as its own fact:
+  `geography_coverage` says whether a level is complete, partial or uncollected
+  and why, and tender collection status is derived per state from the collection
+  window rather than inferred from a total.
+
+  `tender` was written by an upsert, so a closing date moved from 18 to
+  25 September left no trace of the 18th. A trigger now keeps every superseded
+  reading, following the pattern migration 0009 established for review decisions:
+  append-only, written by the database, and only when a field the source controls
+  actually changes. Re-ingesting identical data creates no version. The tender row
+  stays the current reading, so nothing downstream reconstructs anything.
+
+  `ingestion_run` records each execution with its status, timing and counts,
+  opened before the load's transaction and closed after it, so a failed run rolls
+  the ledger back without rolling back the account of the failure. Freshness now
+  distinguishes when a record was seen, when the source was checked, and when
+  collection last succeeded.
+
+  No Maharashtra tender data is collected, invented or implied by any of this.
+
+- 844bb2d: Make the selected place decide what records are shown.
+
+  The explorer asked for records by state code at every level, so Maharashtra,
+  Nagpur district and Nagpur Municipal Corporation all returned the same thirty
+  state-wide audit reports. Records are now queried by `admin_unit.id`, exactly and
+  without inheritance — the LGD code the query used before is per-register and
+  collides across levels, so a state's own code also names a district elsewhere.
+
+  `document.geography_source` records how a placement was reached, mirroring
+  `tender.district_source`. One value exists, `publisher_filter`, because one basis
+  exists: the CAG site's own state filter. No document was re-attributed, because
+  none carries evidence for anything narrower than a state — a report issued by the
+  Accountant General at Nagpur is not a report about Nagpur, and its title is not
+  evidence.
+
+  Maharashtra shows its 10 documents; Nagpur, its talukas and its municipal
+  corporation show none, and the panel says what that means rather than implying an
+  absence of audits. Documents with no established geography are reachable at
+  `?unresolved=true`.
+
+  Village coverage is now stated for Maharashtra — 40 held, all inside one
+  district, against a state with more than forty thousand — and the boundary
+  artifacts are regenerated from the ledger.
+
+- cc475cd: Production hardening for Maharashtra, from a full audit.
+
+  A deep link could pair one state with a unit inside another: `?state=27&unit=<a
+Kerala district>` rendered the selector as Maharashtra, framed the map on Kerala
+  and drew Kerala's breadcrumb under a Maharashtra heading — every part correct on
+  its own and the page as a whole saying something false. The pair is now
+  reconciled on the server before the first render, keeping the state and dropping
+  the unit, so a mistyped id never silently moves a reader to another state.
+
+  The three tables added since migration 0002 reach the API's role through
+  `ALTER DEFAULT PRIVILEGES`, so no migration names them and development connects
+  as the owner — a regression would have been seen first in production. They are
+  now exercised as `lokdarpan_api`: readable, and unwritable.
+
+  A collection window for portal `tn` asserted that a portal was being watched
+  from 1 September. The registry has no such code, it held no tenders, and Tamil
+  Nadu's real window carries the same date and 32 tenders, so it was the one window
+  that could never report a status. Removed, conditionally, with Tamil Nadu's floor
+  untouched.
+
+  Also records what the audit found rather than fixing it silently: nothing is
+  scheduled, so every collected state correctly reads `stale`, and `/explore` has
+  grown to 409 kB first-load against the ~291 kB ADR-022 recorded.
+
+- 328b3b4: Schedule the GEP-NIC sweep daily, under a credential that can only ingest.
+
+  A sweep exited 0 whatever happened. Refusals were counted and named in the
+  summary and never reached the exit code, so a day on which every portal refused
+  looked to a scheduler exactly like a day on which everything worked. A sweep in
+  which every attempted portal refused now exits 69; some refusing while others
+  collect stays a success, because those records are real and a workflow that went
+  red for one portal in twenty would stop being read.
+
+  `lokdarpan_etl` is the role the scheduler runs as, derived by reading every
+  statement the pipeline issues rather than by removing privileges from ownership.
+  It may read the hierarchy and tender history, and write tenders, their collection
+  windows and ingestion runs. It cannot change the schema, create objects, or write
+  tender history directly — that is the SECURITY DEFINER trigger's job, and
+  granting it here would have defeated the point of making it one.
+
+  One sweep at a time, enforced by a PostgreSQL advisory lock on key 437642, taken
+  on the connection that runs the sweep so the server releases it when the process
+  dies. No stale lock, no timeout. A sweep that cannot take it records an
+  `ingestion_run` with the new `skipped` status, naming the backend that holds it,
+  and exits 75 — neither a failure nor a success, which the previous three statuses
+  could not express.
+
+  Maharashtra tender ingestion remains `not_collected`. Scheduling changes what the
+  other twenty states report; it does not make Maharashtra data available.
+
+### Patch Changes
+
+- d355358: Refuse a figure whose scale word is in a script the parser cannot read.
+
+  Tamil Nadu's reports are published as separate Tamil and English PDFs. The Tamil
+  text layer arrives either in visual glyph order (`ணைாடி` where Unicode spells
+  `கோடி`) or as mojibake (`ேகா}`), and both keep the digits while destroying the
+  word beside them: the state's revenue receipts, `₹2,43,749.34` crore, were read
+  as `₹2,43,749`.
+
+  An unqualified amount whose next word is in neither English nor Devanagari is
+  now refused rather than read as rupees. Verified against every decision already
+  recorded — the same facts are stranded with the rule and without it, and the
+  published ledger is unchanged.
+
+  `page_script` gains `tamil`; 730 pages of Tamil had been stored as English
+  since those pages carry page numbers and roman numerals.
+
+  Also: an HTML entity in a report link is decoded (`&#039;` in "CAG's Report" made
+  one URL unfetchable), and one report that will not fetch no longer ends the run.
+
+- db1f218: Stop a timestamp that lost precision in transit from looking like a changed
+  tender.
+
+  PostgreSQL stores timestamps to the microsecond and a JavaScript `Date` carries
+  milliseconds, so a caller reading a closing date back and writing it again
+  unchanged handed over `12:00:00.123` where `12:00:00.123789` was stored. The
+  versioning trigger compared exact values, saw a difference, and would have
+  recorded a government office moving a deadline it never touched. ADR-049 shipped
+  with this as a known limitation; ADR-050 closes it.
+
+  Where two readings agree to the millisecond, the stored value is now restored
+  before any comparison — so the comparison itself is unchanged, a real change of a
+  millisecond or more still files a version, and the stored microseconds survive
+  the round trip rather than being quietly shortened.
+
+  Declaring the column `timestamptz(3)` was the obvious fix and is wrong: that cast
+  rounds `.123789` to `.124` while the driver truncates it to `.123`, leaving the
+  two unequal. `date_trunc('milliseconds', …)` truncates, matching the driver.
+
+- Updated dependencies [844bb2d]
+  - @lokdarpan/domain@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

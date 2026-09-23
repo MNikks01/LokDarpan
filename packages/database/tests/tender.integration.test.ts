@@ -122,9 +122,9 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       });
 
       await pool.query(
-        `INSERT INTO tender_collection_window (portal_code, collecting_since)
-         VALUES ($1, DATE '2026-09-01') ON CONFLICT (portal_code) DO NOTHING`,
-        [PORTAL],
+        `INSERT INTO tender_collection_window (portal_code, collecting_since, state_lgd_code)
+         VALUES ($1, DATE '2026-09-01', $2) ON CONFLICT (portal_code) DO NOTHING`,
+        [PORTAL, LGD_STATE],
       );
     });
 
@@ -135,6 +135,31 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await pool?.query(`DELETE FROM dataset_version WHERE id = $1`, [versionId]);
       await pool?.query(`DELETE FROM source_artifact WHERE sha256 = $1`, [ARTIFACT]);
       await pool?.end();
+    });
+
+    it("counts only a state's own districts when asked for a state", async () => {
+      const inState = (await repository?.countsByDistrict(undefined, LGD_STATE)) ?? [];
+      expect(inState.map((c) => c.adminUnitId)).toEqual([districtId]);
+      expect(inState[0]?.tenderCount).toBe(2);
+
+      const elsewhere = (await repository?.countsByDistrict(undefined, "9920099")) ?? [];
+      expect(elsewhere).toEqual([]);
+    });
+
+    it("scopes the unplaced total and the departments to the state's own portals", async () => {
+      expect(await repository?.unplacedCount(LGD_STATE)).toBe(1);
+      expect(await repository?.unplacedCount("9920099")).toBe(0);
+
+      const here = (await repository?.departments(LGD_STATE)) ?? [];
+      expect(here).toEqual([{ name: "Test Department", tenderCount: 3 }]);
+      expect(await repository?.departments("9920099")).toEqual([]);
+
+      const listed =
+        (await repository?.listTenders({ unplacedOnly: true, stateLgdCode: LGD_STATE })) ?? [];
+      expect(listed.map((t) => t.title)).toEqual(["Open but unplaced"]);
+      expect(await repository?.countTenders({ unplacedOnly: true, stateLgdCode: "9920099" })).toBe(
+        0,
+      );
     });
 
     it("counts only tenders still open", async () => {
@@ -165,6 +190,21 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         [];
       expect(unplaced.map((t) => t.title)).toContain("Open but unplaced");
       expect(await repository?.unplacedCount()).toBeGreaterThanOrEqual(1);
+    });
+
+    // What the explorer shows while tender details are withheld (ADR-056): the
+    // count must agree with the list it stands in for, filter for filter.
+    it("counts exactly the tenders the list would show, without reading them", async () => {
+      const listed = (await repository?.listTenders({ adminUnitId: districtId })) ?? [];
+      expect(await repository?.countTenders({ adminUnitId: districtId })).toBe(listed.length);
+      expect(listed.length).toBe(2);
+
+      const unplaced =
+        (await repository?.listTenders({ unplacedOnly: true, department: "Test Department" })) ??
+        [];
+      expect(
+        await repository?.countTenders({ unplacedOnly: true, department: "Test Department" }),
+      ).toBe(unplaced.length);
     });
 
     it("sends money as a decimal string, never a number", async () => {

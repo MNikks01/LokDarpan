@@ -2,6 +2,23 @@ import "server-only";
 
 import { AppError, toEnvelope } from "@lokdarpan/errors";
 import { randomUUID } from "node:crypto";
+import { datasetVersionOpenedAt } from "./container";
+
+export interface Produced {
+  readonly data: unknown;
+  readonly datasetVersion: number;
+  /**
+   * When `datasetVersion` was opened. Omitted by handlers whose version comes
+   * from their rows, and looked up here. Never the time of the response: that
+   * described the request, and read as a statement about the data.
+   */
+  readonly asOf?: string | null;
+}
+
+async function asOfFor(produced: Produced): Promise<string | null> {
+  if (produced.asOf !== undefined) return produced.asOf;
+  return produced.datasetVersion > 0 ? datasetVersionOpenedAt(produced.datasetVersion) : null;
+}
 
 /**
  * One response shape for every handler, so the correlation id, the error
@@ -9,14 +26,16 @@ import { randomUUID } from "node:crypto";
  */
 export async function respond(
   request: Request,
-  produce: () => Promise<{ data: unknown; datasetVersion: number }>,
+  produce: () => Promise<Produced>,
 ): Promise<Response> {
   const requestId = request.headers.get("x-request-id") ?? randomUUID();
 
   try {
-    const { data, datasetVersion } = await produce();
+    const produced = await produce();
+    const { data, datasetVersion } = produced;
+    const asOf = await asOfFor(produced);
     return Response.json(
-      { data, meta: { datasetVersion, asOf: new Date().toISOString() } },
+      { data, meta: { datasetVersion, asOf } },
       {
         status: 200,
         headers: {

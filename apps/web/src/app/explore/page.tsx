@@ -1,8 +1,9 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { GeometryNotInstalledError, listStateOptions, stateOutlineSource } from "@/data/geography";
+import { datasetVersionOpenedAt, geographyRepository } from "@/server/container";
 import { ExploreShell } from "@/components/explore/ExploreShell";
-import { parseExplorerState, toSearchParams } from "@/state/explorer-url";
+import { parseExplorerState, reconcile, reconcilePin, toSearchParams } from "@/state/explorer-url";
 import { color } from "@/ui/tokens";
 
 export const metadata: Metadata = {
@@ -37,9 +38,29 @@ export default async function ExplorePage({
 
   // The selection is read from the request, so a shared deep link is rendered
   // server-side as the place it names rather than being corrected on the client.
-  const initialState = parseExplorerState(toSearchParams(await searchParams));
+  const requested = parseExplorerState(toSearchParams(await searchParams));
+  // Resolved on the server, so the first render is already coherent and no
+  // correction flashes on screen.
+  const placed = reconcile(
+    requested,
+    requested.geo.unitId === null
+      ? null
+      : await geographyRepository().stateCodeOf(requested.geo.unitId),
+  );
+  // A pinned version is checked against the ledger here, so a link naming one
+  // it does not hold opens as an ordinary link rather than as a claim (ADR-061).
+  const pinnedAt =
+    placed.pinnedVersion === null ? null : await datasetVersionOpenedAt(placed.pinnedVersion);
+  const initialState = reconcilePin(placed, pinnedAt);
 
-  return <ExploreShell states={states} initialState={initialState} outlineSource={outlineSource} />;
+  return (
+    <ExploreShell
+      states={states}
+      initialState={initialState}
+      pinnedAt={initialState.pinnedVersion === null ? null : pinnedAt}
+      outlineSource={outlineSource}
+    />
+  );
 }
 
 /**

@@ -44,6 +44,8 @@
 
 **Building the website** → `01-product/sprint-plan.md` → `decisions/web-first-pivot.md` → `02-architecture/web-architecture.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
 
+**Working on the map or ingestion safety** → `decisions/gods-eye-view-adoption.md` → `adr/022` → `adr/052`
+
 **Working on data** → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md`
 
 **Reviewing for neutrality** → `17-legal/legal-ethical-rules.md` → `01-product/design-system.md` §Neutrality primitives → `01-product/screen-inventory.md` §Screens that must not exist → `14-testing/testing-strategy.md` §6
@@ -72,12 +74,12 @@ Web-specific:
 
 ## Open items
 
-| #   | Item                                                                                                                                                                                                                                                                                                                        | Blocks                                  |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| 1   | Backend acceptance of the P0 contract items (`11-api/client-api-contract.md` §7)                                                                                                                                                                                                                                            | W4, W5                                  |
-| 2   | **The execution-data gap — located, and licence-blocked.** PMGSY/OMMAS publishes work-level progress, contractor and final-bill data; NRIDA's terms forbid copying or republication without written permission ([`06-government-sources/pmgsy-ommas-findings.md`](./06-government-sources/pmgsy-ommas-findings.md), 28 Aug) | What the Money Trail can show at launch |
-| 3   | **Ask for permission, or don't.** Q1 _no_, Q3 _yes_ ([`sprint0-findings-q1-q3.md`](./06-government-sources/sprint0-findings-q1-q3.md)); Q2 answered 28 Aug — reachable, and licence-blocked. Three of four sources now turn on a written request to a government body. **Not yet asked.**                                   | Phase-1 scope, and Branch A vs B        |
-| 4   | Confirm self-hosted deployability is tested, not assumed (`adr/011`)                                                                                                                                                                                                                                                        | W1                                      |
+| #   | Item                                                                                                                                                                                                                                                                             | Blocks                                      |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| 1   | Backend acceptance of the P0 contract items (`11-api/client-api-contract.md` §7)                                                                                                                                                                                                 | W4, W5                                      |
+| 2   | ~~**The execution-data gap**~~ — **settled 5 Sep, not closed.** PMGSY is licence-blocked and permission is not being sought, so it is not collected. `Released − Utilized` has no input ([`00-overview/what-the-ledger-is-today.md`](./00-overview/what-the-ledger-is-today.md)) | Project-level Money Trail, indefinitely     |
+| 3   | ~~**Ask for permission, or don't.**~~ **Answered 5 Sep: don't.** BEAMS is collected but not displayed; PMGSY is not collected. What is publishable is CAG and LGD ([`00-overview/what-the-ledger-is-today.md`](./00-overview/what-the-ledger-is-today.md))                       | — reversible by one variable and one letter |
+| 4   | Confirm self-hosted deployability is tested, not assumed (`adr/011`)                                                                                                                                                                                                             | W1                                          |
 
 ---
 

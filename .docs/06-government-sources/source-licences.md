@@ -1,6 +1,6 @@
 # Source licences — what we are allowed to republish
 
-**Status:** Verified 28 August 2026 · Closes row 32 of [`data-availability-matrix.md`](./data-availability-matrix.md)
+**Status:** Verified 28 August 2026; GePNIC tender portals and OpenStreetMap added 17 September 2026 · Closes row 32 of [`data-availability-matrix.md`](./data-availability-matrix.md)
 
 [`access-and-permissions.md`](./access-and-permissions.md) answers a different question — _may we collect this?_ — from `robots.txt`. This answers _may we publish it?_, from each publisher's own stated terms. A source can be freely crawlable and still not freely republishable, and only the second question governs what a reader is allowed to see.
 
@@ -26,11 +26,13 @@ The line above about BEAMS supplying "every monetary figure the site currently r
 also now out of date: all 5,164 published facts come from CAG, which permits reproduction
 outright.
 
-| Source                     | Host                    | Republication                       | Attribution         |
-| -------------------------- | ----------------------- | ----------------------------------- | ------------------- |
-| Local Government Directory | `lgdirectory.gov.in`    | **Permitted**, no permission needed | Required, prominent |
-| CAG audit reports          | `cag.gov.in`            | **Permitted**, no permission needed | Required, prominent |
-| BEAMS                      | `beams.mahakosh.gov.in` | **Permission required in writing**  | Required            |
+| Source                           | Host                          | Republication                                                             | Attribution                              |
+| -------------------------------- | ----------------------------- | ------------------------------------------------------------------------- | ---------------------------------------- |
+| Local Government Directory       | `lgdirectory.gov.in`          | **Permitted**, no permission needed                                       | Required, prominent                      |
+| CAG audit reports                | `cag.gov.in`                  | **Permitted**, no permission needed                                       | Required, prominent                      |
+| BEAMS                            | `beams.mahakosh.gov.in`       | **Permission required in writing**                                        | Required                                 |
+| GePNIC state tender portals (21) | e.g. `etenders.kerala.gov.in` | **Permission required** (written, for Madhya Pradesh); linking needs none | Required where stated                    |
+| OpenStreetMap                    | `openstreetmap.org`           | **Permitted** under ODbL 1.0                                              | Required: "© OpenStreetMap contributors" |
 
 ---
 
@@ -93,6 +95,69 @@ Also observed on 28 Aug 2026:
 The most restrictive terms examined, and the only ones that reach _collection_ rather than only display. BEAMS requires permission before publishing; NRIDA requires it before copying at all.
 
 This matters more than the others because of what sits behind it: the work-level agreement, contractor, progress, completion and final-bill data that rows 16–19 of the availability matrix record as having no source located. It exists, it needs no credential, and it may not be taken. See [`pmgsy-ommas-findings.md`](./pmgsy-ommas-findings.md).
+
+---
+
+## 5. GePNIC state tender portals — permission required
+
+**Found 17 September 2026, while building source descriptors for the explorer — and not recorded before, although tenders from these portals have been listed on the explorer since #55 (`93bc1ef`).**
+
+Each portal's footer links "Portal policies" at `/nicgep/app?page=Disclaimer&service=page`. The
+page was fetched from all 21 portals in `services/ingestion/src/gepnic/portals.ts` on
+17 Sep 2026, each after opening a session on the landing page, and each answered **HTTP 200**.
+Twenty publish the same Copyright Policy. Fetched from `https://etenders.kerala.gov.in/nicgep/app?page=Disclaimer&service=page`
+(title _"eTendering System Government of Kerala"_), and identical on the other nineteen:
+
+> "The contents published in this portal are primarily owned by the respective Government / Organisation /Department."
+
+> "Material featured on this Portal maybe reproduced free of charge **after taking proper permission** from the respective Organisation / Department."
+
+> "However, the material has to be reproduced accurately and not to be used in a derogatory manner or in a misleading context and as per the guidelines provided by the respective Government / Department."
+
+> "We do not object to you linking directly to the information that is hosted on this eProcurement Portal and no prior permission is required for the same."
+
+**Madhya Pradesh (`mptenders.gov.in`) is stricter** in two respects:
+
+> "Material featured on this Portal maybe reproduced free of charge after taking proper **written** permission from the respective Organisation / Department."
+
+> "Wherever the material is being published or issued to others, the source must be prominently acknowledged."
+
+Portals checked: Arunachal Pradesh, Assam, Goa, Haryana, Himachal Pradesh, Jharkhand, Kerala,
+Madhya Pradesh, Manipur, Meghalaya, Mizoram, Nagaland, Odisha, Punjab, Rajasthan, Sikkim, Tamil
+Nadu, Tripura, Uttar Pradesh, Uttarakhand, West Bengal.
+
+**This is the BEAMS clause, on every portal we collect.** Permission has not been sought from any
+department. The explorer nonetheless shows tender titles, references, departments, organisation
+chains, values and locations from these portals. The rule at the end of this document says such a
+source is not publishable. `mayRepublish` would refuse it, but only the CAG document path calls
+`mayRepublish`, and the tender path does not. **Resolved 17 September 2026, the same way as BEAMS: tender details are withheld, and the reader is
+linked to the state's portal instead** ([`../adr/056-a-tender-is-linked-to-not-reproduced.md`](../adr/056-a-tender-is-linked-to-not-reproduced.md)).
+Counts and district shading remain, as LokDarpan's own measurement. `PUBLISH_TENDER_DETAILS` restores
+the lists once permission exists.
+
+Two limits, as with BEAMS:
+
+1. **"Respective Organisation / Department" is not one body.** A tender is issued by a specific
+   department, so permission is per department, not per portal. That is materially harder than
+   BEAMS's single address.
+2. **Whether a copyright policy reaches a tender's facts** (its title, reference, value and closing
+   date as published notices of intent to buy) is the same unresolved legal question as for BEAMS.
+   Not answered here.
+
+---
+
+## 6. OpenStreetMap — permitted under ODbL
+
+**Fetched:** `https://www.openstreetmap.org/copyright` · 17 Sep 2026 · HTTP 200
+
+The page states that OpenStreetMap data is licensed under the **Open Data Commons Open Database
+License**, and asks users to credit OpenStreetMap by displaying its attribution notice, as a credit
+in the corner of the map. The explorer already shows "© OpenStreetMap contributors" for both the
+base map and the boundaries.
+
+The page also states: "If you alter or build upon our data, you may distribute the result only
+under the same license." Our simplified boundaries are data built upon theirs. That obligation is
+recorded here rather than resolved.
 
 ---
 

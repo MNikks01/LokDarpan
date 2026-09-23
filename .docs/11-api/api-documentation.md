@@ -358,20 +358,21 @@ Contractor profile — **descriptive statistics only**, no characterization.
 
 Read-only, same envelope/provenance rules. `unitId` is an `admin_unit` id ([19](../03-domain/administrative-hierarchy.md)).
 
-| Method & path                                                                        | Purpose                                                                                                      |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `GET /states` / `GET /states/:id`                                                    | States/UTs with finance rollups                                                                              |
-| `GET /divisions/:id` · `GET /districts/:id` · `GET /talukas/:id` · `GET /blocks/:id` | Level-specific rollups                                                                                       |
-| `GET /units/:id`                                                                     | Any `admin_unit` (generic) — finance, children, assets                                                       |
-| `GET /units/:id/children`                                                            | Direct children (drill-down)                                                                                 |
-| `GET /units/:id/rollup`                                                              | Aggregated allocation/release/expenditure for the whole subtree                                              |
-| `GET /units/:id/consistency`                                                         | Vertical roll-up gap check ([06 §10](../07-analytics/analytics-engine.md))                                   |
-| `GET /villages/:id` / `GET /local-bodies/:id`                                        | GP/ULB finance, scheme grants, works                                                                         |
-| `GET /ministries` / `GET /ministries/:id`                                            | Ministry rollups & scheme list                                                                               |
-| `GET /schemes` / `GET /schemes/:id`                                                  | Scheme allocations/releases across units                                                                     |
-| `GET /transfers`                                                                     | Inter-governmental transfers/grants (filter by from/to unit, scheme)                                         |
-| `GET /facilities/:id` · `GET /roads/:id` · `GET /assets`                             | Social/utility/transport assets (filter by type, unit, bbox)                                                 |
-| `GET /geo/units/:id`                                                                 | GeoJSON boundary; `GET /tiles/{layer}/{z}/{x}/{y}.mvt` vector tiles ([20](../03-domain/gis-intelligence.md)) |
+| Method & path                                                                        | Purpose                                                                                                                                                   |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /states` / `GET /states/:id`                                                    | States/UTs with finance rollups                                                                                                                           |
+| `GET /divisions/:id` · `GET /districts/:id` · `GET /talukas/:id` · `GET /blocks/:id` | Level-specific rollups                                                                                                                                    |
+| `GET /units/:id`                                                                     | Any `admin_unit` (generic) — finance, children, assets                                                                                                    |
+| `GET /units/:id/children`                                                            | Direct children (drill-down)                                                                                                                              |
+| `GET /units/:id/rollup`                                                              | Aggregated allocation/release/expenditure for the whole subtree                                                                                           |
+| `GET /units/:id/consistency`                                                         | Vertical roll-up gap check ([06 §10](../07-analytics/analytics-engine.md))                                                                                |
+| `GET /villages/:id` / `GET /local-bodies/:id`                                        | GP/ULB finance, scheme grants, works                                                                                                                      |
+| `GET /ministries` / `GET /ministries/:id`                                            | Ministry rollups & scheme list                                                                                                                            |
+| `GET /schemes` / `GET /schemes/:id`                                                  | Scheme allocations/releases across units                                                                                                                  |
+| `GET /transfers`                                                                     | Inter-governmental transfers/grants (filter by from/to unit, scheme)                                                                                      |
+| `GET /facilities/:id` · `GET /roads/:id` · `GET /assets`                             | Social/utility/transport assets (filter by type, unit, bbox)                                                                                              |
+| `GET /geo/units/:id`                                                                 | GeoJSON boundary; `GET /tiles/{layer}/{z}/{x}/{y}.mvt` vector tiles ([20](../03-domain/gis-intelligence.md))                                              |
+| `GET /geo/units/:id/level`                                                           | The units inside a place with their coverage, sources and boundaries, in one snapshot ([ADR-064](../adr/064-a-level-is-read-once-and-kept-by-version.md)) |
 
 `GET /units/:id` filter examples:
 

@@ -69,6 +69,54 @@ test.describe("explore", () => {
     await expect(page.getByRole("checkbox", { name: /State boundaries/ })).toBeChecked();
   });
 
+  test("place names never overlap once the map settles, and return after being hidden", async ({
+    page,
+  }) => {
+    await page.goto("/explore");
+    test.skip(!(await geometryInstalled(page)), "no boundary geometry in this checkout");
+
+    /** Names drawn at full opacity, and how many pairs of them overlap on screen. */
+    const drawn = (): Promise<{ count: number; overlaps: number }> =>
+      page.evaluate(() => {
+        const rects = [...document.querySelectorAll(".maplibregl-marker span")]
+          .filter((e) => getComputedStyle(e).opacity === "1")
+          .map((e) => e.getBoundingClientRect());
+        let overlaps = 0;
+        for (let i = 0; i < rects.length; i++) {
+          for (let j = i + 1; j < rects.length; j++) {
+            const a = rects[i];
+            const b = rects[j];
+            if (
+              a &&
+              b &&
+              a.left < b.right &&
+              a.right > b.left &&
+              a.top < b.bottom &&
+              a.bottom > b.top
+            ) {
+              overlaps++;
+            }
+          }
+        }
+        return { count: rects.length, overlaps };
+      });
+
+    // MapLibre's Marker resets its own element's opacity on every camera move.
+    // Names hidden on that element came back after the first move — eleven
+    // overlapping pairs on the India view — which only a browser shows.
+    await expect.poll(async () => (await drawn()).count, { timeout: 10_000 }).toBeGreaterThan(0);
+    await page.waitForTimeout(1_500);
+    expect((await drawn()).overlaps).toBe(0);
+
+    await page.getByRole("button", { name: "Layers" }).click();
+    const placeNames = page.getByRole("checkbox", { name: /Place names/ });
+    await placeNames.uncheck();
+    await expect.poll(async () => (await drawn()).count).toBe(0);
+    await placeNames.check();
+    await expect.poll(async () => (await drawn()).count).toBeGreaterThan(0);
+    expect((await drawn()).overlaps).toBe(0);
+  });
+
   test("search opens and says so when it cannot answer", async ({ page }) => {
     await page.goto("/explore");
     test.skip(!(await geometryInstalled(page)), "no boundary geometry in this checkout");

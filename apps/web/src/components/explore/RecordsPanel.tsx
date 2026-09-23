@@ -55,10 +55,28 @@ export function RecordsPanel({
               Records could not be loaded. This is a fault here, not an absence of records.
             </p>
           ) : documents.length === 0 ? (
-            <p style={{ fontSize: 13, color: "var(--ld-text-secondary)", margin: 0 }}>
-              <span aria-hidden="true">▤ </span>
-              No document is recorded against this unit.
-            </p>
+            <>
+              <p style={{ fontSize: 13, color: "var(--ld-text-secondary)", margin: 0 }}>
+                <span aria-hidden="true">▤ </span>
+                No records are currently attributed to {scopeLabel}.
+              </p>
+              {/*
+                The sentence that stops the first one being read as a finding.
+                An empty list describes what LokDarpan holds; a reader will take
+                it for a statement about the place unless told otherwise.
+              */}
+              <p
+                style={{
+                  fontSize: 11.5,
+                  color: "var(--ld-text-tertiary)",
+                  margin: "6px 0 0",
+                }}
+              >
+                That describes what is held here, not what has been audited or spent in this area.
+                Reports are attributed only where the source establishes the geography they concern
+                — the office that issued a report is not the area it audits.
+              </p>
+            </>
           ) : (
             <ul
               aria-labelledby="records-heading"

@@ -97,6 +97,13 @@ export interface BoundaryFeatureCollection {
       readonly level: AdminUnitLevel;
       readonly sourceKind: BoundarySourceKind;
       readonly sourceName: string;
+      /**
+       * Where the name is drawn: inside the unit, away from its edges. Computed
+       * in PostGIS from the stored geometry (migration 0032). `[lng, lat]`.
+       */
+      readonly labelPoint: readonly [number, number];
+      /** Ellipsoidal area in m². Decides which of two colliding names is drawn; never a statistic. */
+      readonly areaM2: number;
     };
     readonly geometry: unknown;
   }[];

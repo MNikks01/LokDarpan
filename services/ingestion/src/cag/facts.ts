@@ -14,7 +14,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/22";
+export const PARSER_VERSION = "cag-facts/23";
 
 export type FactKind =
   "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
@@ -310,6 +310,29 @@ const DECLARES_RUPEES = /(?:amount|amounts|amt|figures?|value|values|rupees)\.?\
 const UNREADABLE_UNIT =
   /^\s*(?:core|cores|crores|cr|crs|lac|lacs|lakhs|thousands|million|millions|billion|billions|mn|bn|करोड|कोटय|ोटय)\b/iu;
 
+/**
+ * A word in a script the parser does not read, standing where a scale word
+ * would.
+ *
+ * Tamil Nadu publishes its reports as separate Tamil and English PDFs, and the
+ * Tamil half arrives two ways: in visual glyph order (`ணைாடி` where Unicode
+ * spells `கோடி`), and as mojibake mixing Tamil with Latin-1 (`ேகா}`). Both keep
+ * the digits and destroy the word. `₹2,43,749.34 ணைாடி` — the state's revenue
+ * receipts, in crore — was read as ₹2,43,749: the same seven-order error as
+ * `₹ 2.12 िोटी`, arrived at from a different direction.
+ *
+ * The rule states only what the parser can honestly claim. It reads English and
+ * Devanagari; a figure whose next word is in neither has a magnitude it cannot
+ * establish, so the figure is refused. Combining marks count as letters here
+ * because a Tamil vowel sign leads the word once the text layer has reordered
+ * it — `ேகா}` begins with one.
+ *
+ * Punctuation is deliberately outside the class. An amount followed by an en
+ * dash or an ellipsis is ordinary English typesetting, and matching those would
+ * retire figures that are already published and correct.
+ */
+const UNREADABLE_SCRIPT = /^\s*(?![A-Za-z]|\p{Script=Devanagari})(?:\p{L}|\p{M})/u;
+
 /** Whether this page states a scale its bare figures could belong to. */
 export function pageDeclaresUnit(content: string): boolean {
   return PAGE_DECLARES_UNIT.test(content);
@@ -566,16 +589,18 @@ function moneyIn(sentence: string, rules: ReadingRules): FactCandidate[] {
 /**
  * Whether an unqualified amount's scale can be trusted to be absent.
  *
- * Three ways it cannot: a unit the parser could not read, a fraction the text
- * layer separated from its decimal point, and a scale word the sentence states
- * outside a bracket that governs what is inside it. Each means the figure has a
- * magnitude the parser cannot establish, so it is refused rather than read as
- * rupees — which is the same error seven orders down.
+ * Four ways it cannot: a unit the parser could not read, a word in a script it
+ * does not read at all, a fraction the text layer separated from its decimal
+ * point, and a scale word the sentence states outside a bracket that governs
+ * what is inside it. Each means the figure has a magnitude the parser cannot
+ * establish, so it is refused rather than read as rupees — which is the same
+ * error seven orders down.
  */
 function scaleIsUnusable(sentence: string, from: number): boolean {
   const after = sentence.slice(from, from + 20);
   return (
     UNREADABLE_UNIT.test(after) ||
+    UNREADABLE_SCRIPT.test(after) ||
     SPLIT_DECIMAL.test(after) ||
     SCALE_OUTSIDE_BRACKET.test(sentence.slice(from, from + 60))
   );

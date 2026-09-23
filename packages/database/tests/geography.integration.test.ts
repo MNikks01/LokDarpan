@@ -28,12 +28,13 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     let pool: pg.Pool | undefined;
     let repository: PostgresGeographyRepository | undefined;
 
-    const ids: Record<"state" | "district" | "taluka" | "body" | "outside", number> = {
+    const ids: Record<"state" | "district" | "taluka" | "body" | "outside" | "hub", number> = {
       state: 0,
       district: 0,
       taluka: 0,
       body: 0,
       outside: 0,
+      hub: 0,
     };
     /**
      * A digest no other suite uses. Single-letter repeats a-f are all taken,
@@ -110,6 +111,10 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await boundary(ids.taluka, square(70.212345678, -19.812345678, 0.5), "open_dataset", null);
       await boundary(ids.body, square(71.0, -19.2, 0.3), "official_government", "Test Authority");
       await boundary(ids.outside, square(60.0, -30.0, 1), "derived", null);
+      // A small unit centred on the district's own label point (71, -19): the
+      // district's interior point falls inside it, though the district is not.
+      ids.hub = await unit("sub_district", "Test Hub", ids.district);
+      await boundary(ids.hub, square(70.9, -19.1, 0.2), "open_dataset", null);
     });
 
     afterAll(async () => {
@@ -137,6 +142,13 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       const children = (await repository?.childrenOf(ids.district)) ?? [];
       const levels = children.map((c) => c.level);
       expect(levels.indexOf("sub_district")).toBeLessThan(levels.indexOf("urban_local_body"));
+    });
+
+    // The regression: 79 pairs in the ledger listed a state or district as the
+    // child of one of its own smaller units, because its interior point fell there.
+    it("never lists a larger unit as the child of a smaller one", async () => {
+      const children = (await repository?.childrenOf(ids.hub)) ?? [];
+      expect(children.map((c) => c.name)).not.toContain("Test District");
     });
 
     it("excludes a unit that merely sits elsewhere", async () => {
@@ -189,10 +201,25 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     it("returns boundary features with their provenance attached", async () => {
       const collection = await repository?.boundariesOfChildren(ids.district);
       expect(collection?.type).toBe("FeatureCollection");
-      expect(collection?.features.length).toBe(2);
+      expect(collection?.features.length).toBe(3); // taluka, city and hub
       for (const feature of collection?.features ?? []) {
         expect(feature.properties.sourceName).toBe("Test source");
         expect(feature.geometry).not.toBeNull();
+      }
+    });
+
+    it("places each name inside its own unit and sizes the unit in square metres", async () => {
+      const collection = await repository?.boundariesOfChildren(ids.district);
+      expect(collection?.features.length).toBeGreaterThan(0);
+      for (const feature of collection?.features ?? []) {
+        const [lng, lat] = feature.properties.labelPoint;
+        const inside = await pool?.query<{ inside: boolean }>(
+          `SELECT ST_Contains(geometry, ST_SetSRID(ST_MakePoint($2, $3), 4326)) AS inside
+             FROM admin_unit_boundary WHERE admin_unit_id = $1`,
+          [feature.properties.unitId, lng, lat],
+        );
+        expect(inside?.rows[0]?.inside).toBe(true);
+        expect(feature.properties.areaM2).toBeGreaterThan(0);
       }
     });
 
@@ -255,6 +282,65 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
     it("ignores a search term too short to mean anything", async () => {
       expect(await repository?.search("T", 10)).toEqual([]);
+    });
+
+    /**
+     * 0025 recorded district, taluka and local-body coverage and left villages
+     * out. Forty are held, all inside one district, against a state with more
+     * than forty thousand — so a taluka showing no village would be read as a
+     * statement about the taluka rather than about a query nobody has run.
+     */
+    it("states how complete every level held for Maharashtra is", async () => {
+      const maharashtra = await pool?.query<{ id: string }>(
+        `SELECT id FROM admin_unit WHERE level = 'state' AND lgd_code = '27'`,
+      );
+      const id = Number(maharashtra?.rows[0]?.id);
+      if (!Number.isInteger(id)) return; // Maharashtra is not ingested here.
+
+      const missing = await pool?.query<{ level: string }>(
+        `WITH RECURSIVE tree AS (
+           SELECT id, level FROM admin_unit WHERE id = $1
+           UNION ALL SELECT a.id, a.level FROM admin_unit a JOIN tree t ON a.parent_id = t.id)
+         SELECT DISTINCT t.level::text AS level FROM tree t
+          WHERE t.level::text <> 'state'
+            AND t.level::text NOT IN (
+              SELECT level::text FROM geography_coverage WHERE admin_unit_id = $1)`,
+        [id],
+      );
+      expect(missing?.rows.map((r) => r.level)).toEqual([]);
+    });
+
+    /**
+     * The explorer's URL carries a state and a unit independently, so a link can
+     * pair a state with a unit inside another one. This is the lookup that lets
+     * the pairing be rejected before anything renders.
+     */
+    describe("which state a unit sits in", () => {
+      it("answers with the state above a nested unit", async () => {
+        const nagpur = await pool?.query<{ id: string }>(
+          `SELECT id FROM admin_unit WHERE level = 'district' AND name_en = 'Nagpur'
+             AND parent_id = (SELECT id FROM admin_unit WHERE level='state' AND lgd_code='27')`,
+        );
+        const id = Number(nagpur?.rows[0]?.id);
+        if (!Number.isInteger(id)) return; // Maharashtra is not ingested here.
+        expect(await repository?.stateCodeOf(id)).toBe("27");
+      });
+
+      it("answers with its own code when the unit is itself a state", async () => {
+        const state = await pool?.query<{ id: string }>(
+          `SELECT id FROM admin_unit WHERE level='state' AND lgd_code='27'`,
+        );
+        const id = Number(state?.rows[0]?.id);
+        if (!Number.isInteger(id)) return;
+        // No special case is needed for selecting a state directly.
+        expect(await repository?.stateCodeOf(id)).toBe("27");
+      });
+
+      // A unit that cannot be placed cannot be shown under a state, and the
+      // caller drops it rather than guessing.
+      it("answers null for a unit that does not exist", async () => {
+        expect(await repository?.stateCodeOf(999_999_999)).toBeNull();
+      });
     });
   },
 );

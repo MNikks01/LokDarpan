@@ -1,17 +1,21 @@
 {
   "name": "@lokdarpan/web",
-  "version": "0.0.3",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
+    "predev": "tsx scripts/copy-maplibre-worker.ts",
     "dev": "next dev",
+    "prebuild": "tsx scripts/copy-maplibre-worker.ts",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "geo:fetch": "tsx scripts/fetch-boundaries.ts",
-    "geo:basemap": "tsx scripts/fetch-basemap.ts"
+    "geo:basemap": "tsx scripts/fetch-basemap.ts",
+    "perf:bytes": "tsx perf/bytes.ts",
+    "perf:runtime": "tsx perf/runtime.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",
@@ -21,8 +25,8 @@
     "@lokdarpan/money": "workspace:*",
     "@lokdarpan/neutrality": "workspace:*",
     "@protomaps/basemaps": "^5.7.2",
-    "maplibre-gl": "^5.24.0",
-    "next": "^15.1.3",
+    "maplibre-gl": "^6.11.1",
+    "next": "^15.5.26",
     "pg": "^8.13.1",
     "pmtiles": "^4.5.0",
     "react": "^19.0.0",

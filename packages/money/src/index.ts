@@ -148,3 +148,24 @@ export class Money {
     return this.toDecimalString();
   }
 }
+
+/**
+ * An amount as the server sent it — a decimal string of rupees — formatted for
+ * display.
+ *
+ * Client code's only door into this package (ADR-059, rule A). It formats; it
+ * never hands back a `Money` a component could add, subtract or compare. Every
+ * figure's arithmetic happens on the server, versioned and source-linked.
+ */
+export function formatAmount(
+  decimal: string,
+  locale: Locale = "en",
+  style: MoneyStyle = "crore-lakh",
+): string {
+  return Money.fromDecimalString(decimal).format(locale, style);
+}
+
+/** The same amount for a screen reader: the unit spoken, never a digit string. */
+export function formatAmountSpoken(decimal: string, locale: Locale = "en"): string {
+  return Money.fromDecimalString(decimal).toAccessibleString(locale);
+}
