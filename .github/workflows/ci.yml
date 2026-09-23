@@ -48,6 +48,10 @@ jobs:
       - name: G1 · Neutrality (all locales)
         run: pnpm neutrality
 
+      # ADR-059. Layering is checked, not described: every tracked file.
+      - name: G2 · Import directions (rules A, C, D, E, F, R)
+        run: pnpm architecture
+
       - name: G3 · Palette — no red in any data token
         run: pnpm exec vitest run apps/web/src/ui/tokens.test.ts
 

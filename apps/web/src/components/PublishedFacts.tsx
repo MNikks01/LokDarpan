@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { Money } from "@lokdarpan/money";
+import { formatAmount, formatAmountSpoken } from "@lokdarpan/money";
 import { isReviewComplete, type DocumentFactsView, type PublishedFact } from "@lokdarpan/domain";
 
 import { color, figureFontFeatures, radius, space } from "@/ui/tokens";
@@ -23,7 +23,6 @@ export function Value({ fact }: { readonly fact: PublishedFact }): React.JSX.Ele
   if (fact.kind !== "monetary_amount") {
     return <span style={{ fontWeight: 600, color: color.text.primary }}>{fact.value}</span>;
   }
-  const money = Money.fromDecimalString(fact.value);
   // A rate is rendered with its denominator or not at all. "₹1,500" beside a
   // page citation is a claim the source never made; "₹1,500 per month" is the
   // claim it did (ADR-044). The unit is read into `perUnit` and shown here in
@@ -35,11 +34,11 @@ export function Value({ fact }: { readonly fact: PublishedFact }): React.JSX.Ele
       style={{ fontWeight: 600, color: color.text.primary, ...figureFontFeatures }}
       title={
         perUnit === null
-          ? money.toAccessibleString()
-          : `${money.toAccessibleString()} per ${perUnit}`
+          ? formatAmountSpoken(fact.value)
+          : `${formatAmountSpoken(fact.value)} per ${perUnit}`
       }
     >
-      {money.format()}
+      {formatAmount(fact.value)}
       {perUnit === null ? null : (
         <span style={{ fontWeight: 400, color: color.text.secondary }}> per {perUnit}</span>
       )}

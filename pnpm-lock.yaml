@@ -138,6 +138,8 @@ importers:
         specifier: ^19.0.2
         version: 19.2.5(@types/react@19.2.18)
 
+  packages/architecture: {}
+
   packages/contracts:
     dependencies:
       zod:

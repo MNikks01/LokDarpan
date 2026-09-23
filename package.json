@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "neutrality": "tsx packages/neutrality/src/cli.ts apps packages services",
+    "architecture": "tsx packages/architecture/src/cli.ts",
     "dev": "pnpm --filter @lokdarpan/web dev",
     "dev:api": "pnpm --filter @lokdarpan/api dev",
     "prepare": "husky",
