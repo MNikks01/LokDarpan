@@ -1,5 +1,32 @@
 # @lokdarpan/api
 
+## 0.0.5
+
+### Patch Changes
+
+- 03e5402: Serve unit views whose units came from several loads (ADR-053 addendum).
+
+  `UnitService` no longer refuses a payload that spans loads. Geography is loaded district by district,
+  so it refused every real state. The web routes read inside the ledger snapshot and report its
+  watermark, and each unit keeps its own `provenance.datasetVersion`. `singleDatasetVersion` and
+  `ViolationSink` are removed; `newestDatasetVersion` replaces them for callers with no snapshot.
+  `PostgresAdminUnitRepository` accepts a snapshot client.
+
+- Updated dependencies [744bdda]
+- Updated dependencies [b04aadb]
+- Updated dependencies [c472e32]
+- Updated dependencies [469deb8]
+- Updated dependencies [79e0920]
+- Updated dependencies [52a6d22]
+- Updated dependencies [59de13e]
+- Updated dependencies [4a831f0]
+- Updated dependencies [65f19bd]
+- Updated dependencies [03e5402]
+  - @lokdarpan/database@0.3.0
+  - @lokdarpan/contracts@0.2.0
+  - @lokdarpan/money@0.1.0
+  - @lokdarpan/domain@0.3.0
+
 ## 0.0.4
 
 ### Patch Changes

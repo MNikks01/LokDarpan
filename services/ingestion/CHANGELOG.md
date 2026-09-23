@@ -1,5 +1,66 @@
 # @lokdarpan/ingestion
 
+## 0.5.0
+
+### Minor Changes
+
+- 0f4227c: Bound every collector's downloads by size and time.
+
+  CAG, LGD, BEAMS, GePNIC and Overpass read whole responses with no limit on size and no deadline.
+  A host serving an endless body or holding a connection open could exhaust the scheduled sweep's
+  memory or keep it running until the runner killed it, and a killed runner leaves no
+  `ingestion_run` record of why.
+
+  All five now fetch through `fetchWithLimits`, which enforces a decoded-byte limit, a deadline for
+  headers, a limit on silence between chunks and a total deadline, and names the limit it reached.
+  Decoded bytes are counted because Node undoes gzip before the body is read: a 199 KiB gzip
+  response expanding to 200 MiB was stopped at a 16 MiB limit when tested.
+
+  A CAG report is now refused from its status and content type before the body is downloaded, so
+  an HTML error page is no longer fetched in full to discover it is not a PDF. Overpass errors are
+  classified from the status line in the same way.
+
+  Limits come from the raw store's largest artefacts: CAG reports 128 MiB, BEAMS 4 MiB, LGD 1 MiB.
+  GePNIC and Overpass were not measurable locally and have generous ceilings until their sizes are
+  logged. No figure, parser or stored artefact changes for a response within its limits.
+
+### Patch Changes
+
+- 65f19bd: Link to tender portals instead of reproducing their tenders.
+
+  All 21 collected GePNIC portals permit reproduction only with the issuing department's permission,
+  which has not been sought (ADR-055, ADR-056). Tender titles, references, values, EMDs, organisation
+  chains and locations are no longer shown, and `/api/v1/tenders` no longer reads them unless
+  `PUBLISH_TENDER_DETAILS` is `true`. District shading and counts remain.
+
+  A selected place now shows how many open tenders are held, why details are not shown, and a link
+  to its state's portal, which the portals' terms allow. The unplaced-tenders list can no longer be
+  opened while details are withheld. The portal table moves from the collector to
+  `@lokdarpan/domain` so the explorer can link to it; the collector re-exports it unchanged.
+
+  New sentences, for review:
+
+  - "{n} open tenders are held for offices here."
+  - "Tender details are not shown. The state portals permit reproducing them only with the issuing
+    department's permission, which LokDarpan has not sought."
+  - "Read these tenders on the state's e-procurement portal" (link)
+  - "Their details are not shown, for the same reason as other tenders." (after the unplaced count)
+
+- Updated dependencies [744bdda]
+- Updated dependencies [b04aadb]
+- Updated dependencies [c472e32]
+- Updated dependencies [469deb8]
+- Updated dependencies [79e0920]
+- Updated dependencies [52a6d22]
+- Updated dependencies [59de13e]
+- Updated dependencies [4a831f0]
+- Updated dependencies [65f19bd]
+- Updated dependencies [03e5402]
+  - @lokdarpan/database@0.3.0
+  - @lokdarpan/contracts@0.2.0
+  - @lokdarpan/money@0.1.0
+  - @lokdarpan/domain@0.3.0
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,106 @@
 # @lokdarpan/database
 
+## 0.3.0
+
+### Minor Changes
+
+- 744bdda: Name the real dataset version on every explorer response.
+
+  The seven explorer routes returned `datasetVersion: 0`, and every response's `asOf` was the time
+  it was served. Neither described the data, so nothing could tell which state of the ledger a page
+  came from.
+
+  A response's version is now the newest dataset version committed when it was read, and `asOf` is
+  when that version was opened. Each route reads inside one read-only snapshot
+  (`readLedger`), so a load that commits mid-request cannot put rows from one state under the version
+  of another. Routes whose version comes from their rows keep it, and now report that version's date
+  instead of the time of the request.
+
+  `EnvelopeMetaSchema.asOf` may be `null`, only for a ledger no load has written to.
+
+- c472e32: Draw a level from outlines simplified when they were loaded, and shade tenders without re-sending
+  the level (ADR-065).
+
+  Migration 0033 stores `geometry_overview`, each boundary simplified once. The level endpoint for
+  Madhya Pradesh falls from ~580 ms to ~62 ms. Containment now tests the stored label point and
+  requires a child to be smaller than its parent. That removes 79 pairs where a state or district was
+  listed as the child of one of its own smaller units.
+
+  Tender counts reach the map as feature-state, so the level's geometry is sent once per visit and a
+  department change moves only numbers.
+
+- 79e0920: Draw each place's name inside the place, and stop names flickering.
+
+  Names were anchored at the middle of a unit's bounding box, which for a coastal district or a
+  crescent-shaped taluka can be in the sea or a neighbouring unit, and overlaps were ranked by
+  bounding-box area in square degrees. Migration 0032 adds `label_point`, the centre of the largest
+  circle inside the unit, and `area_m2` as generated columns, and boundary features now carry both.
+
+  Placement is decided by a neutral arbiter: selection, administrative level, and area bucketed by
+  powers of two, with nothing from a place's records. A just-shown name holds for 600 ms and a hidden
+  one waits 400 ms, so names no longer flicker at the edge of a collision. Collision tests use a
+  spatial grid, and names are measured in one batch.
+
+  Names stay as DOM text because MapLibre 5.24 cannot shape Devanagari, Tamil or other Indic scripts.
+  Their visibility is written inside the marker, because MapLibre resets a marker's own opacity on
+  every move, which had redrawn hidden names on top of each other.
+
+- 4a831f0: Scope the tender panel to the selected state.
+
+  With a state selected, `/api/v1/tenders/overview` returned the country's district counts,
+  departments and unplaced total. The panel under Odisha said "12 open tenders across 6 districts"
+  when all twelve were in Madhya Pradesh, Uttarakhand, Jharkhand and Kerala. District counts are now
+  limited to districts inside the state. The departments, the unplaced total and the unplaced list
+  (`/api/v1/tenders?unplaced=true&state=`) are limited to the state's own portals, since an unplaced
+  tender has no district to go by. With no state selected, nothing changes.
+
+  A collected state with nothing to shade no longer reads "0 open tenders across 0 districts".
+
+  New sentence, for review:
+
+  - "No open tender is held for offices in a district of {state}. This describes what LokDarpan holds,
+    not what was advertised."
+
+- 65f19bd: Link to tender portals instead of reproducing their tenders.
+
+  All 21 collected GePNIC portals permit reproduction only with the issuing department's permission,
+  which has not been sought (ADR-055, ADR-056). Tender titles, references, values, EMDs, organisation
+  chains and locations are no longer shown, and `/api/v1/tenders` no longer reads them unless
+  `PUBLISH_TENDER_DETAILS` is `true`. District shading and counts remain.
+
+  A selected place now shows how many open tenders are held, why details are not shown, and a link
+  to its state's portal, which the portals' terms allow. The unplaced-tenders list can no longer be
+  opened while details are withheld. The portal table moves from the collector to
+  `@lokdarpan/domain` so the explorer can link to it; the collector re-exports it unchanged.
+
+  New sentences, for review:
+
+  - "{n} open tenders are held for offices here."
+  - "Tender details are not shown. The state portals permit reproducing them only with the issuing
+    department's permission, which LokDarpan has not sought."
+  - "Read these tenders on the state's e-procurement portal" (link)
+  - "Their details are not shown, for the same reason as other tenders." (after the unplaced count)
+
+- 03e5402: Serve unit views whose units came from several loads (ADR-053 addendum).
+
+  `UnitService` no longer refuses a payload that spans loads. Geography is loaded district by district,
+  so it refused every real state. The web routes read inside the ledger snapshot and report its
+  watermark, and each unit keeps its own `provenance.datasetVersion`. `singleDatasetVersion` and
+  `ViolationSink` are removed; `newestDatasetVersion` replaces them for callers with no snapshot.
+  `PostgresAdminUnitRepository` accepts a snapshot client.
+
+### Patch Changes
+
+- Updated dependencies [b04aadb]
+- Updated dependencies [469deb8]
+- Updated dependencies [79e0920]
+- Updated dependencies [52a6d22]
+- Updated dependencies [59de13e]
+- Updated dependencies [65f19bd]
+- Updated dependencies [03e5402]
+  - @lokdarpan/money@0.1.0
+  - @lokdarpan/domain@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
