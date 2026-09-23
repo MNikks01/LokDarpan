@@ -56,6 +56,29 @@ const tenderPanel = (over: Partial<TenderOverview> = {}, stateName = "Maharashtr
     />,
   );
 
+describe("a collected state with nothing to shade", () => {
+  // The regression behind it: the panel under Odisha said "0 open tenders
+  // across 0 districts" once its counts were scoped to Odisha. A bare zero is
+  // a measurement of our collection that reads as one of the state.
+  it("says none is held, in words, rather than counting zero", () => {
+    const markup = tenderPanel(
+      {
+        collection: collection({
+          status: "collected",
+          portalCode: "odisha",
+          collectingSince: "2026-09-01",
+          lastSuccessAt: "2026-09-23T00:00:00Z",
+          lastCheckedAt: "2026-09-23T00:00:00Z",
+        }),
+        districts: [],
+      },
+      "Odisha",
+    );
+    expect(markup).toContain("No open tender is held for offices in a district of Odisha");
+    expect(markup).not.toMatch(/\b0\b\s*(open\s*)?tenders?/u);
+  });
+});
+
 describe("a state nobody collects is not a state with no tenders", () => {
   it("says tender data is not collected, naming the state", () => {
     const markup = tenderPanel();

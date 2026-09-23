@@ -103,6 +103,17 @@ const STALE_AFTER_HOURS = 48;
  */
 const STILL_OPEN = `(t.closing_at IS NULL OR t.closing_at > now())`;
 
+/**
+ * Tenders read from a state's own portals, when a state is asked for.
+ *
+ * Only for what has no district to go by: a tender that names no district we
+ * hold, or the list of departments advertising. `$n` is the state's LGD code,
+ * or null for the whole country.
+ */
+const FROM_STATE_PORTAL = (n: number): string =>
+  `($${String(n)}::text IS NULL OR t.portal_code IN (
+      SELECT w.portal_code FROM tender_collection_window w WHERE w.state_lgd_code = $${String(n)}))`;
+
 /** The row shape `listTenders` selects, named so the mapping needs no casts. */
 interface TenderRow {
   readonly id: string;
@@ -137,15 +148,30 @@ export class PostgresTenderRepository {
    * what is returned and leaves the rest unshaded, which is the truthful
    * rendering: collection is forward-only, so "none advertised" and "we hold
    * none" are the same statement about our own coverage.
+   *
+   * With a state, only districts inside it. Without one, the panel under
+   * Odisha said "12 open tenders across 6 districts" when all twelve were in
+   * Madhya Pradesh, Uttarakhand, Jharkhand and Kerala: the country's number
+   * stated as the state's. Placement decides, not the portal, because the
+   * count is a claim about where the issuing offices are.
    */
-  async countsByDistrict(department?: string): Promise<readonly DistrictTenderCount[]> {
+  async countsByDistrict(
+    department?: string,
+    stateLgdCode?: string,
+  ): Promise<readonly DistrictTenderCount[]> {
     const result = await this.db.query<{
       admin_unit_id: string;
       district_name: string;
       tender_count: string;
       departments: string[] | null;
     }>(
-      `SELECT t.admin_unit_id,
+      `WITH RECURSIVE within_state AS (
+         SELECT u.id FROM admin_unit u
+          WHERE $2::text IS NOT NULL AND u.level = 'state' AND u.lgd_code = $2
+         UNION ALL
+         SELECT c.id FROM admin_unit c JOIN within_state w ON c.parent_id = w.id
+       )
+       SELECT t.admin_unit_id,
               d.name_en AS district_name,
               count(*)::text AS tender_count,
               array_agg(DISTINCT t.department) FILTER (WHERE t.department IS NOT NULL) AS departments
@@ -153,9 +179,10 @@ export class PostgresTenderRepository {
          JOIN admin_unit d ON d.id = t.admin_unit_id
         WHERE ${STILL_OPEN}
           AND ($1::text IS NULL OR t.department = $1)
+          AND ($2::text IS NULL OR t.admin_unit_id IN (SELECT id FROM within_state))
         GROUP BY t.admin_unit_id, d.name_en
         ORDER BY count(*) DESC`,
-      [department ?? null],
+      [department ?? null, stateLgdCode ?? null],
     );
     return result.rows.map((row) => ({
       adminUnitId: Number(row.admin_unit_id),
@@ -165,14 +192,17 @@ export class PostgresTenderRepository {
     }));
   }
 
-  /** Every department currently advertising, with its open-tender count. */
-  async departments(): Promise<readonly { readonly name: string; readonly tenderCount: number }[]> {
+  /** Every department currently advertising, with its open-tender count; a state's portals only when given one. */
+  async departments(
+    stateLgdCode?: string,
+  ): Promise<readonly { readonly name: string; readonly tenderCount: number }[]> {
     const result = await this.db.query<{ department: string; tender_count: string }>(
       `SELECT t.department, count(*)::text AS tender_count
          FROM tender t
-        WHERE ${STILL_OPEN} AND t.department IS NOT NULL
+        WHERE ${STILL_OPEN} AND t.department IS NOT NULL AND ${FROM_STATE_PORTAL(1)}
         GROUP BY t.department
         ORDER BY count(*) DESC, t.department`,
+      [stateLgdCode ?? null],
     );
     return result.rows.map((r) => ({ name: r.department, tenderCount: Number(r.tender_count) }));
   }
@@ -188,6 +218,8 @@ export class PostgresTenderRepository {
     readonly adminUnitId?: number;
     readonly department?: string;
     readonly unplacedOnly?: boolean;
+    /** A state's own portals only, by LGD code. What scopes the unplaced list under a state. */
+    readonly stateLgdCode?: string;
     readonly limit?: number;
   }): Promise<readonly TenderSummary[]> {
     const result = await this.db.query<TenderRow>(
@@ -212,6 +244,7 @@ export class PostgresTenderRepository {
           AND ($1::bigint IS NULL OR t.admin_unit_id = $1)
           AND ($2::text IS NULL OR t.department = $2)
           AND ($3::boolean IS NOT TRUE OR t.admin_unit_id IS NULL)
+          AND ${FROM_STATE_PORTAL(5)}
         ORDER BY t.closing_at NULLS LAST, t.title
         LIMIT $4`,
       [
@@ -219,6 +252,7 @@ export class PostgresTenderRepository {
         options.department ?? null,
         options.unplacedOnly ?? false,
         Math.min(options.limit ?? 100, 200),
+        options.stateLgdCode ?? null,
       ],
     );
 
@@ -255,6 +289,7 @@ export class PostgresTenderRepository {
     readonly adminUnitId?: number;
     readonly department?: string;
     readonly unplacedOnly?: boolean;
+    readonly stateLgdCode?: string;
   }): Promise<number> {
     const result = await this.db.query<{ count: string }>(
       `SELECT count(*)::text AS count
@@ -262,8 +297,14 @@ export class PostgresTenderRepository {
         WHERE ${STILL_OPEN}
           AND ($1::bigint IS NULL OR t.admin_unit_id = $1)
           AND ($2::text IS NULL OR t.department = $2)
-          AND ($3::boolean IS NOT TRUE OR t.admin_unit_id IS NULL)`,
-      [options.adminUnitId ?? null, options.department ?? null, options.unplacedOnly ?? false],
+          AND ($3::boolean IS NOT TRUE OR t.admin_unit_id IS NULL)
+          AND ${FROM_STATE_PORTAL(4)}`,
+      [
+        options.adminUnitId ?? null,
+        options.department ?? null,
+        options.unplacedOnly ?? false,
+        options.stateLgdCode ?? null,
+      ],
     );
     return Number(result.rows[0]?.count ?? "0");
   }
@@ -353,10 +394,17 @@ export class PostgresTenderRepository {
     };
   }
 
-  /** How many open tenders we hold but could not place. Shown, never hidden. */
-  async unplacedCount(): Promise<number> {
+  /**
+   * How many open tenders we hold but could not place. Shown, never hidden.
+   *
+   * With a state, those read from its own portals: an unplaced tender has no
+   * district, so the portal it was advertised on is the only tie it has to one.
+   */
+  async unplacedCount(stateLgdCode?: string): Promise<number> {
     const result = await this.db.query<{ count: string }>(
-      `SELECT count(*)::text AS count FROM tender t WHERE ${STILL_OPEN} AND t.admin_unit_id IS NULL`,
+      `SELECT count(*)::text AS count FROM tender t
+        WHERE ${STILL_OPEN} AND t.admin_unit_id IS NULL AND ${FROM_STATE_PORTAL(1)}`,
+      [stateLgdCode ?? null],
     );
     return Number(result.rows[0]?.count ?? "0");
   }

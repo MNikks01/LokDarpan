@@ -18,7 +18,11 @@ export const dynamic = "force-dynamic";
  * narrowed with them, so the filter still offers every other choice once one
  * has been made.
  *
- * `?state=<lgd code>` adds `collection`, which answers a question no count can:
+ * `?state=<lgd code>` scopes the counts, the departments and the unplaced
+ * total to that state. Without it they are the country's, and the panel under
+ * a state was stating the country's number as the state's.
+ *
+ * It also adds `collection`, which answers a question no count can:
  * whether tenders are collected for that state at all. Maharashtra holds none,
  * and the panel reported "0 tenders" — a true count and a false statement,
  * because no Maharashtra portal is collected, so the zero describes our reach
@@ -41,10 +45,10 @@ export function GET(request: Request): Promise<Response> {
     // collection status are only truthful together if they describe one state.
     return inLedger(async ({ tenders }) => {
       const [districts, departments, windows, unplacedCount, collection] = await Promise.all([
-        tenders.countsByDistrict(department),
-        tenders.departments(),
+        tenders.countsByDistrict(department, stateLgdCode ?? undefined),
+        tenders.departments(stateLgdCode ?? undefined),
         tenders.collectionWindows(),
-        tenders.unplacedCount(),
+        tenders.unplacedCount(stateLgdCode ?? undefined),
         stateLgdCode === null ? Promise.resolve(null) : tenders.collectionForState(stateLgdCode),
       ]);
       const collectionState = collection === null ? null : tenderCollectionState(collection);
