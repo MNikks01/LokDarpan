@@ -12,7 +12,9 @@ import { useExplorerState, type ExplorerState } from "@/state/useExplorerState";
 import { Breadcrumb } from "./Breadcrumb";
 import { FilterPanel } from "./FilterPanel";
 import { CopyViewLink, PinNotice } from "./ViewLink";
-import { MapCanvas, type MapCanvasProps, type MapHandle } from "./MapCanvas";
+import { MARK, mark } from "@/lib/perf-marks";
+import dynamic from "next/dynamic";
+import type { MapCanvasProps, MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
@@ -27,6 +29,23 @@ import {
 } from "./tenders";
 import { useExplorerGeography, type LevelCoverage, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
+
+/**
+ * The map, loaded after the page is interactive (ADR-062).
+ *
+ * MapLibre was 266 KB of the explorer's ~405 KB of initial JavaScript, and the
+ * rail — the list-first path to every place, which needs no map — waited for
+ * all of it before it would answer a tap. Split out, the rail hydrates first
+ * and the renderer arrives behind it. Never server-rendered: it needs WebGL.
+ *
+ * Starting the download when this module runs, instead of at render, was
+ * measured and not kept: it saved ~300 ms on a throttled phone and cost ~500 ms
+ * on a desktop, where evaluating the renderer competed with hydration (ADR-062).
+ */
+const MapCanvas = dynamic(() => import("./MapCanvas").then((module) => module.MapCanvas), {
+  ssr: false,
+  loading: () => <div className={styles.map} aria-busy="true" />,
+});
 
 const DRAWER_WIDTH = 428;
 /** Matches `.rail` in explorer.module.css, plus its 12px gutters. */
@@ -146,6 +165,10 @@ export function ExploreShell({
   outlineSource,
 }: ExploreShellProps): React.JSX.Element {
   const explorer = useExplorerState(initialState);
+
+  useEffect(() => {
+    mark(MARK.hydrated);
+  }, []);
   const { geo, selectedDocumentId, layers, department, pinnedVersion, actions } = explorer;
 
   const {
