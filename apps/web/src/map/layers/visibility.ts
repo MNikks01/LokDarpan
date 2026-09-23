@@ -12,6 +12,17 @@ export interface LayerVisibility {
   readonly placeNames: boolean;
 }
 
+/**
+ * Each toggle's token in a shared link's `?layers=`. Stable: a token is never
+ * reused for a different toggle, or old links would open showing something
+ * their author did not choose. The registry's `urlToken`s agree with these.
+ */
+export const TOGGLE_TOKEN: Readonly<Record<keyof LayerVisibility, string>> = {
+  states: "so",
+  areas: "cb",
+  placeNames: "pn",
+};
+
 export const DEFAULT_LAYERS: LayerVisibility = {
   states: true,
   areas: true,

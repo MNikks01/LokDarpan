@@ -131,7 +131,12 @@ export function FilterPanel({
                 onClick={() => {
                   // Step out one level rather than back to the state, so a
                   // reader deep in a taluka does not lose the whole descent.
-                  actions.selectUnit(parent?.id ?? null);
+                  // The state itself is "no unit selected": selecting its own
+                  // row put `unit=<state>` in the URL and downloaded the whole
+                  // state outline to frame what was already in view.
+                  actions.selectUnit(
+                    parent === undefined || parent.level === "state" ? null : parent.id,
+                  );
                 }}
               >
                 <span aria-hidden="true">←</span> Up one level

@@ -20,6 +20,16 @@ interface Held<T> {
   readonly failed: boolean;
 }
 
+/** The newest dataset version any response on this page has named; 0 before the first. */
+export function useWatermark(): number {
+  const [watermark, setWatermark] = useState(resources.watermark);
+  useEffect(() => {
+    setWatermark(resources.watermark);
+    return resources.subscribe(setWatermark);
+  }, []);
+  return watermark;
+}
+
 /**
  * Read one API resource through the shared cache.
  *

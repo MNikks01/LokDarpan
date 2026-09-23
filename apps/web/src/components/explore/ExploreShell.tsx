@@ -11,6 +11,7 @@ import { cx } from "@/ui/cx";
 import { useExplorerState, type ExplorerState } from "@/state/useExplorerState";
 import { Breadcrumb } from "./Breadcrumb";
 import { FilterPanel } from "./FilterPanel";
+import { CopyViewLink, PinNotice } from "./ViewLink";
 import { MapCanvas, type MapCanvasProps, type MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
@@ -24,7 +25,6 @@ import {
   useTendersFor,
   withTenderCounts,
 } from "./tenders";
-import { DEFAULT_LAYERS, type LayerVisibility } from "@/map/layers/visibility";
 import { useExplorerGeography, type LevelCoverage, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
 
@@ -41,6 +41,8 @@ export interface OutlineSource {
 export interface ExploreShellProps {
   readonly states: readonly StateOption[];
   readonly initialState: ExplorerState;
+  /** When the dataset version a pinned link names was opened. Null without a pin. */
+  readonly pinnedAt: string | null;
   /** Credit for the country-view outlines. ODbL requires it be shown. */
   readonly outlineSource: OutlineSource;
 }
@@ -85,8 +87,15 @@ function useTenderLayer(
   unitId: number | null,
   childBoundaries: FeatureCollection | null,
   stateLgdCode: string | null,
+  // In the URL (ADR-061), so a shared link keeps the narrowing.
+  {
+    department,
+    setDepartment,
+  }: {
+    readonly department: string | null;
+    readonly setDepartment: (department: string | null) => void;
+  },
 ): TenderLayer {
-  const [department, setDepartment] = useState<string | null>(null);
   const [showingUnplaced, setShowingUnplaced] = useState(false);
   // The state travels with the request so the panel can say whether tenders are
   // collected for it at all. Without it the only available answer was a count,
@@ -133,9 +142,11 @@ function useTenderLayer(
 export function ExploreShell({
   states,
   initialState,
+  pinnedAt,
   outlineSource,
 }: ExploreShellProps): React.JSX.Element {
-  const { geo, selectedDocumentId, actions } = useExplorerState(initialState);
+  const explorer = useExplorerState(initialState);
+  const { geo, selectedDocumentId, layers, department, pinnedVersion, actions } = explorer;
 
   const {
     selectedState,
@@ -150,9 +161,11 @@ export function ExploreShell({
     scopeLabel,
   } = useExplorerGeography(states, geo.stateCode, geo.unitId);
 
-  const tenderState = useTenderLayer(geo.unitId, childBoundaries, geo.stateCode);
+  const tenderState = useTenderLayer(geo.unitId, childBoundaries, geo.stateCode, {
+    department,
+    setDepartment: actions.selectDepartment,
+  });
 
-  const [layers, setLayers] = useState<LayerVisibility>(DEFAULT_LAYERS);
   const [layersOpen, setLayersOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
@@ -222,11 +235,14 @@ export function ExploreShell({
           setSearchOpen(true);
         }}
       />
-      <p className={styles.notice}>
-        <span aria-hidden="true">◆</span>
-        Official records only. Every figure shown has been checked by a person against the page it
-        was read from.
-      </p>
+      <div>
+        <p className={styles.notice}>
+          <span aria-hidden="true">◆</span>
+          Official records only. Every figure shown has been checked by a person against the page it
+          was read from.
+        </p>
+        <PinNotice pinnedVersion={pinnedVersion} pinnedAt={pinnedAt} />
+      </div>
 
       <div className={styles.stage}>
         <MapCanvas
@@ -292,10 +308,9 @@ export function ExploreShell({
             onToggleLayersOpen={() => {
               setLayersOpen((open) => !open);
             }}
-            onToggleLayer={(key) => {
-              setLayers((previous) => ({ ...previous, [key]: !previous[key] }));
-            }}
+            onToggleLayer={actions.toggleLayer}
           />
+          <CopyViewLink state={explorer} />
         </div>
 
         <SearchDialog
