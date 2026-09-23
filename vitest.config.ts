@@ -6,7 +6,8 @@ export default defineConfig({
   // apps/web sets `jsx: "preserve"` so Next can compile it; the test runner has
   // no Next pipeline and must transform JSX itself, or a .test.tsx fails to
   // parse and silently reports "no tests" rather than failing.
-  esbuild: { jsx: "automatic" },
+  // Vite's Oxc transform since vitest 4; `esbuild.jsx` is no longer read.
+  oxc: { jsx: { runtime: "automatic" } },
   // `@/` is apps/web's own alias, declared in its tsconfig. The test runner
   // resolves from the repository root and needs it spelled out here too.
   resolve: {
@@ -24,7 +25,14 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       // Correctness-critical logic is gated hard; UI is not.
-      thresholds: { branches: 90, functions: 85, statements: 85 },
+      // Branches is 80, not the 90 it was, because the measurement changed, not
+      // the code. Vitest 3 counted a file no test loads as a single branch;
+      // vitest 4 counts its real branches, and the same tree reads 80.7% instead
+      // of 90.4%. 80 is a floor to ratchet up from, not a target. The largest
+      // untested files: services/ingestion/src/gepnic/{fetch,load}.ts,
+      // osm/overpass.ts, review/queue.ts, services/api/src/http/server.ts and
+      // packages/database/src/{admin-unit,department-finance}.repository.ts.
+      thresholds: { branches: 80, functions: 85, statements: 85 },
       include: [
         "packages/money/src/**",
         "packages/neutrality/src/**",
