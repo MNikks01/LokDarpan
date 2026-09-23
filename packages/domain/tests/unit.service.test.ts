@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AppError } from "@lokdarpan/errors";
 import type { AdminUnit, AdminUnitLevel, AdminUnitRepository } from "../src/admin-unit";
-import { UnitService, parseLevel, singleDatasetVersion } from "../src/unit.service";
+import { UnitService, newestDatasetVersion, parseLevel } from "../src/unit.service";
 
 const unit = (id: number, datasetVersion: number, over: Partial<AdminUnit> = {}): AdminUnit => ({
   id,
@@ -39,33 +39,13 @@ class FakeRepo implements AdminUnitRepository {
   }
 }
 
-describe("singleDatasetVersion", () => {
-  it("returns the version when every fact shares one", () => {
-    expect(singleDatasetVersion([unit(1, 101), unit(2, 101)])).toBe(101);
+describe("newestDatasetVersion", () => {
+  it("names the newest load in the payload, so it never claims an older vintage", () => {
+    expect(newestDatasetVersion([unit(1, 101), unit(2, 104), unit(3, 102)])).toBe(104);
   });
 
-  // Two figures on one page carrying different provenance vintages, while
-  // appearing equally current, is a traceability defect — refused, not served.
-  it("refuses a payload that mixes dataset versions", () => {
-    expect(() => singleDatasetVersion([unit(1, 101), unit(2, 102)])).toThrow(AppError);
-    expect(() => singleDatasetVersion([unit(1, 101), unit(2, 102)])).toThrow(
-      /single dataset version/i,
-    );
-  });
-
-  it("keeps the mixed versions out of the client-facing message", () => {
-    try {
-      singleDatasetVersion([unit(1, 101), unit(2, 102)]);
-      expect.unreachable("should have thrown");
-    } catch (error) {
-      expect(error).toBeInstanceOf(AppError);
-      expect((error as AppError).publicMessage).not.toMatch(/10[12]/);
-      expect((error as AppError).status).toBe(500);
-    }
-  });
-
-  it("refuses an empty payload rather than inventing a version", () => {
-    expect(() => singleDatasetVersion([])).toThrow(AppError);
+  it("is 0 for an empty payload, as an empty ledger is", () => {
+    expect(newestDatasetVersion([])).toBe(0);
   });
 });
 
@@ -95,40 +75,21 @@ describe("parseLevel", () => {
 describe("UnitService", () => {
   const mh = unit(20, 101, { nameEn: "Maharashtra", nameLocal: "महाराष्ट्र", lgdCode: "27" });
 
-  it("returns a unit with its children and one dataset version", async () => {
+  it("returns a unit with its children", async () => {
     const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]));
     const view = await service.getUnit("20");
     expect(view.unit.nameEn).toBe("Maharashtra");
     expect(view.unit.nameLocal).toBe("महाराष्ट्र");
     expect(view.children).toHaveLength(1);
-    expect(view.datasetVersion).toBe(101);
   });
 
-  it("refuses a unit whose children came from another ingest", async () => {
+  // The rule this replaces refused exactly this, and geography is loaded
+  // district by district, so it refused every real state (ADR-053).
+  it("serves units from several loads, each keeping the version it came from", async () => {
     const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]));
-    await expect(service.getUnit("20")).rejects.toThrow(/single dataset version/i);
-  });
-
-  // The refusal is also an integrity alarm. The service reports it through a
-  // callback rather than owning a metrics registry, so one implementation
-  // serves both the DI-wired server and the serverless handlers — each
-  // counting the violation in whatever way its runtime can.
-  it("reports a contract violation when versions are mixed", async () => {
-    const seen: string[] = [];
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 999)]), (kind) => {
-      seen.push(kind);
-    });
-    await expect(service.getUnit("20")).rejects.toThrow();
-    expect(seen).toEqual(["mixed_dataset_version"]);
-  });
-
-  it("reports nothing when the payload is consistent", async () => {
-    const seen: string[] = [];
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]]), [unit(21, 101)]), (kind) => {
-      seen.push(kind);
-    });
-    await service.getUnit("20");
-    expect(seen).toEqual([]);
+    const view = await service.getUnit("20");
+    expect(view.unit.provenance.datasetVersion).toBe(101);
+    expect(view.children[0]?.provenance.datasetVersion).toBe(999);
   });
 
   it("rejects a non-numeric id before touching the database", async () => {
@@ -142,10 +103,16 @@ describe("UnitService", () => {
     await expect(service.getUnit("404")).rejects.toThrow(AppError);
   });
 
-  it("lists by level with a single dataset version", async () => {
-    const service = new UnitService(new FakeRepo(new Map([[20, mh]])));
+  it("lists by level, however many loads the units came from", async () => {
+    const service = new UnitService(
+      new FakeRepo(
+        new Map([
+          [20, mh],
+          [32, unit(32, 140)],
+        ]),
+      ),
+    );
     const result = await service.listByLevel("state");
-    expect(result.units).toHaveLength(1);
-    expect(result.datasetVersion).toBe(101);
+    expect(result.units.map((u) => u.provenance.datasetVersion)).toEqual([101, 140]);
   });
 });
