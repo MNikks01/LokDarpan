@@ -95,7 +95,12 @@ function useTenderLayer(
   const unitTenders = useTendersFor(unitId, department);
   // Fetched only once asked for: the panel states the count from the overview,
   // so the list itself is a second question the reader may never put.
-  const { tenders: unplacedTenders } = useTendersFor(null, department, showingUnplaced);
+  const { tenders: unplacedTenders } = useTendersFor(
+    null,
+    department,
+    showingUnplaced,
+    stateLgdCode,
+  );
   const toggleUnplaced = useCallback(() => {
     setShowingUnplaced((showing) => !showing);
   }, []);

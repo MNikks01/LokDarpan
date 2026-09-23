@@ -45,6 +45,10 @@ export const tenderCopy = {
   emptyHere:
     "No open tender is held here. This describes what LokDarpan holds, not what was advertised.",
 
+  /** A collected state with nothing to shade. Stated instead of "0 across 0", which reads as a finding. */
+  noneShaded: (place: string): string =>
+    `No open tender is held for offices in a district of ${place}. This describes what LokDarpan holds, not what was advertised.`,
+
   notHeldBefore: (date: string): string => ` Tenders from before ${date} are not held.`,
 
   /** Details withheld under the portals' terms (ADR-056). A count is ours to state. */

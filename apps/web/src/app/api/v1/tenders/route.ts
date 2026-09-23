@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
  * `?unplaced=true` is not a debugging affordance. A tender whose issuing
  * district could not be established is still a real advertisement by a real
  * government office, and it has to stay reachable rather than vanish because
- * the map has nowhere to draw it.
+ * the map has nowhere to draw it. `&state=<lgd code>` narrows that list to the
+ * state's own portals, so it agrees with the count the panel shows under it.
  *
  * DETAILS ARE WITHHELD BY DEFAULT
  * Every collected portal permits reproduction only with the issuing
@@ -27,11 +28,16 @@ export function GET(request: Request): Promise<Response> {
     const unitParam = params.get("unit");
     const unitId = unitParam === null ? Number.NaN : Number(unitParam);
     const department = params.get("department");
+    const requestedState = params.get("state");
 
     const filter = {
       ...(Number.isInteger(unitId) && unitId > 0 ? { adminUnitId: unitId } : {}),
       ...(department === null || department === "" ? {} : { department }),
       unplacedOnly: params.get("unplaced") === "true",
+      // Validated as the shape an LGD code takes: it reaches a query.
+      ...(requestedState !== null && /^\d{1,7}$/u.test(requestedState)
+        ? { stateLgdCode: requestedState }
+        : {}),
     };
 
     return inLedger(async ({ tenders, geography }) => {

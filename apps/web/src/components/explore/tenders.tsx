@@ -366,12 +366,18 @@ export function TendersPanel({
               ))}
             </select>
 
-            <p style={{ fontSize: 12, margin: "10px 0 0" }}>
-              <strong>{shadedCount(overview)}</strong> open{" "}
-              {shadedCount(overview) === 1 ? "tender" : "tenders"} across{" "}
-              {overview.districts.length}{" "}
-              {overview.districts.length === 1 ? "district" : "districts"}.
-            </p>
+            {overview.districts.length === 0 ? (
+              <p style={{ fontSize: 12, margin: "10px 0 0" }}>
+                {tenderCopy.noneShaded(stateName ?? "India")}
+              </p>
+            ) : (
+              <p style={{ fontSize: 12, margin: "10px 0 0" }}>
+                <strong>{shadedCount(overview)}</strong> open{" "}
+                {shadedCount(overview) === 1 ? "tender" : "tenders"} across{" "}
+                {overview.districts.length}{" "}
+                {overview.districts.length === 1 ? "district" : "districts"}.
+              </p>
+            )}
 
             <Unplaced
               count={overview.unplacedCount}
@@ -445,12 +451,15 @@ export function useTendersFor(
   unitId: number | null,
   department: string | null,
   unplaced = false,
+  stateLgdCode: string | null = null,
 ): TendersFor {
   let url: string | null = null;
   if (unitId !== null || unplaced) {
     const query = new URLSearchParams();
     if (unitId !== null) query.set("unit", String(unitId));
     if (unplaced) query.set("unplaced", "true");
+    // The unplaced list is scoped like the count above it, or the two disagree.
+    if (unplaced && stateLgdCode !== null) query.set("state", stateLgdCode);
     if (department !== null) query.set("department", department);
     url = `/api/v1/tenders?${query.toString()}`;
   }
