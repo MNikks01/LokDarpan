@@ -1,10 +1,11 @@
 "use client";
 
 import type React from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import type { FeatureCollection } from "geojson";
 import { displayStateOf, type DataState } from "@lokdarpan/domain";
 import { notChecked, tenderCopy } from "@/copy/data-state";
+import { useResource } from "@/lib/use-resource";
 import styles from "./explorer.module.css";
 
 /**
@@ -85,34 +86,12 @@ export function useTenderOverview(
   readonly overview: TenderOverview;
   readonly failed: boolean;
 } {
-  const [overview, setOverview] = useState<TenderOverview>(EMPTY);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const params = new URLSearchParams();
-    if (department !== null) params.set("department", department);
-    if (stateLgdCode !== null) params.set("state", stateLgdCode);
-    const query = params.size === 0 ? "" : `?${params.toString()}`;
-    fetch(`/api/v1/tenders/overview${query}`, { signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
-      .then((body: { data: TenderOverview }) => {
-        setOverview(body.data);
-        setFailed(false);
-      })
-      .catch((error: unknown) => {
-        // An aborted request is this component moving on, not a failure to
-        // report — saying "unavailable" for it would be false.
-        if (error instanceof Error && error.name === "AbortError") return;
-        setOverview(EMPTY);
-        setFailed(true);
-      });
-    return () => {
-      controller.abort();
-    };
-  }, [department, stateLgdCode]);
-
-  return { overview, failed };
+  const params = new URLSearchParams();
+  if (department !== null) params.set("department", department);
+  if (stateLgdCode !== null) params.set("state", stateLgdCode);
+  const query = params.size === 0 ? "" : `?${params.toString()}`;
+  const { data, failed } = useResource<TenderOverview>(`/api/v1/tenders/overview${query}`);
+  return { overview: data ?? EMPTY, failed };
 }
 
 /**
@@ -464,38 +443,16 @@ export function useTendersFor(
   department: string | null,
   unplaced = false,
 ): TendersFor {
-  const [result, setResult] = useState<Omit<TendersFor, "loading">>(NO_TENDERS);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (unitId === null && !unplaced) {
-      setResult(NO_TENDERS);
-      return;
-    }
-    const controller = new AbortController();
-    setLoading(true);
+  let url: string | null = null;
+  if (unitId !== null || unplaced) {
     const query = new URLSearchParams();
     if (unitId !== null) query.set("unit", String(unitId));
     if (unplaced) query.set("unplaced", "true");
     if (department !== null) query.set("department", department);
-
-    fetch(`/api/v1/tenders?${query.toString()}`, { signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
-      .then((body: { data: Omit<TendersFor, "loading"> }) => {
-        setResult(body.data);
-        setLoading(false);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Error && error.name === "AbortError") return;
-        setResult(NO_TENDERS);
-        setLoading(false);
-      });
-    return () => {
-      controller.abort();
-    };
-  }, [unitId, department, unplaced]);
-
-  return { ...result, loading };
+    url = `/api/v1/tenders?${query.toString()}`;
+  }
+  const { data, loading } = useResource<Omit<TendersFor, "loading">>(url);
+  return { ...(data ?? NO_TENDERS), loading };
 }
 
 /** How the district was arrived at, in words a reader can weigh. */

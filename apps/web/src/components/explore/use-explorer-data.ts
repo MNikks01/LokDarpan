@@ -1,33 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { DataState, DocumentSummary, GeoUnit } from "@lokdarpan/domain";
 import type { StateOption } from "@/data/geography";
 import type { FeatureCollection } from "geojson";
+import { useResource } from "@/lib/use-resource";
 
 /**
- * The explorer's reads, one hook per resource.
+ * The explorer's reads.
  *
- * Each aborts its in-flight request when its input changes, which is what stops
- * a reader clicking through four places quickly from ending up with the second
- * one's data under the fourth one's heading. Each fails closed to an empty
- * result rather than to stale data: showing the previous area's records under a
- * new heading is worse than showing none.
+ * Every read goes through the shared resource cache (`@/lib/use-resource`), so
+ * two panels asking for the same thing share one request, a place the reader
+ * returns to draws from memory, and a newer dataset version seen by any panel
+ * makes the others read again rather than sit on an older ledger (ADR-064).
  *
- * Nothing here holds geometry in React state beyond the one collection the map
- * is currently drawing. Boundaries go from `fetch` to a MapLibre source and are
- * replaced wholesale on the next selection — React never diffs them.
+ * Each fails closed to an empty result rather than to stale data: showing the
+ * previous area's records under a new heading is worse than showing none.
+ *
+ * Boundaries are held once, in the cache, and handed to a MapLibre source by
+ * reference; they are replaced wholesale on the next selection and React
+ * never diffs them.
  */
-
-async function readJson<T>(url: string, signal: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error(`${url} returned ${String(response.status)}`);
-  return (await response.json()) as T;
-}
-
-function isAbort(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
-}
 
 /**
  * How complete our holdings are at one level inside the unit being browsed.
@@ -48,87 +41,39 @@ export interface LevelCoverage {
   readonly state: DataState;
 }
 
-export interface ChildrenState {
+export interface LevelState {
   readonly units: readonly GeoUnit[];
   readonly coverage: readonly LevelCoverage[];
+  readonly boundaries: FeatureCollection | null;
   readonly loading: boolean;
   readonly failed: boolean;
 }
 
+interface LevelPayload {
+  readonly units: GeoUnit[];
+  readonly coverage: LevelCoverage[];
+  readonly boundaries: FeatureCollection;
+}
+
 /**
- * The units inside a place, whatever levels those turn out to be.
+ * The units inside a place, whatever levels those turn out to be, with their
+ * boundaries and coverage — one request, one dataset version.
  *
  * The caller does not say what it expects. A district may hold talukas,
  * municipal bodies and villages at once, and the panel groups whatever comes
  * back by level rather than assuming a fixed sequence.
  */
-export function useChildUnits(unitId: number | null): ChildrenState {
-  const [state, setState] = useState<ChildrenState>({
-    units: [],
-    coverage: [],
-    loading: false,
-    failed: false,
-  });
-
-  useEffect(() => {
-    if (unitId === null) {
-      setState({ units: [], coverage: [], loading: false, failed: false });
-      return;
-    }
-    const controller = new AbortController();
-    setState({ units: [], coverage: [], loading: true, failed: false });
-
-    readJson<{ data: { units: GeoUnit[]; coverage: LevelCoverage[] } }>(
-      `/api/v1/geo/units/${String(unitId)}/children`,
-      controller.signal,
-    )
-      .then((body) => {
-        setState({
-          units: body.data.units,
-          coverage: body.data.coverage,
-          loading: false,
-          failed: false,
-        });
-      })
-      .catch((error: unknown) => {
-        if (isAbort(error)) return;
-        setState({ units: [], coverage: [], loading: false, failed: true });
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [unitId]);
-
-  return state;
-}
-
-/** Boundary geometry for one level, simplified server-side. */
-export function useChildBoundaries(unitId: number | null): FeatureCollection | null {
-  const [collection, setCollection] = useState<FeatureCollection | null>(null);
-
-  useEffect(() => {
-    if (unitId === null) {
-      setCollection(null);
-      return;
-    }
-    const controller = new AbortController();
-    readJson<{ data: FeatureCollection }>(
-      `/api/v1/geo/units/${String(unitId)}/boundaries`,
-      controller.signal,
-    )
-      .then((body) => {
-        setCollection(body.data);
-      })
-      .catch((error: unknown) => {
-        if (!isAbort(error)) setCollection(null);
-      });
-    return () => {
-      controller.abort();
-    };
-  }, [unitId]);
-
-  return collection;
+export function useLevel(unitId: number | null): LevelState {
+  const { data, loading, failed } = useResource<LevelPayload>(
+    unitId === null ? null : `/api/v1/geo/units/${String(unitId)}/level`,
+  );
+  return {
+    units: data?.units ?? [],
+    coverage: data?.coverage ?? [],
+    boundaries: data?.boundaries ?? null,
+    loading,
+    failed,
+  };
 }
 
 export interface UnitDetail {
@@ -139,27 +84,8 @@ export interface UnitDetail {
 
 /** One unit with its ancestors and its own boundary, for framing and breadcrumbs. */
 export function useUnit(unitId: number | null): UnitDetail | null {
-  const [detail, setDetail] = useState<UnitDetail | null>(null);
-
-  useEffect(() => {
-    if (unitId === null) {
-      setDetail(null);
-      return;
-    }
-    const controller = new AbortController();
-    readJson<{ data: UnitDetail }>(`/api/v1/geo/units/${String(unitId)}`, controller.signal)
-      .then((body) => {
-        setDetail(body.data);
-      })
-      .catch((error: unknown) => {
-        if (!isAbort(error)) setDetail(null);
-      });
-    return () => {
-      controller.abort();
-    };
-  }, [unitId]);
-
-  return detail;
+  return useResource<UnitDetail>(unitId === null ? null : `/api/v1/geo/units/${String(unitId)}`)
+    .data;
 }
 
 export interface RecordsState {
@@ -181,38 +107,10 @@ export interface RecordsState {
  * levels, so a state's own code also names a district elsewhere.
  */
 export function useRecords(unitId: number | null): RecordsState {
-  const [state, setState] = useState<RecordsState>({
-    documents: [],
-    loading: false,
-    failed: false,
-  });
-
-  useEffect(() => {
-    if (unitId === null) {
-      setState({ documents: [], loading: false, failed: false });
-      return;
-    }
-    const controller = new AbortController();
-    setState({ documents: [], loading: true, failed: false });
-
-    readJson<{ data: { documents: DocumentSummary[] } }>(
-      `/api/v1/documents?unit=${String(unitId)}`,
-      controller.signal,
-    )
-      .then((body) => {
-        setState({ documents: body.data.documents, loading: false, failed: false });
-      })
-      .catch((error: unknown) => {
-        if (isAbort(error)) return;
-        setState({ documents: [], loading: false, failed: true });
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [unitId]);
-
-  return state;
+  const { data, loading, failed } = useResource<{ documents: DocumentSummary[] }>(
+    unitId === null ? null : `/api/v1/documents?unit=${String(unitId)}`,
+  );
+  return { documents: data?.documents ?? [], loading, failed };
 }
 
 /**
@@ -248,8 +146,12 @@ export function useExplorerGeography(
   );
 
   const parentUnitId = unitId ?? selectedState?.unitId ?? null;
-  const { units, coverage, loading: loadingChildren } = useChildUnits(parentUnitId);
-  const childBoundaries = useChildBoundaries(parentUnitId);
+  const {
+    units,
+    coverage,
+    boundaries: childBoundaries,
+    loading: loadingChildren,
+  } = useLevel(parentUnitId);
   const detail = useUnit(unitId);
   const records = useRecords(parentUnitId);
 
