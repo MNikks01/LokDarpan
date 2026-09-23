@@ -2,7 +2,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { Map as MapLibreMap, addProtocol } from "maplibre-gl";
+import { Map as MapLibreMap, addProtocol, getVersion, setWorkerUrl } from "maplibre-gl";
 import { Protocol } from "pmtiles";
 import type { GeoJSONSource, MapMouseEvent, MapSourceDataEvent } from "maplibre-gl";
 import type React from "react";
@@ -61,6 +61,19 @@ function registerPmtilesProtocol(): void {
   if (pmtilesRegistered) return;
   addProtocol("pmtiles", new Protocol().tile);
   pmtilesRegistered = true;
+}
+
+/**
+ * Where MapLibre's worker is served from: copied into `public/` at build by
+ * `scripts/copy-maplibre-worker.ts`, under this MapLibre's own version. Left to
+ * itself, MapLibre 6 looks for the worker beside its bundled module, which under
+ * Next is a `file://` URL, and the map never loads.
+ */
+let workerConfigured = false;
+function configureWorker(): void {
+  if (workerConfigured) return;
+  setWorkerUrl(`/maplibre/${getVersion()}/maplibre-gl-worker.mjs`);
+  workerConfigured = true;
 }
 
 /** The calls the layer binder makes, bound to one map. */
@@ -164,6 +177,7 @@ export function MapCanvas({
     // `pmtiles://` URLs through it, and a style referencing one without the
     // protocol registered fails with an unhelpful network error.
     registerPmtilesProtocol();
+    configureWorker();
 
     const start = async (): Promise<void> => {
       // A style that names a missing extract renders nothing and says nothing,

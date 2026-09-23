@@ -15,6 +15,8 @@ export default tseslint.config(
       "**/.venv/**",
       "**/coverage/**",
       "graphify-out/**",
+      // MapLibre's own worker, copied from node_modules at build (copy-maplibre-worker.ts).
+      "apps/web/public/maplibre/**",
     ],
   },
   js.configs.recommended,
