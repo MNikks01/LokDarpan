@@ -246,6 +246,29 @@ export class PostgresTenderRepository {
   }
 
   /**
+   * How many open tenders match, without reading any of their details.
+   *
+   * What the explorer shows while tender details are withheld: a count is
+   * LokDarpan's measurement, not material reproduced from a portal (ADR-056).
+   */
+  async countTenders(options: {
+    readonly adminUnitId?: number;
+    readonly department?: string;
+    readonly unplacedOnly?: boolean;
+  }): Promise<number> {
+    const result = await this.db.query<{ count: string }>(
+      `SELECT count(*)::text AS count
+         FROM tender t
+        WHERE ${STILL_OPEN}
+          AND ($1::bigint IS NULL OR t.admin_unit_id = $1)
+          AND ($2::text IS NULL OR t.department = $2)
+          AND ($3::boolean IS NOT TRUE OR t.admin_unit_id IS NULL)`,
+      [options.adminUnitId ?? null, options.department ?? null, options.unplacedOnly ?? false],
+    );
+    return Number(result.rows[0]?.count ?? "0");
+  }
+
+  /**
    * When collection began for each portal.
    *
    * The floor on the data, and not optional. Collection is forward-only, so

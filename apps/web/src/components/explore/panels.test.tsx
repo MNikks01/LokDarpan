@@ -33,6 +33,7 @@ const overview = (over: Partial<TenderOverview> = {}): TenderOverview => {
     departments: [],
     windows: [],
     unplacedCount: 0,
+    detailsWithheld: true,
     ...over,
     collection: stateCollection,
     collectionState: stateCollection === null ? null : tenderCollectionState(stateCollection),
@@ -281,5 +282,72 @@ describe("holding no record for a place is not a finding about the place", () =>
     ]);
     expect(markup).toContain("A report about this district");
     expect(markup).not.toContain("No records are currently attributed");
+  });
+});
+
+const tender = {
+  id: 1,
+  title: "Improvement of Road from A to B",
+  tenderReference: "2026_PWD_1_1",
+  department: "Public Works Department",
+  closingAt: null,
+  tenderCategory: null,
+  productCategory: null,
+  tenderType: null,
+  location: null,
+  pincode: null,
+  tenderValueInr: "5920000.00",
+  emdInr: null,
+  organisationChain: "PWD||Division 1",
+  districtName: "Somewhere",
+  districtSource: "chain_unit",
+  sourceUrl: "https://etenders.kerala.gov.in/nicgep/app",
+};
+
+describe("tender details are withheld under the portals' terms", () => {
+  // Every collected portal permits reproduction only with the issuing
+  // department's permission. Until that exists the reader gets a count, the
+  // reason, and the portal — which the same terms let anyone link to.
+  it("states how many are held and links to the portal, reproducing nothing", () => {
+    const markup = renderToStaticMarkup(
+      <TenderList
+        heading="Tenders from offices in Somewhere"
+        tenders={[]}
+        loading={false}
+        detailsWithheld
+        heldCount={12}
+        portalUrl="https://etenders.kerala.gov.in/nicgep/app"
+      />,
+    );
+    expect(markup).toContain("12 open tenders are held for offices here.");
+    expect(markup).toContain("which LokDarpan has not sought");
+    expect(markup).toContain('href="https://etenders.kerala.gov.in/nicgep/app"');
+    expect(markup).not.toContain("Improvement of Road");
+    expect(markup).not.toContain("59,20,000");
+  });
+
+  it("still says nothing is held when nothing is, rather than withholding nothing", () => {
+    const markup = renderToStaticMarkup(
+      <TenderList heading="Tenders" tenders={[]} loading={false} detailsWithheld heldCount={0} />,
+    );
+    expect(markup).toContain("No open tender is held here.");
+    expect(markup).not.toContain("details are not shown");
+  });
+
+  it("lists tender details once permission is recorded", () => {
+    const markup = renderToStaticMarkup(
+      <TenderList heading="Tenders" tenders={[tender]} loading={false} detailsWithheld={false} />,
+    );
+    expect(markup).toContain("Improvement of Road from A to B");
+  });
+
+  it("offers no way to open the unplaced list while details are withheld", () => {
+    const markup = tenderPanel({
+      collection: collection({ status: "collected", portalCode: "kerala" }),
+      unplacedCount: 7,
+    });
+    expect(markup).toContain("7 further tenders name no district");
+    expect(markup).not.toContain("Show them");
+    expect(markup).toContain("for the same reason as other tenders");
   });
 });

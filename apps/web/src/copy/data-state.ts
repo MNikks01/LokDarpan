@@ -46,6 +46,17 @@ export const tenderCopy = {
     "No open tender is held here. This describes what LokDarpan holds, not what was advertised.",
 
   notHeldBefore: (date: string): string => ` Tenders from before ${date} are not held.`,
+
+  /** Details withheld under the portals' terms (ADR-056). A count is ours to state. */
+  heldHere: (count: number): string =>
+    `${String(count)} open ${count === 1 ? "tender is" : "tenders are"} held for offices here.`,
+
+  detailsWithheld:
+    "Tender details are not shown. The state portals permit reproducing them only with the issuing department's permission, which LokDarpan has not sought.",
+
+  portalLink: "Read these tenders on the state's e-procurement portal",
+
+  unplacedWithheld: "Their details are not shown, for the same reason as other tenders.",
 } as const;
 
 export const boundaryCopy = {

@@ -167,6 +167,21 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(await repository?.unplacedCount()).toBeGreaterThanOrEqual(1);
     });
 
+    // What the explorer shows while tender details are withheld (ADR-056): the
+    // count must agree with the list it stands in for, filter for filter.
+    it("counts exactly the tenders the list would show, without reading them", async () => {
+      const listed = (await repository?.listTenders({ adminUnitId: districtId })) ?? [];
+      expect(await repository?.countTenders({ adminUnitId: districtId })).toBe(listed.length);
+      expect(listed.length).toBe(2);
+
+      const unplaced =
+        (await repository?.listTenders({ unplacedOnly: true, department: "Test Department" })) ??
+        [];
+      expect(
+        await repository?.countTenders({ unplacedOnly: true, department: "Test Department" }),
+      ).toBe(unplaced.length);
+    });
+
     it("sends money as a decimal string, never a number", async () => {
       // A JSON number loses precision on a national aggregate silently, behind
       // a correct-looking source link.
