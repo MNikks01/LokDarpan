@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { treasuryFiguresArePublishable } from "./publishable";
+import { tenderDetailsArePublishable, treasuryFiguresArePublishable } from "./publishable";
 
 /**
  * BEAMS permits reproduction "after taking proper permission by sending a mail
@@ -13,6 +13,7 @@ import { treasuryFiguresArePublishable } from "./publishable";
 
 afterEach(() => {
   delete process.env["PUBLISH_BEAMS_FIGURES"];
+  delete process.env["PUBLISH_TENDER_DETAILS"];
 });
 
 describe("treasury figures are withheld unless permission is recorded", () => {
@@ -43,5 +44,32 @@ describe("treasury figures are withheld unless permission is recorded", () => {
     expect(treasuryFiguresArePublishable()).toBe(false);
     process.env["PUBLISH_BEAMS_FIGURES"] = "true";
     expect(treasuryFiguresArePublishable()).toBe(true);
+  });
+});
+
+/**
+ * Every collected tender portal permits reproduction only with the issuing
+ * department's permission, which has not been sought. Same default, same strict
+ * reading, and independent of the treasury flag.
+ */
+describe("tender details are withheld unless permission is recorded", () => {
+  it("withholds when nothing is configured", () => {
+    expect(tenderDetailsArePublishable()).toBe(false);
+  });
+
+  it.each(["", "false", "1", "TRUE", "yes"])("withholds for the ambiguous value %o", (value) => {
+    process.env["PUBLISH_TENDER_DETAILS"] = value;
+    expect(tenderDetailsArePublishable()).toBe(false);
+  });
+
+  it("publishes only when explicitly told to, and reads the flag at call time", () => {
+    expect(tenderDetailsArePublishable()).toBe(false);
+    process.env["PUBLISH_TENDER_DETAILS"] = "true";
+    expect(tenderDetailsArePublishable()).toBe(true);
+  });
+
+  it("is not opened by the treasury flag", () => {
+    process.env["PUBLISH_BEAMS_FIGURES"] = "true";
+    expect(tenderDetailsArePublishable()).toBe(false);
   });
 });

@@ -130,9 +130,10 @@ Nadu, Tripura, Uttar Pradesh, Uttarakhand, West Bengal.
 department. The explorer nonetheless shows tender titles, references, departments, organisation
 chains, values and locations from these portals. The rule at the end of this document says such a
 source is not publishable. `mayRepublish` would refuse it, but only the CAG document path calls
-`mayRepublish`, and the tender path does not. **What to do about the tenders already on screen is an
-open decision, recorded in [`../decisions/gods-eye-view-adoption.md`](../decisions/gods-eye-view-adoption.md); this document does not
-change what is displayed.**
+`mayRepublish`, and the tender path does not. **Resolved 17 September 2026, the same way as BEAMS: tender details are withheld, and the reader is
+linked to the state's portal instead** ([`../adr/056-a-tender-is-linked-to-not-reproduced.md`](../adr/056-a-tender-is-linked-to-not-reproduced.md)).
+Counts and district shading remain, as LokDarpan's own measurement. `PUBLISH_TENDER_DETAILS` restores
+the lists once permission exists.
 
 Two limits, as with BEAMS:
 

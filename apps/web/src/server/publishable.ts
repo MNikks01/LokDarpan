@@ -29,3 +29,21 @@
 export function treasuryFiguresArePublishable(): boolean {
   return process.env["PUBLISH_BEAMS_FIGURES"] === "true";
 }
+
+/**
+ * Whether tender details may be rendered: titles, references, values, EMDs,
+ * organisation chains and locations.
+ *
+ * Every GePNIC portal we collect permits reproduction "after taking proper
+ * permission from the respective Organisation / Department" (Madhya Pradesh: in
+ * writing), the clause BEAMS is withheld under. Permission has not been sought,
+ * so details are withheld and the reader is linked to the state's portal, which
+ * the same terms allow without asking (`source-licences.md` §5, ADR-056).
+ *
+ * Counts and district shading stay: they are computed by LokDarpan, not
+ * reproduced from a portal. Read at call time, and only the exact string
+ * "true" opens it, for the same reasons as `treasuryFiguresArePublishable`.
+ */
+export function tenderDetailsArePublishable(): boolean {
+  return process.env["PUBLISH_TENDER_DETAILS"] === "true";
+}

@@ -64,8 +64,7 @@ interface TenderLayer {
   readonly department: string | null;
   readonly setDepartment: (department: string | null) => void;
   readonly shadedBoundaries: FeatureCollection | null;
-  readonly unitTenders: ReturnType<typeof useTendersFor>["tenders"];
-  readonly unitTendersLoading: boolean;
+  readonly unitTenders: ReturnType<typeof useTendersFor>;
   readonly showingUnplaced: boolean;
   readonly toggleUnplaced: () => void;
   readonly unplacedTenders: ReturnType<typeof useTendersFor>["tenders"];
@@ -91,7 +90,7 @@ function useTenderLayer(
   // collected for it at all. Without it the only available answer was a count,
   // and a count cannot distinguish "none held" from "none advertised".
   const { overview, failed } = useTenderOverview(department, stateLgdCode);
-  const { tenders: unitTenders, loading: unitTendersLoading } = useTendersFor(unitId, department);
+  const unitTenders = useTendersFor(unitId, department);
   // Fetched only once asked for: the panel states the count from the overview,
   // so the list itself is a second question the reader may never put.
   const { tenders: unplacedTenders } = useTendersFor(null, department, showingUnplaced);
@@ -111,7 +110,6 @@ function useTenderLayer(
     setDepartment,
     shadedBoundaries,
     unitTenders,
-    unitTendersLoading,
     showingUnplaced,
     toggleUnplaced,
     unplacedTenders,
@@ -414,8 +412,11 @@ function ExplorerRail({
       {activeUnit !== null && (
         <TenderList
           heading={`Tenders from offices in ${activeUnit.name}`}
-          tenders={tenderState.unitTenders}
-          loading={tenderState.unitTendersLoading}
+          tenders={tenderState.unitTenders.tenders}
+          loading={tenderState.unitTenders.loading}
+          detailsWithheld={tenderState.unitTenders.detailsWithheld}
+          heldCount={tenderState.unitTenders.heldCount}
+          portalUrl={tenderState.unitTenders.portalUrl}
           collectingSince={tenderState.overview.collectionState?.collectingSince ?? null}
         />
       )}

@@ -29,6 +29,8 @@ export {
 } from "./source-licence";
 export type { Republication, SourceDescriptor, SourceLicence } from "./source-licence";
 export * from "./geography";
+export { PORTALS, portalByCode, portalForState, portalHomeUrl } from "./gepnic-portals";
+export type { Portal } from "./gepnic-portals";
 export {
   displayStateOf,
   levelCoverageState,

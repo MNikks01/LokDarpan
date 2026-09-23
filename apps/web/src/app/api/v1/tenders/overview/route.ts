@@ -1,5 +1,6 @@
 import { describeSources, tenderCollectionState } from "@lokdarpan/domain";
 import { inLedger } from "@/server/container";
+import { tenderDetailsArePublishable } from "@/server/publishable";
 import { respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +57,8 @@ export function GET(request: Request): Promise<Response> {
         // The same facts as `collection`, in the shared data-state model (ADR-054).
         // `collection` stays for one release while the panels move over.
         collectionState,
+        // Whether the panel may offer tender details at all (ADR-056).
+        detailsWithheld: !tenderDetailsArePublishable(),
         // The terms each portal's material is held under (ADR-055). For the whole
         // country, every collected portal contributes to the counts.
         sources: describeSources(

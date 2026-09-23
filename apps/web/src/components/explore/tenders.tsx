@@ -64,6 +64,8 @@ export interface TenderOverview {
   readonly collection: StateCollection | null;
   /** The same facts in the shared data-state model (ADR-054). What the panel reads. */
   readonly collectionState: DataState | null;
+  /** True while the portals' terms keep tender details off the page (ADR-056). */
+  readonly detailsWithheld: boolean;
 }
 
 const EMPTY: TenderOverview = {
@@ -73,6 +75,7 @@ const EMPTY: TenderOverview = {
   unplacedCount: 0,
   collection: null,
   collectionState: null,
+  detailsWithheld: true,
 };
 
 export function useTenderOverview(
@@ -190,10 +193,13 @@ function Unplaced({
   count,
   showing,
   onToggle,
+  canShow,
 }: {
   readonly count: number;
   readonly showing: boolean;
   readonly onToggle: () => void;
+  /** False while tender details are withheld: there is no list to show. */
+  readonly canShow: boolean;
 }): React.JSX.Element | null {
   if (count === 0) return null;
   return (
@@ -201,22 +207,26 @@ function Unplaced({
       <span aria-hidden="true">▤ </span>
       {count} further {count === 1 ? "tender names" : "tenders name"} no district we hold, so{" "}
       {count === 1 ? "it is" : "they are"} not shaded here.{" "}
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={showing}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          font: "inherit",
-          color: "var(--ld-accent)",
-          textDecoration: "underline",
-          cursor: "pointer",
-        }}
-      >
-        {showing ? "Hide them" : "Show them"}
-      </button>
+      {canShow ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={showing}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            font: "inherit",
+            color: "var(--ld-accent)",
+            textDecoration: "underline",
+            cursor: "pointer",
+          }}
+        >
+          {showing ? "Hide them" : "Show them"}
+        </button>
+      ) : (
+        tenderCopy.unplacedWithheld
+      )}
     </p>
   );
 }
@@ -385,6 +395,7 @@ export function TendersPanel({
               count={overview.unplacedCount}
               showing={showingUnplaced}
               onToggle={onToggleUnplaced}
+              canShow={!overview.detailsWithheld}
             />
 
             <CollectionFooter state={collectionState} />
@@ -431,20 +442,34 @@ export function groupRupees(value: string): string {
   return fraction === undefined || fraction === "00" ? grouped : `${grouped}.${fraction}`;
 }
 
+export interface TendersFor {
+  readonly tenders: readonly TenderSummary[];
+  /** How many open tenders are held, whether or not their details may be shown. */
+  readonly heldCount: number;
+  readonly detailsWithheld: boolean;
+  /** The state's portal, which may always be linked to. Null for tenders with no state. */
+  readonly portalUrl: string | null;
+  readonly loading: boolean;
+}
+
+const NO_TENDERS: Omit<TendersFor, "loading"> = {
+  tenders: [],
+  heldCount: 0,
+  detailsWithheld: true,
+  portalUrl: null,
+};
+
 export function useTendersFor(
   unitId: number | null,
   department: string | null,
   unplaced = false,
-): {
-  readonly tenders: readonly TenderSummary[];
-  readonly loading: boolean;
-} {
-  const [tenders, setTenders] = useState<readonly TenderSummary[]>([]);
+): TendersFor {
+  const [result, setResult] = useState<Omit<TendersFor, "loading">>(NO_TENDERS);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (unitId === null && !unplaced) {
-      setTenders([]);
+      setResult(NO_TENDERS);
       return;
     }
     const controller = new AbortController();
@@ -456,13 +481,13 @@ export function useTendersFor(
 
     fetch(`/api/v1/tenders?${query.toString()}`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error("failed"))))
-      .then((body: { data: { tenders: readonly TenderSummary[] } }) => {
-        setTenders(body.data.tenders);
+      .then((body: { data: Omit<TendersFor, "loading"> }) => {
+        setResult(body.data);
         setLoading(false);
       })
       .catch((error: unknown) => {
         if (error instanceof Error && error.name === "AbortError") return;
-        setTenders([]);
+        setResult(NO_TENDERS);
         setLoading(false);
       });
     return () => {
@@ -470,7 +495,7 @@ export function useTendersFor(
     };
   }, [unitId, department, unplaced]);
 
-  return { tenders, loading };
+  return { ...result, loading };
 }
 
 /** How the district was arrived at, in words a reader can weigh. */
@@ -479,11 +504,49 @@ const PLACEMENT_NOTE: Readonly<Record<string, string>> = {
   office_code: "Read from an office name, which may cover more than one district.",
 };
 
+/**
+ * What stands in for the list while tender details are withheld: how many are
+ * held, why nothing more is shown, and where to read them. Linking to a portal
+ * needs no permission under its terms; reproducing its tenders does (ADR-056).
+ */
+function WithheldTenders({
+  heldCount,
+  portalUrl,
+}: {
+  readonly heldCount: number;
+  readonly portalUrl: string | null;
+}): React.JSX.Element {
+  return (
+    <>
+      <p style={{ fontSize: 12.5, margin: 0 }}>
+        <span aria-hidden="true">▤ </span>
+        {tenderCopy.heldHere(heldCount)}
+      </p>
+      <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "6px 0 0" }}>
+        {tenderCopy.detailsWithheld}
+      </p>
+      {portalUrl !== null && (
+        <a
+          href={portalUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          style={{ display: "inline-block", fontSize: 12, marginTop: 8 }}
+        >
+          {tenderCopy.portalLink}
+        </a>
+      )}
+    </>
+  );
+}
+
 export function TenderList({
   heading,
   tenders,
   loading,
   collectingSince = null,
+  detailsWithheld = false,
+  heldCount = tenders.length,
+  portalUrl = null,
 }: {
   /** Stated by the caller, because a placed list and an unplaced one are
    *  different claims and neither should be phrased as the other. */
@@ -492,6 +555,9 @@ export function TenderList({
   readonly loading: boolean;
   /** When collection began for the state on screen, so an empty list can say what it cannot cover. */
   readonly collectingSince?: string | null;
+  readonly detailsWithheld?: boolean;
+  readonly heldCount?: number;
+  readonly portalUrl?: string | null;
 }): React.JSX.Element {
   return (
     <div className={styles.panel}>
@@ -500,7 +566,11 @@ export function TenderList({
 
         {loading && <p style={{ fontSize: 12.5, margin: 0 }}>Loading…</p>}
 
-        {!loading && tenders.length === 0 && (
+        {!loading && detailsWithheld && heldCount > 0 && (
+          <WithheldTenders heldCount={heldCount} portalUrl={portalUrl} />
+        )}
+
+        {!loading && heldCount === 0 && (
           <p style={{ fontSize: 12.5, color: "var(--ld-text-secondary)", margin: 0 }}>
             <span aria-hidden="true">▤ </span>
             {tenderCopy.emptyHere}
