@@ -11,7 +11,7 @@ import { cx } from "@/ui/cx";
 import { useExplorerState, type ExplorerState } from "@/state/useExplorerState";
 import { Breadcrumb } from "./Breadcrumb";
 import { FilterPanel } from "./FilterPanel";
-import { MapCanvas, type MapHandle } from "./MapCanvas";
+import { MapCanvas, type MapCanvasProps, type MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
@@ -24,7 +24,7 @@ import {
   useTendersFor,
   withTenderCounts,
 } from "./tenders";
-import { DEFAULT_LAYERS, type LayerVisibility } from "./layer-visibility";
+import { DEFAULT_LAYERS, type LayerVisibility } from "@/map/layers/visibility";
 import { useExplorerGeography, type LevelCoverage, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
 
@@ -64,6 +64,8 @@ interface TenderLayer {
   readonly department: string | null;
   readonly setDepartment: (department: string | null) => void;
   readonly shadedBoundaries: FeatureCollection | null;
+  /** What the map's tender layer needs to decide whether it may draw. */
+  readonly mapTenders: MapCanvasProps["tenders"];
   readonly unitTenders: ReturnType<typeof useTendersFor>;
   readonly showingUnplaced: boolean;
   readonly toggleUnplaced: () => void;
@@ -103,9 +105,16 @@ function useTenderLayer(
     [childBoundaries, overview.districts],
   );
 
+  const { sources, collectionState } = overview;
+  const mapTenders = useMemo(
+    () => (failed ? null : { sources, state: collectionState }),
+    [collectionState, failed, sources],
+  );
+
   return {
     overview,
     failed,
+    mapTenders,
     department,
     setDepartment,
     shadedBoundaries,
@@ -221,6 +230,7 @@ export function ExploreShell({
           activeUnit={activeUnit}
           activeGeometry={activeGeometry}
           childBoundaries={tenderState.shadedBoundaries}
+          tenders={tenderState.mapTenders}
           states={states}
           layers={layers}
           insets={insets}

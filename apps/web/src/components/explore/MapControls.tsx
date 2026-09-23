@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { Button, ButtonStack, IconButton } from "@/components/ui";
-import { LAYER_LABELS, type LayerVisibility } from "./layer-visibility";
+import { LAYER_LABELS, type LayerVisibility } from "@/map/layers/visibility";
 import { CheckRow } from "@/components/ui";
 import styles from "./explorer.module.css";
 

@@ -4,23 +4,20 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { Map as MapLibreMap, addProtocol } from "maplibre-gl";
 import { Protocol } from "pmtiles";
-import type { GeoJSONSource, MapGeoJSONFeature, MapMouseEvent } from "maplibre-gl";
+import type { GeoJSONSource, MapMouseEvent } from "maplibre-gl";
 import type React from "react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import type { GeoUnit } from "@lokdarpan/domain";
-import { LEVEL_LABEL } from "@lokdarpan/domain";
+import type { DataState, GeoUnit, SourceDescriptor } from "@lokdarpan/domain";
 import type { BBox, FeatureCollection } from "geojson";
 import { INDIA_BBOX } from "@/domain/geography";
 import type { StateOption } from "@/data/geography";
 import { CAMERA_MS, fitTo, framePadding } from "@/map/camera";
-import {
-  EMPTY_COLLECTION,
-  GeometryUnavailableError,
-  fetchStateOutlines,
-} from "@/map/geometry-source";
-import { LAYER, SOURCE, basemapAvailable, basemapUrl, buildStyle } from "@/map/style";
+import { GeometryUnavailableError, fetchStateOutlines } from "@/map/geometry-source";
+import { basemapAvailable, basemapUrl, buildStyle } from "@/map/style";
+import { createBinder, type Binder, type MapPort } from "@/map/engine/binder";
+import type { MapInput } from "@/map/layers/types";
 import { createPlaceLabelLayer, type PlaceLabel, type PlaceLabelLayer } from "@/map/place-labels";
-import type { LayerVisibility } from "./layer-visibility";
+import type { LayerVisibility } from "@/map/layers/visibility";
 import { MapOverlays, MapUnavailable } from "./MapOverlays";
 import type { HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
@@ -37,6 +34,11 @@ export interface MapCanvasProps {
   readonly activeUnit: GeoUnit | null;
   readonly activeGeometry: unknown;
   readonly childBoundaries: FeatureCollection | null;
+  /** What the tender shading is drawn from, and on what terms. Null before it loads. */
+  readonly tenders: {
+    readonly sources: readonly SourceDescriptor[];
+    readonly state: DataState | null;
+  } | null;
   readonly states: readonly StateOption[];
   readonly layers: LayerVisibility;
   readonly insets: { readonly left: number; readonly right: number };
@@ -62,15 +64,16 @@ function registerPmtilesProtocol(): void {
   pmtilesRegistered = true;
 }
 
-/** A ledger level rendered for a reader, falling back to the raw value. */
-function levelLabel(level: string): string {
-  return (LEVEL_LABEL as Readonly<Record<string, string | undefined>>)[level] ?? level;
-}
-
-function setSourceData(map: MapLibreMap, id: string, data: unknown): void {
-  const source = map.getSource(id);
-  // `setData` returns the source for chaining; nothing here needs the return.
-  if (source !== undefined) (source as GeoJSONSource).setData(data as FeatureCollection);
+/** The calls the layer binder makes, bound to one map. */
+function portOf(map: MapLibreMap): MapPort {
+  return {
+    getSource: (id) => map.getSource<GeoJSONSource>(id),
+    getLayer: (id) => map.getLayer(id),
+    setLayoutProperty: (layerId, name, value) => map.setLayoutProperty(layerId, name, value),
+    setFilter: (layerId, filter) => map.setFilter(layerId, filter),
+    queryRenderedFeatures: (point, options) =>
+      map.queryRenderedFeatures([point.x, point.y], options),
+  };
 }
 
 /**
@@ -98,10 +101,12 @@ function whenLoaded(map: MapLibreMap): Promise<void> {
 /**
  * The map.
  *
- * Draws three things: state outlines, the boundaries of whatever level is being
- * drilled into, and the selected unit. It does not know what those levels are —
- * "children" is one source fed by the ledger, so a district of talukas and a
- * taluka of villages render through the same path with no per-level code.
+ * What it draws is the layer registry's business (`map/layers/registry.ts`,
+ * ADR-058); this component owns the renderer's lifecycle, the pointer, the
+ * camera and the place names, and hands everything else to the binder as one
+ * `MapInput`. It does not know what levels are being drawn — "children" is one
+ * source fed by the ledger, so a district of talukas and a taluka of villages
+ * render through the same path with no per-level code.
  *
  * Geometry is handed to MapLibre and never diffed by React.
  */
@@ -111,6 +116,7 @@ export function MapCanvas({
   activeUnit,
   activeGeometry,
   childBoundaries,
+  tenders,
   states,
   layers,
   insets,
@@ -121,6 +127,8 @@ export function MapCanvas({
 }: MapCanvasProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const binderRef = useRef<Binder | null>(null);
+  const [stateOutlines, setStateOutlines] = useState<FeatureCollection | null>(null);
   const [ready, setReady] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const [hover, setHover] = useState<HoverTarget | null>(null);
@@ -197,7 +205,8 @@ export function MapCanvas({
 
       const outlines = await fetchStateOutlines();
       if (cancelled()) return;
-      setSourceData(map, SOURCE.states, outlines);
+      binderRef.current = createBinder(portOf(map));
+      setStateOutlines(outlines);
       mapRef.current = map;
       setReady(true);
     };
@@ -220,6 +229,7 @@ export function MapCanvas({
       holder.cancelled = true;
       holder.instance?.remove();
       mapRef.current = null;
+      binderRef.current = null;
       setReady(false);
     };
   }, []);
@@ -230,55 +240,37 @@ export function MapCanvas({
     if (map === null || !ready) return;
     const canvas = map.getCanvas();
 
-    /**
-     * ONE hit test, not one listener per layer. Per-layer handlers all fire for
-     * the same pointer and the last to run wins, so the state polygon underneath
-     * an area was overwriting the area's own hover.
-     */
-    const topmost = (point: MapMouseEvent["point"]): MapGeoJSONFeature | null => {
-      for (const id of [LAYER.childFill, LAYER.stateFill]) {
-        if (map.getLayer(id) === undefined) continue;
-        const [hit] = map.queryRenderedFeatures(point, { layers: [id] });
-        if (hit !== undefined) return hit;
-      }
-      return null;
-    };
-
     // Feature-state hover, so the fill lifts under the pointer without React
     // re-rendering the map on every mouse move.
-    let hovered: string | number | undefined;
+    let hovered: { source: string; id: string | number } | undefined;
     const clearHover = (): void => {
       if (hovered !== undefined) {
-        map.setFeatureState({ source: SOURCE.children, id: hovered }, { hover: false });
+        map.setFeatureState(hovered, { hover: false });
         hovered = undefined;
       }
     };
 
     const onMove = (event: MapMouseEvent): void => {
-      const feature = topmost(event.point);
-      if (feature === null) {
+      const hit = binderRef.current?.hitAt(event.point) ?? null;
+      if (hit === null) {
         clearHover();
         canvas.style.cursor = "";
         setHover(null);
         return;
       }
-      if (feature.source === SOURCE.children && feature.id !== hovered) {
+      const { feature } = hit;
+      if (!hit.hover) {
         clearHover();
-        hovered = feature.id;
-        if (hovered !== undefined) {
-          map.setFeatureState({ source: SOURCE.children, id: hovered }, { hover: true });
+      } else if (feature.source !== hovered?.source || feature.id !== hovered.id) {
+        clearHover();
+        if (feature.id !== undefined) {
+          hovered = { source: feature.source, id: feature.id };
+          map.setFeatureState(hovered, { hover: true });
         }
       }
       canvas.style.cursor = "pointer";
       const { x, y } = event.point;
-      const level: unknown = feature.properties["level"];
-      setHover({
-        kind: "area",
-        title: String(feature.properties["name"] ?? feature.properties["stateName"] ?? ""),
-        subtitle: typeof level === "string" ? levelLabel(level) : "State",
-        x,
-        y,
-      });
+      setHover({ kind: "area", title: hit.title, subtitle: hit.subtitle, x, y });
     };
 
     const onLeave = (): void => {
@@ -288,15 +280,10 @@ export function MapCanvas({
     };
 
     const onClick = (event: MapMouseEvent): void => {
-      const feature = topmost(event.point);
-      if (feature === null) return;
-      const unitId: unknown = feature.properties["unitId"];
-      if (typeof unitId === "number") {
-        callbacks.current.onSelectUnit(unitId);
-        return;
-      }
-      const code: unknown = feature.properties["stateCode"];
-      if (typeof code === "string") callbacks.current.onSelectState(code);
+      const selection = binderRef.current?.hitAt(event.point)?.selection ?? null;
+      if (selection === null) return;
+      if (selection.kind === "unit") callbacks.current.onSelectUnit(selection.id);
+      else callbacks.current.onSelectState(selection.code);
     };
 
     map.on("mousemove", onMove);
@@ -310,45 +297,23 @@ export function MapCanvas({
     };
   }, [ready]);
 
-  /* ------------------------------------------------------------ geometry */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    setSourceData(map, SOURCE.children, childBoundaries ?? EMPTY_COLLECTION);
-  }, [childBoundaries, ready]);
+  /* --------------------------------------------------------------- layers */
+  const input = useMemo<MapInput>(
+    () => ({
+      stateCode,
+      stateOutlines,
+      childBoundaries,
+      activeGeometry,
+      tenders,
+      visibility: layers,
+    }),
+    [activeGeometry, childBoundaries, layers, stateCode, stateOutlines, tenders],
+  );
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    setSourceData(
-      map,
-      SOURCE.active,
-      activeGeometry === null || activeGeometry === undefined
-        ? EMPTY_COLLECTION
-        : { type: "Feature", properties: {}, geometry: activeGeometry },
-    );
-  }, [activeGeometry, ready]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    map.setFilter(LAYER.stateFillActive, ["==", ["get", "stateCode"], stateCode ?? "__none__"]);
-  }, [ready, stateCode]);
-
-  /* ------------------------------------------------------ layer visibility */
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map === null || !ready) return;
-    const show = (id: string, visible: boolean): void => {
-      if (map.getLayer(id) !== undefined) {
-        map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
-      }
-    };
-    show(LAYER.stateLine, layers.states);
-    show(LAYER.stateFill, layers.states);
-    show(LAYER.childFill, layers.areas);
-    show(LAYER.childLine, layers.areas);
-  }, [layers, ready]);
+    if (!ready) return;
+    binderRef.current?.update(input);
+  }, [input, ready]);
 
   /* --------------------------------------------------------------- labels */
   const labelLayerRef = useRef<PlaceLabelLayer | null>(null);
