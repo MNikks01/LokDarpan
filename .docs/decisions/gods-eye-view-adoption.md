@@ -96,10 +96,8 @@ container resizes; load MapLibre after hydration; update the hover tooltip at mo
   the new fetch layer logs.
 - **Indic text shaping in MapLibre** — resolved: 5.24 cannot shape U+0900–U+0DFF, so labels stay
   in the DOM (ADR-057).
-- **Unit views and the single-version rule.** `UnitService` refuses a payload whose rows come from
-  more than one load, and geography is loaded per district, so `/api/v1/units` fails as soon as
-  units span loads. Decide whether unit views keep strict row versions or report the watermark
-  (ADR-053).
+- **Unit views and the single-version rule — resolved 23 September 2026 (ADR-053 addendum).** Unit
+  views report the watermark; each unit keeps the version of the load it came from.
 - **Pinned links cannot reconstruct old boundaries — resolved by saying so (ADR-061).** A pinned link
   names its version and date, and the page says when the ledger has moved on and that earlier
   boundaries and counts are not kept. Versioning boundary rows remains possible if replay is ever

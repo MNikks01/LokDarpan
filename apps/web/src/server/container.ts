@@ -9,7 +9,6 @@ import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-f
 import { PostgresTenderRepository } from "@lokdarpan/database/tender";
 import { readLedger, versionOpenedAt } from "@lokdarpan/database/ledger";
 import pg from "pg";
-import { UnitService } from "@lokdarpan/domain";
 
 /**
  * Composition for the serverless runtime.
@@ -24,7 +23,6 @@ import { UnitService } from "@lokdarpan/domain";
  * pool built on every invocation would open a new connection each time and
  * exhaust a free-tier Postgres in minutes.
  */
-let repository: PostgresAdminUnitRepository | undefined;
 let facts: PostgresPublishedFactRepository | undefined;
 let geography: PostgresGeographyRepository | undefined;
 let tenders: PostgresTenderRepository | undefined;
@@ -51,32 +49,9 @@ export function pool(): pg.Pool {
   return sharedPool;
 }
 
-export function unitService(): UnitService {
-  repository ??= new PostgresAdminUnitRepository({
-    connectionString: databaseUrl(),
-    runtime: "serverless",
-  });
-  // Contract violations are counted by the platform's log-derived metrics here:
-  // an in-process counter cannot survive an isolate that is frozen between
-  // invocations (.docs/adr/018-telemetry-without-identifiers.md, and see
-  // .docs/adr/020-vercel-deployment.md for why /metrics is not served).
-  return new UnitService(repository, (kind) => {
-    process.stdout.write(
-      `${JSON.stringify({
-        level: "error",
-        message: "contract_violation",
-        kind,
-        service: "web",
-        env: process.env["VERCEL_ENV"] ?? "development",
-        time: new Date().toISOString(),
-      })}\n`,
-    );
-  });
-}
-
 /**
  * Reads only the `published_fact` view, so nothing unreviewed can be served.
- * Shares the isolate's pool for the same reason the unit repository does.
+ * Shares the isolate's pool: a pool per invocation exhausts a small Postgres.
  */
 export function publishedFactRepository(): PostgresPublishedFactRepository {
   facts ??= new PostgresPublishedFactRepository(pool());
@@ -103,6 +78,7 @@ export function tenderRepository(): PostgresTenderRepository {
 
 /** Read-side repositories bound to one ledger snapshot. */
 export interface LedgerRepositories {
+  readonly units: PostgresAdminUnitRepository;
   readonly geography: PostgresGeographyRepository;
   readonly tenders: PostgresTenderRepository;
   readonly facts: PostgresPublishedFactRepository;
@@ -126,6 +102,7 @@ export async function inLedger<T>(
 ): Promise<VersionedResult<T>> {
   const { value, ledger } = await readLedger(pool(), (db) =>
     read({
+      units: new PostgresAdminUnitRepository({ db }),
       geography: new PostgresGeographyRepository(db),
       tenders: new PostgresTenderRepository(db),
       facts: new PostgresPublishedFactRepository(db),

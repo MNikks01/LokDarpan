@@ -63,3 +63,20 @@ views keep strict row versions or move to the watermark is an open decision in t
 
 **Not in this change:** `ETag` and `If-None-Match` handling, cache-tag ISR, and pinning a version
 from a shared link (phase 7).
+
+## Addendum · 2026-09-23 — unit views follow the watermark
+
+The open question above is decided: **unit views report the watermark, and each unit keeps its own
+version.** The strict rule refused any payload whose units came from more than one load. Geography is
+loaded district by district, so Madhya Pradesh's 55 districts span loads, and the rule failed every
+real request.
+
+- `/api/v1/units` and `/api/v1/units/:id` now read inside `inLedger`, like the explorer routes.
+  `PostgresAdminUnitRepository` accepts a snapshot client for this.
+- Each unit's `provenance.datasetVersion` still says which load it came from.
+- `singleDatasetVersion` and its "mixed version" contract violation are removed from the domain.
+- `services/api`, which has no ledger snapshot, reports `newestDatasetVersion` of the payload: never
+  older than anything in it.
+
+Checked live: 36 states listed, and Madhya Pradesh with its 55 districts, each answer carrying the
+watermark. Missing ids still return 404 and malformed ids 400.

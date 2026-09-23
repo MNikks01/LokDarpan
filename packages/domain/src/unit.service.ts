@@ -10,8 +10,6 @@ import {
 export interface UnitView {
   readonly unit: AdminUnit;
   readonly children: readonly AdminUnit[];
-  /** The single dataset version every fact in this payload came from. */
-  readonly datasetVersion: number;
 }
 
 export function parseLevel(raw: string): AdminUnitLevel {
@@ -23,49 +21,22 @@ export function parseLevel(raw: string): AdminUnitLevel {
 }
 
 /**
- * One payload carries one `datasetVersion`.
+ * The newest load any of these units came from, for a caller that cannot read
+ * the ledger's watermark. Never older than anything in the payload, so it never
+ * claims a vintage the payload does not have.
  *
- * If a unit and its children came from different ingests, two figures on the
- * same page would carry different provenance vintages while appearing equally
- * current. That is a traceability defect, so it is refused rather than served
- * with a caveat (.docs/adr/012-web-api-strategy.md).
+ * Units read from several loads are served, each carrying its own
+ * `provenance.datasetVersion`. This used to be refused as a "mixed" payload,
+ * but geography is loaded district by district, so a state's units always span
+ * loads: the rule failed every real request. A payload's version is the
+ * ledger's watermark (ADR-053); which load a row came from is its provenance.
  */
-export function singleDatasetVersion(
-  units: readonly AdminUnit[],
-  onViolation?: () => void,
-): number {
-  const versions = new Set(units.map((u) => u.provenance.datasetVersion));
-  if (versions.size > 1) {
-    // An integrity alarm, not a usage number
-    // (.docs/13-observability/observability.md §Guardrail telemetry).
-    onViolation?.();
-    throw AppError.internal(
-      "This response could not be assembled from a single dataset version.",
-      `Payload mixes dataset versions ${[...versions].sort((a, b) => a - b).join(", ")}.`,
-    );
-  }
-  const [only] = versions;
-  if (only === undefined) {
-    throw AppError.internal(
-      "This response could not be assembled from a single dataset version.",
-      "Empty payload has no dataset version.",
-    );
-  }
-  return only;
+export function newestDatasetVersion(units: readonly AdminUnit[]): number {
+  return units.reduce((newest, u) => Math.max(newest, u.provenance.datasetVersion), 0);
 }
 
-/** Raised when a payload mixes provenance vintages, for the caller to count. */
-export type ViolationSink = (kind: "mixed_dataset_version") => void;
-
 export class UnitService {
-  constructor(
-    private readonly units: AdminUnitRepository,
-    private readonly onViolation: ViolationSink = () => undefined,
-  ) {}
-
-  private readonly mixed = (): void => {
-    this.onViolation("mixed_dataset_version");
-  };
+  constructor(private readonly units: AdminUnitRepository) {}
 
   async getUnit(rawId: string): Promise<UnitView> {
     if (!/^\d+$/u.test(rawId)) {
@@ -73,18 +44,10 @@ export class UnitService {
     }
     const unit = await this.units.findById(Number(rawId));
     const children = await this.units.listChildren(unit.id);
-    return {
-      unit,
-      children,
-      datasetVersion: singleDatasetVersion([unit, ...children], this.mixed),
-    };
+    return { unit, children };
   }
 
-  async listByLevel(rawLevel: string): Promise<{
-    readonly units: readonly AdminUnit[];
-    readonly datasetVersion: number;
-  }> {
-    const units = await this.units.listByLevel(parseLevel(rawLevel));
-    return { units, datasetVersion: singleDatasetVersion(units, this.mixed) };
+  async listByLevel(rawLevel: string): Promise<{ readonly units: readonly AdminUnit[] }> {
+    return { units: await this.units.listByLevel(parseLevel(rawLevel)) };
   }
 }

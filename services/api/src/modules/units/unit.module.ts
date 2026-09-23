@@ -1,6 +1,5 @@
 import { PostgresAdminUnitRepository } from "@lokdarpan/database";
 import { UnitService, type AdminUnitRepository } from "@lokdarpan/domain";
-import { METRICS, type MetricsRegistry } from "@lokdarpan/observability";
 import type { DependencyContainer } from "tsyringe";
 
 import { CONFIG, type Config } from "../../config/index.js";
@@ -37,9 +36,6 @@ export function registerUnits(container: DependencyContainer): void {
   });
 
   container.register<UnitService>(UNIT_SERVICE, {
-    useFactory: (c) =>
-      new UnitService(c.resolve<AdminUnitRepository>(ADMIN_UNIT_REPOSITORY), (kind) => {
-        c.resolve<MetricsRegistry>(METRICS).recordContractViolation(kind);
-      }),
+    useFactory: (c) => new UnitService(c.resolve<AdminUnitRepository>(ADMIN_UNIT_REPOSITORY)),
   });
 }

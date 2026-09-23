@@ -1,6 +1,7 @@
 import type { AdminUnit, AdminUnitLevel, AdminUnitRepository, Provenance } from "@lokdarpan/domain";
 import { AppError } from "@lokdarpan/errors";
 import pg from "pg";
+import type { Queryable } from "./published-fact.repository";
 
 interface UnitRow {
   readonly id: string;
@@ -60,23 +61,41 @@ export interface RepositoryOptions {
   readonly onNotFound?: (id: number) => void;
 }
 
+/**
+ * Read inside a snapshot someone else opened — `readLedger`'s client — so the
+ * units share one state of the ledger with the version the response reports
+ * (ADR-053). The caller owns the connection; `close` leaves it alone.
+ */
+export interface SnapshotOptions {
+  readonly db: Queryable;
+  readonly onNotFound?: (id: number) => void;
+}
+
 export class PostgresAdminUnitRepository implements AdminUnitRepository {
-  private readonly pool: pg.Pool;
+  /** Null when reading through a snapshot the caller owns. */
+  private readonly pool: pg.Pool | null;
+  private readonly db: Queryable;
   private readonly onNotFound: (id: number) => void;
 
-  constructor(options: RepositoryOptions) {
-    this.pool = new pg.Pool({
-      connectionString: options.connectionString,
-      max: options.runtime === "serverless" ? 1 : 10,
-      // A serverless isolate is frozen between invocations; a connection held
-      // open across that gap is usually dead by the next one.
-      idleTimeoutMillis: options.runtime === "serverless" ? 5_000 : 30_000,
-    });
+  constructor(options: RepositoryOptions | SnapshotOptions) {
+    if ("db" in options) {
+      this.pool = null;
+      this.db = options.db;
+    } else {
+      this.pool = new pg.Pool({
+        connectionString: options.connectionString,
+        max: options.runtime === "serverless" ? 1 : 10,
+        // A serverless isolate is frozen between invocations; a connection held
+        // open across that gap is usually dead by the next one.
+        idleTimeoutMillis: options.runtime === "serverless" ? 5_000 : 30_000,
+      });
+      this.db = this.pool;
+    }
     this.onNotFound = options.onNotFound ?? ((): void => undefined);
   }
 
   async findById(id: number): Promise<AdminUnit> {
-    const result = await this.pool.query<UnitRow>(`${SELECT} WHERE a.id = $1`, [id]);
+    const result = await this.db.query<UnitRow>(`${SELECT} WHERE a.id = $1`, [id]);
     const row = result.rows[0];
     if (row === undefined) {
       this.onNotFound(id);
@@ -86,15 +105,14 @@ export class PostgresAdminUnitRepository implements AdminUnitRepository {
   }
 
   async listByLevel(level: AdminUnitLevel): Promise<AdminUnit[]> {
-    const result = await this.pool.query<UnitRow>(
-      `${SELECT} WHERE a.level = $1 ORDER BY a.name_en`,
-      [level],
-    );
+    const result = await this.db.query<UnitRow>(`${SELECT} WHERE a.level = $1 ORDER BY a.name_en`, [
+      level,
+    ]);
     return result.rows.map(toUnit);
   }
 
   async listChildren(parentId: number): Promise<AdminUnit[]> {
-    const result = await this.pool.query<UnitRow>(
+    const result = await this.db.query<UnitRow>(
       `${SELECT} WHERE a.parent_id = $1 ORDER BY a.name_en`,
       [parentId],
     );
@@ -110,7 +128,7 @@ export class PostgresAdminUnitRepository implements AdminUnitRepository {
    * holding write access to the canonical record.
    */
   async assertReadOnly(): Promise<void> {
-    const result = await this.pool.query<{ writable: boolean }>(
+    const result = await this.db.query<{ writable: boolean }>(
       `SELECT bool_or(p) AS writable FROM (
          SELECT has_table_privilege(current_user, 'admin_unit', 'INSERT') AS p
          UNION ALL SELECT has_table_privilege(current_user, 'admin_unit', 'UPDATE')
@@ -127,6 +145,6 @@ export class PostgresAdminUnitRepository implements AdminUnitRepository {
   }
 
   async close(): Promise<void> {
-    await this.pool.end();
+    await this.pool?.end();
   }
 }
