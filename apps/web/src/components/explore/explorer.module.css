@@ -344,3 +344,15 @@
     transition: none;
   }
 }
+
+/* What "Copy link to this view" reports. A panel, so it reads over the map. */
+.linkStatus {
+  max-width: 268px;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  text-align: left;
+  background: var(--ld-surface);
+  border: 1px solid var(--ld-hair);
+  border-radius: 10px;
+}

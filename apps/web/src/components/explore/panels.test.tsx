@@ -208,6 +208,8 @@ const filterPanel = (levels: readonly LevelCoverage[]): string =>
         selectUnit: noop,
         selectPlace: noop,
         selectDocument: noop,
+        toggleLayer: noop,
+        selectDepartment: noop,
         resetAll: noop,
       }}
       loading={false}
