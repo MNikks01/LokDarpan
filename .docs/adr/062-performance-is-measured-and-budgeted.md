@@ -88,3 +88,12 @@ Every other measured budget is within target. HTML is 8.7 KB and the level paylo
 - a nightly CI job for `perf:runtime`, which needs a seeded ledger in CI;
 - the pan frame-time and label-layout budgets;
 - the heap check after ten drill-downs.
+
+## Addendum · 2026-09-23
+
+Both over-budget items were taken up in [ADR-065](./065-a-level-is-drawn-from-outlines-made-when-they-were-loaded.md):
+
+- **The level endpoint is fixed:** 580 → 62 ms, by simplifying outlines once when they are loaded.
+- **The first draw is not:** ~800 ms after `map:load`. Re-sending the level for tender counts turned
+  out not to be the cause. The rest is worker tiling and software rendering, to be measured on a real
+  GPU before anything else changes.

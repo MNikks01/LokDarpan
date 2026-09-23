@@ -11,6 +11,7 @@ const POINT: Point = { type: "Point", coordinates: [0, 0] };
 function fakeMap(hits: Record<string, HitFeature[]> = {}) {
   const calls: string[] = [];
   const data = new Map<string, unknown>();
+  const states = new Map<string, number>();
   const visibility = new Map<string, string>();
   const layerIds = new Set([
     "ld-state-fill",
@@ -38,8 +39,18 @@ function fakeMap(hits: Record<string, HitFeature[]> = {}) {
       calls.push(`filter ${id}`);
     },
     queryRenderedFeatures: (_point, options) => hits[options.layers[0] ?? ""] ?? [],
+    setFeatureState: (target, state) => {
+      calls.push(`state ${target.source} ${String(target.id)}`);
+      for (const [key, value] of Object.entries(state)) {
+        states.set(`${target.source}/${String(target.id)}/${key}`, value);
+      }
+    },
+    removeFeatureState: (target, key) => {
+      calls.push(`unstate ${target.source} ${String(target.id)}`);
+      states.delete(`${target.source}/${String(target.id)}/${key}`);
+    },
   };
-  return { map, calls, data, visibility };
+  return { map, calls, data, visibility, states };
 }
 
 const level: FeatureCollection = {
@@ -74,7 +85,11 @@ const input = (over: Partial<MapInput> = {}): MapInput => ({
   stateOutlines: outlines,
   childBoundaries: level,
   activeGeometry: null,
-  tenders: { sources: describeSources(["gepnic-od"]), state: collected },
+  tenders: {
+    sources: describeSources(["gepnic-od"]),
+    state: collected,
+    counts: [{ adminUnitId: 7, tenderCount: 4 }],
+  },
   visibility: DEFAULT_LAYERS,
   ...over,
 });
@@ -115,7 +130,9 @@ describe("the layer binder", () => {
     const { map, visibility } = fakeMap();
     const binder = createBinder(map);
     binder.update(
-      input({ tenders: { sources: describeSources(["gepnic-od"]), state: notCollected } }),
+      input({
+        tenders: { sources: describeSources(["gepnic-od"]), state: notCollected, counts: [] },
+      }),
     );
     expect(visibility.get("ld-tender-fill")).toBe("none");
     expect(binder.refused().get("tender-offices")).toBe("not collected");
@@ -188,5 +205,74 @@ describe("the layer binder", () => {
     const binder = createBinder(map);
     binder.update(input());
     expect(binder.hitAt({ x: 1, y: 1 })).toBeNull();
+  });
+
+  it("shades by feature-state, never by re-sending the level", () => {
+    const { map, calls, states } = fakeMap();
+    const binder = createBinder(map);
+    const first = input();
+    binder.update(first);
+    expect(states.get("ld-children/7/tenderCount")).toBe(4);
+
+    // The counts change — a department is chosen — and the geometry does not move.
+    binder.update({
+      ...first,
+      tenders: {
+        ...(first.tenders ?? { sources: [], state: null }),
+        counts: [{ adminUnitId: 7, tenderCount: 1 }],
+      },
+    });
+    expect(states.get("ld-children/7/tenderCount")).toBe(1);
+    expect(calls.filter((c) => c === "setData ld-children")).toHaveLength(1);
+  });
+
+  it("gives a district with no tenders no state, not a zero", () => {
+    const { map, states } = fakeMap();
+    const binder = createBinder(map);
+    binder.update(
+      input({
+        tenders: {
+          sources: describeSources(["gepnic-od"]),
+          state: collected,
+          counts: [
+            { adminUnitId: 7, tenderCount: 0 },
+            { adminUnitId: 8, tenderCount: 2 },
+          ],
+        },
+      }),
+    );
+    expect(states.has("ld-children/7/tenderCount")).toBe(false);
+    expect(states.get("ld-children/8/tenderCount")).toBe(2);
+  });
+
+  it("removes a count that is no longer held, and every count when the layer is refused", () => {
+    const { map, states } = fakeMap();
+    const binder = createBinder(map);
+    binder.update(input());
+    binder.update(
+      input({ tenders: { sources: describeSources(["gepnic-od"]), state: collected, counts: [] } }),
+    );
+    expect(states.has("ld-children/7/tenderCount")).toBe(false);
+
+    binder.update(input());
+    expect(states.get("ld-children/7/tenderCount")).toBe(4);
+    binder.update(
+      input({
+        tenders: {
+          sources: describeSources(["gepnic-od"]),
+          state: notCollected,
+          counts: [{ adminUnitId: 7, tenderCount: 4 }],
+        },
+      }),
+    );
+    expect(states.size).toBe(0);
+  });
+
+  it("re-applies counts after the level's data is re-sent", () => {
+    const { map, calls } = fakeMap();
+    const binder = createBinder(map);
+    binder.update(input());
+    binder.update(input({ childBoundaries: { ...level } }));
+    expect(calls.filter((c) => c === "state ld-children 7")).toHaveLength(2);
   });
 });

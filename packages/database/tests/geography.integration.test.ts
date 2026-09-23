@@ -28,12 +28,13 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     let pool: pg.Pool | undefined;
     let repository: PostgresGeographyRepository | undefined;
 
-    const ids: Record<"state" | "district" | "taluka" | "body" | "outside", number> = {
+    const ids: Record<"state" | "district" | "taluka" | "body" | "outside" | "hub", number> = {
       state: 0,
       district: 0,
       taluka: 0,
       body: 0,
       outside: 0,
+      hub: 0,
     };
     /**
      * A digest no other suite uses. Single-letter repeats a-f are all taken,
@@ -110,6 +111,10 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await boundary(ids.taluka, square(70.212345678, -19.812345678, 0.5), "open_dataset", null);
       await boundary(ids.body, square(71.0, -19.2, 0.3), "official_government", "Test Authority");
       await boundary(ids.outside, square(60.0, -30.0, 1), "derived", null);
+      // A small unit centred on the district's own label point (71, -19): the
+      // district's interior point falls inside it, though the district is not.
+      ids.hub = await unit("sub_district", "Test Hub", ids.district);
+      await boundary(ids.hub, square(70.9, -19.1, 0.2), "open_dataset", null);
     });
 
     afterAll(async () => {
@@ -137,6 +142,13 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       const children = (await repository?.childrenOf(ids.district)) ?? [];
       const levels = children.map((c) => c.level);
       expect(levels.indexOf("sub_district")).toBeLessThan(levels.indexOf("urban_local_body"));
+    });
+
+    // The regression: 79 pairs in the ledger listed a state or district as the
+    // child of one of its own smaller units, because its interior point fell there.
+    it("never lists a larger unit as the child of a smaller one", async () => {
+      const children = (await repository?.childrenOf(ids.hub)) ?? [];
+      expect(children.map((c) => c.name)).not.toContain("Test District");
     });
 
     it("excludes a unit that merely sits elsewhere", async () => {
@@ -189,7 +201,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     it("returns boundary features with their provenance attached", async () => {
       const collection = await repository?.boundariesOfChildren(ids.district);
       expect(collection?.type).toBe("FeatureCollection");
-      expect(collection?.features.length).toBe(2);
+      expect(collection?.features.length).toBe(3); // taluka, city and hub
       for (const feature of collection?.features ?? []) {
         expect(feature.properties.sourceName).toBe("Test source");
         expect(feature.geometry).not.toBeNull();

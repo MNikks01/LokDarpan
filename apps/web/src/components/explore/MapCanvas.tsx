@@ -7,7 +7,7 @@ import { Protocol } from "pmtiles";
 import type { GeoJSONSource, MapMouseEvent, MapSourceDataEvent } from "maplibre-gl";
 import type React from "react";
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import type { DataState, GeoUnit, SourceDescriptor } from "@lokdarpan/domain";
+import type { GeoUnit } from "@lokdarpan/domain";
 import type { BBox, FeatureCollection } from "geojson";
 import { INDIA_BBOX } from "@/domain/geography";
 import type { StateOption } from "@/data/geography";
@@ -37,10 +37,7 @@ export interface MapCanvasProps {
   readonly activeGeometry: unknown;
   readonly childBoundaries: FeatureCollection | null;
   /** What the tender shading is drawn from, and on what terms. Null before it loads. */
-  readonly tenders: {
-    readonly sources: readonly SourceDescriptor[];
-    readonly state: DataState | null;
-  } | null;
+  readonly tenders: MapInput["tenders"];
   readonly states: readonly StateOption[];
   readonly layers: LayerVisibility;
   readonly insets: { readonly left: number; readonly right: number };
@@ -75,6 +72,12 @@ function portOf(map: MapLibreMap): MapPort {
     setFilter: (layerId, filter) => map.setFilter(layerId, filter),
     queryRenderedFeatures: (point, options) =>
       map.queryRenderedFeatures([point.x, point.y], options),
+    setFeatureState: (target, state) => {
+      map.setFeatureState(target, state);
+    },
+    removeFeatureState: (target, key) => {
+      map.removeFeatureState(target, key);
+    },
   };
 }
 

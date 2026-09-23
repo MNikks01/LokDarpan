@@ -51,7 +51,9 @@ export interface LevelCoverage {
   readonly inherited: boolean;
 }
 
-const TOLERANCE_OVERVIEW = 0.005;
+// The overview tolerance (0.005°) is not here: a whole level is drawn from
+// `geometry_overview`, simplified once when the boundary was written
+// (migration 0033). Only a single unit's outline is simplified per request.
 const TOLERANCE_DETAIL = 0.0005;
 
 /**
@@ -168,7 +170,7 @@ export class PostgresGeographyRepository implements GeographyRepository {
 
     const result = await this.db.query<UnitRow>(
       `WITH parent AS (
-         SELECT geometry FROM admin_unit_boundary WHERE admin_unit_id = $1
+         SELECT geometry, area_m2 FROM admin_unit_boundary WHERE admin_unit_id = $1
        )
        SELECT ${UNIT_COLUMNS}
          FROM admin_unit u
@@ -176,10 +178,15 @@ export class PostgresGeographyRepository implements GeographyRepository {
          CROSS JOIN parent p
         WHERE u.id <> $1
           AND b.geometry && p.geometry
+          -- A unit is never inside a smaller one. Without this, a state whose
+          -- interior point happened to fall in one of its own districts was
+          -- listed as that district's child: 79 such pairs in the ledger.
+          AND b.area_m2 < p.area_m2
           -- A boundary that merely brushes a neighbour is not inside it. The
-          -- surface point lies on the polygon by construction, so this is exact
-          -- for well-formed geometry and cheap once the index has cut the set.
-          AND ST_Contains(p.geometry, ST_PointOnSurface(b.geometry))
+          -- label point is the centre of the child's largest inscribed circle,
+          -- so it lies inside the child by construction, and it is stored
+          -- (migration 0032) rather than computed per child per request.
+          AND ST_Contains(p.geometry, b.label_point)
         ORDER BY
           CASE u.level
             WHEN 'district' THEN 2 WHEN 'sub_district' THEN 3
@@ -324,18 +331,18 @@ export class PostgresGeographyRepository implements GeographyRepository {
                   'sourceKind', b.source_kind::text,
                   'sourceName', b.source_name,
                   'labelPoint', jsonb_build_array(
-                    round(ST_X(b.label_point)::numeric, $3),
-                    round(ST_Y(b.label_point)::numeric, $3)
+                    round(ST_X(b.label_point)::numeric, $2),
+                    round(ST_Y(b.label_point)::numeric, $2)
                   ),
                   'areaM2', round(b.area_m2)
                 ),
-                'geometry', ST_AsGeoJSON(ST_SimplifyPreserveTopology(b.geometry, $2), $3)::jsonb
+                'geometry', ST_AsGeoJSON(b.geometry_overview, $2)::jsonb
               ) AS feature
          FROM admin_unit u
          JOIN admin_unit_boundary b ON b.admin_unit_id = u.id
         WHERE u.parent_id = $1
         ORDER BY u.name_en`,
-      [parentId, TOLERANCE_OVERVIEW, COORDINATE_DIGITS],
+      [parentId, COORDINATE_DIGITS],
     );
     return { type: "FeatureCollection", features: result.rows.map((r) => r.feature) };
   }

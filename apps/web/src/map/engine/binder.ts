@@ -35,6 +35,14 @@ export interface MapPort {
     point: { readonly x: number; readonly y: number },
     options: { layers: string[] },
   ): readonly HitFeature[];
+  setFeatureState(
+    target: { readonly source: string; readonly id: number },
+    state: Readonly<Record<string, number>>,
+  ): unknown;
+  removeFeatureState(
+    target: { readonly source: string; readonly id: number },
+    key: string,
+  ): unknown;
 }
 
 export interface Hit {
@@ -74,6 +82,8 @@ export function createBinder(map: MapPort, layers: readonly LayerDefinition[] = 
     .sort((a, b) => (a.hit?.order ?? 0) - (b.hit?.order ?? 0));
 
   const sentData = new Map<string, unknown>();
+  /** Feature-state last applied, by `source|key`. Forgotten when that source's data is re-sent. */
+  const sentStates = new Map<string, ReadonlyMap<number, number>>();
   const sentVisibility = new Map<string, "visible" | "none">();
   const sentFilter = new Map<string, string>();
   const readSnapshot = new Map<LayerId, readonly unknown[]>();
@@ -86,6 +96,11 @@ export function createBinder(map: MapPort, layers: readonly LayerDefinition[] = 
     if (source === undefined) return;
     source.setData(data as never);
     sentData.set(sourceId, data);
+    // New data may bring new features, or drop state with the old ones: the
+    // next feature-state pass re-applies everything for this source.
+    for (const key of sentStates.keys()) {
+      if (key.startsWith(`${sourceId}|`)) sentStates.delete(key);
+    }
   };
 
   const setVisibility = (styleId: string, value: "visible" | "none"): void => {
@@ -123,6 +138,24 @@ export function createBinder(map: MapPort, layers: readonly LayerDefinition[] = 
     }
   };
 
+  const bindFeatureState = (layer: LayerDefinition, input: MapInput, refused: boolean): void => {
+    const spec = layer.featureState?.(input);
+    if (spec === undefined) return;
+    const key = `${spec.source}|${spec.key}`;
+    const previous = sentStates.get(key) ?? new Map<number, number>();
+    // A refused layer keeps no numbers on the map, not just no visible ones.
+    const next = refused ? new Map<number, number>() : spec.values;
+    for (const id of previous.keys()) {
+      if (!next.has(id)) map.removeFeatureState({ source: spec.source, id }, spec.key);
+    }
+    for (const [id, value] of next) {
+      if (previous.get(id) !== value) {
+        map.setFeatureState({ source: spec.source, id }, { [spec.key]: value });
+      }
+    }
+    sentStates.set(key, new Map(next));
+  };
+
   const bindVisibility = (layer: LayerDefinition, visible: boolean): void => {
     if (visible) visibleNow.add(layer.id);
     else visibleNow.delete(layer.id);
@@ -133,13 +166,19 @@ export function createBinder(map: MapPort, layers: readonly LayerDefinition[] = 
 
   return {
     update(input) {
+      // Data first, for every layer, so a feature-state pass never runs before
+      // the data it annotates has been sent in the same update.
+      const reasons = new Map(layers.map((layer) => [layer.id, refusal(layer, input)]));
       for (const layer of layers) {
-        const reason = refusal(layer, input);
+        const reason = reasons.get(layer.id) ?? null;
         if (reason === null) refusedNow.delete(layer.id);
         else refusedNow.set(layer.id, reason);
-
         bindData(layer, input, reason !== null);
+      }
+      for (const layer of layers) {
+        const reason = reasons.get(layer.id) ?? null;
         bindFilters(layer, input);
+        bindFeatureState(layer, input, reason !== null);
         bindVisibility(
           layer,
           reason === null && (layer.toggle === null || input.visibility[layer.toggle]),
