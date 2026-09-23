@@ -3,7 +3,6 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import type { FeatureCollection } from "geojson";
 import type { GeoUnit, SearchResult } from "@lokdarpan/domain";
 import type { StateOption } from "@/data/geography";
 import { Button, controlStyles } from "@/components/ui";
@@ -20,13 +19,7 @@ import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
 import { SearchDialog } from "./SearchDialog";
 import { BoundarySources } from "./BoundarySources";
-import {
-  TenderList,
-  TendersPanel,
-  useTenderOverview,
-  useTendersFor,
-  withTenderCounts,
-} from "./tenders";
+import { TenderList, TendersPanel, useTenderOverview, useTendersFor } from "./tenders";
 import { useExplorerGeography, type LevelCoverage, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
 
@@ -84,7 +77,6 @@ interface TenderLayer {
   readonly failed: boolean;
   readonly department: string | null;
   readonly setDepartment: (department: string | null) => void;
-  readonly shadedBoundaries: FeatureCollection | null;
   /** What the map's tender layer needs to decide whether it may draw. */
   readonly mapTenders: MapCanvasProps["tenders"];
   readonly unitTenders: ReturnType<typeof useTendersFor>;
@@ -97,14 +89,13 @@ interface TenderLayer {
  * The tender layer's state, gathered so the shell keeps orchestrating rather
  * than accumulating one feature's bookkeeping.
  *
- * The counts ride along inside the boundary features the map already draws, so
- * there is no second source and no feature-state to keep in step. Selecting a
- * unit lists its tenders through the explorer's existing click routing, which
- * means a shaded district is clickable without a separate target to discover.
+ * The counts reach the map as feature-state on the boundaries it already draws
+ * (ADR-065), so they never re-send the geometry. Selecting a unit lists its
+ * tenders through the explorer's existing click routing, which means a shaded
+ * district is clickable without a separate target to discover.
  */
 function useTenderLayer(
   unitId: number | null,
-  childBoundaries: FeatureCollection | null,
   stateLgdCode: string | null,
   // In the URL (ADR-061), so a shared link keeps the narrowing.
   {
@@ -133,15 +124,10 @@ function useTenderLayer(
     setShowingUnplaced((showing) => !showing);
   }, []);
 
-  const shadedBoundaries = useMemo(
-    () => withTenderCounts(childBoundaries, overview.districts),
-    [childBoundaries, overview.districts],
-  );
-
-  const { sources, collectionState } = overview;
+  const { sources, collectionState, districts } = overview;
   const mapTenders = useMemo(
-    () => (failed ? null : { sources, state: collectionState }),
-    [collectionState, failed, sources],
+    () => (failed ? null : { sources, state: collectionState, counts: districts }),
+    [collectionState, districts, failed, sources],
   );
 
   return {
@@ -150,7 +136,6 @@ function useTenderLayer(
     mapTenders,
     department,
     setDepartment,
-    shadedBoundaries,
     unitTenders,
     showingUnplaced,
     toggleUnplaced,
@@ -184,7 +169,7 @@ export function ExploreShell({
     scopeLabel,
   } = useExplorerGeography(states, geo.stateCode, geo.unitId);
 
-  const tenderState = useTenderLayer(geo.unitId, childBoundaries, geo.stateCode, {
+  const tenderState = useTenderLayer(geo.unitId, geo.stateCode, {
     department,
     setDepartment: actions.selectDepartment,
   });
@@ -273,7 +258,7 @@ export function ExploreShell({
           stateBbox={selectedState?.bbox ?? null}
           activeUnit={activeUnit}
           activeGeometry={activeGeometry}
-          childBoundaries={tenderState.shadedBoundaries}
+          childBoundaries={childBoundaries}
           tenders={tenderState.mapTenders}
           states={states}
           layers={layers}

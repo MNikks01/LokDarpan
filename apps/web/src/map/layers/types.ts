@@ -22,7 +22,7 @@ export interface MapInput {
   readonly stateCode: string | null;
   /** The national outlines, from a static file loaded once. */
   readonly stateOutlines: FeatureCollection | null;
-  /** Whatever level is being drilled into, with tender counts merged in. */
+  /** Whatever level is being drilled into. */
   readonly childBoundaries: FeatureCollection | null;
   /** The selected unit's own geometry; null when no unit is selected. */
   readonly activeGeometry: unknown;
@@ -30,6 +30,8 @@ export interface MapInput {
   readonly tenders: {
     readonly sources: readonly SourceDescriptor[];
     readonly state: DataState | null;
+    /** Open tenders by the district of the issuing office. Absent districts have none held. */
+    readonly counts: readonly { readonly adminUnitId: number; readonly tenderCount: number }[];
   } | null;
   readonly visibility: LayerVisibility;
 }
@@ -104,6 +106,18 @@ export interface LayerDefinition {
   readonly provenance: (input: MapInput) => readonly SourceDescriptor[];
   /** When `not_collected`, the layer draws nothing rather than an empty-looking map. */
   readonly dataState?: (input: MapInput) => DataState | null;
+  /**
+   * Numbers set per feature as `feature-state`, so they can change — a new
+   * department, a later count — without re-sending the geometry they sit on.
+   */
+  readonly featureState?: (input: MapInput) => FeatureStates;
+}
+
+export interface FeatureStates {
+  readonly source: string;
+  readonly key: string;
+  /** Feature id to value. A feature not here has no state under `key`. */
+  readonly values: ReadonlyMap<number, number>;
 }
 
 export const EMPTY_COLLECTION: FeatureCollection = { type: "FeatureCollection", features: [] };

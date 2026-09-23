@@ -2,7 +2,6 @@
 
 import type React from "react";
 import { useCallback } from "react";
-import type { FeatureCollection } from "geojson";
 import { displayStateOf, type DataState, type SourceDescriptor } from "@lokdarpan/domain";
 import { notChecked, tenderCopy } from "@/copy/data-state";
 import { useResource } from "@/lib/use-resource";
@@ -95,32 +94,6 @@ export function useTenderOverview(
   const query = params.size === 0 ? "" : `?${params.toString()}`;
   const { data, failed } = useResource<TenderOverview>(`/api/v1/tenders/overview${query}`);
   return { overview: data ?? EMPTY, failed };
-}
-
-/**
- * Put the counts into the boundary features the map already draws.
- *
- * A district with no tenders is left WITHOUT the property rather than given a
- * zero, so the style's `["has", "tenderCount"]` filter leaves it unshaded. A
- * zero would be shaded the palest colour and read as "we looked and found
- * none", which forward-only collection cannot support.
- */
-export function withTenderCounts(
-  boundaries: FeatureCollection | null,
-  districts: readonly DistrictTenderCount[],
-): FeatureCollection | null {
-  if (boundaries === null) return null;
-  if (districts.length === 0) return boundaries;
-
-  const byUnit = new Map(districts.map((d) => [d.adminUnitId, d.tenderCount]));
-  return {
-    ...boundaries,
-    features: boundaries.features.map((feature) => {
-      const count = byUnit.get(Number(feature.properties?.["unitId"]));
-      if (count === undefined) return feature;
-      return { ...feature, properties: { ...feature.properties, tenderCount: count } };
-    }),
-  };
 }
 
 function formatDate(iso: string): string {
