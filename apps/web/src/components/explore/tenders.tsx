@@ -3,7 +3,7 @@
 import type React from "react";
 import { useCallback } from "react";
 import type { FeatureCollection } from "geojson";
-import { displayStateOf, type DataState } from "@lokdarpan/domain";
+import { displayStateOf, type DataState, type SourceDescriptor } from "@lokdarpan/domain";
 import { notChecked, tenderCopy } from "@/copy/data-state";
 import { useResource } from "@/lib/use-resource";
 import styles from "./explorer.module.css";
@@ -67,6 +67,8 @@ export interface TenderOverview {
   readonly collectionState: DataState | null;
   /** True while the portals' terms keep tender details off the page (ADR-056). */
   readonly detailsWithheld: boolean;
+  /** The portals the counts come from, and their terms (ADR-055). The map draws nothing without them. */
+  readonly sources: readonly SourceDescriptor[];
 }
 
 const EMPTY: TenderOverview = {
@@ -77,6 +79,7 @@ const EMPTY: TenderOverview = {
   collection: null,
   collectionState: null,
   detailsWithheld: true,
+  sources: [],
 };
 
 export function useTenderOverview(

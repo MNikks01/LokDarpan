@@ -68,7 +68,7 @@ Order matters: phases 1 and 2 come first because later phases key on what they p
 | 3     | Label arbitration; `label_point` and `area_m2` stored per boundary                               | 057      | Done                                                                             |
 | 4     | `DataState` model and reviewed wording; source terms recorded and returned as `SourceDescriptor` | 054–056  | Done — tender details withheld and linked to the portal (ADR-056)                |
 | 5     | One level endpoint; browser resource cache keyed by version                                      | 064      | Done — panels still read separately; the cache corrects a mixed page, not more   |
-| 6     | Layer registry and binder                                                                        | 058      | Planned                                                                          |
+| 6     | Layer registry and binder                                                                        | 058      | Done — layers still receive data from the shell; they do not fetch their own     |
 | 7     | URL carries layers, filters, selection and an optional version pin                               | 061      | Planned                                                                          |
 | 8     | Performance harness and enforced budgets                                                         | 062      | Planned                                                                          |
 | 9     | Records layers with an aggregate-first budget — waits on a licensed coordinate source            | 063, 060 | Blocked                                                                          |

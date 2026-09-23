@@ -34,6 +34,7 @@ const overview = (over: Partial<TenderOverview> = {}): TenderOverview => {
     windows: [],
     unplacedCount: 0,
     detailsWithheld: true,
+    sources: [],
     ...over,
     collection: stateCollection,
     collectionState: stateCollection === null ? null : tenderCollectionState(stateCollection),

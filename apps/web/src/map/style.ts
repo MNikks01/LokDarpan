@@ -1,5 +1,5 @@
 /**
- * The map style, and the layer contract the explorer draws against.
+ * The map style: the base map, with the explorer's registered layers on top.
  *
  * TWO LAYERS, KEPT APART
  * Layer A is the geographic base — roads, buildings, water, railways, places —
@@ -22,183 +22,39 @@
  */
 import { layers as basemapLayers, namedFlavor } from "@protomaps/basemaps";
 import { color } from "@/ui/tokens";
+import { LAYERS, orderedStyleLayers } from "./layers/registry";
 import type { StyleSpecification, LayerSpecification, SourceSpecification } from "maplibre-gl";
 
 export const BASE_SOURCE = "protomaps";
 
-export const SOURCE = {
-  states: "ld-states",
-  /** Whatever level is currently being drilled into — districts, talukas,
-   *  municipal bodies, villages. One source, because the map draws one level at
-   *  a time and the level is decided by the data, not by the renderer. */
-  children: "ld-children",
-  /** The selected unit's own boundary, drawn above its siblings. */
-  active: "ld-active-unit",
-} as const;
-
-export const LAYER = {
-  background: "ld-background",
-  stateFill: "ld-state-fill",
-  stateFillActive: "ld-state-fill-active",
-  stateLine: "ld-state-line",
-  childFill: "ld-child-fill",
-  childLine: "ld-child-line",
-  activeFill: "ld-active-fill",
-  tenderFill: "ld-tender-fill",
-  activeLine: "ld-active-line",
-} as const;
-
-const EMPTY: SourceSpecification = {
-  type: "geojson",
-  data: { type: "FeatureCollection", features: [] },
-};
+const BACKGROUND_LAYER = "ld-background";
 
 /**
- * Layers the explorer owns: administrative areas and their outlines.
+ * Layers the explorer owns, from the layer registry (ADR-058), over a flat
+ * background when there is no base map to draw them on.
  *
  * There is no works layer. No register of individual works has been located for
  * any area, so there is nothing to draw — and a layer fed demo geometry would
  * make a blank map look like a populated one.
  */
 function overlayLayers(withBasemap: boolean): LayerSpecification[] {
-  const layers: LayerSpecification[] = [];
-
-  // With a base map underneath, these fills exist to catch the pointer and to
-  // mark the selection — not to paint the map. An opaque administrative fill
-  // over a street map hides the streets, which is the whole reason the base map
-  // is there. Without one, they carry the map's legibility instead.
-  const opacity = withBasemap
-    ? { state: 0.02, stateActive: 0.18, child: 0.02, childHover: 0.22, active: 0.16 }
-    : { state: 0.9, stateActive: 1, child: 0.06, childHover: 0.55, active: 0.55 };
-
-  if (!withBasemap) {
-    layers.push({
-      id: LAYER.background,
-      type: "background",
-      paint: { "background-color": color.bg.sunken },
-    });
-  }
-
-  layers.push(
-    {
-      id: LAYER.stateFill,
-      type: "fill",
-      source: SOURCE.states,
-      paint: {
-        "fill-color": color.bg.surface,
-        // Subdued once a state is chosen: the eye should go to the selection,
-        // and dimming the rest does that without hiding the country.
-        "fill-opacity": [
-          "case",
-          ["boolean", ["feature-state", "dimmed"], false],
-          opacity.state * 0.4,
-          opacity.state,
-        ],
-      },
-    },
-    {
-      id: LAYER.stateFillActive,
-      type: "fill",
-      source: SOURCE.states,
-      filter: ["==", ["get", "stateCode"], "__none__"],
-      paint: { "fill-color": color.accent.soft, "fill-opacity": opacity.stateActive },
-    },
-    {
-      id: LAYER.stateLine,
-      type: "line",
-      source: SOURCE.states,
-      layout: { "line-join": "round", "line-cap": "round" },
-      paint: {
-        "line-color": [
-          "case",
-          ["boolean", ["feature-state", "active"], false],
-          color.accent.base,
-          color.border.strong,
-        ],
-        "line-width": ["case", ["boolean", ["feature-state", "active"], false], 1.8, 0.7],
-      },
-    },
-    {
-      // The selected unit is a BACKDROP, drawn beneath its children. Painted on
-      // top it covered the very boundaries the reader drilled in to see.
-      id: LAYER.activeFill,
-      type: "fill",
-      source: SOURCE.active,
-      paint: { "fill-color": color.accent.soft, "fill-opacity": opacity.active },
-    },
-    {
-      // TENDER SHADING — how many tenders offices in this district have
-      // advertised. Sequential teal, never a red or a diverging ramp: a count
-      // of advertisements is a measurement, not a severity, and a red district
-      // would read as an accusation before a word of the legend is read
-      // (.docs/17-legal/legal-ethical-rules.md).
-      //
-      // Districts with no tenders carry no `tenderCount` and are left unshaded
-      // rather than painted the palest colour. Collection is forward-only, so
-      // "none advertised" and "we hold none" are the same statement, and an
-      // explicit lightest shade would imply we had looked and found nothing.
-      id: LAYER.tenderFill,
-      type: "fill",
-      source: SOURCE.children,
-      filter: ["has", "tenderCount"],
-      paint: {
-        "fill-color": [
-          "interpolate",
-          ["linear"],
-          ["get", "tenderCount"],
-          1,
-          "#CDE7E3",
-          3,
-          "#7FC4BC",
-          6,
-          "#3C9A90",
-          12,
-          color.accent.base,
-        ],
-        "fill-opacity": 0.72,
-      },
-    },
-    {
-      id: LAYER.childFill,
-      type: "fill",
-      source: SOURCE.children,
-      paint: {
-        // Nearly transparent: the fill exists to catch the pointer and to lift
-        // on hover, not to tint the map. The outline carries the shape.
-        "fill-color": color.bg.surface,
-        "fill-opacity": [
-          "case",
-          ["boolean", ["feature-state", "hover"], false],
-          opacity.childHover,
-          opacity.child,
-        ],
-      },
-    },
-    {
-      id: LAYER.childLine,
-      type: "line",
-      source: SOURCE.children,
-      layout: { "line-join": "round" },
-      paint: { "line-color": color.border.strong, "line-width": 1 },
-    },
-    {
-      id: LAYER.activeLine,
-      type: "line",
-      source: SOURCE.active,
-      layout: { "line-join": "round", "line-cap": "round" },
-      paint: { "line-color": color.accent.base, "line-width": 2.2 },
-    },
-  );
-
-  return layers;
+  const background: LayerSpecification[] = withBasemap
+    ? []
+    : [
+        {
+          id: BACKGROUND_LAYER,
+          type: "background",
+          paint: { "background-color": color.bg.sunken },
+        },
+      ];
+  return [...background, ...orderedStyleLayers({ withBasemap }).map((layer) => layer.spec)];
 }
 
 function sources(): Record<string, SourceSpecification> {
-  return {
-    [SOURCE.states]: { ...EMPTY, promoteId: "stateCode" } as SourceSpecification,
-    [SOURCE.children]: { ...EMPTY, promoteId: "unitId" } as SourceSpecification,
-    [SOURCE.active]: EMPTY,
-  };
+  return Object.assign({}, ...LAYERS.map((layer) => layer.sources)) as Record<
+    string,
+    SourceSpecification
+  >;
 }
 
 /**
