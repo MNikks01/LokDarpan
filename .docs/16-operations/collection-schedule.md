@@ -63,7 +63,7 @@ CREATE ROLE lokdarpan_etl_prod LOGIN PASSWORD '<generated>';
 GRANT lokdarpan_etl TO lokdarpan_etl_prod;
 ```
 
-Then set `INGEST_DATABASE_URL` to that user's **pooled** Neon URL.
+Then set `INGEST_DATABASE_URL` to that user's **direct** Neon URL, the one whose host has no `-pooler`. The sweep's advisory lock is session-scoped, and Neon's pooler runs in transaction mode, which does not support session-level advisory locks.
 
 **Verify it is not the owner** before trusting it:
 

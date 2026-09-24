@@ -97,8 +97,18 @@ Neon gives you two, and **the difference matters**.
 
 On the dashboard, find the **Connection string** panel:
 
-- Leave **Connection pooling** _off_ → this is the **direct** string. Its host has no `-pooler`. **Use it for migrations and admin.**
-- Turn **Connection pooling** _on_ → this is the **pooled** string. Its host contains `-pooler`. **Use it for the scheduler.**
+- Leave **Connection pooling** _off_ → this is the **direct** string. Its host has no `-pooler`. **Use it for migrations, admin, and the scheduler.**
+- Turn **Connection pooling** _on_ → this is the **pooled** string. Its host contains `-pooler`. **Use it for the website on Vercel only.**
+
+**The scheduler must not use the pooled string.** The sweep takes a session-level
+advisory lock (`pg_try_advisory_lock`, see `services/ingestion/src/advisory-lock.ts`)
+so two sweeps can never write at once. Neon's pooler runs PgBouncer in
+transaction mode, which hands each transaction to whichever server connection is
+free. Neon documents session-level advisory locks as unsupported there. Through the
+pooler the lock is taken on one server connection while the sweep runs on others,
+so it protects nothing. Its release can also land elsewhere and silently fail,
+leaving the lock held by the pooler, and later runs then exit 75 and collect
+nothing. A job that connects once a day gains nothing from pooling anyway.
 
 Copy both into your password manager, labelled clearly. They look like:
 
@@ -168,11 +178,12 @@ CREATE ROLE lokdarpan_etl_prod LOGIN PASSWORD '<paste generated password>';
 GRANT lokdarpan_etl TO lokdarpan_etl_prod;
 ```
 
-Then build the connection string the scheduler will use. Take the **pooled**
-string from Step 1 and replace the username and password:
+Then build the connection string the scheduler will use. Take the **direct**
+string from Step 1, the one whose host has no `-pooler`, and replace the username
+and password:
 
 ```
-postgresql://lokdarpan_etl_prod:<generated password>@ep-something-123456-pooler.ap-south-1.aws.neon.tech/lokdarpan?sslmode=require
+postgresql://lokdarpan_etl_prod:<generated password>@ep-something-123456.ap-south-1.aws.neon.tech/lokdarpan?sslmode=require
 ```
 
 Keep it in your password manager. You will paste it once, in Step 5.
@@ -444,7 +455,7 @@ SELECT source_id, status, started_at, records_inserted, records_unchanged, note
 | Workflow              | <https://github.com/MNikks01/LokDarpan/actions/workflows/ingest-tenders.yml> |
 | Secret name           | `INGEST_DATABASE_URL`                                                        |
 | Database user         | `lokdarpan_etl_prod`, member of `lokdarpan_etl`                              |
-| Connection endpoint   | **pooled** (host contains `-pooler`)                                         |
+| Connection endpoint   | **direct** (host has no `-pooler`), for the session advisory lock            |
 | Schedule              | `0 20 * * *` — 20:00 UTC, 01:30 IST                                          |
 | Command               | `pnpm --filter @lokdarpan/ingestion ingest:gepnic --all`                     |
 | Advisory lock key     | `437642`                                                                     |
