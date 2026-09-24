@@ -25,17 +25,22 @@ The second command creates the login user the site connects as. **Change the pas
 
 ## 2. Environment variables
 
-| Variable          | Value                                   | Notes                                                                            |
-| ----------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
-| `DATABASE_URL`    | Neon **pooled** URL for `lokdarpan_api` | **Must be the read-only user.** ETL is the only write path; see migration `0002` |
-| `SERVICE_VERSION` | the build SHA                           | Echoed on every log line so a line maps to a deploy                              |
-| `API_BASE_URL`    | _unset_                                 | Only set to point at a separately hosted `services/api`                          |
+| Variable       | Value                                   | Notes                                                                            |
+| -------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
+| `DATABASE_URL` | Neon **pooled** URL for `lokdarpan_api` | **Must be the read-only user.** ETL is the only write path; see migration `0002` |
+| `API_BASE_URL` | _unset_                                 | Only set to point at a separately hosted `services/api`                          |
 
 Do **not** put the owner credential here. The web deployment must never be able to write to the ledger.
 
 ## 3. Project settings
 
-`vercel.json` at the repository root carries the build configuration, so the defaults only need:
+`vercel.json` at the repository root carries the build configuration. Its build command runs
+`geo:fetch` before `next build`: the explorer's boundary geometry is generated from the ledger, using
+the deployment's read-only `DATABASE_URL`, and is not committed. `next.config.ts` names
+`public/geo/manifest.json` in `outputFileTracingIncludes`, because `/explore` reads it from disk at
+runtime.
+
+The defaults only need:
 
 - **Framework preset:** Next.js
 - **Root Directory:** leave at the repository root — `vercel.json` runs the workspace build
