@@ -1,7 +1,7 @@
 import type pg from "pg";
 
 import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run";
-import { normalise, type TenderDetail } from "./detail";
+import { districtKey, type TenderDetail } from "./detail";
 import type { FetchedArtifact } from "./fetch";
 import type { ParsedTender } from "./landing";
 
@@ -63,7 +63,7 @@ const LINKAGE_CONFIDENCE: Readonly<Record<"chain_unit" | "office_code", number>>
 };
 
 /**
- * The districts of one state, keyed by normalised name.
+ * The districts of one state, keyed by `districtKey`.
  *
  * Scoped to a single state deliberately. The normalisation collapses eighteen
  * pairs of distinct districts nationwide — Pune with Panna among them — and
@@ -81,7 +81,7 @@ export async function districtsOfState(
     [stateLgdCode],
   );
   const byName = new Map<string, number>();
-  for (const row of result.rows) byName.set(normalise(row.name_en), Number(row.id));
+  for (const row of result.rows) byName.set(districtKey(row.name_en), Number(row.id));
   return byName;
 }
 
@@ -102,7 +102,7 @@ export function placementFor(
   if (name === undefined || name === null || source === undefined || source === null) {
     return UNPLACED;
   }
-  const id = districts.get(normalise(name));
+  const id = districts.get(districtKey(name));
   // A name that does not resolve leaves the tender unplaced rather than
   // approximately placed. Missing is never zero, and a wrong district is a
   // false statement about where public money is going.

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import {
   districtFromChain,
+  districtKey,
   labelledValues,
   normalise,
   parseDetail,
@@ -210,5 +211,42 @@ describe("the page as a whole", () => {
   it("keeps the first value when a label appears more than once", () => {
     const pairs = labelledValues(page({ Location: "First" }) + page({ Location: "Second" }));
     expect(pairs.get("Location")).toBe("First");
+  });
+});
+
+describe("a district's administrative word is not part of its name", () => {
+  // OpenStreetMap names Manipur's districts `Churachandpur district`; Goa's
+  // chains read `District South Goa`. Compared with the word left in, eight
+  // states placed nothing even where the chain named the district.
+  const manipur = new Set(["Churachandpur district", "Imphal East"].map(districtKey));
+  const goa = new Set(["North Goa", "South Goa", "Kushavati"].map(districtKey));
+
+  it("drops the word on either side, and only as a whole word", () => {
+    expect(districtKey("Churachandpur district")).toBe(districtKey("Churachandpur"));
+    expect(districtKey("District South Goa")).toBe(districtKey("South Goa"));
+    expect(districtKey("Distt. Kangra")).toBe(districtKey("Kangra"));
+    expect(districtKey("Zila Varanasi")).toBe(districtKey("Varanasi"));
+    // Not inside a word: a place whose name merely contains the letters stays itself.
+    expect(districtKey("Districtpur")).not.toBe(districtKey("pur"));
+  });
+
+  it("places a chain that names the district with the word in front", () => {
+    const chain = ["MUNICIPAL COUNCILS", "District South Goa", "MORMUGAO MUNICIPAL COUNCIL"];
+    expect(districtFromChain(chain, goa)).toEqual({
+      name: "District South Goa",
+      source: "chain_unit",
+    });
+  });
+
+  it("places a chain against a ledger name that carries the word", () => {
+    const chain = ["PWD", "Churachandpur", "Division I"];
+    expect(districtFromChain(chain, manipur)).toEqual({
+      name: "Churachandpur",
+      source: "chain_unit",
+    });
+  });
+
+  it("does not treat the word alone as a district", () => {
+    expect(districtFromChain(["Dept", "DISTRICT", "District Office"], goa)).toBeNull();
   });
 });
