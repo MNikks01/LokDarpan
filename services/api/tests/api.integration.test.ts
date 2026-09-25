@@ -70,6 +70,38 @@ describe("API integration", () => {
     expect((await fetch(`${base}/livez`, { method: "POST" })).status).toBe(400);
   });
 
+  it("serves metrics as uncached text, naming routes by pattern and never by id", async () => {
+    await fetch(`${base}/api/v1/projects/501`);
+    const res = await fetch(`${base}/metrics`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toMatch(/^text\/plain/);
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    const text = await res.text();
+    expect(text).toContain("/api/v1/projects/:id");
+    expect(text).not.toContain("/api/v1/projects/501");
+  });
+
+  it("asks for a level rather than listing every unit in the country", async () => {
+    const res = await fetch(`${base}/api/v1/units`);
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: { code: "BAD_REQUEST" } });
+  });
+
+  it("fails without leaking why when the ledger is not configured", async () => {
+    // This suite runs with no DATABASE_URL, so the unit routes cannot be served.
+    for (const path of ["/api/v1/units?level=state", "/api/v1/units/20"]) {
+      const res = await fetch(`${base}${path}`);
+      expect(res.status).toBe(500);
+      const body = await res.text();
+      expect(body).not.toMatch(/DATABASE_URL|stack|node_modules/);
+    }
+  });
+
+  it("404s a route that does not exist", async () => {
+    const res = await fetch(`${base}/api/v1/nothing-here`);
+    expect(res.status).toBe(404);
+  });
+
   it("never sets a cacheable header on an error", async () => {
     const res = await fetch(`${base}/api/v1/projects/999999`);
     expect(res.headers.get("cache-control")).toBe("no-store");

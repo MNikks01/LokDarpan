@@ -1,6 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import {
   OSM_ATTRIBUTION,
+  OverpassRateLimited,
+  OverpassUnavailable,
+  runQuery,
+  waitForSlot,
   OSM_LICENCE,
   boundariesInRelationQuery,
   findRelationQuery,
@@ -130,5 +134,88 @@ describe("reading Overpass's status page", () => {
   // format carries no version, so a change to it must fail safe.
   it("waits conservatively when the page cannot be read", () => {
     expect(slotDelayMs("<html>maintenance</html>")).toBe(60_000);
+  });
+});
+
+describe("the network, stubbed", () => {
+  const ENDPOINT = "https://overpass.example.invalid/api/interpreter";
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  /** Answers each request in turn, and fails the test if asked once too often. */
+  function answers(...replies: (() => Response | Promise<Response>)[]): string[] {
+    const asked: string[] = [];
+    vi.stubGlobal("fetch", (url: string) => {
+      asked.push(url);
+      const reply = replies.shift();
+      if (reply === undefined) throw new Error(`unexpected request to ${url}`);
+      return Promise.resolve(reply());
+    });
+    return asked;
+  }
+
+  it("waits as long as the status page says, and not at all once a slot is free", async () => {
+    const asked = answers(
+      () => new Response("Slot available after: 2026-09-05T07:50:12Z, in 39 seconds."),
+      () => new Response("2 slots available now."),
+    );
+    const slept: number[] = [];
+    await waitForSlot(ENDPOINT, (ms) => {
+      slept.push(ms);
+      return Promise.resolve();
+    });
+    expect(slept).toEqual([40_000]);
+    expect(asked).toEqual([
+      "https://overpass.example.invalid/api/status",
+      "https://overpass.example.invalid/api/status",
+    ]);
+  });
+
+  it("falls back to a conservative wait when the status page cannot be read, and gives up waiting in the end", async () => {
+    answers(
+      () => new Response("", { status: 503 }),
+      () => Promise.reject(new TypeError("fetch failed")),
+    );
+    const slept: number[] = [];
+    await waitForSlot(
+      ENDPOINT,
+      (ms) => {
+        slept.push(ms);
+        return Promise.resolve();
+      },
+      2,
+    );
+    expect(slept).toEqual([60_000, 60_000]);
+  });
+
+  it("posts the query and digests the answer", async () => {
+    let sent: RequestInit | undefined;
+    vi.stubGlobal("fetch", (_url: string, init: RequestInit) => {
+      sent = init;
+      return Promise.resolve(new Response('{"elements":[]}'));
+    });
+    const fetched = await runQuery("[out:json];rel(1);out;", ENDPOINT);
+    expect(sent?.method).toBe("POST");
+    expect(sent?.body).toBe("[out:json];rel(1);out;");
+    expect(fetched.sourceUrl).toBe(ENDPOINT);
+    expect(fetched.byteSize).toBe(15);
+    expect(readElements(fetched)).toEqual([]);
+  });
+
+  it("classifies a refusal by the service apart from a broken query", async () => {
+    answers(() => new Response("", { status: 429 }));
+    await expect(runQuery("q", ENDPOINT)).rejects.toBeInstanceOf(OverpassRateLimited);
+
+    answers(() => new Response("", { status: 504 }));
+    const unavailable = await runQuery("q", ENDPOINT).catch((e: unknown) => e);
+    expect(unavailable).toBeInstanceOf(OverpassUnavailable);
+    expect((unavailable as OverpassUnavailable).status).toBe(504);
+
+    answers(() => new Response("", { status: 400 }));
+    const broken = await runQuery("q", ENDPOINT).catch((e: unknown) => e);
+    expect(broken).not.toBeInstanceOf(OverpassUnavailable);
+    expect((broken as Error).message).toBe("Overpass returned 400");
   });
 });
