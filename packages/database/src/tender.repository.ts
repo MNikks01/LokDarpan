@@ -16,6 +16,11 @@ export interface DistrictTenderCount {
   readonly adminUnitId: number;
   readonly districtName: string;
   readonly tenderCount: number;
+  /**
+   * Of those, the ones placed by inference — a pincode or a place name — rather
+   * than named by the issuing office. Counted so the map can say so.
+   */
+  readonly inferredCount: number;
   /** Distinct departments issuing here, so a reader can see the mix. */
   readonly departments: readonly string[];
 }
@@ -38,6 +43,8 @@ export interface TenderSummary {
   readonly organisationChain: string | null;
   readonly districtName: string | null;
   readonly districtSource: string | null;
+  /** What an inferred district was matched on: the pincode, or the post office's name. */
+  readonly districtEvidenceKey: string | null;
   readonly linkageConfidence: number | null;
   readonly firstSeenAt: string;
   readonly sourceUrl: string;
@@ -129,6 +136,7 @@ interface TenderRow {
   readonly pincode: string | null;
   readonly organisation_chain: string | null;
   readonly district_source: string | null;
+  readonly district_evidence_key: string | null;
   readonly linkage_confidence: string | null;
   readonly first_seen_at: string;
   readonly district_name: string | null;
@@ -163,6 +171,7 @@ export class PostgresTenderRepository {
       admin_unit_id: string;
       district_name: string;
       tender_count: string;
+      inferred_count: string;
       departments: string[] | null;
     }>(
       `WITH RECURSIVE within_state AS (
@@ -174,6 +183,8 @@ export class PostgresTenderRepository {
        SELECT t.admin_unit_id,
               d.name_en AS district_name,
               count(*)::text AS tender_count,
+              count(*) FILTER (WHERE t.district_source IN ('pincode', 'place_name'))::text
+                AS inferred_count,
               array_agg(DISTINCT t.department) FILTER (WHERE t.department IS NOT NULL) AS departments
          FROM tender t
          JOIN admin_unit d ON d.id = t.admin_unit_id
@@ -188,6 +199,7 @@ export class PostgresTenderRepository {
       adminUnitId: Number(row.admin_unit_id),
       districtName: row.district_name,
       tenderCount: Number(row.tender_count),
+      inferredCount: Number(row.inferred_count),
       departments: row.departments ?? [],
     }));
   }
@@ -226,7 +238,8 @@ export class PostgresTenderRepository {
       `SELECT t.id::text AS id, t.title, t.tender_reference, t.department,
               t.closing_at, t.bid_opening_at, t.tender_category, t.product_category,
               t.tender_type, t.location, t.pincode, t.organisation_chain,
-              t.district_source, t.linkage_confidence::text AS linkage_confidence,
+              t.district_source, t.district_evidence_key,
+              t.linkage_confidence::text AS linkage_confidence,
               t.first_seen_at, d.name_en AS district_name,
               -- Paise to rupees as text. A JSON number would lose precision on a
               -- large figure silently, behind a correct-looking source link.
@@ -273,6 +286,7 @@ export class PostgresTenderRepository {
       organisationChain: row.organisation_chain,
       districtName: row.district_name,
       districtSource: row.district_source,
+      districtEvidenceKey: row.district_evidence_key,
       linkageConfidence: row.linkage_confidence === null ? null : Number(row.linkage_confidence),
       firstSeenAt: row.first_seen_at,
       sourceUrl: row.source_url,

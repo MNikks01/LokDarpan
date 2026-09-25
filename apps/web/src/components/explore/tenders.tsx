@@ -67,7 +67,12 @@ export interface TenderOverview {
   /** True while the portals' terms keep tender details off the page (ADR-056). */
   readonly detailsWithheld: boolean;
   /** How many open tenders the shading accounts for, and across how many districts. Summed by the server. */
-  readonly placed: { readonly tenders: number; readonly districts: number };
+  readonly placed: {
+    readonly tenders: number;
+    readonly districts: number;
+    /** Of `tenders`, those placed by pincode or place name. */
+    readonly inferred: number;
+  };
   /** The portals the counts come from, and their terms (ADR-055). The map draws nothing without them. */
   readonly sources: readonly SourceDescriptor[];
 }
@@ -80,7 +85,7 @@ const EMPTY: TenderOverview = {
   collection: null,
   collectionState: null,
   detailsWithheld: true,
-  placed: { tenders: 0, districts: 0 },
+  placed: { tenders: 0, districts: 0, inferred: 0 },
   sources: [],
 };
 
@@ -340,6 +345,11 @@ export function TendersPanel({
                 {overview.placed.tenders === 1 ? "tender" : "tenders"} across{" "}
                 {overview.placed.districts}{" "}
                 {overview.placed.districts === 1 ? "district" : "districts"}.
+                {overview.placed.inferred > 0 && (
+                  <span style={{ display: "block", color: "var(--ld-text-secondary)" }}>
+                    {tenderCopy.inferredShading(overview.placed.inferred)}
+                  </span>
+                )}
               </p>
             )}
 
@@ -374,6 +384,7 @@ export interface TenderSummary {
   readonly organisationChain: string | null;
   readonly districtName: string | null;
   readonly districtSource: string | null;
+  readonly districtEvidenceKey: string | null;
   readonly sourceUrl: string;
 }
 
@@ -432,11 +443,6 @@ export function useTendersFor(
 }
 
 /** How the district was arrived at, in words a reader can weigh. */
-const PLACEMENT_NOTE: Readonly<Record<string, string>> = {
-  chain_unit: "The issuing office names this district.",
-  office_code: "Read from an office name, which may cover more than one district.",
-};
-
 /**
  * What stands in for the list while tender details are withheld: how many are
  * held, why nothing more is shown, and where to read them. Linking to a portal
@@ -553,7 +559,7 @@ export function TenderList({
               )}
               {tender.districtSource !== null && (
                 <span style={{ display: "block", color: "var(--ld-text-tertiary)", fontSize: 11 }}>
-                  {PLACEMENT_NOTE[tender.districtSource] ?? ""}
+                  {tenderCopy.placement(tender.districtSource, tender.districtEvidenceKey)}
                 </span>
               )}
               <a

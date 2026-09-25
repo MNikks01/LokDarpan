@@ -13,7 +13,6 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "geo:fetch": "tsx scripts/fetch-boundaries.ts",
-    "geo:basemap": "tsx scripts/fetch-basemap.ts",
     "perf:bytes": "tsx perf/bytes.ts",
     "perf:runtime": "tsx perf/runtime.ts"
   },
@@ -24,11 +23,9 @@
     "@lokdarpan/errors": "workspace:*",
     "@lokdarpan/money": "workspace:*",
     "@lokdarpan/neutrality": "workspace:*",
-    "@protomaps/basemaps": "^5.7.2",
     "maplibre-gl": "^6.11.1",
     "next": "^15.5.26",
     "pg": "^8.13.1",
-    "pmtiles": "^4.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

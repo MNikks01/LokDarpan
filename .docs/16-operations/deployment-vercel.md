@@ -30,6 +30,10 @@ The second command creates the login user the site connects as. **Change the pas
 | `DATABASE_URL` | Neon **pooled** URL for `lokdarpan_api` | **Must be the read-only user.** ETL is the only write path; see migration `0002` |
 | `API_BASE_URL` | _unset_                                 | Only set to point at a separately hosted `services/api`                          |
 
+Optional, for the base map ([ADR-066](../adr/066-the-base-map-is-hosted-and-claims-no-boundary.md)):
+`NEXT_PUBLIC_BASEMAP_STYLE_URL` (unset means OpenFreeMap; empty means no base map) and
+`NEXT_PUBLIC_BASEMAP_ATTRIBUTION` (the credit for a provider whose style states none).
+
 Do **not** put the owner credential here. The web deployment must never be able to write to the ledger.
 
 ## 3. Project settings
@@ -52,6 +56,20 @@ The defaults only need:
   and Next.js's output is `.next` inside the Root Directory. Overriding the output directory to
   `apps/web/.next` fails the deployment after "Collecting build traces", because the path is then
   counted from `apps/web`.
+
+### Protection Bypass for Automation
+
+Server components fetch this deployment's own `/api/v1/*`. When Deployment Protection is on, those
+requests need the bypass, which Vercel provides as `VERCEL_AUTOMATION_BYPASS_SECRET` once it is
+enabled. It is a server-side secret and nothing else:
+
+1. Project → Settings → Deployment Protection → **Protection Bypass for Automation** → create one.
+   Leave "set as `VERCEL_AUTOMATION_BYPASS_SECRET` on deployments" checked.
+2. Redeploy. `apps/web/src/lib/api.ts` sends it as `x-vercel-protection-bypass` on server-side
+   fetches only.
+3. Do not weaken the protection itself, and never copy the value into a `NEXT_PUBLIC_*` variable:
+   those are inlined into the browser bundle. `secrets-stay-on-server.test.ts` fails the build if
+   the secret is read outside a `server-only` module or given a public name.
 
 ## 4. Ingesting data
 

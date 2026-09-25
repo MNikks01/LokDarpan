@@ -1,0 +1,96 @@
+{
+  "$comment": "Permission and access requests to government bodies. Checked by services/ingestion/tests/permission-registry.test.ts. A request is recorded as sent only with the date and reference of the actual request; nothing here is inferred, and silence is never recorded as consent. Statuses: not_sent, draft_ready, sent, acknowledged, granted, refused, not_required, credential_needed.",
+  "updated": "2026-09-25",
+  "requests": [
+    {
+      "id": "nrida-pmgsy-ommas",
+      "department": "National Rural Infrastructure Development Agency (NRIDA), Ministry of Rural Development",
+      "dataset": "PMGSY OMMAS work-level register: sanction, physical and financial progress, completion",
+      "access_method": "Public web reports at pmgsy.dord.gov.in, no login (92 report routes observed)",
+      "restrictions": "\"the Materials may not be copied, reproduced, modified, published, republished, uploaded, downloaded, posted, transmitted, or distributed in any way, without NRIDA's prior written permission\" (pmgsy.dord.gov.in/Home/HomeLegalNotice/, fetched 2026-08-28)",
+      "request": {
+        "status": "draft_ready",
+        "date": null,
+        "reference": null,
+        "channel": null,
+        "draft": "nrida-access-request-draft.md"
+      },
+      "response": { "date": null, "summary": null },
+      "last_verified": "2026-08-28",
+      "evidence": "pmgsy-ommas-findings.md",
+      "not_collected_meanwhile": true
+    },
+    {
+      "id": "maharashtra-finance-beams",
+      "department": "Finance Department, Government of Maharashtra",
+      "dataset": "BEAMS departmental budget, release and expenditure (actuals)",
+      "access_method": "Public web export at beams.mahakosh.gov.in; robots.txt 404 (no stated restriction)",
+      "restrictions": "\"Material featured on this website may be reproduced free of charge after taking proper permission by sending a mail to us.\" (finance.maharashtra.gov.in/en/website-policies/, fetched 2026-08-28). Collected for internal checking; not displayed (PUBLISH_BEAMS_FIGURES off).",
+      "request": {
+        "status": "draft_ready",
+        "date": null,
+        "reference": null,
+        "channel": null,
+        "draft": "beams-access-request-draft.md"
+      },
+      "response": { "date": null, "summary": null },
+      "last_verified": "2026-08-28",
+      "evidence": "source-licences.md",
+      "not_collected_meanwhile": false
+    },
+    {
+      "id": "gepnic-issuing-departments",
+      "department": "Each issuing department on the 21 collected GePNIC state portals",
+      "dataset": "Tender details: organisation chain, location, value, EMD",
+      "access_method": "Public web pages of each state's GePNIC portal; robots.txt permits",
+      "restrictions": "Reproduction requires the issuing department's permission (written, for Madhya Pradesh); linking needs none. Held and counted, not displayed (PUBLISH_TENDER_DETAILS off), per ADR-056.",
+      "request": {
+        "status": "draft_ready",
+        "date": null,
+        "reference": null,
+        "channel": null,
+        "draft": "tender-details-permission-draft.md"
+      },
+      "response": { "date": null, "summary": null },
+      "last_verified": "2026-09-17",
+      "evidence": "source-licences.md",
+      "not_collected_meanwhile": false
+    },
+    {
+      "id": "mahatenders",
+      "department": "Government of Maharashtra (mahatenders.gov.in operator; addressee to be confirmed)",
+      "dataset": "Maharashtra tenders and award-of-contract data",
+      "access_method": "None permitted: robots.txt serves Disallow: /",
+      "restrictions": "robots.txt Disallow: / (verified 2026-08-25). Not collected.",
+      "request": {
+        "status": "draft_ready",
+        "date": null,
+        "reference": null,
+        "channel": null,
+        "draft": "mahatenders-access-request-draft.md"
+      },
+      "response": { "date": null, "summary": null },
+      "last_verified": "2026-08-25",
+      "evidence": "access-and-permissions.md",
+      "not_collected_meanwhile": true
+    },
+    {
+      "id": "dop-pincode-directory",
+      "department": "Department of Posts, Ministry of Communications (published on data.gov.in)",
+      "dataset": "All India Pincode Directory till last month (resource 5c2f62fe-5afa-4119-a499-fec9d604d5bd, updated 2025-10-03)",
+      "access_method": "data.gov.in API with a key issued to a registered account; data.gov.in HTML and files are Disallow: / for programs",
+      "restrictions": "Government Open Data License - India: reuse permitted with attribution. No permission needed; an API key is.",
+      "request": {
+        "status": "credential_needed",
+        "date": null,
+        "reference": null,
+        "channel": "data.gov.in account registration",
+        "draft": null
+      },
+      "response": { "date": null, "summary": null },
+      "last_verified": "2026-09-25",
+      "evidence": "pincode-directory-findings.md",
+      "not_collected_meanwhile": true
+    }
+  ]
+}
