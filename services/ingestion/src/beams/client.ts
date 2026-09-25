@@ -1,4 +1,4 @@
-import { fetchWithLimits, type Http } from "../net/fetch-with-limits";
+import { fetchWithLimits, type Http, RETRY_IDEMPOTENT } from "../net/fetch-with-limits";
 import { BEAMS_EXPORT } from "../net/limits";
 import { sha256Of } from "../raw-store";
 
@@ -36,6 +36,7 @@ export class BeamsClient {
     if (referer !== undefined) headers["referer"] = referer;
 
     const response = await fetchWithLimits({
+      retry: RETRY_IDEMPOTENT,
       url,
       init: { headers },
       limits: BEAMS_EXPORT,

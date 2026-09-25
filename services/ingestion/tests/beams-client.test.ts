@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { vi, describe, expect, it } from "vitest";
 
 import { BeamsClient, type HttpLike } from "../src/beams/client";
 
@@ -72,7 +72,16 @@ describe("BeamsClient", () => {
     const { http } = stub([OK, { status: 503, body: "" }]);
     const client = new BeamsClient("https://example.test", http);
     await client.openSession();
-    await expect(client.fetchDepartmentYear("H", 2024)).rejects.toThrow(/503/);
+    // A 503 is retried with pauses; fake timers run them instantly, and the
+    // client still refuses once the retries are spent.
+    vi.useFakeTimers();
+    try {
+      const refused = expect(client.fetchDepartmentYear("H", 2024)).rejects.toThrow(/503/);
+      await vi.runAllTimersAsync();
+      await refused;
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("refuses when the parent report is unavailable", async () => {

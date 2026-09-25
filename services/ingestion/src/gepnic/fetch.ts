@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { fetchWithLimits, textOf } from "../net/fetch-with-limits";
+import { fetchWithLimits, textOf, RETRY_IDEMPOTENT } from "../net/fetch-with-limits";
 import { GEPNIC_PAGE, ROBOTS_TXT } from "../net/limits";
 
 /**
@@ -131,6 +131,7 @@ export class PortalSession {
   ): Promise<{ readonly session: PortalSession; readonly landing: FetchedArtifact }> {
     const host = new URL(baseUrl).origin;
     const robots = await fetchWithLimits({
+      retry: RETRY_IDEMPOTENT,
       url: `${host}/robots.txt`,
       init: { headers: { "user-agent": USER_AGENT, "accept-language": ACCEPT_LANGUAGE } },
       limits: ROBOTS_TXT,
@@ -157,6 +158,7 @@ export class PortalSession {
   async get(url: string): Promise<FetchedArtifact> {
     const cookie = [...this.cookies].map(([k, v]) => `${k}=${v}`).join("; ");
     const response = await fetchWithLimits({
+      retry: RETRY_IDEMPOTENT,
       url,
       init: {
         headers: {

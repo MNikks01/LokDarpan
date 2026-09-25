@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { vi, describe, expect, it } from "vitest";
 
 import { titleFromUrl } from "../src/cag/client";
 import { glyphSubstitution } from "../src/cag/extract";
@@ -83,9 +83,17 @@ describe("CagClient", () => {
   });
 
   it("refuses a non-200 listing", async () => {
-    await expect(
-      new CagClient("https://x.test", stub(503, "", "text/html")).listStateReports(),
-    ).rejects.toThrow(/503/);
+    // Retried with pauses; fake timers run them, and the refusal still stands.
+    vi.useFakeTimers();
+    try {
+      const refused = expect(
+        new CagClient("https://x.test", stub(503, "", "text/html")).listStateReports(),
+      ).rejects.toThrow(/503/);
+      await vi.runAllTimersAsync();
+      await refused;
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   // An HTML body from a PDF URL is an error page. Storing it would put a

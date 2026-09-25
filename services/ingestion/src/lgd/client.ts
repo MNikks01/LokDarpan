@@ -1,4 +1,4 @@
-import { fetchWithLimits, type Http } from "../net/fetch-with-limits.js";
+import { RETRY_IDEMPOTENT, fetchWithLimits, type Http } from "../net/fetch-with-limits.js";
 import { LGD_PAGE } from "../net/limits.js";
 import { sha256Of } from "../raw-store.js";
 
@@ -36,6 +36,7 @@ export class LgdClient {
     if (this.cookie !== "") headers["cookie"] = this.cookie;
 
     const response = await fetchWithLimits({
+      retry: RETRY_IDEMPOTENT,
       url,
       init: { headers },
       limits: LGD_PAGE,
