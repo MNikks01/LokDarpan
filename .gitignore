@@ -43,14 +43,15 @@ playwright-report/
 # forbids republishing material whose terms we have not established.
 apps/web/public/geo/
 
-# Self-hosted vector base map, built at setup by `pnpm --filter @lokdarpan/web geo:basemap`.
-# Derived from an OpenStreetMap planet extract (ODbL); regenerating it is a command,
-# and committing tens of megabytes of derived tiles would bloat the history.
-apps/web/public/basemap/
 # MapLibre's worker, copied from node_modules before dev and build (MapCanvas, configureWorker).
 apps/web/public/maplibre/
 
-# The pinned pmtiles CLI, downloaded by that script.
+# A self-hosted base map extract from before ADR-066. No longer built or read,
+# but a checkout may still hold one, and it is tens of megabytes of derived tiles.
+apps/web/public/basemap/
+
+# Local tool downloads. The basemap script that fetched a pmtiles CLI here is gone
+# (ADR-066), but a checkout may still hold one.
 tools/
 
 # Python service: virtualenv, caches and build output.

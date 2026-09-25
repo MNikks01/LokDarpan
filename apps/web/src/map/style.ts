@@ -2,32 +2,53 @@
  * The map style: the base map, with the explorer's registered layers on top.
  *
  * TWO LAYERS, KEPT APART
- * Layer A is the geographic base — roads, buildings, water, railways, places —
- * from an OpenStreetMap extract served as PMTiles from this deployment's own
- * origin. Layer B is what LokDarpan knows: administrative boundaries now, and
- * government works when a register for them exists. They are composed here and
- * nowhere else, so the base map answers "what is here?" without knowing
- * anything about the ledger, and the ledger's layers sit on top without
- * knowing what a building is.
+ * Layer A is the geographic base — roads, water, railways, towns — from a
+ * hosted tile provider. Layer B is what LokDarpan knows: administrative
+ * boundaries now, and government works when a register for them exists. They
+ * are composed here and nowhere else, so the base map answers "what is here?"
+ * without knowing anything about the ledger, and the ledger's layers sit on top
+ * without knowing what a road is.
  *
- * BASEMAP POLICY
- * Self-hosted, so there is no API key, no per-load bill, and no request from a
- * reader's browser to a commercial vendor — a civic site's readers should not be
- * logged by a map company for looking at a public record. This is the same
- * reasoning `.docs/adr/006-maps.md` used to reject Mapbox.
+ * BASEMAP POLICY (ADR-066)
+ * Hosted, not self-hosted, by decision: an all-India extract is not worth
+ * building and serving at this stage. The default is OpenFreeMap, which needs no
+ * account and no key; any provider serving an OpenMapTiles-schema MapLibre style
+ * can replace it through `NEXT_PUBLIC_BASEMAP_STYLE_URL`.
  *
- * The extract is fetched at setup and gitignored, like the boundary geometry.
- * When it is absent the style still builds: the reader gets boundaries without
- * a base map rather than an error, and the panel says which.
+ * The base map draws NO administrative boundary and names NO country or state.
+ * A hosted style draws the lines its data holds, and for India those are
+ * OpenStreetMap's, not the Survey of India's. The only boundaries on this map
+ * are the ledger's own, each with its source named in the panel, so a line
+ * whose authority nobody can state is never drawn beside one whose authority
+ * is recorded.
+ *
+ * When the provider cannot be reached the style still builds: the reader gets
+ * boundaries without a base map rather than an error, and the map says which.
  */
-import { layers as basemapLayers, namedFlavor } from "@protomaps/basemaps";
 import { color } from "@/ui/tokens";
 import { LAYERS, orderedStyleLayers } from "./layers/registry";
-import type { StyleSpecification, LayerSpecification, SourceSpecification } from "maplibre-gl";
-
-export const BASE_SOURCE = "protomaps";
+import type {
+  FilterSpecification,
+  LayerSpecification,
+  SourceSpecification,
+  StyleSpecification,
+} from "maplibre-gl";
 
 const BACKGROUND_LAYER = "ld-background";
+
+export const DEFAULT_BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
+
+/**
+ * OpenFreeMap's style carries no attribution of its own, and the tiles are
+ * OpenMapTiles-schema data from OpenStreetMap, whose licence requires credit.
+ */
+const DEFAULT_ATTRIBUTION = "OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors (ODbL)";
+
+/**
+ * Place classes that assert where a jurisdiction is. Their names are the
+ * ledger's to draw (ADR-057), from records whose source is stated.
+ */
+const JURISDICTION_CLASSES = ["continent", "country", "state", "province"];
 
 /**
  * Layers the explorer owns, from the layer registry (ADR-058), over a flat
@@ -58,79 +79,105 @@ function sources(): Record<string, SourceSpecification> {
 }
 
 /**
- * Where the self-hosted vector extract lives, relative to this origin.
- *
- * Configurable so a deployment can serve a different region — or a whole
- * country — without a code change. `null` disables the base map entirely.
+ * The provider's style URL. An empty value disables the base map, for a
+ * deployment that wants no third-party request from a reader's browser at all.
  */
-export function basemapUrl(): string | null {
-  const configured = process.env["NEXT_PUBLIC_BASEMAP_URL"];
+export function basemapStyleUrl(): string | null {
+  const configured = process.env["NEXT_PUBLIC_BASEMAP_STYLE_URL"];
   if (configured === "") return null;
-  return configured ?? "/basemap/nagpur.pmtiles";
+  return configured ?? DEFAULT_BASEMAP_STYLE;
 }
 
-/** Whether the extract is actually present, so the UI can say if it is not. */
-/** Every PMTiles archive begins with these seven bytes (spec v3 §3). */
-const PMTILES_MAGIC = "PMTiles";
-
-export async function basemapAvailable(url: string): Promise<boolean> {
-  try {
-    // A range request, not a HEAD: PMTiles is served as a static file and the
-    // first bytes are the header, so reading them proves it is there and is an
-    // archive. The status alone proves neither: for a missing file Vercel
-    // answered 206 with the first bytes of the site's HTML 404 page, and the
-    // map then failed with "Wrong magic number for PMTiles archive".
-    const response = await fetch(url, { headers: { range: "bytes=0-15" } });
-    if (!response.ok) return false;
-    const head = new Uint8Array(await response.arrayBuffer()).subarray(0, PMTILES_MAGIC.length);
-    return new TextDecoder().decode(head) === PMTILES_MAGIC;
-  } catch {
-    return false;
-  }
+export interface Basemap {
+  readonly style: StyleSpecification;
+  /** Shown on the map; a provider's terms and the data's licence both require it. */
+  readonly attribution: string;
 }
 
 /**
- * The geographic base layer, or nothing when no extract is installed.
+ * The provider's style with every administrative claim taken out.
  *
- * `glyphs` and `sprite` are Protomaps' own hosted assets: fonts and icons, not
- * map data, and without them every label and shield in the base map is missing.
- * They are the one third-party fetch this style makes, and they carry no
- * information about which place the reader is looking at.
+ * `boundary` layers go entirely. Place layers keep towns, villages and
+ * neighbourhoods but lose the jurisdiction classes, by narrowing each layer's
+ * own filter rather than guessing from its id — a provider renaming a layer
+ * cannot then bring a country label back.
+ *
+ * Assumes expression-syntax filters, which OpenMapTiles styles use; legacy and
+ * expression syntax cannot be combined in one filter.
  */
-function baseLayers(sourceName: string): LayerSpecification[] {
-  return basemapLayers(sourceName, namedFlavor("light"), { lang: "en" });
+export function withoutAdministrativeClaims(style: StyleSpecification): StyleSpecification {
+  const notJurisdiction: FilterSpecification = [
+    "!",
+    ["in", ["get", "class"], ["literal", JURISDICTION_CLASSES]],
+  ];
+  const layers = style.layers.flatMap((layer): LayerSpecification[] => {
+    const sourceLayer = "source-layer" in layer ? layer["source-layer"] : undefined;
+    if (sourceLayer === "boundary") return [];
+    if (sourceLayer !== "place") return [layer];
+    const filter = "filter" in layer ? layer.filter : undefined;
+    return [
+      {
+        ...layer,
+        filter:
+          filter === undefined
+            ? notJurisdiction
+            : (["all", notJurisdiction, filter] as FilterSpecification),
+      } as LayerSpecification,
+    ];
+  });
+  return { ...style, layers };
+}
+
+function attributionOf(style: StyleSpecification, url: string): string {
+  const stated = Object.values(style.sources)
+    .map((source) => ("attribution" in source ? source.attribution : undefined))
+    .filter((text): text is string => typeof text === "string" && text.trim() !== "")
+    .map((text) => text.replace(/<[^>]*>/gu, "").trim());
+  if (stated.length > 0) return [...new Set(stated)].join(" · ");
+  const configured = process.env["NEXT_PUBLIC_BASEMAP_ATTRIBUTION"];
+  if (configured !== undefined && configured !== "") return configured;
+  return url === DEFAULT_BASEMAP_STYLE ? DEFAULT_ATTRIBUTION : `Base map: ${new URL(url).host}`;
+}
+
+/**
+ * The provider's style, fetched once per map, or null when it cannot be had.
+ *
+ * Null is not an error to show: the ledger's boundaries draw on a flat
+ * background and the attribution line says no base map is shown.
+ */
+export async function fetchBasemap(url: string): Promise<Basemap | null> {
+  try {
+    const response = await fetch(url, { headers: { accept: "application/json" } });
+    if (!response.ok) return null;
+    const style = (await response.json()) as Partial<StyleSpecification>;
+    if (style.version !== 8 || !Array.isArray(style.layers) || typeof style.sources !== "object") {
+      return null;
+    }
+    const complete = style as StyleSpecification;
+    return {
+      style: withoutAdministrativeClaims(complete),
+      attribution: attributionOf(complete, url),
+    };
+  } catch {
+    return null;
+  }
 }
 
 export interface StyleOptions {
-  /** Set when the extract is present; the base map is omitted otherwise. */
-  readonly basemap: string | null;
+  /** The base map when the provider answered; omitted otherwise. */
+  readonly basemap: Basemap | null;
 }
 
 export function buildStyle(options: StyleOptions): StyleSpecification {
-  const { basemap } = options;
-  const withBasemap = basemap !== null;
+  const base = options.basemap?.style ?? null;
+  const withBasemap = base !== null;
 
   return {
     version: 8,
-    ...(withBasemap
-      ? {
-          glyphs: "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf",
-          sprite: "https://protomaps.github.io/basemaps-assets/sprites/v4/light",
-        }
-      : {}),
-    sources: {
-      ...(withBasemap
-        ? {
-            [BASE_SOURCE]: {
-              type: "vector",
-              url: `pmtiles://${basemap}`,
-              attribution: "© OpenStreetMap contributors",
-            } satisfies SourceSpecification,
-          }
-        : {}),
-      ...sources(),
-    },
+    ...(base?.glyphs === undefined ? {} : { glyphs: base.glyphs }),
+    ...(base?.sprite === undefined ? {} : { sprite: base.sprite }),
+    sources: { ...(base?.sources ?? {}), ...sources() },
     // Base first, then the ledger's own geometry on top of it.
-    layers: [...(withBasemap ? baseLayers(BASE_SOURCE) : []), ...overlayLayers(withBasemap)],
+    layers: [...(base?.layers ?? []), ...overlayLayers(withBasemap)],
   };
 }
