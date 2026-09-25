@@ -2,8 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm --filter @lokdarpan/web geo:fetch && pnpm --filter @lokdarpan/web build",
-  "outputDirectory": "apps/web/.next",
+  "buildCommand": "pnpm geo:fetch && pnpm build",
   "headers": [
     {
       "source": "/api/(.*)",
