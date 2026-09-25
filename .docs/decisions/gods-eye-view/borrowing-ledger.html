@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>God's Eye View Borrowing Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="borrowing-ledger.css">
+</head>
+<body>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+<p>Contents</p>
+<ol>
+<li><a href="#s1">Executive summary</a></li>
+<li><a href="#s2">LokDarpan today</a></li>
+<li><a href="#s3">God's Eye View</a></li>
+<li><a href="#s4">Side-by-side comparison</a></li>
+<li><a href="#s5">Algorithms worth borrowing</a></li>
+<li><a href="#s6">Map rendering patterns</a></li>
+<li><a href="#s7">Data &amp; network patterns</a></li>
+<li><a href="#s8">UI &amp; interaction patterns</a></li>
+<li><a href="#s9">Architecture patterns</a></li>
+<li><a href="#s10">Performance patterns</a></li>
+<li><a href="#s11">Must not be borrowed</a></li>
+<li><a href="#s12">Target architecture</a></li>
+<li><a href="#s13">Layer architecture</a></li>
+<li><a href="#s14">Map context model</a></li>
+<li><a href="#s15">Feature budget / LOD</a></li>
+<li><a href="#s16">Label arbitration</a></li>
+<li><a href="#s17">Data state model</a></li>
+<li><a href="#s18">Provenance model</a></li>
+<li><a href="#s19">Request coalescing</a></li>
+<li><a href="#s20">Network safety</a></li>
+<li><a href="#s21">Performance budget</a></li>
+<li><a href="#s22">File-level change map</a></li>
+<li><a href="#s23">ADRs required</a></li>
+<li><a href="#s24">Migration plan</a></li>
+<li><a href="#s25">Risk register</a></li>
+<li><a href="#s26">Prioritised roadmap</a></li>
+<li><a href="#s27">Every GEV feature, classified</a></li>
+</ol>
+</nav>
+
+<main>
+<header class="doc">
+<div class="eyebrow">Architecture review · research only · no code changed</div>
+<h1>God's Eye View Borrowing Ledger</h1>
+<p class="lede">What LokDarpan can legitimately take from a real-time surveillance globe, judged against the code LokDarpan actually runs rather than the code its documents describe.</p>
+<div class="meta">
+<span>LokDarpan <code>ed037b6</code> · 7 Sep 2026 · development</span>
+<span>God's Eye View <code>0d41b6b</code> · 16 Sep 2026 · MIT</span>
+<span>Reviewed 17 Sep 2026</span>
+</div>
+</header>
+
+<div class="legend" aria-label="Verdict legend">
+<span class="chip borrow">■ Borrow</span> same engineering idea
+<span class="chip reimpl">◧ Reimplement</span> same idea, native TypeScript
+<span class="chip adapt">◑ Adapt</span> concept kept, model changed
+<span class="chip no">⊘ Do not use</span> irrelevant or conflicts
+</div>
+
+<section id="s1">
+<h2><span class="n">01</span>Executive summary</h2>
+<div class="callout key">
+<p><strong>The short answer.</strong> Keep MapLibre, PMTiles and PostGIS as they are. God's Eye View (GEV) is worth studying for eight engineering mechanisms, not for its renderer, its data or its look. And LokDarpan has three foundations to fix before any borrowed idea can pay off.</p>
+</div>
+
+<h3>Four facts that reorder the plan</h3>
+<p>These come from reading the implementation. Each contradicts what the documentation suggests.</p>
+<div class="findings">
+<div class="finding"><span class="k">Finding A</span><b>No map API carries a real datasetVersion</b><p>All 11 explorer, geo, tender, search and document-list route handlers return a hard-coded <code>datasetVersion: 0</code>, even though <code>admin_unit_boundary.dataset_version_id</code> exists. <code>meta.asOf</code> is the time of the response (<code>respond.ts:19</code>), not the data vintage. Every route is <code>force-dynamic</code>; the documented cache-tag ISR is not implemented. A version in a share link would pin nothing today.</p></div>
+<div class="finding"><span class="k">Finding B</span><b>There is no point layer to budget</b><p>The explorer draws state outlines, child boundaries, a selected unit and a tender choropleth. The 400-feature cap exists only in a mobile wireframe. ADR-022's "works above districts" hit order and 20 px road hit layer are no longer in <code>MapCanvas.tsx</code>. Tenders are deliberately not pins, because the portals publish no coordinates.</p></div>
+<div class="finding"><span class="k">Finding C</span><b>Ingestion downloads are unbounded</b><p>CAG, LGD and BEAMS read whole bodies with <code>arrayBuffer()</code>; GePNIC and Overpass use <code>text()</code>. None has a size cap, and only the OCR client has a timeout. CAG downloads the entire body before checking that it is a PDF.</p></div>
+<div class="finding"><span class="k">Finding D</span><b>Architecture rules are prose, not checks</b><p>ESLint enforces type safety and bans <code>parseFloat</code>; the neutrality CLI scans vocabulary. Nothing enforces import direction. The <code>ServerText</code> brand exists in <code>packages/neutrality</code>, but no web component uses it, and <code>tenders.tsx</code> alone writes about fifteen reader-facing sentences inline.</p></div>
+</div>
+
+<h3>What to take, in priority order</h3>
+<div class="tbl mid"><table>
+<thead><tr><th>#</th><th>Mechanism from GEV</th><th>Verdict</th><th>LokDarpan problem it solves</th><th>Cost</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td>Byte-capped streaming reads, timeouts, backoff ladder</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Finding C: a broken or hostile government host can exhaust ingestion memory or hang the scheduled sweep</td><td>S</td></tr>
+<tr><td class="num">2</td><td>Freshness, contact time and completeness kept as separate facts (transit and vessel cache states)</td><td><span class="chip adapt">◑ Adapt</span></td><td>Unifies LokDarpan's three partial state models into one contract, so missing data can never render as zero</td><td>M</td></tr>
+<tr><td class="num">3</td><td>Label arbiter: spatial hash, incumbency, minimum lifetime, cooldown, fades</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Label placement is O(n·k) per frame, toggles instantly, and anchors on bounding boxes that can fall outside the polygon. Village levels will expose all three.</td><td>M</td></tr>
+<tr><td class="num">4</td><td>Import-direction checker</td><td><span class="chip adapt">◑ Adapt</span></td><td>Finding D: rules A–F are unenforced</td><td>S–M</td></tr>
+<tr><td class="num">5</td><td>Single-flight coalescing with exact-promise eviction</td><td><span class="chip adapt">◑ Adapt</span></td><td>Duplicate and version-mixed client reads. The pattern already exists once, in <code>geometry-source.ts</code>.</td><td>S</td></tr>
+<tr><td class="num">6</td><td>Layer module contract (enable, disable, destroy, stats) with an allowlist per source</td><td><span class="chip adapt">◑ Adapt</span></td><td>Map layer logic is scattered across <code>MapCanvas</code>, <code>style.ts</code>, <code>layer-visibility.ts</code> and <code>ExploreShell</code></td><td>M</td></tr>
+<tr><td class="num">7</td><td>LOD budget with incumbency and eviction grace</td><td><span class="chip adapt">◑ Adapt</span></td><td>Finding B: design it now and build it when the first licensed point source lands. LokDarpan aggregates where GEV samples.</td><td>S (design)</td></tr>
+<tr><td class="num">8</td><td>Performance method: record counts, separate cold from warm, repeat runs, assert relatively</td><td><span class="chip borrow">■ Borrow</span></td><td><code>/explore</code> measured 409 kB against a documented 400 kB target, and no harness holds any budget</td><td>S</td></tr>
+</tbody></table></div>
+
+<h3>What never comes across</h3>
+<p>CesiumJS, Google Photorealistic 3D Tiles, Esri imagery, every live-tracking layer (aircraft, ships, satellites, transit), CCTV, licence-plate readers, military installations, sensor shaders, the HUD aesthetic, the voice agent, motion interpolation, and GEV's proximity-based "hand off to the nearest camera". Section 11 gives the reason for each. The common thread: GEV's value is <em>watching</em>; LokDarpan's is <em>citing</em>.</p>
+
+<h3>One sequencing rule</h3>
+<p>Wire the real <code>datasetVersion</code> and the data-state contract through <strong>before</strong> building a layer registry, share-link pinning or request coalescing. All three are keyed on the version, and each would otherwise be built twice.</p>
+</section>
+
+<section id="s2">
+<h2><span class="n">02</span>LokDarpan current architecture</h2>
+<p>Verified from source at <code>ed037b6</code>: 131 commits and 51 ADRs. Line counts exclude tests.</p>
+
+<h3>Monorepo shape</h3>
+<div class="tbl mid"><table>
+<thead><tr><th>Unit</th><th class="num">Source lines</th><th class="num">Test files</th><th>State</th></tr></thead>
+<tbody>
+<tr><td><code>services/ingestion</code></td><td class="num">10,079</td><td class="num">37</td><td>Real. CAG, LGD, BEAMS, GePNIC, OSM/Overpass, OCR bridge, review queue, raw store, ingestion runs.</td></tr>
+<tr><td><code>apps/web</code></td><td class="num">7,042</td><td class="num">6 + 2 e2e</td><td>Real. Next.js 15 App Router, explorer, entity pages, <code>/api/v1</code> route handlers.</td></tr>
+<tr><td><code>packages/database</code></td><td class="num">1,505</td><td class="num">11</td><td>Real. Repositories, migrator, PostGIS geography.</td></tr>
+<tr><td><code>packages/domain</code></td><td class="num">727</td><td class="num">4</td><td>Real. Units, geography types, <code>UnitService</code> with a single-version check.</td></tr>
+<tr><td><code>services/api</code></td><td class="num">493</td><td class="num">3</td><td>Standalone HTTP server. The explorer does not use it; web route handlers read PostGIS through <code>server/container.ts</code>.</td></tr>
+<tr><td><code>packages/contracts · neutrality · observability · money · errors</code></td><td class="num">313 · 314 · 249 · 150 · 96</td><td class="num">1 · 1 · 2 · 1 · 0</td><td>Real and small. <code>observability</code> already exports byte and latency buckets.</td></tr>
+<tr><td><code>packages/config · utils · validation</code>; <code>services/ai · analytics · entity-resolution · normalization · risk-engine</code></td><td class="num">0</td><td class="num">0</td><td>Empty skeletons</td></tr>
+</tbody></table></div>
+
+<h3>Explorer data flow as it actually runs</h3>
+<pre><code>GET /explore?state=&amp;unit=&amp;doc=        (RSC, force-dynamic)
+  └─ listStateOptions() + reconcile(state, unit) on the server
+  └─ &lt;ExploreShell&gt; client island
+        useExplorerGeography ─┬─ GET /api/v1/geo/units/:parent/children    units + coverage
+                              ├─ GET /api/v1/geo/units/:parent/boundaries  GeoJSON, simplified per request
+                              ├─ GET /api/v1/geo/units/:unit               detail + ancestors + geometry
+                              └─ GET /api/v1/documents?unit=:parent
+        useTenderLayer ───────┬─ GET /api/v1/tenders/overview?department&amp;state
+                              ├─ GET /api/v1/tenders?unit&amp;department
+                              └─ GET /api/v1/tenders?unplaced=true         (on demand)
+        MapCanvas ── setData(GeoJSON sources) · DOM Marker labels · PMTiles basemap
+  every response: { data, meta:{ datasetVersion: 0, asOf: now() } }, cache-control public max-age=300</code></pre>
+
+<h3>What exists, what is partial, what is only documented</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Area</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>MapLibre GL JS v5, pinned</td><td>Exists, good</td><td><code>maplibre-gl ^5.24</code>. Bounded 15 s load wait; renderer errors surfaced to the reader (<code>MapCanvas.tsx:49</code>).</td></tr>
+<tr><td>PMTiles + Protomaps basemap</td><td>Exists, demo scale</td><td>Protocol registered once per page (<code>:59</code>). <code>fetch-basemap.ts</code> builds a bbox extract (the example is Nagpur), gitignored, with a presence check before the style references it.</td></tr>
+<tr><td>Boundary geometry</td><td>Exists, simplified per request</td><td><code>boundariesOfChildren</code> runs <code>ST_SimplifyPreserveTopology(geom, 0.005)</code> per feature on every request (<code>geography.repository.ts:314</code>). National outlines are static files fetched at setup.</td></tr>
+<tr><td>"Boundaries via MVT only; no inline geometry"</td><td>Documented only</td><td>A P0 in <code>.docs/11-api/client-api-contract.md</code>. The implementation serves inline GeoJSON per level.</td></tr>
+<tr><td>Spatial index &amp; containment</td><td>Exists, good</td><td>GIST on <code>admin_unit_boundary.geometry</code>, <code>ST_IsValid</code> check constraint, <code>ST_Contains(parent, ST_PointOnSurface(child))</code> with an <code>&amp;&amp;</code> prefilter.</td></tr>
+<tr><td>Viewport query</td><td>Exists, unused</td><td><code>unitsIntersecting(bbox, levels, limit)</code> (<code>:342</code>) is called only from integration tests. It orders by <code>ST_Area</code> computed on raw geometry for every row.</td></tr>
+<tr><td>Closure table</td><td>Present, empty</td><td><code>ancestorsOf</code> and <code>search</code> walk <code>parent_id</code> recursively, <code>search</code> once per matched row via <code>LATERAL</code>. No <code>pg_trgm</code> index backs <code>ILIKE '%term%'</code>.</td></tr>
+<tr><td>datasetVersion</td><td>Partial</td><td>Real on <code>/units</code>, departments and document detail, where <code>UnitService</code> refuses mixed versions. Hard-coded to <code>0</code> on 11 explorer-facing routes.</td></tr>
+<tr><td>ISR by version cache tag</td><td>Documented only</td><td>Every page and route is <code>force-dynamic</code>; comments say "the architecture calls for ISR".</td></tr>
+<tr><td>URL explorer state</td><td>Exists, good</td><td><code>state</code>, <code>unit</code>, <code>doc</code>; one pure parser shared by server and client; <code>reconcile()</code> drops a unit from another state; <code>history.replaceState</code>.</td></tr>
+<tr><td>Layers and filters in the URL</td><td>Missing</td><td>Layer toggles and the tender department filter are <code>useState</code> (<code>ExploreShell.tsx:88</code>), so a shared link loses both.</td></tr>
+<tr><td>Feature limits</td><td>Documented only</td><td>A 400-feature cap with announced truncation in <code>.docs/wireframes/04-explore-map.md</code> (mobile). No code, because there are no point features.</td></tr>
+<tr><td>Labels</td><td>Exists, weak at scale</td><td><code>place-labels.ts</code>: DOM markers; a priority sort plus a <code>taken.some()</code> scan on every frame (<code>:77, :100</code>); <code>offsetWidth</code> read per label at creation (<code>:137</code>); instant hide and show; anchor at the bbox midpoint; priority by bbox area in degrees².</td></tr>
+<tr><td>Hover and click</td><td>Exists, good</td><td>One ordered hit test instead of per-layer handlers; hover via <code>feature-state</code>. React state is still set on every mousemove (<code>:275</code>).</td></tr>
+<tr><td>Camera</td><td>Exists, one defect</td><td>Framing is derived from the selection. The <code>ResizeObserver</code> calls <code>frame()</code> (<code>:412–416</code>), so any container resize discards the reader's own pan and zoom.</td></tr>
+<tr><td>Tender layer</td><td>Exists, principled</td><td>Choropleth by issuing-office district. The property is omitted rather than zeroed. Status is <code>not_collected / collected / stale / failing</code>, and the unplaced count is stated.</td></tr>
+<tr><td>Coverage and run model</td><td>Exists, good</td><td><code>geography_coverage</code>: complete, partial or not_collected, with a note required for partial. <code>ingestion_run</code>: running, succeeded, failed or skipped, with counts for seen, inserted, updated, unchanged, rejected and unresolved.</td></tr>
+<tr><td>Provenance</td><td>Exists, uneven</td><td>Content-addressed <code>source_artifact</code>, <code>dataset_version</code> with <code>sealed_at</code>, boundary licence and <code>retrieved_at</code> columns, <code>ProvenanceNote</code>. Map features carry only <code>sourceKind</code> and <code>sourceName</code>.</td></tr>
+<tr><td>Client coalescing</td><td>Partial</td><td><code>geometry-source.ts</code> caches promises and evicts failures, for static files only. Its <code>fetchDistricts</code> has no callers.</td></tr>
+<tr><td>Ingestion network safety</td><td>Missing</td><td>Finding C. Retries exist only as OSM per-district attempts with 60 s sleeps, and pauses between GePNIC portals.</td></tr>
+<tr><td>Architecture enforcement</td><td>Partial</td><td>Strict type-checked ESLint, complexity ≤ 12, neutrality vocabulary gate, no-red token test. No import-direction rules.</td></tr>
+<tr><td>Performance budgets</td><td>Documented, not enforced</td><td><code>web-architecture.md</code>: map page ≤ 400 KB target, 600 KB ceiling; LCP 1.2 s; INP 150 ms. ADR-022 records 409 kB.</td></tr>
+<tr><td>Map tests</td><td>Thin</td><td><code>explore.spec.ts</code> covers map-or-setup, layer toggles, search and deep-link carry. No label, hit-test, performance or version tests.</td></tr>
+</tbody></table></div>
+
+<h3>Decisions already right, which must not be disturbed</h3>
+<ul>
+<li><strong>No invented points.</strong> Tenders shade the issuing office's district; local bodies show a labelled extent, never a fabricated polygon. This is stronger than anything in GEV.</li>
+<li><strong>Omit, never zero.</strong> <code>withTenderCounts</code> leaves the property off, so the <code>["has","tenderCount"]</code> filter cannot shade a false zero.</li>
+<li><strong>Spatial work in PostGIS.</strong> The repository's own rule, that containment is milliseconds in the database and a frozen tab in JavaScript, is correct.</li>
+<li><strong>Selection in the URL, camera derived from it.</strong> One canonical <code>/units/:id</code>; the explorer is a view, not a second naming scheme.</li>
+<li><strong>Self-hosted basemap.</strong> No map vendor logs the reader.</li>
+<li><strong>Coverage is a first-class record,</strong> never inferred from a list's length.</li>
+<li><strong><code>ingestion_run</code> sits outside the load transaction,</strong> so a failure survives rollback.</li>
+<li><strong>The rail is the accessible equivalent of the map.</strong> Labels are <code>aria-hidden</code>, and every place is reachable without a pointer.</li>
+</ul>
+</section>
+
+<section id="s3">
+<h2><span class="n">03</span>God's Eye View architecture</h2>
+<p>About 177k tracked text lines, of which roughly 75k are bundled data (the CCTV ground-height table alone is 69,569). Vanilla ES modules, CesiumJS ^1.124, Vite 6, satellite.js, mgrs, egm96. A Node provider layer mounted as Vite middleware. 49 QA harnesses under <code>scripts/qa-*.mjs</code>.</p>
+
+<h3>Structure</h3>
+<pre><code>src/sources/          portable protocols: capped HTTP bodies, rate limiter, Overpass, Nominatim, transit service
+src/layers/&lt;family&gt;/  source.js · records.js · ingestion.js · rendering.js · cards.js · policy.js
+src/data/             LayerLifecycle (2,314 lines), labelArbiter (1,228), LOD policies, context store, layer state
+src/overlays/         screen-space world overlay host (label paint lanes)
+src/ui/ · src/app/    shell composition, navigation generations, panels, share restoration
+src/renderGovernor.js continuous vs request-render mode, driven by identity-keyed holds
+server/providers/     one route factory per upstream; allowlisted feeds; process-scoped caches
+scripts/check-*       import-direction and package-boundary gates over git ls-files
+package.json exports  ~150 named entries: the authoritative ownership inventory</code></pre>
+
+<h3>How a layer lives</h3>
+<p><code>LayerLifecycle.register(module)</code> takes a module exposing <code>init / enable / disable / update / destroy / getStats</code>. <code>enable</code> runs <code>init</code> and one immediate <code>update(viewer, {signal})</code>, then a <code>setInterval</code> at the module's <code>refreshInterval</code>. A <code>refreshing</code> flag prevents overlapping updates, <code>refreshEpoch</code> discards late completions, and intent epochs settle toggle races. <code>disable</code> keeps loaded data; <code>destroy</code> aborts fetches, discards late results and removes the layer's own context records. Failures are read from <code>stats.error</code> or <code>stats.unavailable</code>, so a layer can be enabled and unavailable at once.</p>
+
+<h3>How a request lives (the transit service, its most complete example)</h3>
+<p>The browser names a registered feed id, never a URL. Redirects are followed hop by hop, at most 3, and must stay on the same https origin. Limits: 15 s timeout, 8 MiB byte cap, 15 s TTL, 10-minute serve-stale window. Revalidation is conditional (<code>ETag</code>, <code>Last-Modified</code>), and a 304 restarts freshness. Refresh is single-flight. Admission is capped at 8 per feed and 40 globally per minute. Consecutive failures step through a 5 s / 15 s / 60 s / 300 s cooldown ladder that resets on success. Responses carry <code>X-GEV-Cache: HIT | MISS | INFLIGHT | STALE-ERROR</code>. The service keeps <code>at</code> (when the payload was fetched) separate from <code>contactedAt</code> (when the operator last answered). A shape error purges the cache and is never served stale.</p>
+
+<h3>Rendering and selection</h3>
+<ul>
+<li><strong>Render governor.</strong> Cesium repaints every frame by default; GEV switches to request-render mode whenever no owner holds a continuous claim. Holds are an identity Set, not a counter, so a double release cannot corrupt the mode.</li>
+<li><strong>Label arbiter.</strong> One global screen-space solver: per-layer quotas, then placement through a spatial hash with incumbency, minimum lifetime, cooldown and fade (section 5).</li>
+<li><strong>LOD selectors per family.</strong> Budgets banded by camera height, a rank score, eviction grace, and motion-gated recompute.</li>
+<li><strong>Context store.</strong> A <code>window</code>-global registry of entity metadata keyed by id and owned by layer. Selection fires a <code>CustomEvent</code>.</li>
+<li><strong>Navigation generations.</strong> Each explicit navigation increments a counter; async results such as geocodes check it before moving the camera.</li>
+<li><strong>Share links.</strong> Hash parameters debounced 500 ms, allowlisted per style with clamped values, per-layer serialisation rules, and an <code>at</code> copy timestamp that rejects future or unsafe values.</li>
+</ul>
+
+<h3>What its own documents admit</h3>
+<p><code>docs/PERFORMANCE.md</code> covers one M5 machine and three startup samples, and says outright it is "not a minimum hardware specification". <code>KNOWN-ISSUES.md</code> lists uneven traffic coverage under a global dot cap. The context store is mutable global state. Its candour about limits is itself worth borrowing.</p>
+</section>
+
+<section id="s4">
+<h2><span class="n">04</span>Side-by-side comparison</h2>
+<p>Every meaningful capability found. "Borrow?" is the short answer; section 27 gives the formal one-word classification.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>GEV capability / pattern</th><th>GEV implementation</th><th>LokDarpan equivalent</th><th>Gap</th><th>Borrow?</th><th>Adaptation required</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Byte-capped body reads</td><td><code>readResponseTextCapped</code> / <code>BytesCapped</code>: content-length precheck, streaming count, cancel</td><td>None</td><td>Every ingestion client</td><td>Yes</td><td>Stream to a temp file while hashing; count decoded bytes; per-source caps from measured sizes</td><td><span class="p p0">P0</span></td></tr>
+<tr><td>Upstream timeouts</td><td>AbortController; 15 s for transit</td><td>OCR client only</td><td>CAG, LGD, BEAMS, GePNIC, Overpass</td><td>Yes</td><td>Separate header, idle and total timeouts; long totals for large PDFs</td><td><span class="p p0">P0</span></td></tr>
+<tr><td>Failure cooldown ladder</td><td>5 s → 15 s → 60 s → 300 s, reset on success</td><td>Fixed 60 s OSM sleeps</td><td>No shared policy; <code>Retry-After</code> ignored</td><td>Yes</td><td>Batch cadence in minutes, per host, capped attempts, recorded on <code>ingestion_run</code></td><td><span class="p">P1</span></td></tr>
+<tr><td>Allowlisted upstreams</td><td>Browser names feed ids; redirects stay on the same https origin</td><td>Fetch URLs built in each client</td><td>No redirect policy</td><td>Partly</td><td>Host allowlist from the source registry; refuse cross-host redirects</td><td><span class="p">P1</span></td></tr>
+<tr><td>Conditional GET</td><td>ETag / Last-Modified; 304 restarts freshness</td><td>sha256 dedupe after a full download</td><td>Bandwidth on unchanged listings</td><td>Yes</td><td>Store validators with artifacts; a 304 is still a successful contact</td><td><span class="p">P2</span></td></tr>
+<tr><td>Fetched time vs contact time</td><td><code>at</code> vs <code>contactedAt</code></td><td><code>last_success_at</code>, <code>last_checked_at</code> on tender portals</td><td>Tenders only</td><td>Yes</td><td>Generalised into the data-state contract for every source</td><td><span class="p">P1</span></td></tr>
+<tr><td>Serve stale, labelled</td><td><code>STALE-ERROR</code> response header</td><td>Tender <code>failing</code> wording</td><td>Tenders only</td><td>Adapt</td><td>The ledger persists, so "stale" is a state about collection, not a cache trick</td><td><span class="p">P1</span></td></tr>
+<tr><td>Partial snapshots</td><td>Vessels: complete vs partial; partial keeps missing records for 5 min</td><td><code>geography_coverage.partial</code>; run counts</td><td>No API contract</td><td>Adapt</td><td>Partial is a coverage fact with a note, never time-based retention</td><td><span class="p">P1</span></td></tr>
+<tr><td>Single-flight coalescing</td><td><code>coalesceProxyRequest</code>, deleting only the exact promise</td><td><code>geometry-source.ts</code> promise map</td><td>API reads uncached and version-blind</td><td>Adapt</td><td>Key includes datasetVersion; reference-counted abort</td><td><span class="p">P2</span></td></tr>
+<tr><td>Admission rate limiter</td><td>Sliding window per key, global backstop, 2,000-key cap</td><td>None; a CGNAT-safe tier is a backend P0</td><td>No public API limiting</td><td>No (as is)</td><td>Per-IP limits misfire on carrier NAT; limit by route cost at the CDN or WAF</td><td><span class="p">P3</span></td></tr>
+<tr><td>Label arbitration</td><td>Spatial hash, incumbency, lifetime, cooldown, fade, sticky corners</td><td>Greedy DOM placement every frame</td><td>No hysteresis; O(n·k); anchors outside polygons</td><td>Yes</td><td>Stay in the DOM for Indic shaping; neutral priority tuple; label points from PostGIS</td><td><span class="p">P1</span></td></tr>
+<tr><td>Per-layer label quotas</td><td>Elastic, or sqrt-weighted largest remainder</td><td>A single label layer</td><td>Not needed yet</td><td>Later</td><td>Elastic only; semantic weights would be a hierarchy claim</td><td><span class="p">P3</span></td></tr>
+<tr><td>LOD active-set budget</td><td>Height bands 80 / 200 / 420; score = priority + incumbency − distance</td><td>None; no point layer</td><td>Future point layers</td><td>Adapt</td><td>Aggregate first; rank only on neutral fields</td><td><span class="p">P2 design</span></td></tr>
+<tr><td>Eviction grace</td><td>2 passes or 4 s</td><td>None</td><td>Flicker at band thresholds</td><td>Adapt</td><td>Zoom and count hysteresis between aggregate and individual modes</td><td><span class="p">P2</span></td></tr>
+<tr><td>Grid aggregation by band</td><td>FIRMS: 2° cells, 1° cells, then detections</td><td>Admin-unit choropleth</td><td>—</td><td>Adapt</td><td>Aggregate by admin unit, a named and cited place, not an arbitrary grid</td><td><span class="p">P2</span></td></tr>
+<tr><td>Motion-gated recompute</td><td>1 s probe; epsilon = max(250 m, 2% of height)</td><td>MapLibre <code>move</code> + rAF</td><td>MapLibre already emits reliable move events</td><td>No</td><td>—</td><td>—</td></tr>
+<tr><td>Render governor</td><td>A hold Set toggles request-render mode</td><td>MapLibre already renders on demand</td><td>None</td><td>No</td><td>Only the rAF-coalesced scheduling idea, which labels already use</td><td>—</td></tr>
+<tr><td>Layer lifecycle contract</td><td>init / enable / disable / update / destroy / stats; epochs</td><td>Inline effects in <code>MapCanvas</code></td><td>No registry</td><td>Adapt</td><td>Declarative definitions and a thin binder; refresh on version change, not on an interval</td><td><span class="p">P2</span></td></tr>
+<tr><td>Stale-completion guards</td><td>Navigation generations, <code>refreshEpoch</code>, source-slot supersession</td><td>AbortController per effect</td><td>Mostly covered</td><td>Borrow idea</td><td>Also reject responses whose version differs from the pinned one</td><td><span class="p">P2</span></td></tr>
+<tr><td>Entity context registry</td><td><code>window</code> global, layer-owned records, CustomEvent</td><td>Selection in URL; drawer keyed by document id</td><td>No selection model for map features</td><td>Adapt</td><td>URL-canonical selection; no globals</td><td><span class="p">P2</span></td></tr>
+<tr><td>Share-link state</td><td>Hash params, allowlists, clamps, per-layer rules, <code>at</code></td><td>Query params: state, unit, doc</td><td>Layers, filters and version absent</td><td>Adapt</td><td>Add <code>layers</code>, <code>dept</code>, <code>sel</code>, <code>v</code>; still no camera</td><td><span class="p">P1</span></td></tr>
+<tr><td>Import-direction gate</td><td>AST walk over git ls-files: browser ↛ server, source ↛ renderer, portable ↛ globals</td><td>None</td><td>Rules A–F unenforced</td><td>Adapt</td><td>ESLint <code>no-restricted-imports</code> per glob, plus a graph check for transitive edges</td><td><span class="p">P1</span></td></tr>
+<tr><td>Exports as ownership inventory</td><td><code>package.json</code> exports, each assigned once</td><td>Deep imports such as <code>@lokdarpan/database/geography</code></td><td>Informal</td><td>Partly</td><td>Declare <code>exports</code> per package; do not mirror 150 entries</td><td><span class="p">P3</span></td></tr>
+<tr><td>Source licence table</td><td><code>DATA_SOURCES.md</code>: live vs bundled, licence, attribution</td><td>Registry, <code>source-licences.md</code>, <code>publishable.ts</code></td><td>LokDarpan's is stronger</td><td>No</td><td>Put it on map payloads instead (section 18)</td><td><span class="p">P1</span></td></tr>
+<tr><td>Performance baseline method</td><td>Counts recorded; cold vs warm; medians; relative frame-count assertions</td><td>One bundle-size note in ADR-022</td><td>No harness</td><td>Yes</td><td>More runs, network profiles typical of India, CI-safe relative checks</td><td><span class="p">P1</span></td></tr>
+<tr><td>Geocoding chain</td><td>Google → Photon → Nominatim → local</td><td>LGD codes; ILIKE search</td><td>—</td><td>No</td><td>Never for display (section 11)</td><td>—</td></tr>
+<tr><td>3D globe, tiles, imagery</td><td>Cesium, Google 3D, Esri</td><td>MapLibre 2D, PMTiles</td><td>—</td><td>No</td><td>—</td><td>—</td></tr>
+<tr><td>Guided scenes ("Director")</td><td>Versioned scene documents, anchors, camera moves</td><td>None</td><td>—</td><td>Defer</td><td>Template-only record walkthrough, if ever</td><td><span class="p">P3</span></td></tr>
+<tr><td>Voice agent</td><td>OpenAI Realtime over WebRTC, 28 tools</td><td>None</td><td>—</td><td>No</td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s5">
+<h2><span class="n">05</span>Algorithms worth borrowing, explained precisely</h2>
+<p>Each entry covers the mechanism, its cost, its failure modes and its fit. Where GEV leaves a constant unexplained, that is stated rather than guessed. <em>n</em> is candidates, <em>k</em> is placed items, <em>c</em> is grid cells touched per rectangle.</p>
+
+<div class="algo">
+<h3>5.1 Label arbiter (<code>src/data/labelArbiter.js</code>) <span class="chip reimpl">◧ Reimplement</span></h3>
+<dl class="spec">
+<dt>Problem</dt><dd>Many layers want screen-space labels at once. Naive greedy placement overlaps, starves some layers, and flickers as the camera moves because each frame's winner set is recomputed from nothing.</dd>
+<dt>Algorithm</dt><dd>
+<ol>
+<li>Drop candidates with no key, no layer, or zero visibility (<code>keyholeAlpha</code>). Bucket the rest by layer.</li>
+<li>Sort each bucket by a total order: <em>pinned</em> (selected less than 2,500 ms ago) → <em>incumbent</em> (selected last solve) → priority → visibility → distance from screen centre → key.</li>
+<li>Split capacity across layers. <em>Elastic</em>: equal shares, with unused share redistributed. <em>Weighted</em>: weight = √count × semantic weight; one slot each first, then largest-remainder apportionment.</li>
+<li>For each layer, try incumbents first. They may take an overlap fallback so an established label is not ejected by a newcomer's rectangle. Then fill the rest from a farthest-point queue that spreads equal-priority labels apart.</li>
+<li>Each candidate offers up to four corner placements. The previous corner is tried first ("sticky"), and the first rectangle the spatial hash accepts wins.</li>
+<li>Labels that lost their slot enter fade-out (300 ms) and a cooldown until <code>now + 300 + 1,200 ms</code>, during which they cannot re-enter. State is garbage-collected after that.</li>
+</ol></dd>
+<dt>Spatial hash</dt><dd>Uniform 32 px cells. Keys bit-pack <code>(cx&lt;&lt;14)|cy</code> into a small integer so V8 does not box doubles. Buckets are invalidated by a generation stamp rather than cleared. Collision is AABB with 4 px padding.</dd>
+<dt>Inputs</dt><dd><code>{key, layerId, priority, keyholeAlpha, centerDistance, placements[≤4]{rect, corner}}</code>, capacity, strategy, per-layer demand, <code>now</code>.</dd>
+<dt>Outputs</dt><dd>Selected keys with placements; per-key state <code>{selectedAt, enterStartedAt, exitStartedAt, cooldownUntil, corner}</code>; diagnostics (quotas, retained incumbents).</dd>
+<dt>Complexity</dt><dd>O(n log n) sort + O(n·c·b) placement, where b is the average bucket occupancy (small when cells ≈ label size). The farthest-point queue adds O(n·a) distance updates for a accepted anchors, bounded by capacity. Effectively linear per solve for bounded capacity.</dd>
+<dt>Memory</dt><dd>O(n) state and typed-array scratch reused across solves; the stamp maps are pruned when they exceed the live cohort.</dd>
+<dt>Failure modes</dt><dd>Labels that should change can be kept for up to 2.5 s. Cooldown can leave a gap where a label was. A stale incumbent may overlap via the fallback. Wall-clock time (<code>Date.now</code>) makes it hard to test without an injected clock, which GEV does pass in.</dd>
+<dt>Why it exists</dt><dd>A 60 fps globe with thousands of moving candidates, where churn is the dominant visual defect.</dd>
+<dt>Fit for LokDarpan</dt><dd>The <em>stability</em> ideas (incumbency, minimum lifetime, cooldown, fade, spatial hash, total-order tie-break) fit. The <em>quota and semantic-weight</em> ideas do not yet: there is one label layer, and a semantic weight would be an editorial hierarchy. The farthest-point spread is unnecessary for administrative units, which are already spatially distributed.</dd>
+<dt>Changes needed</dt><dd>Neutral priority tuple (section 16). Anchors precomputed in PostGIS. An injected clock. Pin only the explicit selection, not "selected by the solver". Solve on <code>move</code> via rAF but re-sort only when the input set changes.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.2 LOD active-set selection (<code>src/data/localGeojsonLod.js</code>) <span class="chip adapt">◑ Adapt</span></h3>
+<dl class="spec">
+<dt>Problem</dt><dd>At global zoom every feature is on screen at once, so per-feature geometry work explodes exactly when the features are least legible.</dd>
+<dt>Algorithm</dt><dd>Budget by camera height: at least 3,000 km → 80; at least 200 km → 200; else 420. Unreadable height resolves to the <em>cheapest</em> band. Score = priority + 250 if incumbent − 200 × min(1, distance / 12,000 km). Duplicate ids collapse to the best score. Sort by score, then distance, then id; take the top <em>budget</em>. Priority comes from <code>labelPriorityFromProperties</code>: has a name +1000, English name +700, operator +180, output +120.</dd>
+<dt>Constant design</dt><dd>The incumbent bonus (250) is deliberately smaller than the has-a-name gap (≥ 700), so incumbency reorders within a tier but never keeps an unnamed feature over a named one. The distance penalty (≤ 200) only breaks ties. This bounded-tier reasoning is the most transferable idea in the file.</dd>
+<dt>Complexity / memory</dt><dd>O(n log n) per selection; O(n) maps.</dd>
+<dt>Failure modes</dt><dd>A hard cutoff means feature n+1 is invisible with no signal; GEV relies on the overlay saying so. Priority from "has a name" systematically hides poorly tagged places.</dd>
+<dt>Fit</dt><dd>Only once a point layer exists. The bias problem is disqualifying as written: in LokDarpan, "has a name" and "has an operator" correlate with how well a government publishes, so ranking by them would hide exactly the places where publication is weakest (the wireframe warns about this).</dd>
+<dt>Changes needed</dt><dd>Aggregate instead of sample. Individual features only when the in-view count ≤ budget. Tie-breaks only on stable id. Truncation always announced (section 15).</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.3 Eviction grace (<code>applyInfraEvictionGrace</code>, from <code>cctvLod</code>) <span class="chip adapt">◑ Adapt</span></h3>
+<dl class="spec">
+<dt>Problem</dt><dd>A feature on the budget edge enters and leaves on every small camera move.</dd>
+<dt>Algorithm</dt><dd>Newly selected ids enter immediately. A built id that falls out of the selection accumulates <code>misses</code>. It is evicted once misses ≥ 2 passes <em>or</em> 4,000 ms have passed since it first missed. Under cap pressure, graced ids are evicted first, oldest grace first, so the hard cap is never exceeded. The function is pure: it takes the previous grace map and returns a new one.</dd>
+<dt>Complexity / memory</dt><dd>O(b log b) over built ids; O(b) grace map.</dd>
+<dt>Failure modes</dt><dd>A feature can remain visible for up to 4 s after it should have gone. If a transient mode is not declared as such, a reader may read the grace period as data.</dd>
+<dt>Fit</dt><dd>As zoom and count <em>hysteresis</em> between "aggregated by unit" and "individual records": enter individual mode at count ≤ 400, leave only at count > 480 or zoom out by more than 0.5. No time-based grace on data features.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.4 Motion-gated recompute (<code>shouldRecomputeInfraLod</code>) <span class="chip no">⊘ Do not use</span></h3>
+<dl class="spec">
+<dt>Mechanism</dt><dd>Recompute at most every 1,000 ms, and only if squared travel since the last selection exceeds max(250 m, 2 % of camera height)². Travel is measured from the last <em>selection</em>, not the last probe, so slow drift still triggers eventually. An unreadable height takes the <em>most eager</em> epsilon, the opposite polarity to the budget, because a missed recompute empties the layer.</dd>
+<dt>Why not</dt><dd>It compensates for Cesium follow and orbit cameras that emit no <code>moveEnd</code>. MapLibre emits <code>move</code>, <code>moveend</code> and <code>zoomend</code> for every camera change in LokDarpan, which has no autonomous camera. Two ideas are worth keeping as review guidance: scale-relative thresholds, and choosing the safe default per failure consequence.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.5 Grid aggregation by band (FIRMS) <span class="chip adapt">◑ Adapt</span></h3>
+<dl class="spec">
+<dt>Algorithm</dt><dd><code>latCell = floor(lat / g) × g</code>, same for longitude, with g = 2° above 9,000 km and 1° above 3,000 km. Each band has a cell cap (1,800 / 3,600). The aggregation is cached per grid size, invalidated per dataset, checked every 650 ms, and viewport-filtered via <code>cellIntersectsBounds</code>. Below 750 km: individual detections, capped at 2,500 / 3,000.</dd>
+<dt>Complexity</dt><dd>O(n) per grid size, once per dataset; O(cells) per view.</dd>
+<dt>Failure modes</dt><dd>Grid cells are arbitrary and cut across administrative units; equal-degree cells vary in area by latitude.</dd>
+<dt>Fit</dt><dd>The <em>idea</em> (precomputed aggregates per band, cached per data version, individual records only when zoomed in) is exactly right. The <em>grid</em> is wrong for LokDarpan: aggregate by <code>admin_unit</code>, which is a cited place with a name and a canonical URL, and compute it in PostGIS keyed by <code>datasetVersion</code>, never in the browser.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.6 Capped body read (<code>src/sources/httpBody.js</code>) <span class="chip reimpl">◧ Reimplement</span></h3>
+<dl class="spec">
+<dt>Algorithm</dt><dd>If <code>Content-Length</code> exceeds the cap, cancel the body and throw <code>RESPONSE_TOO_LARGE</code>. Otherwise read the stream chunk by chunk, adding <code>byteLength</code> to a running total; past the cap, cancel the reader and throw. Honour an <code>AbortSignal</code> between reads. The bytes variant buffers the chunks and concatenates once at the end.</dd>
+<dt>Complexity / memory</dt><dd>O(bytes) time. Peak memory = cap (bytes variant) or roughly 2 × cap (text: chunks plus UTF-16 string).</dd>
+<dt>Subtlety GEV does not handle</dt><dd>Node's <code>fetch</code> (undici) transparently decompresses <code>gzip</code> and <code>br</code>. <code>Content-Length</code> is the <em>compressed</em> size while the stream yields <em>decoded</em> bytes. The early check therefore under-rejects, but the streaming count on decoded bytes is what actually defends against a decompression bomb. LokDarpan must rely on the decoded count, and should send <code>accept-encoding: identity</code> for PDFs, which are already compressed.</dd>
+<dt>Failure modes</dt><dd>A slow trickle stays under the cap forever unless there is an idle timeout. Buffering a 150 MB PDF in memory is legal under a 200 MB cap but wasteful. LokDarpan should stream to disk while hashing.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.7 Single-flight coalescing (<code>coalesceProxyRequest</code>) <span class="chip adapt">◑ Adapt</span></h3>
+<dl class="spec">
+<dt>Algorithm</dt><dd><code>inFlight.get(key)</code> returns <code>{promise, shared:true}</code> if present. Otherwise it creates <code>Promise.resolve().then(create).finally(...)</code> and, on settle, deletes the key <em>only if the map still holds this exact promise</em>, so a newer request for the same key is not evicted by an older one settling.</dd>
+<dt>Complexity</dt><dd>O(1); memory O(in-flight keys).</dd>
+<dt>Failure modes</dt><dd>No cancellation: if one caller aborts, the shared upstream continues, correct only because the proxy serves many callers. A rejection is shared by all waiters, which is correct. There is no result cache; that is a separate TTL layer.</dd>
+<dt>Fit</dt><dd>See section 19 for where it belongs; the key must include <code>datasetVersion</code>.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.8 Cache state and cooldown machine (transit service) <span class="chip adapt">◑ Adapt</span></h3>
+<dl class="spec">
+<dt>States</dt><dd><code>none</code> → <code>fresh</code> (age &lt; 15 s) → <code>stale</code> (&lt; 10 min) → <code>expired</code>. Negative age counts as fresh (clock skew).</dd>
+<dt>Transitions</dt><dd>Fresh: serve. Otherwise, if cooling down or not admitted: serve stale with <code>STALE-ERROR</code> if one is held, else 503 with <code>Retry-After</code>. Otherwise coalesced refresh: 304 → restart <code>at</code> and <code>contactedAt</code>; 200 → capped decode → replace; failure → <code>failures += 1</code>, next attempt after <code>ladder[min(failures, 4) − 1]</code>, then serve stale or 502/504. A shape fault purges and returns 502 without serving stale.</dd>
+<dt>Key insight</dt><dd>Three independent timestamps answer three questions: when the payload was produced, when the operator last answered, and when we may ask again. Conflating them either makes a dead feed look alive or ages a healthy feed into silence. LokDarpan's tender status already separates <code>last_success_at</code> from <code>last_checked_at</code>; section 17 generalises it.</dd>
+<dt>Fit</dt><dd>The timings are real-time and irrelevant. The state separation and the "a shape fault is not an outage" rule transfer directly to ingestion: a portal that changes its HTML is a <em>parser</em> failure, not "stale data".</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.9 Supersession guards (navigation generations, <code>refreshEpoch</code>, <code>sourceSlot</code>) <span class="chip borrow">■ Borrow</span></h3>
+<dl class="spec">
+<dt>Algorithm</dt><dd>A monotonically increasing counter is captured when async work starts and compared when it ends; mismatched results are dropped. <code>createSourceSlot</code> rejects a result as <code>AbortError</code> if its provider was replaced while the call was pending.</dd>
+<dt>Complexity</dt><dd>O(1).</dd>
+<dt>Fit</dt><dd>LokDarpan's AbortController per effect already covers most of this. The one new guard needed: <em>version supersession</em>. A response whose <code>meta.datasetVersion</code> differs from the view's pinned version must be discarded and refetched, never merged.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.10 Sliding-window admission limiter (<code>src/sources/rateLimit.js</code>) <span class="chip no">⊘ Do not use</span></h3>
+<dl class="spec">
+<dt>Algorithm</dt><dd>Per key, an array of timestamps filtered to the window, plus a global array for a backstop. The map is capped at 2,000 keys, evicting the oldest insertion.</dd>
+<dt>Complexity</dt><dd>O(hits in window) per call, both per key and globally; O(keys × max) memory.</dd>
+<dt>Why not</dt><dd>It is in-process, so a serverless deployment with many isolates enforces nothing globally. It is keyed on socket address, which on Indian carrier-grade NAT puts thousands of readers behind one IP. Correct for GEV's localhost proxy; wrong for a public civic site. For outbound politeness toward government hosts, a sequential per-host queue with a minimum interval is simpler and already how the collectors behave.</dd>
+</dl>
+</div>
+
+<div class="algo">
+<h3>5.11 Motion interpolation and dead reckoning (<code>flights/motion.js</code>, <code>motionModel.js</code>) <span class="chip no">⊘ Do not use</span></h3>
+<dl class="spec">
+<dt>Mechanism</dt><dd>Render one interval behind real time, interpolate between fixes, dead-reckon along course and speed when fixes stop, cap course slew in degrees per second, ease floor heights.</dd>
+<dt>Why not</dt><dd>It invents intermediate positions, which is acceptable for a moving aircraft on a visual globe and unacceptable for a ledger. Nothing in LokDarpan moves; animating a figure between two published values would display numbers no source published.</dd>
+</dl>
+</div>
+</section>
+
+<section id="s6">
+<h2><span class="n">06</span>Map rendering patterns worth borrowing</h2>
+<p>All of these improve MapLibre without switching renderers.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>Topic</th><th>Current LokDarpan</th><th>Recommendation</th><th>Why (problem it solves)</th><th>Cost</th></tr></thead>
+<tbody>
+<tr><td>Source / layer separation</td><td>Sources <code>ld-states</code>, <code>ld-children</code>, <code>ld-active</code> in <code>style.ts</code>; visibility toggled in <code>MapCanvas</code></td><td>Keep the style builder pure. Move per-layer style fragments, hit layers and legend into layer definitions (section 13).</td><td>Adding a layer today touches four files and one ordered hit-test array. That coupling is how ADR-022's works layer silently disappeared.</td><td>M</td></tr>
+<tr><td>Vector source management</td><td>GeoJSON <code>setData</code> per level</td><td>Keep GeoJSON up to taluka level. Switch a level to MVT (PMTiles built at ETL, or <code>ST_AsMVT</code> behind the CDN) once a single payload exceeds ~2,000 features or ~500 KB gzipped.</td><td><code>setData</code> reparses and retiles the whole collection in the worker; at village level (Maharashtra has more than 40,000 villages) it would ship megabytes per click.</td><td>L, later</td></tr>
+<tr><td>Feature filtering</td><td><code>setFilter</code> for the active state; property injection for tenders</td><td>Keep. Prefer <code>feature-state</code> for anything that changes on interaction (hover, focus, selected), and properties only for data.</td><td>Re-injecting properties forces a full <code>setData</code>; feature-state updates a single feature on the GPU.</td><td>S</td></tr>
+<tr><td>Feature budgets</td><td>None</td><td>Aggregate-first model (section 15), enforced server-side by <code>limit</code> + <code>total</code>.</td><td>A client-side cap after download wastes bandwidth and hides the truncation decision.</td><td>S design</td></tr>
+<tr><td>Label budgets</td><td>Unbounded DOM markers</td><td>Cap live DOM label nodes (e.g. 150); arbiter with hysteresis (section 16).</td><td>Every marker is repositioned by MapLibre on every frame.</td><td>M</td></tr>
+<tr><td>Layer visibility rules</td><td>Three booleans</td><td>Per-layer <code>minzoom</code> / <code>maxzoom</code> in the definition, plus a reader-facing toggle. The URL holds the toggle, not the zoom rule.</td><td>Declarative zoom ranges are cheaper than JS gating and survive refactors.</td><td>S</td></tr>
+<tr><td>Event handling</td><td>One hit test on mousemove; React <code>setHover</code> per event</td><td>Keep the single ordered hit test. Throttle the React tooltip update to rAF and skip it when the feature id is unchanged.</td><td>Removes a React render per mouse event while panning over one district.</td><td>S</td></tr>
+<tr><td>Hit targets</td><td>Fill layers only</td><td>When line or point layers return, use invisible wide hit layers (ADR-022's 20 px rule), ordered by the registry.</td><td>Already a proven decision; make it structural so it cannot be lost again.</td><td>S</td></tr>
+<tr><td>Selection and highlighting</td><td>Hover feature-state; active unit as a separate source</td><td>Add <code>focus</code> and <code>selected</code> feature-states; draw selection as a line-width and pattern change, never a hue that implies judgement.</td><td>Keyboard focus from the rail should mirror on the map (section 8).</td><td>S</td></tr>
+<tr><td>Camera transitions</td><td>Derived <code>fitTo</code>; <code>ResizeObserver</code> calls <code>frame()</code></td><td>On resize call <code>map.resize()</code> only. Reframe only when the selection changes or the reader presses "Reset view".</td><td>Opening the drawer or rotating a phone currently throws away the reader's pan.</td><td>S</td></tr>
+<tr><td>Render scheduling</td><td>rAF-coalesced label layout</td><td>Keep. Add <code>performance.mark</code> around layout and <code>setData</code> for the perf harness.</td><td>MapLibre already renders on demand; GEV's governor solves a Cesium problem LokDarpan does not have.</td><td>S</td></tr>
+<tr><td>Boundary simplification</td><td>Per-feature <code>ST_SimplifyPreserveTopology</code> per request</td><td>Precompute generalised geometry at ETL with a coverage-aware method, keyed by dataset version.</td><td>Simplifying neighbours independently opens slivers and overlaps along shared borders, and repeats CPU work on every cache miss.</td><td>M</td></tr>
+<tr><td>Label anchors</td><td>Bbox midpoint</td><td>Store a label point per boundary: <code>ST_MaximumInscribedCircle(geom)).center</code>, falling back to <code>ST_PointOnSurface</code>.</td><td>A bbox midpoint lands in the sea for coastal districts and outside crescent- or multipart-shaped units.</td><td>S</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s7">
+<h2><span class="n">07</span>Data and network patterns worth borrowing</h2>
+<ul>
+<li><strong>Bounded reads, typed failures</strong> <span class="chip reimpl">◧ Reimplement</span>. One <code>fetchWithLimits</code> for every collector (section 20). Largest immediate risk reduction in the whole review.</li>
+<li><strong>Distinguish "shape fault" from "outage"</strong> <span class="chip borrow">■ Borrow</span>. GEV purges on a shape fault and serves stale on an outage. LokDarpan's collectors already refuse to guess ("refusing to report an empty discovery"); make this an error class that the run record and the data state both carry, so a changed portal layout shows as a parser failure rather than "no tenders".</li>
+<li><strong>Cooldown ladder per host</strong> <span class="chip adapt">◑ Adapt</span>, at batch cadence (section 20).</li>
+<li><strong>Conditional requests</strong> <span class="chip reimpl">◧ Reimplement</span>. Store <code>etag</code> and <code>last_modified</code> alongside <code>source_artifact</code>. Listing pages that rarely change then cost a 304, and the run records <code>unchanged</code> without downloading.</li>
+<li><strong>Three timestamps</strong> <span class="chip adapt">◑ Adapt</span>: <code>retrievedAt</code> (bytes produced), <code>lastContactAt</code> (publisher answered), <code>nextAttemptAt</code> (when we may ask again). The first two feed the reader-facing data state; the third feeds operations.</li>
+<li><strong>Partial with counts</strong> <span class="chip adapt">◑ Adapt</span>. GEV's "PARTIAL with accepted/received counts" maps to <code>ingestion_run</code> counts, which already exist. Expose them on the API as <code>completeness</code> (section 17).</li>
+<li><strong>Coalescing</strong> <span class="chip adapt">◑ Adapt</span>, in the browser resource cache, keyed with version (section 19).</li>
+<li><strong>Allowlisted redirect policy</strong> <span class="chip reimpl">◧ Reimplement</span>. <code>redirect: "manual"</code>, follow at most 3 hops, each on a host listed for that source. A redirect to a login or parking page is a failure, not data.</li>
+</ul>
+</section>
+
+<section id="s8">
+<h2><span class="n">08</span>UI and interaction patterns worth borrowing</h2>
+<div class="tbl mid"><table>
+<thead><tr><th>GEV pattern</th><th>Verdict</th><th>LokDarpan form</th></tr></thead>
+<tbody>
+<tr><td>Click-to-track: camera locks, trail, metadata card</td><td><span class="chip adapt">◑ Adapt</span></td><td>Click selects a unit or record; the camera frames it once; the drawer shows facts with provenance. No "trail", no follow mode.</td></tr>
+<tr><td>Entity cards from a context registry</td><td><span class="chip adapt">◑ Adapt</span></td><td>The context panel is driven by the URL selection plus a server view model; layers declare how a feature maps to a selection.</td></tr>
+<tr><td>Contacts roster (everything within 250 km)</td><td><span class="chip adapt">◑ Adapt</span></td><td>"Inside this place" list (the rail already does this, by containment rather than distance). Distance lists only for published coordinates.</td></tr>
+<tr><td>Hand off from a tracked fire to the nearest camera</td><td><span class="chip no">⊘ Do not use</span></td><td>Proximity association creates an inferred link between unrelated records. Relationships in LokDarpan are edges stated by a source.</td></tr>
+<tr><td>Global Context: one switch stages everything, then restores your exact view</td><td><span class="chip adapt">◑ Adapt</span></td><td>"Back to where I was": the URL is the restore point; the browser back button already restores. No composite overview mode.</td></tr>
+<tr><td>Panel rails with keyboard escape and focus handling</td><td><span class="chip borrow">■ Borrow</span></td><td>Esc closes the drawer and returns focus to the invoking item; the rail and map stay in sync on keyboard focus.</td></tr>
+<tr><td>Loading feedback per layer (sync chip)</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Per-layer status in the layers menu, using the data-state vocabulary: loading, held as of date, not collected, unavailable.</td></tr>
+<tr><td>Detection boxes over everything in view</td><td><span class="chip no">⊘ Do not use</span></td><td>A targeting aesthetic.</td></tr>
+</tbody></table></div>
+<p>The interaction chain the brief proposes (click → focus → select → context → metadata → relationships → navigate) is designed in section 14. The rule that separates it from GEV: <strong>every step shows records and edges a source stated, and each edge carries its own linkage method and confidence.</strong></p>
+</section>
+
+<section id="s9">
+<h2><span class="n">09</span>Architecture patterns worth borrowing</h2>
+<ul>
+<li><strong>Portable source graphs</strong> <span class="chip adapt">◑ Adapt</span>. GEV proves that its <code>sources/*</code> never reach Cesium, the DOM or Node. The LokDarpan equivalent: <code>packages/domain</code> and <code>packages/contracts</code> never reach React, Next, MapLibre, <code>pg</code> or the filesystem. That is what makes the deferred mobile client possible without a rewrite.</li>
+<li><strong>Checks over every tracked file, not just bundled ones</strong> <span class="chip borrow">■ Borrow</span>. GEV walks <code>git ls-files</code>, so dead code cannot hide a forbidden edge. Use the same scope.</li>
+<li><strong>Negative fixtures for the checker</strong> <span class="chip borrow">■ Borrow</span>. GEV tests that indirect helpers, symlinks and self-imports are caught. A rule without a failing fixture is a rule nobody knows works.</li>
+<li><strong>Explicit owners per responsibility</strong> <span class="chip adapt">◑ Adapt</span>. GEV's <code>CODE-BOUNDARIES.md</code> ownership table maps directly onto LokDarpan's repository-structure doc; the point is one owner per concern, not 150 exports.</li>
+<li><strong>Pure policy modules</strong> <span class="chip borrow">■ Borrow</span>. GEV keeps budget, rank, grace and allocation as pure functions with exported constants and separate tests. LokDarpan's <code>explorer-url.ts</code> already does this; the label arbiter and budget should too.</li>
+<li><strong>Services injected, not imported</strong> <span class="chip adapt">◑ Adapt</span>. GEV layers receive <code>overlayHost</code>, <code>registerEntityContext</code> and so on. LokDarpan's layer binder should receive the map and a context API, so definitions stay testable without MapLibre.</li>
+<li><strong>Window-global stores</strong> <span class="chip no">⊘ Do not use</span>. <code>window.__gevContextStore</code> is shared mutable state; LokDarpan's URL-plus-props model is better.</li>
+</ul>
+</section>
+
+<section id="s10">
+<h2><span class="n">10</span>Performance patterns worth borrowing</h2>
+<ul>
+<li><strong>Record the population with the timing</strong> <span class="chip borrow">■ Borrow</span>. GEV logs live object counts before attributing a change to the client. For LokDarpan: feature count, label candidates, visible labels and payload bytes per measured view.</li>
+<li><strong>Cold, warm and interaction measured separately</strong> <span class="chip borrow">■ Borrow</span>.</li>
+<li><strong>Relative assertions in CI</strong> <span class="chip adapt">◑ Adapt</span>. GEV's <code>qa-perf</code> asserts ratios of frame counts under software rendering rather than absolute FPS. For LokDarpan: bundle bytes (absolute and deterministic), label layout time relative to a synthetic baseline, and "a parked map does zero label layouts".</li>
+<li><strong>Explicit untested scope</strong> <span class="chip borrow">■ Borrow</span>. "What is not established yet" should appear in every LokDarpan performance record.</li>
+<li><strong>One machine, three samples</strong> <span class="chip no">⊘ Do not use</span> as a standard. Too few for network-dominated metrics, and wrong hardware for LokDarpan's readers (section 21).</li>
+</ul>
+</section>
+
+<section id="s11">
+<h2><span class="n">11</span>Patterns that must not be borrowed</h2>
+<div class="tbl wide"><table>
+<thead><tr><th>GEV element</th><th>Architectural reason</th><th>Product and ethical reason</th></tr></thead>
+<tbody>
+<tr><td>CesiumJS globe</td><td>Several MB of JS against a 400 KB map-page target. A second renderer beside MapLibre. No SSR story. Its render loop needs a governor just to idle.</td><td>Administrative comparison is 2D; pitch and rotation make boundaries harder to compare (ADR-022 already disables both).</td></tr>
+<tr><td>Google Photorealistic 3D Tiles</td><td>Per-load billing, an API key in the browser, proprietary terms.</td><td>Every reader's browser would call a commercial vendor; ADR-006 rejects this for Mapbox on the same grounds.</td></tr>
+<tr><td>Esri World Imagery</td><td>Esri Master Agreement terms; no self-hosting.</td><td>Imagery invites visual "verification" that is interpretation, not a record.</td></tr>
+<tr><td>Aircraft, ships, satellites, transit, radio</td><td>Real-time pipelines, per-second rendering, interpolation.</td><td>Nothing to do with public finance.</td></tr>
+<tr><td>CCTV and licence-plate readers</td><td>Frame proxies, SSRF surface.</td><td>They observe people. Incompatible with a platform bound not to target individuals.</td></tr>
+<tr><td>Military installations</td><td>Overpass installation queries.</td><td>Security-sensitive, outside the mandate, and a signal of intelligence-gathering intent.</td></tr>
+<tr><td>FLIR, NVG, CRT, Noir shaders; military HUD; detection boxes; "spy satellite" framing</td><td>GPU cost (FLIR 49 fps, Snow 42 fps in GEV's own baseline).</td><td>A surveillance aesthetic asserts suspicion before any fact is read, which the neutral-presentation rules forbid as surely as a red badge.</td></tr>
+<tr><td>Free-form voice agent</td><td>A realtime WebRTC session, cost governors, 28 tool schemas.</td><td>Free-floating AI chat is permanently excluded; spoken output also bypasses the templated neutral copy path.</td></tr>
+<tr><td>Motion interpolation and dead reckoning</td><td>Complexity for moving objects.</td><td>Displays values no source published.</td></tr>
+<tr><td>Real-time refresh loops</td><td><code>setInterval</code> polling per layer.</td><td>Ledger data changes when ETL seals a version; polling adds load and implies a liveness the data does not have.</td></tr>
+<tr><td>Per-IP rate limiting</td><td>In-process state does not span isolates.</td><td>Carrier-grade NAT puts whole towns behind one IP.</td></tr>
+<tr><td>Proximity-based handoff ("nearest camera")</td><td>—</td><td>Creates relationships by distance; two records near each other are not related.</td></tr>
+<tr><td>Semantic layer weights; "has a name" priority</td><td>—</td><td>Render prominence becomes an editorial ranking, and systematically hides poorly published places.</td></tr>
+<tr><td>Bundling non-commercial data (TeleGeography CC BY-NC-SA)</td><td>—</td><td>LokDarpan's licence discipline forbids republishing what the terms do not permit.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s12">
+<h2><span class="n">12</span>Recommended target architecture</h2>
+<p>This improves on the brief's sketch in three ways. Geography products are computed once at ETL, not per request. One <code>datasetVersion</code> and one data state travel with every payload. And the rail is a peer of the map, not a child of it.</p>
+<pre><code>  Government &amp; public sources  (CAG · LGD · GePNIC portals · OSM · BEAMS†)      † held, not displayed
+            │  fetchWithLimits: host allowlist · byte cap · timeouts · ladder · typed errors
+            ▼
+  services/ingestion ──► raw store (sha256, content-addressed) ──► ingestion_run (counts, error class)
+            │  parse · validate · normalise (transform_version)
+            ▼
+  PostGIS ledger  ── dataset_version (sealed) ── geography_coverage ── source registry
+            │  ETL-time geography products, keyed by version:
+            │    generalised boundaries per level · label points · area_m2 · unit aggregates
+            │    (optional) boundary PMTiles for dense levels
+            ▼
+  Read models / views  (published_fact, tender aggregates, explorer projections)
+            ▼
+  Next.js server  — route handlers &amp; RSC
+     one payload = { data, meta:{ datasetVersion, dataState, sources[] } }
+     CDN cache key includes version; sealed versions immutable
+            ▼
+  Explorer state  (URL canonical: place · selection · layers · filters · v)
+            │
+      ┌─────┴───────────────┬──────────────────────────┐
+      ▼                     ▼                          ▼
+  Layer registry       Context panel &amp; rail      Resource cache (browser)
+  (pure definitions)   (accessible equivalent)   single-flight · version-checked
+      │
+      ▼
+  Map binder ── MapLibre sources/layers · feature-state ── Label arbiter (DOM, Indic shaping)
+      │
+      └── Basemap PMTiles (static, same origin)</code></pre>
+<h3>Placement of computation</h3>
+<div class="tbl mid"><table>
+<thead><tr><th>Computation</th><th>Where</th><th>Why there</th></tr></thead>
+<tbody>
+<tr><td>Containment, parent assignment, area, label point, generalisation</td><td>PostGIS at ETL</td><td>Deterministic per version; expensive; the result is a stored, auditable fact</td></tr>
+<tr><td>Viewport (<code>&amp;&amp;</code>) and nearest-neighbour (<code>&lt;-&gt;</code>) queries</td><td>PostGIS at read time</td><td>GIST answers directly; only for layers with published coordinates</td></tr>
+<tr><td>Aggregates by unit (counts, totals)</td><td>PostGIS / materialised view per version</td><td>The client computes no arithmetic; totals are cited facts</td></tr>
+<tr><td>Payload composition, version check, data state</td><td>Next.js server</td><td>One vintage per payload (ADR-012)</td></tr>
+<tr><td>Vector tiling of dense boundaries</td><td>ETL build → PMTiles on the origin or CDN</td><td>Zero per-request CPU; tiles are immutable per version</td></tr>
+<tr><td>Projection, hit testing, hover, feature-state</td><td>MapLibre</td><td>GPU and worker work it already does</td></tr>
+<tr><td>Label collision and hysteresis</td><td>Browser</td><td>Depends on screen space and rendered text size</td></tr>
+<tr><td>Anything with rupees</td><td>Never the browser</td><td>Formatting only, via <code>@lokdarpan/money</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s13">
+<h2><span class="n">13</span>Proposed layer architecture</h2>
+<p>Derived from GEV's module contract (enable, disable, destroy, stats, services injected) and LokDarpan's facts: refresh is driven by version, not by interval; styles are declarative; interaction resolves to a URL selection. The registry is a static, typed array, not runtime registration. It is SSR-safe, tree-shakeable, and reviewable in one file.</p>
+<pre><code>// apps/web/src/map/layers/types.ts  (sketch, not implemented)
+export interface LayerDefinition&lt;VM&gt; {
+  readonly id: LayerId;                      // "state-outlines" | "child-boundaries" | "tender-offices" | ...
+  readonly urlToken: string;                 // stable short token for ?layers=
+  readonly copy: LayerCopyKeys;              // title, legend, note: keys into the copy catalogue
+  readonly kind: "boundary" | "aggregate" | "records";
+  readonly resource: ResourceSpec&lt;VM&gt;;       // route + params(ctx): server view model, never raw source rows
+  readonly sources: (vm: VM) =&gt; Record&lt;string, SourceSpecification&gt;;
+  readonly styleLayers: (tokens: MapTokens) =&gt; LayerSpecification[];   // pure; no red, patterns + colour
+  readonly zoom: { readonly min: number; readonly max: number };
+  readonly budget?: FeatureBudget;           // records layers only (section 15)
+  readonly hit?: { readonly layerIds: readonly string[]; readonly order: number;
+                   readonly toSelection: (f: MapGeoJSONFeature) =&gt; Selection | null };
+  readonly labels?: (vm: VM) =&gt; readonly LabelCandidate[];
+  readonly provenance: (vm: VM) =&gt; readonly SourceDescriptor[];     // must be non-empty when drawn
+  readonly dataState: (vm: VM) =&gt; DataState;
+  readonly defaultVisible: boolean;
+}</code></pre>
+<h4>Lifecycle, via one binder</h4>
+<ol>
+<li><strong>Resolve.</strong> For visible layers whose zoom range intersects the view, request <code>resource</code> through the resource cache with the pinned version.</li>
+<li><strong>Bind.</strong> On first data, add sources and style layers in registry order; later, <code>setData</code> only if the view model identity changed.</li>
+<li><strong>Toggle.</strong> Visibility uses <code>setLayoutProperty</code>; data is retained, as GEV's <code>disable</code> does.</li>
+<li><strong>Interact.</strong> One hit test walks <code>hit.layerIds</code> by <code>order</code>. First match wins, then <code>toSelection</code>, then a URL update.</li>
+<li><strong>Destroy.</strong> Remove the layers and sources; abort in-flight reads through reference-counted release.</li>
+<li><strong>Refuse.</strong> A layer whose <code>provenance</code> is empty, or whose <code>dataState</code> is <code>not_collected</code>, draws nothing and shows its state instead. This is the map-level equivalent of <code>&lt;Figure&gt;</code> requiring provenance.</li>
+</ol>
+<h4>The catalogue, honestly scoped</h4>
+<div class="tbl mid"><table>
+<thead><tr><th>Layer</th><th>Kind</th><th>Status</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td><code>state-outlines</code></td><td>boundary</td><td>Exists</td><td>Static generalised file; ODbL attribution</td></tr>
+<tr><td><code>child-boundaries</code></td><td>boundary</td><td>Exists</td><td>Per parent; move to ETL generalisation; MVT for dense levels</td></tr>
+<tr><td><code>selected-unit</code></td><td>boundary</td><td>Exists</td><td>Becomes <code>feature-state: selected</code> where the unit is in the child source</td></tr>
+<tr><td><code>tender-offices</code></td><td>aggregate</td><td>Exists</td><td>Shading by issuing-office district; "located in" wording kept</td></tr>
+<tr><td><code>local-body-extents</code></td><td>boundary (extent)</td><td>Partially (ADR-022)</td><td>Dashed rectangle, labelled as an extent</td></tr>
+<tr><td><code>works</code></td><td>records</td><td>Blocked</td><td>Needs a licensed source with published coordinates (OMMAS permission not sought)</td></tr>
+<tr><td><code>scheme-expenditure</code></td><td>aggregate</td><td>Blocked</td><td>BEAMS display not permitted; unit aggregates only when licensed</td></tr>
+<tr><td>Contractors</td><td>—</td><td>Not a layer</td><td>A firm's address on a map invites association; reachable through records only</td></tr>
+<tr><td>Audit observations</td><td>—</td><td>Not a layer</td><td>ADR-051: the issuing office is not the audited area. Listed per unit in the context panel.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s14">
+<h2><span class="n">14</span>Proposed map context model</h2>
+<p>One source of truth per fact. GEV's lesson is layer-owned context records; its mistake is a global store. LokDarpan keeps the URL as canonical and derives everything else from it.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>Field</th><th>Class</th><th>Owner</th><th>In URL?</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td><code>stateCode</code>, <code>unitId</code></td><td>Canonical</td><td><code>explorer-url.ts</code></td><td>Yes (<code>state</code>, <code>unit</code>)</td><td>Exists; <code>reconcile()</code> on the server</td></tr>
+<tr><td><code>selection</code>: <code>{kind: "unit"|"document"|"tender", id}</code></td><td>Canonical</td><td>URL</td><td>Yes (<code>sel=tender:123</code>; <code>doc</code> kept as an alias)</td><td>Replaces the document-only drawer key</td></tr>
+<tr><td><code>layers</code></td><td>Canonical</td><td>URL</td><td>Yes, only if not default (<code>layers=so,cb,to</code>)</td><td>Tokens from the registry; unknown tokens dropped</td></tr>
+<tr><td><code>filters</code> (department, later financial year)</td><td>Canonical</td><td>URL</td><td>Yes (<code>dept</code>, <code>fy</code>)</td><td>Today <code>useState</code>, lost on share</td></tr>
+<tr><td><code>datasetVersion</code> pin</td><td>Canonical when present</td><td>URL</td><td>Only on "link to this exact view" (<code>v</code>)</td><td>Section 16 of the brief; see below</td></tr>
+<tr><td><code>focusedFeature</code></td><td>Client, ephemeral</td><td>Explorer reducer</td><td>No</td><td>Keyboard focus in the rail or map; mirrors to feature-state</td></tr>
+<tr><td><code>hoveredFeature</code></td><td>Client, ephemeral</td><td>MapCanvas</td><td>No</td><td>Feature-state; tooltip updated on rAF</td></tr>
+<tr><td>Viewport, zoom</td><td>Derived</td><td>MapLibre</td><td>No</td><td>ADR-022: position is derived from selection; a pan is not shareable state</td></tr>
+<tr><td><code>activeUnit</code>, <code>ancestors</code>, <code>scopeLabel</code></td><td>Server state</td><td>Resource cache</td><td>No</td><td>Derived from <code>unitId</code></td></tr>
+<tr><td><code>dataState</code> per layer and panel</td><td>Server state</td><td>Payload <code>meta</code></td><td>No</td><td>Never computed client-side from list length</td></tr>
+<tr><td>Visible labels, budgeted features</td><td>Derived</td><td>Arbiter / binder</td><td>No</td><td>Pure functions of candidates and camera</td></tr>
+</tbody></table></div>
+<h3>Interaction chain</h3>
+<pre><code>hover     → feature-state:hover, tooltip "Nagpur · District"                  (no URL change)
+focus     → keyboard in rail or map: feature-state:focus, rail item scrolled into view
+select    → URL sel=… ; camera frames once ; drawer opens ; Esc returns focus
+context   → drawer loads view model: facts, each through &lt;Figure provenance&gt;, plus dataState
+metadata  → "Where did this come from?" disclosure: SourceDescriptor list (section 18)
+relations → typed edges from the server, each with {method, linkageConfidence, source}
+              tender ─issued by→ office ─located in→ district        (placement: chain_unit | office_code)
+              document ─issued by→ office ≠ audited area            (ADR-051)
+              tender ─award→ ?  shown as "no award record held", never inferred
+navigate  → canonical URLs: /units/:id · /documents/:id ; explorer URL updated with replaceState</code></pre>
+<p>Rules: an edge is drawn only if a record states it; an edge with a <code>method</code> other than a direct statement carries its linkage wording; a missing stage renders the missing-data state and stops the chain there, with no skipping to the next stage it can find. The brief's chain (project → tender → contractor → department → scheme → allocation → expenditure → audit) is a <em>possible</em> path, and today only the tender → office → district segment is held.</p>
+</section>
+
+<section id="s15">
+<h2><span class="n">15</span>Proposed feature budget / LOD model</h2>
+<div class="callout warn"><p><strong>Scope.</strong> There are no point features today. Write this as an ADR now and implement it with the first licensed coordinate-bearing source, so the budget arrives with the layer rather than being retrofitted after a reader has already seen a silently truncated map.</p></div>
+
+<h3>Render prioritisation is not analytical prioritisation</h3>
+<div class="tbl mid"><table>
+<thead><tr><th></th><th>Render prioritisation</th><th>Analytical prioritisation</th></tr></thead>
+<tbody>
+<tr><td>Question</td><td>Which of the features in view can the screen show legibly?</td><td>Which records merit a reader's verification attention?</td></tr>
+<tr><td>Allowed inputs</td><td>id, geometry kind, admin level, zoom, in-view, explicit selection, focus, incumbency, a stable hash of id</td><td>Versioned, source-linked, factor-broken-down computations (Verification Priority), shown with confidence</td></tr>
+<tr><td>Forbidden inputs</td><td>value, variance, Verification Priority, anomaly flags, counts of observations, contractor identity, recency of controversy, name availability</td><td>—</td></tr>
+<tr><td>Owner</td><td><code>apps/web/src/map/budget</code></td><td><code>services/risk-engine</code> → API</td></tr>
+<tr><td>Output</td><td>Which features draw; never displayed as a ranking</td><td>A labelled, explained score on an entity page, scoped to where the reader navigated</td></tr>
+</tbody></table></div>
+<p>Enforcement: the budget module's input type admits only the allowed fields, and an import rule forbids <code>map/budget/**</code> from importing any analytics, risk or finance contract. A unit test asserts that selection is invariant under permuting every non-allowed property.</p>
+
+<h3>Algorithm: aggregate first, sample never</h3>
+<ol>
+<li><strong>Server answers counts first.</strong> A records request for a viewport returns <code>{total, byUnit[]}</code> from PostGIS (<code>&amp;&amp;</code> on GIST, grouped by the smallest admin level with a boundary at that zoom).</li>
+<li><strong>Mode decision</strong> with hysteresis: <code>individual</code> when <code>total ≤ B(zoom)</code>; switch back to <code>aggregate</code> only when <code>total &gt; 1.2 × B</code> or zoom drops by 0.5 below the entry zoom. This prevents flapping at the edge, the same purpose as GEV's grace window, but keyed to data and camera rather than wall time.</li>
+<li><strong>Aggregate mode</strong> draws unit shading or unit-anchored count markers ("312 records"), each clickable to zoom in. Nothing is hidden: every record is inside some count.</li>
+<li><strong>Individual mode</strong> fetches features with <code>limit = B</code>; the server guarantees <code>total ≤ B</code>, so no subset is chosen.</li>
+<li><strong>Unmapped records</strong> (no published location) are counted separately and announced ("18 records here have no published location and are not on the map").</li>
+<li><strong>Selection pin.</strong> A selected feature is always drawn, even in aggregate mode, as a single overlay. This is the only incumbency rule.</li>
+</ol>
+<h3>Choosing B</h3>
+<p>Do not copy 400 or GEV's 80/200/420. Measure: render p95 frame time and hit-test latency on the reference mid-tier Android profile at 250, 500, 1,000, 2,000 features, then take the largest count keeping pan p95 ≤ 33 ms and tap-to-drawer ≤ 150 ms. The wireframe's 400 is a reasonable starting hypothesis to test, not a constant to ship.</p>
+<h3>If sampling were ever unavoidable</h3>
+<p>For example, a label or icon collision among features with identical positions: choose by <code>hash(id)</code>, stable across sessions and versions, never by an attribute. And say that it happened.</p>
+</section>
+
+<section id="s16">
+<h2><span class="n">16</span>Proposed label arbitration model</h2>
+<h3>Keep DOM labels; do not switch to a symbol layer (verify first)</h3>
+<p>A MapLibre <code>symbol</code> layer would give collision, fades and <code>symbol-sort-key</code> for free, once glyph PBFs are self-hosted. The blocking concern is script shaping. To the best of my knowledge, MapLibre GL JS does not perform complex text shaping for Indic scripts, so Devanagari, Tamil or Bengali conjuncts would render incorrectly, while DOM text uses the browser's shaper. LokDarpan already handles Tamil in its OCR pipeline (migration 0021) and will want local-script names. <strong>Verify against the pinned v5 before deciding</strong>; if shaping is supported, prefer the symbol layer and skip the rest of this section.</p>
+
+<h3>Neutral priority, as a lexicographic tuple</h3>
+<ol>
+<li>Explicitly selected unit (always placed)</li>
+<li>Keyboard-focused or hovered unit</li>
+<li>Ancestors of the selection shown on screen (orientation)</li>
+<li>Administrative level rank: coarser before finer</li>
+<li><code>floor(log2(area_m2))</code>, computed in PostGIS on <code>geography</code>, not degrees². Bucketed so small area differences do not decide.</li>
+<li>Stable id</li>
+</ol>
+<p>Excluded: population, spend, tender counts, observation counts, political boundaries of constituencies, "has a local name". Area is geometric, not a judgement; it is already the current tiebreaker, just measured wrongly.</p>
+
+<h3>Mechanism</h3>
+<ul>
+<li><strong>Anchor</strong> from PostGIS (<code>label_point</code>), not the bbox midpoint.</li>
+<li><strong>Measure once, in a batch.</strong> Create all nodes in a <code>DocumentFragment</code>, attach, then read widths in one pass (one layout instead of n).</li>
+<li><strong>Sort only when the candidate set changes;</strong> incumbency is applied as a pre-partition (incumbents first, in priority order), which needs no re-sort.</li>
+<li><strong>Grid:</strong> cell = 2 × median label height (≈ 32 px at 12 px type). <code>Map&lt;number, Rect[]&gt;</code> with generation stamps.</li>
+<li><strong>Hysteresis</strong> during camera motion only: a placed label is kept if still on screen and colliding only with lower-priority labels; minimum on-screen time 600 ms; cooldown 400 ms before a removed label may return. Shorter than GEV's 2.5 s / 1.2 s because nothing moves on its own, and a reader panning a state wants responsive names.</li>
+<li><strong>Fade:</strong> opacity transition 120 ms in, 180 ms out; disabled under <code>prefers-reduced-motion</code>.</li>
+<li><strong>Budget:</strong> at most 150 live nodes; beyond that, do not create markers for off-screen candidates (create on entry, remove after cooldown).</li>
+<li><strong>Write only on change:</strong> toggle opacity or visibility only when the state flips.</li>
+<li><strong>Clock injected</strong> so the tests are deterministic.</li>
+</ul>
+
+<h3>Complexity, current versus proposed (per frame during pan)</h3>
+<div class="tbl mid"><table>
+<thead><tr><th>Step</th><th>Current <code>place-labels.ts</code></th><th>Proposed</th></tr></thead>
+<tbody>
+<tr><td>Ordering</td><td>O(n log n) sort every frame</td><td>O(n) partition; sort only on input change</td></tr>
+<tr><td>Collision</td><td>O(n·k), worst O(n²)</td><td>O(n·c·b), effectively O(n)</td></tr>
+<tr><td>Projection</td><td>n × <code>map.project</code></td><td>Same n, skipping candidates outside the padded viewport bbox (O(1) lng/lat test first)</td></tr>
+<tr><td>DOM writes</td><td>n style writes</td><td>Only for state flips</td></tr>
+<tr><td>Creation</td><td>n forced layouts (<code>offsetWidth</code> per label)</td><td>1 layout</td></tr>
+<tr><td>At n = 36 (states)</td><td>Trivial</td><td>Trivial: no gain</td></tr>
+<tr><td>At n = 700 (villages in one taluka)</td><td>Up to ~245,000 rectangle tests + 700 writes per frame</td><td>~2,000 bucket probes + a few dozen writes</td></tr>
+</tbody></table></div>
+<p>Honest note: at today's holdings (states and districts, 40 villages) the current algorithm is adequate. The stability benefit (no flicker) applies now; the complexity benefit arrives with village coverage.</p>
+</section>
+
+<section id="s17">
+<h2><span class="n">17</span>Proposed data state model</h2>
+<p>LokDarpan already has three partial vocabularies: <code>coverage_status</code> (complete / partial / not_collected), tender <code>CollectionStatus</code> (not_collected / collected / stale / failing), and <code>ingestion_run_status</code>. GEV's lesson is that the underlying facts are <em>independent dimensions</em>. A single flat enum forces a choice between "stale" and "partial" when data is both.</p>
+
+<h3>Four dimensions, one derived display state</h3>
+<pre><code>interface DataState {                       // packages/contracts — travels in meta, per resource
+  collection:   "collected" | "not_collected";
+  freshness:    "fresh" | "stale" | "failing" | "unknown";
+  completeness: "complete" | "partial" | "unknown";
+  publication?: { status: "not_identified"; checkedAt: string; sourceId: string };  // evidence-backed only
+  datasetVersion: number;
+  retrievedAt: string | null;      // bytes produced by the publisher's server
+  lastContactAt: string | null;    // publisher last answered (incl. 304)
+  lastSuccessAt: string | null;    // last run that loaded successfully
+  expectedCadence: string | null;  // ISO 8601 duration the collector is scheduled at
+  coverageNote: string | null;     // required when partial (existing DB constraint)
+  counts?: { held: number; unplaced: number; expected: number | null };  // expected only when a source states it
+}
+// Client-only transport state, never sent by the server:
+type Transport = "loading" | "ok" | "unavailable";</code></pre>
+
+<h3>States, meaning, and wording</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Display state</th><th>Derived when</th><th>Backend source</th><th>Reader wording (template)</th><th>Figures shown?</th></tr></thead>
+<tbody>
+<tr><td><code>loading</code></td><td>Transport pending</td><td>—</td><td>"Loading records for {place}…"</td><td>No</td></tr>
+<tr><td><code>unavailable</code></td><td>Transport failed (timeout, 5xx, offline)</td><td>—</td><td>"LokDarpan could not load this just now. This is a problem on our side or your connection, not a statement about {publisher}." + Retry</td><td>No</td></tr>
+<tr><td><code>unknown</code></td><td>No run and no coverage record for this scope</td><td>Absence of rows</td><td>"We have no record of checking {source} for {place}."</td><td>No</td></tr>
+<tr><td><code>not_collected</code></td><td><code>collection = not_collected</code></td><td><code>geography_coverage</code>, portal registry</td><td>"{Records} are not currently collected for {place}. This describes what LokDarpan holds, not what was published."</td><td>No count, not zero</td></tr>
+<tr><td><code>not_published</code></td><td><code>publication.status = not_identified</code> with a successful run that read the publisher's listing</td><td>Run evidence</td><td>"Not identified in {source} as of {date}." (the registry's own rule)</td><td>No</td></tr>
+<tr><td><code>failing</code></td><td>Latest attempt after <code>lastSuccessAt</code> failed</td><td><code>ingestion_run</code></td><td>"The most recent collection did not complete. Showing records last collected on {lastSuccessAt}."</td><td>Yes, with the notice</td></tr>
+<tr><td><code>stale</code></td><td><code>now − lastSuccessAt &gt; 2 × expectedCadence</code>, no failing attempt</td><td>Run and cadence</td><td>"Last collected {date}, longer ago than usual."</td><td>Yes, with the notice</td></tr>
+<tr><td><code>partial</code></td><td><code>completeness = partial</code></td><td><code>geography_coverage.note</code>, run unresolved counts</td><td>"{held} held. {note}" (the note says how it is known that more exist)</td><td>Yes, never extrapolated</td></tr>
+<tr><td><code>fresh</code></td><td>collected, fresh, complete</td><td>—</td><td>Provenance line only</td><td>Yes</td></tr>
+</tbody></table></div>
+<p><strong>Precedence</strong> when several apply: <code>unavailable</code> › <code>not_collected</code> › <code>unknown</code> › <code>failing</code> › <code>stale</code> › <code>partial</code> › <code>fresh</code>. <code>failing</code>, <code>stale</code> and <code>partial</code> can show together; the others cannot. "Failed" in the brief maps to two distinct states: <code>unavailable</code> (our transport) and <code>failing</code> (collection). Conflating them would repeat the "offline vs not published" error CLAUDE.md warns about.</p>
+
+<h3>State machine for one source × scope</h3>
+<pre><code>            first successful run                     run fails
+ unknown ─────────────────────────► fresh ◄──────────────────────┐
+    │                                 │  ▲                        │
+    │ scope marked not collected      │  │ run succeeds           │
+    ▼                                 │  │                        │
+ not_collected                        ▼  │                        │
+                           cadence×2 elapsed ──► stale ──run fails──► failing
+                                                   │                  │
+                                                   └──run succeeds──► fresh
+ completeness (orthogonal): complete ⇄ partial   set by coverage records, not by timers</code></pre>
+
+<h3>Implications</h3>
+<ul>
+<li><strong>Provenance:</strong> a <code>stale</code> or <code>failing</code> figure still carries its original <code>retrievedAt</code> and version, never the time of the current request (fixes <code>respond.ts</code>'s <code>asOf: now()</code>).</li>
+<li><strong>Coverage:</strong> map shading is suppressed for <code>not_collected</code> and <code>unknown</code> scopes; a pattern plus "not collected" legend entry replaces it.</li>
+<li><strong>Missing is never zero:</strong> <code>counts</code> is absent (not <code>0</code>) unless <code>collection = collected</code>. A contract test asserts this for every route.</li>
+<li><strong>Existing code:</strong> tender <code>stale</code> uses a fixed-hours threshold (<code>tender.repository.ts</code>); move that threshold onto the source registry as <code>expectedCadence</code>.</li>
+</ul>
+</section>
+
+<section id="s18">
+<h2><span class="n">18</span>Proposed provenance model</h2>
+<p>GEV's discipline is a table in a Markdown file and an attribution line in the app. LokDarpan's bar is higher: the map must answer "where did this come from?" from the payload itself.</p>
+<pre><code>interface SourceDescriptor {                   // packages/contracts
+  sourceId: string;                            // registry id, e.g. "cag-audit-reports", "gepnic-kerala"
+  publisher: string;                           // organisation as the registry names it (not derived from hostname)
+  dataset: string;                             // "State audit reports", "Open tenders"
+  sourceUrl: string;                           // the page or file the record was read from
+  licence: { name: string; url: string | null; displayPermitted: boolean };
+  attribution: string;                         // exact required text (ODbL, CAG, LGD)
+  retrievedAt: string;                         // from source_artifact
+  publishedAt: string | null;                  // only if the publisher states it
+  datasetVersion: number;
+  ingestionRunId: number;
+  transformVersion: string;                    // ETL git sha, stored on dataset_version
+  coverage: { scopeUnitId: number; level: string; status: "complete" | "partial" | "not_collected"; note: string | null };
+  limitations: string[];                       // vetted template keys, e.g. "office-not-work-site"
+  placement?: { method: "published_coordinates" | "chain_unit" | "office_code" | "contained_in_boundary"; confidence: number | null };
+  confidence?: { extraction: number | null; linkage: number | null };
+}</code></pre>
+<h3>How it travels</h3>
+<ul>
+<li>Payload <code>meta.sources: SourceDescriptor[]</code>, deduplicated; each feature carries only <code>properties.src: number[]</code> (indices), which keeps GeoJSON small.</li>
+<li>Database: add <code>transform_version</code> to <code>dataset_version</code>; add a <code>source</code> table seeded from <code>.docs/06-government-sources</code> (id, publisher, dataset, licence, attribution, display_permitted, expected_cadence); boundaries and tenders reference <code>source_id</code>.</li>
+<li><code>ProvenanceNote</code>'s hostname lookup (<code>PUBLISHERS</code>) becomes a registry read, so a fourth source cannot be credited to the wrong body.</li>
+<li><code>publishable.ts</code>'s environment gate becomes <code>licence.displayPermitted</code>, still false for BEAMS until permission exists.</li>
+</ul>
+<h3>On the map</h3>
+<ul>
+<li>Hover tooltip: name and level only.</li>
+<li>Drawer: facts through <code>&lt;Figure&gt;</code>, then a "Where this came from" disclosure listing every descriptor, including placement method in words ("Read from an office name, which may cover more than one district").</li>
+<li>Layers menu: each layer's attribution and data state, always visible (it is the ODbL requirement and the honesty requirement at once).</li>
+</ul>
+
+<h3>Reproducible links: <code>datasetVersion</code> in shared URLs</h3>
+<pre><code>"Copy link"                     → /explore?state=27&amp;unit=505&amp;layers=cb,to&amp;dept=PWD          (live view)
+"Copy link to this exact view"  → /explore?state=27&amp;unit=505&amp;layers=cb,to&amp;dept=PWD&amp;v=1684   (pinned)
+
+server receives v:
+  v == current                  → render normally
+  v sealed and reconstructable  → render at v; notice "Data as of version 1684 (12 Sep 2026). View current data."
+  v not reconstructable         → render current; notice "Version 1684 can no longer be shown for boundaries; showing 1702."
+  v unknown / unsealed          → ignore v, render current, say so</code></pre>
+<ul>
+<li><strong>Prerequisite:</strong> Finding A. Pinning needs real versions on every explorer route.</li>
+<li><strong>Reconstructability differs by table:</strong> documents and facts are append-only; tenders keep history (<code>tender_history</code>, migration 0022); <code>admin_unit_boundary</code> is keyed by unit, so an old geometry is overwritten. Either version boundary rows or accept "not reconstructable" for geometry and say so.</li>
+<li><strong>Caching bonus:</strong> a sealed version is immutable, so pinned responses can be <code>Cache-Control: public, max-age=31536000, immutable</code>.</li>
+<li><strong>Camera stays out</strong> (ADR-022). GEV's <code>at</code> timestamp is unnecessary; the version's own date is the authoritative "as of".</li>
+</ul>
+</section>
+
+<section id="s19">
+<h2><span class="n">19</span>Proposed request-coalescing model</h2>
+<h3>Where duplicates actually occur</h3>
+<div class="tbl mid"><table>
+<thead><tr><th>Resource</th><th>Duplicate today?</th><th>Evidence</th><th>Right fix</th></tr></thead>
+<tbody>
+<tr><td>Static boundary files</td><td>No</td><td><code>geometry-source.ts</code> already single-flights with failure eviction</td><td>Keep; delete unused <code>fetchDistricts</code></td></tr>
+<tr><td>Children + boundaries of the same parent</td><td>Two requests, same key, can resolve at different versions</td><td><code>useChildUnits</code> (<code>:63</code>) and <code>useChildBoundaries</code> (<code>:105</code>)</td><td>Merge into one level endpoint returning units, coverage, boundaries and one version</td></tr>
+<tr><td>Drill in, then back out</td><td>Refetched each time</td><td>No client cache for API reads</td><td>Browser resource cache, keyed with version</td></tr>
+<tr><td>Many readers, same unit, cold CDN</td><td>Stampede on PostGIS simplification</td><td>Every route <code>force-dynamic</code></td><td>Precompute at ETL; CDN keyed by version; in-process coalescing is weak on serverless (many isolates)</td></tr>
+<tr><td>Tiles</td><td>No</td><td>MapLibre and the PMTiles protocol cache tiles</td><td>Nothing</td></tr>
+<tr><td>Ingestion</td><td>No</td><td>Sequential collectors; sha256 dedupe in the raw store</td><td>Nothing; conditional GET instead</td></tr>
+</tbody></table></div>
+
+<h3>Browser resource cache</h3>
+<pre><code>key        = `${route}?${canonicalParams}@v${pinnedVersion ?? "live"}`
+entry      = { promise, refs, controller, settledAt, bytesEstimate, version }
+acquire()  → refs += 1; return the existing promise, or start one with its own AbortController
+release()  → refs -= 1; if refs == 0 and unsettled: abort after a 250 ms grace (a quick reselect reuses it)
+settle ok  → keep in an LRU (e.g. 40 entries or ~20 MB estimate), stamp version from meta
+settle err → delete only if map.get(key) === entry   (GEV's exact-promise rule); never cache failures
+version    → if meta.datasetVersion ≠ pinned: discard, bump the explorer's live version, refetch everything
+             (never merge vintages on one screen)</code></pre>
+<ul>
+<li><strong>Cancellation:</strong> shared promises must not be aborted by one consumer; reference counting fixes GEV's "no cancellation" gap.</li>
+<li><strong>Races:</strong> AbortController on selection change remains; the version check covers ETL landing mid-session.</li>
+<li><strong>Memory:</strong> LRU bound; entries hold parsed JSON, so estimate from <code>Content-Length</code>.</li>
+<li><strong>Where it belongs:</strong> browser (yes), Next.js server (no; use the CDN), API (the CDN again), ingestion (no).</li>
+</ul>
+</section>
+
+<section id="s20">
+<h2><span class="n">20</span>Proposed network safety model</h2>
+<h3>Every current client that needs protection</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Client</th><th>File:line</th><th>Read</th><th>Timeout</th><th>Cap</th><th>Other issue</th></tr></thead>
+<tbody>
+<tr><td>CAG listing and report PDFs</td><td><code>services/ingestion/src/cag/client.ts:94</code></td><td><code>arrayBuffer()</code></td><td>None</td><td>None</td><td>Downloads the full body before checking status and <code>content-type</code></td></tr>
+<tr><td>LGD session and state listing</td><td><code>lgd/client.ts:45</code></td><td><code>arrayBuffer()</code></td><td>None</td><td>None</td><td>Keeps only the first cookie via <code>headers.get("set-cookie")</code> (GePNIC uses <code>getSetCookie</code>)</td></tr>
+<tr><td>BEAMS</td><td><code>beams/client.ts:44</code></td><td><code>arrayBuffer()</code></td><td>None</td><td>None</td><td>—</td></tr>
+<tr><td>GePNIC robots.txt</td><td><code>gepnic/fetch.ts:130</code></td><td><code>text()</code></td><td>None</td><td>None</td><td>A huge robots.txt blocks the check itself</td></tr>
+<tr><td>GePNIC pages</td><td><code>gepnic/fetch.ts:154–164</code></td><td><code>text()</code></td><td>None</td><td>None</td><td>Cross-host redirects not checked</td></tr>
+<tr><td>Overpass status + query</td><td><code>osm/overpass.ts:163, 178–193</code></td><td><code>text()</code></td><td>Server-side <code>[timeout:240]</code> only</td><td>None</td><td>A district query can legitimately be tens of MB</td></tr>
+<tr><td>OCR service</td><td><code>ocr/client.ts:93</code></td><td><code>json()</code></td><td>Yes</td><td>None</td><td>Internal service; cap still prevents a runaway response</td></tr>
+</tbody></table></div>
+
+<h3>Shared abstraction</h3>
+<pre><code>// services/ingestion/src/net/fetch-with-limits.ts  (design)
+fetchWithLimits({
+  sourceId, url, method = "GET", headers, body,
+  allowHosts,                 // from the source registry; redirects checked hop by hop, max 3
+  maxBytes,                   // decoded bytes
+  timeouts: { headersMs, idleMs, totalMs },
+  expect: { status: [200, 304], contentTypes?: ["application/pdf"] },   // checked BEFORE reading the body
+  sink: "memory" | { file: tmpPath },          // file for PDFs: stream + sha256 incrementally
+  validators?: { etag, lastModified },         // conditional request
+  signal,
+}) → { status, finalUrl, headers, byteSize, sha256, retrievedAt, body | path, notModified }
+throws FetchLimitError { class, sourceId, host, url, bytesRead, elapsedMs }</code></pre>
+<div class="tbl mid"><table>
+<thead><tr><th>Error class</th><th>Retry?</th><th>Run outcome</th><th>Stored?</th></tr></thead>
+<tbody>
+<tr><td><code>too_large</code></td><td>No (deterministic)</td><td>failed; note names the cap and bytes read</td><td>Nothing stored, nothing parsed</td></tr>
+<tr><td><code>timeout_headers</code>, <code>timeout_idle</code>, <code>timeout_total</code></td><td>Yes</td><td>failed after attempts exhausted</td><td>No</td></tr>
+<tr><td><code>network</code> (DNS, reset, TLS)</td><td>Yes</td><td>as above; unreachable hosts recorded as "not reachable from this vantage point on {date}"</td><td>No</td></tr>
+<tr><td><code>http_5xx</code>, <code>429</code></td><td>Yes, honour <code>Retry-After</code></td><td>as above</td><td>No</td></tr>
+<tr><td><code>http_4xx</code> (not 429)</td><td>No</td><td>failed</td><td>No</td></tr>
+<tr><td><code>unexpected_content_type</code></td><td>No</td><td>failed as shape fault</td><td>No (an error page is not evidence)</td></tr>
+<tr><td><code>redirect_refused</code></td><td>No</td><td>failed</td><td>No</td></tr>
+<tr><td><code>aborted</code></td><td>No</td><td>failed ("cancelled")</td><td>No</td></tr>
+</tbody></table></div>
+
+<h3>Choosing numbers instead of inventing them</h3>
+<ol>
+<li><strong>Byte caps:</strong> run once against the raw store: <code>SELECT source_id, max(byte_size), percentile_cont(0.99) WITHIN GROUP (ORDER BY byte_size) FROM source_artifact GROUP BY source_id;</code>. Set cap = max(4 × observed max, the largest size the publisher documents), rounded up to a power of two. Record the query output in the ADR. Until measured, fail open to a <em>generous</em> ceiling per content type (listing HTML: 16 MiB; PDFs: 512 MiB streamed to disk; Overpass JSON: 256 MiB) and log every response above 25% of it.</li>
+<li><strong>Timeouts:</strong> headers 30 s (government hosts are slow, not silent); idle 60 s (resets per chunk, which is what kills a trickle); total = max(10 min, cap / 50 KiB/s floor). Revisit from logged <code>elapsedMs</code> p99 × 3 after two weeks.</li>
+<li><strong>Retries:</strong> 3 attempts per URL; ladder 30 s → 2 min → 10 min with ±20% jitter; per-host circuit: 5 consecutive failures stop further requests to that host for the run and record the note. This is GEV's ladder at batch timescale and prevents a retry storm against one portal.</li>
+<li><strong>Concurrency:</strong> 1 per host (existing behaviour, now enforced), independent hosts may run in parallel.</li>
+</ol>
+<ul>
+<li><strong>Decompression:</strong> send <code>accept-encoding: identity</code> for binary artifacts; for HTML allow gzip but count decoded bytes. Never unzip archives in memory; stream-extract with a per-entry and total cap.</li>
+<li><strong>Parsing:</strong> JSON and CSV parsers get the same cap as the fetch; CSV row count capped per source.</li>
+<li><strong>Partial responses:</strong> there are none. A body that did not complete is a failed fetch; it is never stored, hashed into the raw store or parsed.</li>
+<li><strong>Logging and metrics:</strong> one structured event per fetch <code>{sourceId, host, status, bytes, elapsedMs, class, attempt, sha256}</code>, secrets scrubbed via <code>@lokdarpan/observability</code>'s <code>scrubSecrets</code>; histograms via the existing <code>BYTE_BUCKETS</code> and <code>LATENCY_BUCKETS</code>; error class rolled up into <code>ingestion_run.note</code>.</li>
+</ul>
+</section>
+
+<section id="s21">
+<h2><span class="n">21</span>Proposed performance budget</h2>
+<p>Numbers start from <code>.docs/02-architecture/web-architecture.md</code>. Everything else is a proposal to ratify <em>after</em> a baseline is captured; a budget set before measurement is a guess with a decimal point.</p>
+<h3>Method</h3>
+<ul>
+<li><strong>Profiles:</strong> desktop (4-core laptop, no throttle, 1440 × 900) and reader-typical mobile (Playwright CDP: 4× CPU slowdown, ~9 Mbps down / 150 ms RTT, 412 × 915).</li>
+<li><strong>Runs:</strong> cold (cache disabled) × 9, warm × 7, interaction scripts × 7. Report median and p75; discard nothing silently; record GPU string and live counts (features, label candidates, visible labels, payload bytes) with every run.</li>
+<li><strong>Marks:</strong> <code>map:init</code>, <code>map:style</code>, <code>map:load</code>, <code>map:first-boundaries</code> (first <code>idle</code> after the first <code>setData</code>), <code>labels:layout</code> measure, <code>explorer:select→drawer</code>.</li>
+<li><strong>CI:</strong> bundle bytes are deterministic and gate every PR; runtime metrics run nightly and warn on a 15% median regression, as relative checks do in GEV.</li>
+</ul>
+<div class="tbl wide"><table>
+<thead><tr><th>Scenario</th><th>Metric</th><th class="num">Target</th><th class="num">Ceiling</th><th>Basis</th></tr></thead>
+<tbody>
+<tr><td>Cold load</td><td>Initial JS, <code>/explore</code> (gzip)</td><td class="num">≤ 400 KB</td><td class="num">600 KB</td><td>Documented; measured 409 kB (over target)</td></tr>
+<tr><td>Cold load</td><td>HTML, <code>/explore</code></td><td class="num">≤ 60 KB</td><td class="num">120 KB</td><td>Documented entity-page budget</td></tr>
+<tr><td>Cold load</td><td>Rail usable (state list interactive)</td><td class="num">≤ 2.5 s mobile</td><td class="num">4 s</td><td>Proposal: the list must not wait on MapLibre</td></tr>
+<tr><td>Cold load</td><td><code>map:load</code></td><td class="num">≤ 2 s desktop · 5 s mobile</td><td class="num">15 s</td><td>Ceiling = existing load timeout</td></tr>
+<tr><td>Cold load</td><td>First boundaries rendered after load</td><td class="num">≤ 500 ms</td><td class="num">1.5 s</td><td>Proposal</td></tr>
+<tr><td>Warm load</td><td><code>map:load</code></td><td class="num">≤ 1 s desktop · 2.5 s mobile</td><td class="num">—</td><td>Proposal</td></tr>
+<tr><td>Navigation</td><td>Select unit → drawer or rail updated (INP)</td><td class="num">≤ 150 ms</td><td class="num">200 ms</td><td>Documented INP</td></tr>
+<tr><td>Navigation</td><td>Select unit → child boundaries drawn</td><td class="num">≤ 800 ms mobile</td><td class="num">2 s</td><td>Proposal</td></tr>
+<tr><td>Map interaction</td><td>Pan frame time p95</td><td class="num">≤ 16.7 ms desktop · 33 ms mobile</td><td class="num">50 ms</td><td>Proposal</td></tr>
+<tr><td>Map interaction</td><td>Label layout per frame</td><td class="num">≤ 2 ms at n ≤ 300</td><td class="num">4 ms</td><td>Proposal</td></tr>
+<tr><td>Map interaction</td><td>Visible labels</td><td class="num">≤ 60</td><td class="num">150 nodes</td><td>Section 16</td></tr>
+<tr><td>Filter change</td><td>Department filter → shading updated</td><td class="num">≤ 300 ms</td><td class="num">1 s</td><td>Proposal</td></tr>
+<tr><td>Network</td><td>Boundaries payload per level (gzip)</td><td class="num">≤ 150 KB</td><td class="num">500 KB (→ MVT)</td><td>National outlines ~160 KB raw today</td></tr>
+<tr><td>API</td><td>Level endpoint p95, origin warm</td><td class="num">≤ 300 ms</td><td class="num">800 ms</td><td>Proposal; CDN hit TTFB ≤ 100 ms documented</td></tr>
+<tr><td>Database</td><td>Spatial query (<code>EXPLAIN ANALYZE</code>)</td><td class="num">≤ 50 ms</td><td class="num">200 ms</td><td>Proposal, on production-size data</td></tr>
+<tr><td>Memory</td><td>JS heap after 10 drill-downs and back to India</td><td class="num">within 10% of baseline</td><td class="num">25%</td><td>Leak check, inspired by GEV's heap column</td></tr>
+</tbody></table></div>
+<p>The cheapest win is structural: load MapLibre after the RSC shell hydrates (dynamic import on idle), so the rail, and the list-first accessible path, never waits on a ~200 KB renderer. ADR-022 already names this as the first thing to measure.</p>
+</section>
+
+<section id="s22">
+<h2><span class="n">22</span>Repository and file-level change map</h2>
+
+<h3>Folder and package structure: few, strong boundaries</h3>
+<p>No new <code>map-core</code>, <code>map-layers</code>, <code>map-state</code> or <code>map-rendering</code> packages. There is exactly one map client today; four packages would be four <code>package.json</code> files guarding one consumer. Keep map code in <code>apps/web</code>, written so the pure parts can move to <code>packages/map</code> the day the mobile client resumes.</p>
+<pre><code>apps/web/src/
+  map/
+    engine/          binder.ts · hit-test.ts · camera.ts          ← MapLibre-aware, imperative
+    layers/          types.ts · registry.ts · state-outlines.ts · child-boundaries.ts · tender-offices.ts
+    labels/          arbiter.ts (pure) · dom-labels.ts (renderer)
+    budget/          select.ts (pure; lands with the first records layer)
+    style.ts         basemap composition (exists)
+  data/              resource-cache.ts (single-flight, version-checked)
+  state/             explorer-url.ts (extended: sel, layers, dept, v)
+  copy/              explorer.ts   ← every reader-facing sentence, ServerText or vetted template keys
+packages/
+  contracts/         + explorer view models · DataState · SourceDescriptor · Selection
+  domain/            unchanged role: types and rules, no I/O
+  neutrality/        + copy-catalogue scan
+services/ingestion/src/
+  net/               fetch-with-limits.ts · host-policy.ts · retry.ts
+database/migrations/ + source registry · transform_version · label_point · area_m2 · generalised boundaries</code></pre>
+<p>Each boundary earns its place: <code>contracts</code> is the only shape shared by server and client; <code>map/engine</code> is the only code that touches MapLibre; <code>map/labels</code> and <code>map/budget</code> are pure so they can be tested without a browser and cannot import analytics; <code>copy/</code> is the only place a reader-facing sentence is written; <code>net/</code> is the only way ingestion reaches the network.</p>
+
+<h3>Dependency graph and rules A–F</h3>
+<pre><code>          packages/contracts  ◄─────────────── packages/domain
+                 ▲    ▲                              ▲
+                 │    └───────── packages/database ──┘  (pg, PostGIS)
+                 │                     ▲         ▲
+ apps/web client ─┘    apps/web server ─┘         └── services/ingestion ── net/ ── government hosts
+ (components, map)     (route handlers, RSC)
+      │                      ▲
+      └── fetch /api/v1 ─────┘          nothing imports apps/web · nothing in packages imports services</code></pre>
+<div class="tbl wide"><table>
+<thead><tr><th>Rule</th><th>Enforcement</th><th>Scope (globs)</th><th>Honest limit</th></tr></thead>
+<tbody>
+<tr><td>A. Frontend does no financial arithmetic</td><td>Money crosses as a branded <code>MoneyString</code>; <code>no-restricted-syntax</code> forbids <code>Number()</code>, <code>BigInt()</code>, unary <code>+</code> and <code>parseFloat</code> on it (typed lint rule); client code may import only <code>format*</code> from <code>@lokdarpan/money</code></td><td><code>apps/web/src/components/**</code>, <code>apps/web/src/map/**</code></td><td>Import rules cannot see arithmetic on plain numbers; review still needed. Counts such as <code>shadedCount</code> (<code>tenders.tsx:174</code>) should also arrive as server totals (ADR-048).</td></tr>
+<tr><td>B. No neutral wording authored in components</td><td>Custom ESLint rule: JSX text or string literal over 6 words is an error outside <code>src/copy/**</code>; the neutrality CLI adds a catalogue pass</td><td><code>apps/web/src/components/**</code></td><td>Word-count heuristics have false positives; allow an explicit, reviewed disable comment.</td></tr>
+<tr><td>C. Rendering never talks to external providers</td><td><code>no-restricted-imports</code> on <code>services/**</code> and <code>pg</code>; <code>no-restricted-syntax</code> on <code>fetch("http…")</code> literals</td><td><code>apps/web/src/{components,map}/**</code></td><td>Dynamic URLs need the lint rule to flag non-relative template literals.</td></tr>
+<tr><td>D. Source adapters never depend on UI</td><td><code>no-restricted-imports</code>: <code>react</code>, <code>next</code>, <code>maplibre-gl</code>, <code>apps/**</code></td><td><code>services/ingestion/**</code></td><td>—</td></tr>
+<tr><td>E. Domain never depends on presentation or I/O</td><td>Same, plus <code>pg</code>, <code>node:fs</code></td><td><code>packages/domain/**</code>, <code>packages/contracts/**</code></td><td>—</td></tr>
+<tr><td>F. Map consumes view models, not raw rows</td><td>Forbid <code>@lokdarpan/database*</code> and ingestion types in client code; layer <code>resource</code> typed to <code>@lokdarpan/contracts</code> view models</td><td><code>apps/web/src/{components,map}/**</code></td><td>—</td></tr>
+<tr><td>Render ≠ analytics</td><td>Forbid risk, analytics and finance contracts</td><td><code>apps/web/src/map/{budget,labels}/**</code></td><td>Plus the permutation-invariance test (section 15).</td></tr>
+</tbody></table></div>
+<p>Strategy: ESLint <code>no-restricted-imports</code> per glob (already in the toolchain, instant editor feedback), plus a small graph check over <code>git ls-files</code> for transitive edges and negative fixtures, following GEV's <code>check-import-directions.mjs</code>. Evaluate <code>dependency-cruiser</code> against a ~200-line script; either is acceptable.</p>
+
+<h3>Change map</h3>
+<div class="tbl wide"><table>
+<thead><tr><th>Change</th><th>Existing file(s)</th><th>GEV inspiration</th><th>Benefit</th><th>Risk</th><th>Priority</th><th>ADR?</th></tr></thead>
+<tbody>
+<tr><td>Add <code>fetchWithLimits</code> and route every collector through it; check status and content type before reading the body</td><td><code>services/ingestion/src/cag/client.ts:94</code>, <code>lgd/client.ts:45</code>, <code>beams/client.ts:44</code>, <code>gepnic/fetch.ts:130,154</code>, <code>osm/overpass.ts:163,178</code>, <code>ocr/client.ts:93</code></td><td><code>httpBody.js</code>, transit timeouts</td><td>Bounded memory and time; typed failures in <code>ingestion_run</code></td><td>A cap set too low fails a legitimate large PDF; mitigated by measured caps and generous initial ceilings</td><td><span class="p p0">P0</span></td><td>Yes</td></tr>
+<tr><td>Stream large artifacts to disk while hashing</td><td><code>services/ingestion/src/raw-store.ts</code> (<code>putArtifact</code> takes a <code>Buffer</code>)</td><td>—</td><td>No 150 MB buffers</td><td>Temp-file cleanup on failure</td><td><span class="p">P1</span></td><td>No</td></tr>
+<tr><td>Return the real <code>datasetVersion</code> from every explorer route; <code>asOf</code> becomes the data's retrieval time</td><td><code>apps/web/src/app/api/v1/geo/**</code>, <code>tenders/**</code>, <code>search</code>, <code>documents/route.ts</code>; <code>server/respond.ts:19</code>; <code>packages/database/src/geography.repository.ts:314</code>, <code>tender.repository.ts</code></td><td><code>at</code> vs <code>contactedAt</code></td><td>Unlocks pinning, caching, coalescing and honest provenance</td><td>Payloads mixing versions must be refused, which may surface existing inconsistencies</td><td><span class="p p0">P0</span></td><td>Yes</td></tr>
+<tr><td>Add <code>DataState</code> and <code>SourceDescriptor</code> contracts; populate from <code>geography_coverage</code>, <code>ingestion_run</code>, portal windows</td><td><code>packages/contracts/src/index.ts</code>, <code>apps/web/src/components/explore/tenders.tsx</code> (<code>CollectionStatus</code>), <code>use-explorer-data.ts</code> (<code>LevelCoverage</code>)</td><td>Transit cache states, vessel partials</td><td>One vocabulary; missing never zero, by contract test</td><td>Wording changes need neutrality review</td><td><span class="p">P1</span></td><td>Yes</td></tr>
+<tr><td>Merge children and boundaries into one level endpoint</td><td><code>app/api/v1/geo/units/[id]/children/route.ts</code>, <code>…/boundaries/route.ts</code>, <code>use-explorer-data.ts:63,105</code></td><td>Coalescing</td><td>One request, one version, atomic list plus map</td><td>API change; keep old routes one release</td><td><span class="p">P1</span></td><td>No</td></tr>
+<tr><td>Reimplement label placement: spatial hash, hysteresis, fades, batched measure, node budget</td><td><code>apps/web/src/map/place-labels.ts:77,100,137</code></td><td><code>labelArbiter.js</code></td><td>No flicker; linear scaling for village levels</td><td>Hysteresis tuned wrong feels sluggish; injected clock and tests</td><td><span class="p">P1</span></td><td>Yes</td></tr>
+<tr><td>Store <code>label_point</code> and <code>area_m2</code> per boundary; use them for anchors and priority</td><td>New migration; <code>geography.repository.ts</code> <code>boundariesOfChildren</code>; <code>MapCanvas.tsx</code> <code>centroidOf</code>, <code>extentOf</code></td><td>Precomputed ground heights (the "compute once" idea)</td><td>Labels inside their polygon; area priority in metres</td><td>Backfill for existing boundaries</td><td><span class="p">P1</span></td><td>No</td></tr>
+<tr><td>Precompute generalised boundaries at ETL, coverage-aware</td><td><code>geography.repository.ts:314</code> (<code>ST_SimplifyPreserveTopology</code> per request), <code>apps/web/scripts/fetch-boundaries.ts</code></td><td>FIRMS per-dataset aggregation cache</td><td>No slivers between neighbours; no per-request CPU</td><td>Coverage simplification needs a recent PostGIS or an external tool (mapshaper); verify the managed Postgres version</td><td><span class="p">P2</span></td><td>Yes</td></tr>
+<tr><td>Stop reframing the camera on resize</td><td><code>MapCanvas.tsx:412–416</code></td><td>Navigation authority (explicit navigations only move the camera)</td><td>Opening the drawer keeps the reader's view</td><td>Low</td><td><span class="p">P1</span></td><td>No</td></tr>
+<tr><td>Update the hover tooltip on rAF and only when the id changes</td><td><code>MapCanvas.tsx:275</code></td><td>Render governor's "request, don't loop"</td><td>Fewer React renders while panning</td><td>Low</td><td><span class="p">P2</span></td><td>No</td></tr>
+<tr><td>Put layers, department filter, selection and optional version in the URL</td><td><code>apps/web/src/state/explorer-url.ts</code>, <code>useExplorerState.ts</code>, <code>ExploreShell.tsx:88</code>, <code>layer-visibility.ts</code></td><td><code>sharelink.js</code> allowlists, clamps, dispositions</td><td>Shared links reproduce what was seen</td><td>URL length; keep tokens short</td><td><span class="p">P1</span></td><td>Addendum to ADR-022</td></tr>
+<tr><td>Layer registry and binder</td><td><code>MapCanvas.tsx</code> (visibility, hit test, sources), <code>map/style.ts</code>, <code>layer-visibility.ts</code>, <code>ExploreShell.tsx</code> <code>useTenderLayer</code></td><td><code>LayerLifecycle</code> contract, <code>infrastructure</code> export</td><td>One file per layer; provenance and state mandatory to draw</td><td>Refactor of the core map component; do it behind unchanged e2e tests</td><td><span class="p">P2</span></td><td>Yes</td></tr>
+<tr><td>Browser resource cache</td><td><code>use-explorer-data.ts</code> <code>readJson</code>, <code>tenders.tsx</code> fetches; retire the unused <code>fetchDistricts</code> in <code>map/geometry-source.ts</code></td><td><code>coalesceProxyRequest</code></td><td>No refetch on back-navigation; version supersession</td><td>Stale cache if the version check is skipped</td><td><span class="p">P2</span></td><td>No (covered by the version ADR)</td></tr>
+<tr><td>Copy catalogue and component text lint</td><td><code>tenders.tsx</code> (<code>NotCollected</code>, <code>Freshness</code>, <code>Unplaced</code>, <code>TenderList</code>), <code>ExploreShell.tsx</code> notice, <code>packages/neutrality/src/cli.ts</code></td><td>—</td><td>Rule B enforced; <code>ServerText</code> finally used</td><td>Churn across components</td><td><span class="p">P2</span></td><td>Yes</td></tr>
+<tr><td>Import-direction rules A–F</td><td><code>eslint.config.*</code>, new <code>scripts/check-import-directions.ts</code>, <code>.github/workflows/ci.yml</code></td><td><code>check-import-directions.mjs</code></td><td>Architecture as a failing check</td><td>Initial violations to triage</td><td><span class="p">P1</span></td><td>Yes</td></tr>
+<tr><td>Performance harness and marks</td><td><code>apps/web/e2e/</code> (new <code>perf.spec.ts</code>), <code>MapCanvas.tsx</code>, <code>place-labels.ts</code>, <code>.docs/02-architecture/web-architecture.md</code></td><td><code>docs/PERFORMANCE.md</code>, <code>qa-perf.mjs</code></td><td>Budgets become enforceable</td><td>Flaky runtime metrics; gate only deterministic bytes</td><td><span class="p">P1</span></td><td>Yes</td></tr>
+<tr><td>Load MapLibre after hydration</td><td><code>components/explore/ExploreShell.tsx</code> (static <code>MapCanvas</code> import)</td><td>—</td><td>Brings <code>/explore</code> under the 400 KB target; rail usable first</td><td>A flash of an empty map area; use a sized placeholder</td><td><span class="p">P1</span></td><td>No</td></tr>
+<tr><td>Trigram index for search; populate or drop the closure table</td><td><code>geography.repository.ts:381</code>, new migration</td><td>—</td><td>Search latency at village scale</td><td>Index build time</td><td><span class="p">P2</span></td><td>No</td></tr>
+<tr><td>Correct ADR-022's consequences (works layer and 20 px hit rule no longer present)</td><td><code>.docs/adr/022-web-map-explorer.md</code></td><td>GEV's "what is not established yet"</td><td>Docs match code</td><td>None</td><td><span class="p p0">P0</span></td><td>Addendum</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s23">
+<h2><span class="n">23</span>ADRs required</h2>
+<p>ADRs append and are never rewritten, so numbers continue from 051. Titles follow the repository's sentence style.</p>
+<div class="tbl mid"><table>
+<thead><tr><th>#</th><th>Proposed title</th><th>Decides</th></tr></thead>
+<tbody>
+<tr><td class="num">052</td><td>A download that does not finish is not an artifact</td><td><code>fetchWithLimits</code>, caps from measured sizes, timeouts, retry ladder, error classes</td></tr>
+<tr><td class="num">053</td><td>Every explorer payload states its dataset version</td><td>No <code>datasetVersion: 0</code>; <code>asOf</code> is retrieval, not response time; mixed versions refused</td></tr>
+<tr><td class="num">054</td><td>Collected, fresh and complete are three questions</td><td>The <code>DataState</code> dimensions, precedence and wording</td></tr>
+<tr><td class="num">055</td><td>A feature on the map carries where it came from</td><td><code>SourceDescriptor</code>, source registry table, <code>transform_version</code></td></tr>
+<tr><td class="num">056</td><td>What is drawn is not what is ranked</td><td>Render prioritisation inputs; aggregate-first budget; hysteresis</td></tr>
+<tr><td class="num">057</td><td>Place names are placed in the browser</td><td>DOM labels (Indic shaping) with hysteresis, or symbol layers if shaping is verified</td></tr>
+<tr><td class="num">058</td><td>A map layer is a definition, not an effect</td><td>Layer registry, binder, refuse-to-draw rules</td></tr>
+<tr><td class="num">059</td><td>Import direction is checked, not described</td><td>Rules A–F, tooling, negative fixtures</td></tr>
+<tr><td class="num">060</td><td>Boundaries are generalised once per version</td><td>ETL generalisation, label points, MVT threshold</td></tr>
+<tr><td class="num">061</td><td>A link can name the version it showed</td><td><code>v</code> parameter, reconstructability rules, immutable caching</td></tr>
+<tr><td class="num">062</td><td>The explorer has a measured budget</td><td>Profiles, runs, budgets ratified from the baseline</td></tr>
+<tr><td>022 addendum</td><td>—</td><td>Current state of the works layer; URL gains layers, filters, selection</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s24">
+<h2><span class="n">24</span>Migration plan</h2>
+<p>No rewrite. Each phase ships alone behind the existing e2e tests. Phases 1 and 4 are ordered earlier than the brief suggested, because everything after them depends on them.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>Phase</th><th>Goal</th><th>Files likely affected</th><th>Depends on</th><th>Migration risk</th><th>Backward compatibility</th><th>Tests</th><th>Benefit</th><th>ADR</th></tr></thead>
+<tbody>
+<tr><td>0 · Architecture</td><td>Baseline and decisions before code</td><td><code>.docs/adr/052–062</code>, ADR-022 addendum, <code>web-architecture.md</code>; run the <code>source_artifact</code> size query; capture the perf baseline</td><td>—</td><td>None</td><td>n/a</td><td>—</td><td>Numbers chosen from evidence</td><td>All drafted</td></tr>
+<tr><td>1 · Network safety</td><td>Bounded, typed ingestion fetches</td><td><code>services/ingestion/src/net/*</code>, all clients listed in section 20, <code>raw-store.ts</code>, <code>ingestion-run.ts</code></td><td>0 (size query)</td><td>Low–medium: caps</td><td>Same artifacts and hashes</td><td>Fake servers: oversize body, no Content-Length, gzip bomb, trickle, cross-host redirect, 429 with Retry-After</td><td>Sweep cannot OOM or hang</td><td>052</td></tr>
+<tr><td>2 · Version plumbing</td><td>Real versions on every explorer route</td><td><code>respond.ts</code>, geo and tender routes, repositories</td><td>—</td><td>Medium: may reveal mixed-version rows</td><td>Envelope shape unchanged, values change</td><td>Contract test: no route returns 0; mixed versions → error</td><td>Unblocks 4, 6, 7</td><td>053</td></tr>
+<tr><td>3 · Label arbitration</td><td>Stable, scalable labels</td><td><code>map/place-labels.ts</code> → <code>map/labels/*</code>; migration for <code>label_point</code>, <code>area_m2</code></td><td>Shaping verification</td><td>Low</td><td>Same toggle and look</td><td>Pure arbiter: collision, hysteresis, deterministic order, fixed clock; e2e label toggle</td><td>No flicker; village scale</td><td>057</td></tr>
+<tr><td>4 · Data state model</td><td>One state contract</td><td><code>packages/contracts</code>, <code>tenders.tsx</code>, <code>use-explorer-data.ts</code>, <code>FilterPanel.tsx</code>, <code>RecordsPanel.tsx</code></td><td>2</td><td>Medium: copy changes</td><td>Old fields kept one release</td><td>Missing-is-never-zero contract test per route; wording snapshot through the neutrality gate</td><td>Consistent honesty across panels</td><td>054, 055</td></tr>
+<tr><td>5 · Request coalescing</td><td>Cache and version supersession</td><td><code>data/resource-cache.ts</code>, level endpoint, hooks</td><td>2</td><td>Low</td><td>Old routes retained</td><td>Refcount abort, exact-promise eviction, version-change refetch</td><td>Faster back-navigation; no mixed vintages</td><td>—</td></tr>
+<tr><td>6 · Layer registry</td><td>Layers as definitions</td><td><code>map/layers/*</code>, <code>map/engine/*</code>, <code>MapCanvas.tsx</code>, <code>style.ts</code>, <code>ExploreShell.tsx</code></td><td>4, 5</td><td>Medium: core refactor</td><td>Same URLs and visuals</td><td>Registry invariants (provenance non-empty, hit order), e2e unchanged</td><td>New layers without touching the canvas</td><td>058</td></tr>
+<tr><td>7 · Map context and selection</td><td>URL-canonical selection, focus sync, relationship edges</td><td><code>explorer-url.ts</code>, <code>useExplorerState.ts</code>, <code>RecordDrawer.tsx</code>, API edge payloads</td><td>6</td><td>Medium</td><td><code>doc=</code> accepted as an alias</td><td>URL round-trip property tests; keyboard e2e; edge wording review</td><td>Map as an exploration surface</td><td>022 addendum, 061</td></tr>
+<tr><td>8 · Performance budgets</td><td>Enforced budgets</td><td><code>apps/web/e2e/perf.spec.ts</code>, CI, marks</td><td>0 baseline</td><td>Low</td><td>n/a</td><td>Bundle gate on PR; nightly runtime job</td><td>Regressions caught</td><td>062</td></tr>
+<tr><td>9 · Advanced intelligence UI</td><td>Records layers with budget; unit aggregates</td><td><code>map/budget/*</code>, new records layer</td><td>A licensed coordinate source; 6, 7</td><td>High: product and legal</td><td>Additive</td><td>Permutation-invariance test; truncation announced; unmapped count</td><td>Works on the map, honestly</td><td>056, 060</td></tr>
+</tbody></table></div>
+<p>Also in parallel, small and independent: import rules (ADR-059) after Phase 2; camera-on-resize fix and MapLibre deferral any time.</p>
+</section>
+
+<section id="s25">
+<h2><span class="n">25</span>Risk register</h2>
+<div class="tbl wide"><table>
+<thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr><td>Borrowing sophistication for its own sake: arbiter quotas, governors and lifecycles LokDarpan does not need</td><td>Medium</td><td>Medium: maintenance</td><td>Every change in section 22 names a present defect; section 27 marks the rest "Do not use"</td></tr>
+<tr><td>Render ranking leaks analytical signal (a value or priority used "just for tie-breaks")</td><td>Medium</td><td>High: neutrality breach</td><td>Typed inputs, import ban, permutation-invariance test, ADR-056</td></tr>
+<tr><td>Byte caps reject a legitimate large report</td><td>Medium</td><td>Medium: missing document</td><td>Measured caps, generous initial ceilings, <code>too_large</code> recorded with bytes read, never silently skipped</td></tr>
+<tr><td>Version plumbing reveals mixed-version payloads that currently render</td><td>High</td><td>Medium: pages start erroring</td><td>Ship a log-only mode first; count violations; then enforce</td></tr>
+<tr><td>Hysteresis makes labels feel sluggish or keeps stale names</td><td>Medium</td><td>Low</td><td>Short constants (600 / 400 ms); hysteresis only during motion; reduced-motion respected</td></tr>
+<tr><td>MapLibre cannot shape Indic scripts, or can and DOM labels were unnecessary</td><td>Unknown</td><td>Medium</td><td>Verify on v5 before Phase 3; ADR-057 records the result</td></tr>
+<tr><td>Coverage-aware simplification unavailable on the managed Postgres</td><td>Medium</td><td>Low</td><td>ETL-side tool (mapshaper or topology) with output stored in PostGIS</td></tr>
+<tr><td>Pinned links promise reconstruction the ledger cannot deliver (boundaries overwritten)</td><td>High</td><td>Medium: misleading link</td><td>Explicit "not reconstructable" notice; version boundary rows if pinning matters</td></tr>
+<tr><td>Layer registry refactor regresses the map</td><td>Medium</td><td>High: core surface</td><td>Behind unchanged e2e; one layer migrated per PR</td></tr>
+<tr><td>Copy catalogue churn stalls feature work</td><td>Medium</td><td>Low</td><td>Lint rule starts as a warning on new files only</td></tr>
+<tr><td>Perf runtime metrics flaky in CI</td><td>High</td><td>Low</td><td>Gate deterministic bytes only; runtime nightly with medians</td></tr>
+<tr><td>GEV licence confusion: MIT code vs non-commercial bundled data</td><td>Low</td><td>Medium</td><td>Reimplement ideas; copy no data; credit GEV in ADRs where a mechanism is ported</td></tr>
+<tr><td>Point layers arrive before the budget ADR</td><td>Medium</td><td>High: silent truncation</td><td>Write ADR-056 in Phase 0 even though implementation waits</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s26">
+<h2><span class="n">26</span>Final prioritised roadmap</h2>
+<div class="tbl mid"><table>
+<thead><tr><th>Order</th><th>Item</th><th>Why now</th><th>Size</th></tr></thead>
+<tbody>
+<tr><td><span class="p p0">P0</span></td><td>Phase 0: run the artifact size query, capture the perf baseline, draft ADR-052/053/056, ADR-022 addendum</td><td>Every later number depends on it; the ADR-022 drift is a correctness issue in the docs</td><td>S</td></tr>
+<tr><td><span class="p p0">P0</span></td><td><code>fetchWithLimits</code> across all seven ingestion clients</td><td>The only item that protects the scheduled production job today</td><td>S–M</td></tr>
+<tr><td><span class="p p0">P0</span></td><td>Real <code>datasetVersion</code> on explorer routes</td><td>Traceability invariant currently violated; blocks four later items</td><td>M</td></tr>
+<tr><td><span class="p">P1</span></td><td>Data state contract and source descriptors</td><td>Unifies three existing vocabularies before a fourth appears</td><td>M</td></tr>
+<tr><td><span class="p">P1</span></td><td>Import rules A–F</td><td>Cheap; stops drift while the refactors below happen</td><td>S–M</td></tr>
+<tr><td><span class="p">P1</span></td><td>Label arbitration + PostGIS label points</td><td>Visible stability win now; scale win later</td><td>M</td></tr>
+<tr><td><span class="p">P1</span></td><td>URL carries layers, filters, selection</td><td>Shared links are wrong today</td><td>S</td></tr>
+<tr><td><span class="p">P1</span></td><td>Defer MapLibre load; fix reframe on resize; perf harness</td><td>Over budget today; small fixes</td><td>S</td></tr>
+<tr><td><span class="p">P2</span></td><td>Level endpoint + browser resource cache</td><td>After versions exist</td><td>S</td></tr>
+<tr><td><span class="p">P2</span></td><td>Layer registry and binder</td><td>After state and provenance contracts, so definitions are complete</td><td>M</td></tr>
+<tr><td><span class="p">P2</span></td><td>ETL generalisation; trigram search</td><td>Before village-level coverage grows</td><td>M</td></tr>
+<tr><td><span class="p">P3</span></td><td>Records layers with aggregate-first budget</td><td>Waits on a licensed coordinate source, a decision rather than an engineering task</td><td>M–L</td></tr>
+<tr><td><span class="p">P3</span></td><td>Pinned version links; record walkthroughs</td><td>After reconstructability is settled</td><td>M</td></tr>
+</tbody></table></div>
+
+<h3>Borderline ideas, evaluated separately</h3>
+<h4>Geocoding village and town names</h4>
+<p><strong>Verdict: do not geocode for display.</strong> Nominatim's usage policy forbids bulk and systematic use; Photon's public instance is fair-use only. Indian village names repeat many times within a state and transliterate inconsistently, so a text match is frequently a different village, and a wrong point looks as authoritative as a right one. Acceptable internal uses: matching records to <code>admin_unit</code> by LGD code, and pincode-to-office joins, each stored with <code>placement.method</code> and linkage confidence, rendered as unit shading, never pins. Official gazetteers (Survey of India, Bhuvan village layers, any data.gov.in coordinate sets) must be verified for existence, licence and terms through the registry process before use; none is assumed here.</p>
+<h4>Satellite imagery to check construction</h4>
+<p><strong>Verdict: a separate research capability, not a map layer.</strong> Sentinel-2's 10 m pixels cannot reliably resolve a 3–5 m rural road or its surface; higher resolution is commercial or restricted. More fundamentally, "the imagery shows no road" is an analyst's inference, which LokDarpan's rules treat as categorically different from a published record, and the image date rarely matches the claimed completion date. If ever pursued: imagery as dated, licensed reference context beside the record, with no automated built or not-built judgement.</p>
+<h4>Guided map tours</h4>
+<p><strong>Verdict: defer; if built, template-only.</strong> GEV's Director is a well-engineered scene document (versioned, validated, cancellable). A scripted money-trail tour, though, chooses order, emphasis and pacing, which is editorial. The acceptable form is a generated walkthrough of records a source links, in publication-date order, each step rendered through the same provenance components, with no narration beyond vetted templates and missing stages shown as missing.</p>
+</section>
+
+<section id="s27">
+<h2><span class="n">27</span>Every GEV feature, classified</h2>
+<p>Exactly one classification each, as the brief requires.</p>
+<div class="tbl wide"><table>
+<thead><tr><th>GEV feature</th><th>Classification</th><th>One-line reason</th></tr></thead>
+<tbody>
+<tr><td>Capped streaming body reads</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Same mechanism, TypeScript, decoded-byte counting, disk sink</td></tr>
+<tr><td>Upstream timeouts via AbortController</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Split into header, idle and total</td></tr>
+<tr><td>Cooldown ladder after consecutive failures</td><td><span class="chip adapt">◑ Adapt</span></td><td>Minutes, per host, capped attempts, recorded on the run</td></tr>
+<tr><td>Allowlisted upstreams, same-origin redirect hops</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Host list from the source registry</td></tr>
+<tr><td>Conditional GET with ETag / Last-Modified</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Validators stored with artifacts</td></tr>
+<tr><td>Fetched time vs contact time</td><td><span class="chip borrow">■ Borrow</span></td><td>Exactly the distinction LokDarpan needs</td></tr>
+<tr><td>Shape fault ≠ outage</td><td><span class="chip borrow">■ Borrow</span></td><td>A changed portal is a parser failure, never "no data"</td></tr>
+<tr><td>Serve stale with STALE-ERROR</td><td><span class="chip adapt">◑ Adapt</span></td><td>Stale is a collection state over a persistent ledger</td></tr>
+<tr><td>Partial snapshot retention (vessels)</td><td><span class="chip adapt">◑ Adapt</span></td><td>Partial = coverage fact with a note, no time retention</td></tr>
+<tr><td>Single-flight request coalescing</td><td><span class="chip adapt">◑ Adapt</span></td><td>Version in key, reference-counted abort, browser-side</td></tr>
+<tr><td>Sliding-window admission rate limiter</td><td><span class="chip no">⊘ Do not use</span></td><td>In-process, per-IP; fails on serverless and carrier NAT</td></tr>
+<tr><td>Label arbiter: spatial hash, incumbency, lifetime, cooldown, fade, sticky corners</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Neutral priority, shorter constants, DOM renderer</td></tr>
+<tr><td>Per-layer label quotas (elastic / weighted)</td><td><span class="chip no">⊘ Do not use</span></td><td>One label layer; semantic weights are a hierarchy claim</td></tr>
+<tr><td>Farthest-point spread queue</td><td><span class="chip no">⊘ Do not use</span></td><td>Administrative units are already spatially distributed</td></tr>
+<tr><td>LOD budget by camera height with rank score</td><td><span class="chip adapt">◑ Adapt</span></td><td>Aggregate-first, neutral inputs only</td></tr>
+<tr><td>Eviction grace</td><td><span class="chip adapt">◑ Adapt</span></td><td>Count and zoom hysteresis, not wall time</td></tr>
+<tr><td>"Has a name" label priority</td><td><span class="chip no">⊘ Do not use</span></td><td>Hides poorly published places</td></tr>
+<tr><td>Motion-gated LOD recompute</td><td><span class="chip no">⊘ Do not use</span></td><td>MapLibre emits reliable move events</td></tr>
+<tr><td>Grid aggregation by band (FIRMS)</td><td><span class="chip adapt">◑ Adapt</span></td><td>Aggregate by admin unit in PostGIS</td></tr>
+<tr><td>Render governor</td><td><span class="chip no">⊘ Do not use</span></td><td>Solves a Cesium render-loop problem MapLibre lacks</td></tr>
+<tr><td>LayerLifecycle contract (enable / disable / destroy / stats)</td><td><span class="chip adapt">◑ Adapt</span></td><td>Declarative definitions and a thin binder</td></tr>
+<tr><td>Interval-driven layer refresh</td><td><span class="chip no">⊘ Do not use</span></td><td>Refresh on dataset version</td></tr>
+<tr><td>Navigation generations / refreshEpoch / source slot supersession</td><td><span class="chip borrow">■ Borrow</span></td><td>Extend to version supersession</td></tr>
+<tr><td>Window-global context store</td><td><span class="chip no">⊘ Do not use</span></td><td>URL-canonical selection instead</td></tr>
+<tr><td>Layer-owned context records</td><td><span class="chip adapt">◑ Adapt</span></td><td>Layer definitions own feature → selection mapping</td></tr>
+<tr><td>Click-to-track with metadata card</td><td><span class="chip adapt">◑ Adapt</span></td><td>Select, frame once, cited drawer; no follow mode</td></tr>
+<tr><td>Contacts roster within 250 km</td><td><span class="chip no">⊘ Do not use</span></td><td>Containment lists already exist; distance implies association</td></tr>
+<tr><td>Hand-off to nearest live camera</td><td><span class="chip no">⊘ Do not use</span></td><td>Proximity creates inferred relationships</td></tr>
+<tr><td>Global Context staging with exact-view restore</td><td><span class="chip no">⊘ Do not use</span></td><td>The URL and back button already restore</td></tr>
+<tr><td>Panel keyboard escape and focus return</td><td><span class="chip borrow">■ Borrow</span></td><td>Accessibility parity with the map</td></tr>
+<tr><td>Per-layer loading and sync feedback</td><td><span class="chip reimpl">◧ Reimplement</span></td><td>Using the data-state vocabulary</td></tr>
+<tr><td>Share-link encoding: allowlists, clamps, per-layer dispositions</td><td><span class="chip adapt">◑ Adapt</span></td><td>Query params with layers, filters, selection, version; no camera</td></tr>
+<tr><td>Share-link <code>at</code> timestamp</td><td><span class="chip no">⊘ Do not use</span></td><td>The dataset version date is authoritative</td></tr>
+<tr><td>Import-direction checker over git ls-files</td><td><span class="chip adapt">◑ Adapt</span></td><td>ESLint per glob plus a graph script with fixtures</td></tr>
+<tr><td>package.json exports as ownership inventory</td><td><span class="chip adapt">◑ Adapt</span></td><td>Declare exports per package, not 150 entries</td></tr>
+<tr><td>Pure policy modules with exported constants</td><td><span class="chip borrow">■ Borrow</span></td><td>Testable without a renderer</td></tr>
+<tr><td>Services injected into layers</td><td><span class="chip adapt">◑ Adapt</span></td><td>Binder receives map and context API</td></tr>
+<tr><td>DATA_SOURCES.md licence and attribution table</td><td><span class="chip no">⊘ Do not use</span></td><td>LokDarpan's registry is stronger; expose it in payloads instead</td></tr>
+<tr><td>Performance baseline method</td><td><span class="chip borrow">■ Borrow</span></td><td>Counts, cold vs warm, explicit untested scope</td></tr>
+<tr><td>Relative frame-count CI assertions (qa-perf)</td><td><span class="chip adapt">◑ Adapt</span></td><td>Deterministic byte gates; runtime nightly</td></tr>
+<tr><td>Headless QA harness per feature (49 scripts)</td><td><span class="chip adapt">◑ Adapt</span></td><td>Playwright specs for labels, versions, states</td></tr>
+<tr><td>Director scene documents</td><td><span class="chip adapt">◑ Adapt</span></td><td>Template-only record walkthroughs, deferred</td></tr>
+<tr><td>CesiumJS 3D globe</td><td><span class="chip no">⊘ Do not use</span></td><td>Bundle, second renderer, no SSR, no need for 3D</td></tr>
+<tr><td>Google Photorealistic 3D Tiles</td><td><span class="chip no">⊘ Do not use</span></td><td>Billing, key in browser, reader tracking</td></tr>
+<tr><td>Esri World Imagery</td><td><span class="chip no">⊘ Do not use</span></td><td>Terms; invites visual inference</td></tr>
+<tr><td>Re:Earth terrain and ground-floor sampling</td><td><span class="chip no">⊘ Do not use</span></td><td>No 3D, no heights</td></tr>
+<tr><td>Flights, military flights, 3D aircraft models</td><td><span class="chip no">⊘ Do not use</span></td><td>Unrelated; surveillance</td></tr>
+<tr><td>Ships (AIS)</td><td><span class="chip no">⊘ Do not use</span></td><td>Unrelated</td></tr>
+<tr><td>Satellites (SGP4) and launches</td><td><span class="chip no">⊘ Do not use</span></td><td>Unrelated</td></tr>
+<tr><td>Earthquakes (USGS), fires (FIRMS), weather (Open-Meteo)</td><td><span class="chip no">⊘ Do not use</span></td><td>Beside public works they invite inferred causality</td></tr>
+<tr><td>Traffic simulation (TomTom, Overpass roads)</td><td><span class="chip no">⊘ Do not use</span></td><td>Simulated, not recorded</td></tr>
+<tr><td>Transit vehicles and history</td><td><span class="chip no">⊘ Do not use</span></td><td>Unrelated real-time data</td></tr>
+<tr><td>Bikeshare, radio stations</td><td><span class="chip no">⊘ Do not use</span></td><td>Unrelated</td></tr>
+<tr><td>CCTV feeds and camera gizmos</td><td><span class="chip no">⊘ Do not use</span></td><td>Observes people</td></tr>
+<tr><td>ALPR camera layer</td><td><span class="chip no">⊘ Do not use</span></td><td>Surveillance of individuals</td></tr>
+<tr><td>Military installations</td><td><span class="chip no">⊘ Do not use</span></td><td>Security-sensitive, outside mandate</td></tr>
+<tr><td>Datacenters, dams, submarine cables</td><td><span class="chip no">⊘ Do not use</span></td><td>Unrelated; cables are non-commercial data</td></tr>
+<tr><td>FLIR, NVG, CRT, Noir, Snow, Anime shaders; bloom</td><td><span class="chip no">⊘ Do not use</span></td><td>Surveillance aesthetic</td></tr>
+<tr><td>Military HUD, cockpit, detection boxes</td><td><span class="chip no">⊘ Do not use</span></td><td>Targeting aesthetic</td></tr>
+<tr><td>Voice agent and voice whiteboard annotations</td><td><span class="chip no">⊘ Do not use</span></td><td>Free-form AI excluded; bypasses templated copy</td></tr>
+<tr><td>Motion interpolation and dead reckoning</td><td><span class="chip no">⊘ Do not use</span></td><td>Displays unpublished values</td></tr>
+<tr><td>Geocoding chain (Google, Photon, Nominatim)</td><td><span class="chip no">⊘ Do not use</span></td><td>Inferred geography, bulk-use restrictions</td></tr>
+<tr><td>Directions and OSRM routing</td><td><span class="chip no">⊘ Do not use</span></td><td>No routing use case</td></tr>
+<tr><td>Regional news (Google News, GDELT)</td><td><span class="chip no">⊘ Do not use</span></td><td>Not official records; editorial juxtaposition</td></tr>
+<tr><td>Keychain-backed key setup, Pinokio launcher</td><td><span class="chip no">⊘ Do not use</span></td><td>Local-app concerns; LokDarpan deploys to Vercel with env configuration</td></tr>
+</tbody></table></div>
+<p class="muted">Sources read: LokDarpan <code>apps/web/src/**</code>, <code>packages/database/src/geography.repository.ts</code>, <code>services/ingestion/src/**/client.ts</code>, migrations 0001–0031, ADR-022, <code>web-architecture.md</code>, <code>legal-ethical-rules.md</code>. GEV <code>src/data/labelArbiter.js</code>, <code>localGeojsonLod.js</code>, <code>lifecycle.js</code>, <code>contextStore.js</code>, <code>src/sources/httpBody.js</code>, <code>rateLimit.js</code>, <code>transitService.js</code>, <code>src/data/transitProxy.js</code>, <code>src/renderGovernor.js</code>, <code>src/sharelink.js</code>, <code>src/layers/{firms,vessels}</code>, <code>scripts/check-import-directions.mjs</code>, <code>scripts/qa-perf.mjs</code>, <code>docs/*</code>, <code>DATA_SOURCES.md</code>. Not measured: live payload sizes, query latencies and frame times, because no database or browser benchmark was run in this review.</p>
+</section>
+</main>
+</div>
+</body>
+</html>
