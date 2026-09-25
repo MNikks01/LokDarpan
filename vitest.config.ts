@@ -25,14 +25,13 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       // Correctness-critical logic is gated hard; UI is not.
-      // Branches is 80, not the 90 it was, because the measurement changed, not
-      // the code. Vitest 3 counted a file no test loads as a single branch;
-      // vitest 4 counts its real branches, and the same tree reads 80.7% instead
-      // of 90.4%. 80 is a floor to ratchet up from, not a target. The largest
-      // untested files: services/ingestion/src/gepnic/{fetch,load}.ts,
-      // osm/overpass.ts, review/queue.ts, services/api/src/http/server.ts and
-      // packages/database/src/{admin-unit,department-finance}.repository.ts.
-      thresholds: { branches: 80, functions: 85, statements: 85 },
+      // Floors, a point or so under the measured figures, to ratchet up from.
+      // Branches read 80.7% when vitest 4 began counting the real branches of
+      // files no test loads; tests for the GePNIC fetch and load, Overpass, the
+      // review queue, the API server and the unit and department repositories
+      // raised it to 89%. The largest remaining gaps: services/ingestion/src/
+      // cag/{facts,client}.ts, gepnic/landing.ts and review/present.ts.
+      thresholds: { branches: 88, functions: 94, statements: 95 },
       include: [
         "packages/money/src/**",
         "packages/neutrality/src/**",

@@ -67,3 +67,20 @@ All six rules hold. A new violation fails CI.
   (ADR-048).
 - **A check that `apps/web` server modules stay out of client bundles.** `server-only` already makes
   that a build error.
+
+## Addendum · 2026-09-25 — rule B, as a ratchet
+
+Rule B is now checked by `pnpm architecture`. A run of JSX text of six or more words in
+`apps/web/src/components/` or `apps/web/src/app/` is a sentence, and sentences belong in
+`apps/web/src/copy/`, where neutral wording is reviewed. Labels, headings and button text are
+shorter and are not counted. Tests and `copy/` itself are out of scope.
+
+The existing prose is a ratchet, not a failure. `packages/architecture/copy-baseline.json` recorded
+**57 sentences in 19 files** when the rule began, 12 of them on the About page. A file may hold its
+baseline or fewer, never more, so any new sentence written in a component fails CI with its line
+and text. When a file goes below its baseline, the check says to lower it:
+`pnpm architecture --write-copy-baseline`. A test adding one sentence to `MapControls.tsx` failed as
+intended before it was reverted.
+
+Still not in this change: moving the 57 into `copy/`. The ratchet makes that work visible and
+one-way, and each move is a wording review in its own right.

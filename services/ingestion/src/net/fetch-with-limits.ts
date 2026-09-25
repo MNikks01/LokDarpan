@@ -23,6 +23,14 @@ import type { ReadableStreamDefaultReader } from "node:stream/web";
  *   body is read, so an HTML error page is not downloaded to discover that it is
  *   not the PDF that was asked for.
  *
+ * - A redirect is followed only within the host that was asked for (`www.` or
+ *   not), never from https down to http, and at most `MAX_REDIRECTS` times. A
+ *   collector that asked a government host for a document has no business
+ *   accepting one from somewhere else.
+ * - With a `retry` policy, a failure that may pass — no connection, no answer in
+ *   time, 429, 502, 503, 504 — is tried again after a pause. A limit reached
+ *   mid-body, a 4xx or any other 5xx is not: it would fail the same way again.
+ *
  * There is no partial result. A body that did not complete is a failure, and is
  * never handed to a parser or the raw store.
  */
@@ -65,7 +73,44 @@ export interface HttpInit {
   readonly method?: string;
   readonly body?: string;
   readonly signal?: AbortSignal;
+  /** Always `manual` from here: redirects are followed by `fetchWithLimits`, under its own rules. */
+  readonly redirect?: "manual";
 }
+
+/** A response refused for where it came from, not for its size or timing. */
+export class FetchRefused extends Error {
+  constructor(
+    readonly url: string,
+    reason: string,
+  ) {
+    super(`${reason} (${url})`);
+    this.name = "FetchRefused";
+  }
+}
+
+export interface RetryPolicy {
+  /** Tries in total, the first included. */
+  readonly attempts: number;
+  /** Pause before each retry; the last value repeats if there are more retries than values. */
+  readonly backoffMs: readonly number[];
+  /** A server's `Retry-After` is honoured up to this, never longer. */
+  readonly maxRetryAfterMs: number;
+}
+
+/**
+ * Three tries, two and then eight seconds apart: long enough for a portal's
+ * momentary refusal to pass, short enough that a sweep of twenty-one portals
+ * still ends inside its job timeout if several are down.
+ */
+export const RETRY_IDEMPOTENT: RetryPolicy = {
+  attempts: 3,
+  backoffMs: [2_000, 8_000],
+  maxRetryAfterMs: 60_000,
+};
+
+const MAX_REDIRECTS = 5;
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const RETRY_STATUSES = new Set([429, 502, 503, 504]);
 
 /** The shape of `fetch` the collectors use, so tests can stand in for it. */
 export type Http = (url: string, init: HttpInit) => Promise<Response>;
@@ -87,6 +132,13 @@ export interface BoundedRequest {
    * response; its body is then cancelled rather than downloaded.
    */
   readonly accept?: (response: Response) => void;
+  /**
+   * Try again after a failure that may pass. Applied to GET and HEAD only: a
+   * POST repeated after a lost response may have taken effect the first time.
+   */
+  readonly retry?: RetryPolicy;
+  /** How pauses are taken; replaced in tests so retries do not wait for real. */
+  readonly sleep?: (ms: number) => Promise<void>;
 }
 
 const MIB = 1024 * 1024;
@@ -179,39 +231,147 @@ async function readCapped(response: Response, url: string, limits: FetchLimits):
   return Buffer.concat(chunks, received);
 }
 
+/** The same host, allowing only a `www.` prefix to differ. */
+function sameHost(from: URL, to: URL): boolean {
+  const bare = (host: string): string => host.toLowerCase().replace(/^www\./, "");
+  return bare(from.hostname) === bare(to.hostname);
+}
+
+/** Where a redirect may go, or why it may not. */
+function redirectTarget(current: string, location: string | null, hops: number): string {
+  if (location === null || location === "") {
+    throw new FetchRefused(current, "redirect with no location");
+  }
+  if (hops >= MAX_REDIRECTS) {
+    throw new FetchRefused(current, `more than ${String(MAX_REDIRECTS)} redirects`);
+  }
+  const from = new URL(current);
+  const to = new URL(location, from);
+  if (!sameHost(from, to)) {
+    throw new FetchRefused(current, `redirect to another host, ${to.hostname}, refused`);
+  }
+  if (from.protocol === "https:" && to.protocol !== "https:") {
+    throw new FetchRefused(current, "redirect from https to http refused");
+  }
+  return to.href;
+}
+
+/** A status worth retrying, raised inside an attempt that is not the last. */
+class RetryableStatus extends Error {
+  constructor(
+    readonly status: number,
+    readonly retryAfterMs: number | null,
+  ) {
+    super(`HTTP ${String(status)}`);
+  }
+}
+
+function retryAfterMs(response: Response): number | null {
+  const raw = response.headers.get("retry-after");
+  if (raw === null) return null;
+  const seconds = Number(raw);
+  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  const date = Date.parse(raw);
+  return Number.isNaN(date) ? null : Math.max(0, date - Date.now());
+}
+
+/** How long to wait before trying again, or null when this failure will not pass. */
+function retryDelay(error: unknown, attempt: number, policy: RetryPolicy): number | null {
+  if (attempt >= policy.attempts) return null;
+  const backoff = policy.backoffMs[Math.min(attempt - 1, policy.backoffMs.length - 1)] ?? 0;
+  if (error instanceof RetryableStatus) {
+    return error.retryAfterMs === null
+      ? backoff
+      : Math.min(Math.max(error.retryAfterMs, backoff), policy.maxRetryAfterMs);
+  }
+  // No answer in time may pass. A body that stalled, or passed its size, was
+  // answered and will be answered the same way again.
+  if (error instanceof FetchLimitExceeded)
+    return error.limit === "headers-timeout" ? backoff : null;
+  if (error instanceof FetchRefused) return null;
+  // `fetch` reports a refused or dropped connection as a TypeError.
+  return error instanceof TypeError ? backoff : null;
+}
+
 /**
  * Fetch one URL within limits, or fail saying which limit was reached.
  *
  * The abort signal is passed to `http` so a real `fetch` stops the socket, and
  * every wait is also raced against its own timer, so an implementation that
- * ignores the signal still cannot outlive the deadline.
+ * ignores the signal still cannot outlive the deadline. Each attempt has the
+ * full limits; a retry does not inherit the time the last one used.
  */
 export async function fetchWithLimits(request: BoundedRequest): Promise<BoundedResponse> {
-  const { url, init, limits, accept } = request;
+  const method = (request.init.method ?? "GET").toUpperCase();
+  const policy: RetryPolicy =
+    request.retry !== undefined && (method === "GET" || method === "HEAD")
+      ? request.retry
+      : { attempts: 1, backoffMs: [], maxRetryAfterMs: 0 };
+  const pause =
+    request.sleep ??
+    ((ms: number) =>
+      new Promise<void>((done) => {
+        setTimeout(done, ms);
+      }));
+
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await attemptOnce(request, attempt >= policy.attempts);
+    } catch (error) {
+      const wait = retryDelay(error, attempt, policy);
+      if (wait === null) throw error;
+      await pause(wait);
+    }
+  }
+}
+
+async function attemptOnce(request: BoundedRequest, last: boolean): Promise<BoundedResponse> {
+  const { url, limits, accept } = request;
   const http: Http = request.http ?? fetch;
   const controller = new AbortController();
 
   const exchange = async (): Promise<BoundedResponse> => {
-    const response = await within(
-      http(url, { ...init, signal: controller.signal }),
-      limits.headersTimeoutMs,
-      () =>
-        new FetchLimitExceeded(
-          url,
-          "headers-timeout",
-          `no response within ${String(limits.headersTimeoutMs)} ms`,
-        ),
-    );
-    if (accept !== undefined) {
-      try {
-        accept(response);
-      } catch (refusal) {
+    let current = url;
+    let init: HttpInit = request.init;
+    for (let hops = 0; ; hops++) {
+      const response = await within(
+        http(current, { ...init, redirect: "manual", signal: controller.signal }),
+        limits.headersTimeoutMs,
+        () =>
+          new FetchLimitExceeded(
+            current,
+            "headers-timeout",
+            `no response within ${String(limits.headersTimeoutMs)} ms`,
+          ),
+      );
+      if (REDIRECT_STATUSES.has(response.status)) {
         await cancelBody(response);
-        throw refusal;
+        current = redirectTarget(current, response.headers.get("location"), hops);
+        // A 303, or a 301/302 after a POST, is fetched with GET, as browsers do.
+        if (
+          response.status === 303 ||
+          ((response.status === 301 || response.status === 302) && init.method === "POST")
+        ) {
+          const { body: _dropped, ...rest } = init;
+          init = { ...rest, method: "GET" };
+        }
+        continue;
       }
+      if (!last && RETRY_STATUSES.has(response.status)) {
+        await cancelBody(response);
+        throw new RetryableStatus(response.status, retryAfterMs(response));
+      }
+      if (accept !== undefined) {
+        try {
+          accept(response);
+        } catch (refusal) {
+          await cancelBody(response);
+          throw refusal;
+        }
+      }
+      const body = await readCapped(response, current, limits);
+      return { url, status: response.status, headers: response.headers, body };
     }
-    const body = await readCapped(response, url, limits);
-    return { url, status: response.status, headers: response.headers, body };
   };
 
   try {

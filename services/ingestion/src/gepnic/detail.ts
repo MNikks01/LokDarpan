@@ -116,6 +116,26 @@ export function normalise(name: string): string {
 }
 
 /**
+ * Words that say a name is a district without being part of it.
+ *
+ * OpenStreetMap names many districts with the word attached — Manipur's are
+ * `Churachandpur district`, `Chandel district` — and portals prefix it — Goa's
+ * chains read `District South Goa`. Either way the place is `Churachandpur`, or
+ * `South Goa`, and comparing with the word left in placed nothing in eight
+ * states. Only whole words go, and only these: they carry no place.
+ */
+const DISTRICT_WORDS = /\b(?:district|distt?|zilla|zila|jilla|jila)\b\.?/gi;
+
+/**
+ * How a district name is compared: its administrative word removed, then
+ * normalised. Used for the ledger's names and the portal's alike, so the two
+ * sides are reduced by the same rule.
+ */
+export function districtKey(name: string): string {
+  return normalise(name.replace(DISTRICT_WORDS, " "));
+}
+
+/**
  * Shortest word that may be tested as a district name.
  *
  * The normalisation is lossy, so a short token matches far too readily: an
@@ -169,7 +189,8 @@ export function districtFromChain(
 
   for (const segment of units) {
     const cleaned = cleanSegment(segment);
-    if (cleaned !== "" && known.has(normalise(cleaned))) {
+    const key = districtKey(cleaned);
+    if (key !== "" && known.has(key)) {
       return { name: cleaned, source: "chain_unit" };
     }
   }
@@ -185,7 +206,8 @@ export function districtFromChain(
       // collide easily, and `Tiruchirappalli City Municipal Corporation` — the
       // shape every city corporation in the country takes — needs only whole
       // words to be tested, not fragments.
-      if (candidate.length >= MIN_DISTRICT_TOKEN && known.has(normalise(candidate))) {
+      const key = districtKey(candidate);
+      if (candidate.length >= MIN_DISTRICT_TOKEN && key !== "" && known.has(key)) {
         return { name: candidate, source: "office_code" };
       }
     }

@@ -62,3 +62,31 @@ silent memory failure in a scheduled job.
 conditional requests (`ETag`, `Last-Modified`), streaming large PDFs to disk instead of memory,
 refusing redirects to other hosts, and a byte limit on the OCR service client (an internal service
 that already has a timeout).
+
+## Addendum · 2026-09-25 — redirects and retries
+
+Two of the deferred items are done, in `fetchWithLimits`.
+
+**Redirects stay on the host that was asked.** Redirects are followed manually, at most five,
+only to the same host (`www.` or not) and never from https down to http. Anything else fails
+with `FetchRefused`, naming the host it tried to go to. Before this change, all 24 source entry
+points were probed: the 21 GePNIC portals, CAG, LGD and BEAMS. None redirects across hosts, and
+CAG's `/` → `/en` stays on its host, so no current source is refused. A 303, or a 301/302 after a
+POST, is fetched with GET, as browsers do.
+
+**A failure that may pass is tried again,** when the caller passes a policy. `RETRY_IDEMPOTENT`
+allows three tries, two and then eight seconds apart, and honours `Retry-After` up to 60 s.
+
+- **Retried:** a refused or dropped connection, no response in time, 429, 502, 503, 504.
+- **Not retried:** a body that stalled or passed its size, any 4xx, any other 5xx. They were
+  answered, and would be answered the same way.
+- **Never retried:** POST, which may have taken effect the first time.
+- **Last try:** the server's own response is returned, so collectors refuse it exactly as before.
+
+The CAG, LGD, BEAMS and GePNIC collectors opt in. A dropped connection like West Bengal's on the
+first scheduled run is now retried instead of failing the portal for the day.
+
+Still deferred: conditional requests, which need somewhere to keep each URL's `ETag`, and
+streaming PDFs to disk, which matters little while the largest file is 28.8 MB under a byte cap.
+The OCR client's byte limit is also still deferred: it is an internal service, and it already
+has a timeout.
