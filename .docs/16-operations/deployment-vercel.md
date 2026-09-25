@@ -34,16 +34,24 @@ Do **not** put the owner credential here. The web deployment must never be able 
 
 ## 3. Project settings
 
-`vercel.json` at the repository root carries the build configuration. Its build command runs
-`geo:fetch` before `next build`: the explorer's boundary geometry is generated from the ledger, using
-the deployment's read-only `DATABASE_URL`, and is not committed. `next.config.ts` names
+`apps/web/vercel.json` carries the build configuration and the security headers. Its build command
+runs `geo:fetch` before `next build`: the explorer's boundary geometry is generated from the ledger,
+using the deployment's read-only `DATABASE_URL`, and is not committed. `next.config.ts` names
 `public/geo/manifest.json` in `outputFileTracingIncludes`, because `/explore` reads it from disk at
 runtime.
 
 The defaults only need:
 
 - **Framework preset:** Next.js
-- **Root Directory:** leave at the repository root — `vercel.json` runs the workspace build
+- **Root Directory:** `apps/web`. Vercel reads `vercel.json` from the Root Directory, and at the
+  repository root it detects `services/ocr` as a second service and offers an "Other" multi-service
+  preset, which is wrong: the OCR service is not deployed to Vercel.
+- **Include files outside the Root Directory:** on (the default). The app builds from the workspace
+  packages in `packages/`; install still runs at the repository root, where the lockfile is.
+- **Output Directory, Build and Install commands:** no overrides. `vercel.json` sets the commands,
+  and Next.js's output is `.next` inside the Root Directory. Overriding the output directory to
+  `apps/web/.next` fails the deployment after "Collecting build traces", because the path is then
+  counted from `apps/web`.
 
 ## 4. Ingesting data
 
