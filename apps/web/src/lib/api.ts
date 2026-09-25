@@ -36,7 +36,6 @@ export interface AdminUnit {
 export interface UnitView {
   readonly unit: AdminUnit;
   readonly children: readonly AdminUnit[];
-  readonly datasetVersion: number;
 }
 
 export class ApiError extends Error {
@@ -49,19 +48,39 @@ export class ApiError extends Error {
   }
 }
 
-async function get(path: string): Promise<{ data: unknown; datasetVersion: number }> {
-  // A relative URL is not valid in a server-side fetch, so an absolute origin
-  // is needed even when the handler lives in this deployment. VERCEL_URL is set
-  // per deployment; localhost covers `next dev`.
-  const origin =
-    API_BASE !== ""
-      ? API_BASE
-      : process.env["VERCEL_URL"] !== undefined
-        ? `https://${process.env["VERCEL_URL"]}`
-        : `http://localhost:${process.env["PORT"] ?? "3000"}`;
+/**
+ * Where a server-side fetch reaches this deployment's own route handlers.
+ *
+ * A relative URL is not valid in a server-side fetch, so an absolute origin is
+ * needed even when the handler lives in this deployment. Not `VERCEL_URL` in
+ * production: that names the per-deployment address, which Vercel's deployment
+ * protection answers with a redirect to its login, so every page that fetched
+ * through it failed with a 500. The production domain is public.
+ */
+function apiOrigin(): string {
+  if (API_BASE !== "") return API_BASE;
+  const production = process.env["VERCEL_PROJECT_PRODUCTION_URL"];
+  if (process.env["VERCEL_ENV"] === "production" && production !== undefined) {
+    return `https://${production}`;
+  }
+  const deployment = process.env["VERCEL_URL"];
+  if (deployment !== undefined) return `https://${deployment}`;
+  return `http://localhost:${process.env["PORT"] ?? "3000"}`;
+}
 
-  const response = await fetch(`${origin}${path}`, {
-    headers: { accept: "application/json" },
+/**
+ * A preview deployment is protected too, and has no public domain to fall back
+ * on. Vercel sets this secret when "Protection Bypass for Automation" is enabled
+ * for the project; without it, preview pages that fetch still fail.
+ */
+function protectionBypass(): Record<string, string> {
+  const secret = process.env["VERCEL_AUTOMATION_BYPASS_SECRET"];
+  return secret === undefined || secret === "" ? {} : { "x-vercel-protection-bypass": secret };
+}
+
+async function get(path: string): Promise<{ data: unknown; datasetVersion: number }> {
+  const response = await fetch(`${apiOrigin()}${path}`, {
+    headers: { accept: "application/json", ...protectionBypass() },
     // Revalidated by datasetVersion cache tag, never by a timer.
     next: { tags: ["dataset"], revalidate: false },
   });
