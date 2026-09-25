@@ -94,7 +94,10 @@ export default async function UnitPage({
   const result = await load(id);
   if (result === null) notFound();
 
-  const { unit, children, datasetVersion } = result.data;
+  const { unit, children } = result.data;
+  // The payload's version is the ledger watermark, carried by the envelope, not
+  // the unit (ADR-053 addendum).
+  const { datasetVersion } = result;
   const level = LEVEL_LABEL[unit.level] ?? unit.level;
   const childHeading = CHILD_LABEL[unit.level] ?? "Sub-units";
 
