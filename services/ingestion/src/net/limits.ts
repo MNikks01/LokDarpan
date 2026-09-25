@@ -73,6 +73,17 @@ export const ROBOTS_TXT: FetchLimits = {
   totalTimeoutMs: 1 * MINUTE,
 };
 
+/**
+ * One page of records from the data.gov.in API. Unmeasured: a page of a
+ * thousand pincode records is well under a megabyte, so this is a ceiling for a
+ * misbehaving answer, not a budget.
+ */
+export const DATAGOVIN_PAGE: FetchLimits = {
+  maxBytes: 16 * MIB,
+  ...PATIENT,
+  totalTimeoutMs: 2 * MINUTE,
+};
+
 /** GePNIC portal pages. Unmeasured: a generous ceiling for HTML. */
 export const GEPNIC_PAGE: FetchLimits = {
   maxBytes: 16 * MIB,
