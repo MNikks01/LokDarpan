@@ -14,13 +14,14 @@ import styles from "./explorer.module.css";
  * works are in view, which is the information a sighted reader gets for free.
  */
 export function MapOverlays({
-  basemapPresent,
+  basemapAttribution,
   hover,
   placeName,
   stateName,
   loading,
 }: {
-  readonly basemapPresent: boolean;
+  /** The provider's credit, or null when no base map is shown. */
+  readonly basemapAttribution: string | null;
   readonly hover: HoverTarget | null;
   readonly placeName: string | null;
   readonly stateName: string | null;
@@ -32,10 +33,8 @@ export function MapOverlays({
     <>
       {hover !== null && <AreaTooltip target={hover} />}
       <p className={styles.attribution}>
-        {basemapPresent
-          ? "Base map © OpenStreetMap contributors (ODbL), self-hosted"
-          : "No base map installed"}{" "}
-        · Boundaries © OpenStreetMap contributors (ODbL) · MapLibre GL
+        {basemapAttribution === null ? "No base map shown" : `Base map: ${basemapAttribution}`} ·
+        Boundaries © OpenStreetMap contributors (ODbL) · MapLibre GL
       </p>
       {loading && (
         <p className={styles.attribution} style={{ left: 12, right: "auto" }} role="status">
