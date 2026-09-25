@@ -70,12 +70,20 @@ export function basemapUrl(): string | null {
 }
 
 /** Whether the extract is actually present, so the UI can say if it is not. */
+/** Every PMTiles archive begins with these seven bytes (spec v3 §3). */
+const PMTILES_MAGIC = "PMTiles";
+
 export async function basemapAvailable(url: string): Promise<boolean> {
   try {
     // A range request, not a HEAD: PMTiles is served as a static file and the
-    // first bytes are the header, so this also proves it is readable.
+    // first bytes are the header, so reading them proves it is there and is an
+    // archive. The status alone proves neither: for a missing file Vercel
+    // answered 206 with the first bytes of the site's HTML 404 page, and the
+    // map then failed with "Wrong magic number for PMTiles archive".
     const response = await fetch(url, { headers: { range: "bytes=0-15" } });
-    return response.ok || response.status === 206;
+    if (!response.ok) return false;
+    const head = new Uint8Array(await response.arrayBuffer()).subarray(0, PMTILES_MAGIC.length);
+    return new TextDecoder().decode(head) === PMTILES_MAGIC;
   } catch {
     return false;
   }
