@@ -63,6 +63,12 @@ export function GET(request: Request): Promise<Response> {
         collectionState,
         // Whether the panel may offer tender details at all (ADR-056).
         detailsWithheld: !tenderDetailsArePublishable(),
+        // What the shading accounts for, summed here rather than in the browser:
+        // client code does no arithmetic on what it shows (ADR-059, rule A).
+        placed: {
+          tenders: districts.reduce((sum, d) => sum + d.tenderCount, 0),
+          districts: districts.length,
+        },
         // The terms each portal's material is held under (ADR-055). For the whole
         // country, every collected portal contributes to the counts.
         sources: describeSources(
