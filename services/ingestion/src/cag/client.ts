@@ -1,4 +1,9 @@
-import { fetchWithLimits, type FetchLimits, type Http } from "../net/fetch-with-limits";
+import {
+  fetchWithLimits,
+  type FetchLimits,
+  type Http,
+  RETRY_IDEMPOTENT,
+} from "../net/fetch-with-limits";
 import { CAG_PAGE, CAG_REPORT } from "../net/limits";
 import { sha256Of } from "../raw-store";
 
@@ -94,6 +99,7 @@ export class CagClient {
     accept?: (response: Response) => void,
   ): Promise<FetchedDocument> {
     const response = await fetchWithLimits({
+      retry: RETRY_IDEMPOTENT,
       url,
       init: { headers: { "user-agent": USER_AGENT } },
       limits,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { vi, describe, expect, it } from "vitest";
 
 import { LgdClient, type HttpLike } from "../src/lgd/client.js";
 
@@ -79,7 +79,15 @@ describe("LgdClient", () => {
   it("refuses when the home page does not return 200", async () => {
     const { http } = stubHttp([{ status: 503, body: "" }]);
     const client = new LgdClient("https://example.test", http);
-    await expect(client.openSession()).rejects.toThrow(/503/);
+    // Retried with pauses; fake timers run them, and the refusal still stands.
+    vi.useFakeTimers();
+    try {
+      const refused = expect(client.openSession()).rejects.toThrow(/503/);
+      await vi.runAllTimersAsync();
+      await refused;
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("refuses to fetch a citizen view before a session exists", async () => {

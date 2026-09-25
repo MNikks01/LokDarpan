@@ -4,6 +4,8 @@ import { BeamsClient } from "../src/beams/client";
 import { CagClient } from "../src/cag/client";
 import {
   FetchLimitExceeded,
+  FetchRefused,
+  RETRY_IDEMPOTENT,
   fetchWithLimits,
   textOf,
   type FetchLimits,
@@ -170,5 +172,172 @@ describe("collectors use the limits", () => {
     const failure = await client.fetchDepartmentYear("A", 2024).catch((e: unknown) => e);
     expect(failure).toBeInstanceOf(FetchLimitExceeded);
     expect((failure as FetchLimitExceeded).limit).toBe("bytes");
+  });
+});
+
+/** A server that answers from a script, one response per request, recording what was asked. */
+type Step = Error | (() => Response);
+
+function scripted(steps: readonly Step[]) {
+  const asked: { url: string; method: string; redirect: string | undefined }[] = [];
+  let i = 0;
+  const http: Http = (url, init) => {
+    asked.push({ url, method: init.method ?? "GET", redirect: init.redirect });
+    const step = steps[Math.min(i, steps.length - 1)];
+    i += 1;
+    // A fresh response per request, as a real server sends: an earlier attempt
+    // may have cancelled the body of the one before.
+    if (step === undefined) return Promise.resolve(new Response("?"));
+    return step instanceof Error ? Promise.reject(step) : Promise.resolve(step());
+  };
+  return { http, asked };
+}
+
+const moved =
+  (location: string, status = 302) =>
+  () =>
+    new Response(null, { status, headers: { location } });
+const reply =
+  (body: string | null, init: ResponseInit = {}) =>
+  () =>
+    new Response(body, init);
+
+describe("redirects stay on the host that was asked", () => {
+  it("follows a redirect within the host, and within www.", async () => {
+    const { http, asked } = scripted([
+      moved("/en"),
+      moved("https://www.cag.gov.in/en/reports"),
+      reply("ok"),
+    ]);
+    const response = await fetchWithLimits({
+      url: "https://cag.gov.in/",
+      init: { headers: {} },
+      limits: QUICK,
+      http,
+    });
+    expect(textOf(response)).toBe("ok");
+    expect(asked.map((a) => a.url)).toEqual([
+      "https://cag.gov.in/",
+      "https://cag.gov.in/en",
+      "https://www.cag.gov.in/en/reports",
+    ]);
+    // Never left to fetch itself: the rules above are the only ones applied.
+    expect(asked.every((a) => a.redirect === "manual")).toBe(true);
+  });
+
+  it("refuses a redirect to another host", async () => {
+    const { http } = scripted([moved("https://elsewhere.example/doc.pdf")]);
+    await expect(
+      fetchWithLimits({
+        url: "https://cag.gov.in/doc.pdf",
+        init: { headers: {} },
+        limits: QUICK,
+        http,
+      }),
+    ).rejects.toThrow(/another host, elsewhere\.example/);
+  });
+
+  it("refuses a redirect from https down to http", async () => {
+    const { http } = scripted([moved("http://cag.gov.in/doc.pdf")]);
+    await expect(
+      fetchWithLimits({
+        url: "https://cag.gov.in/doc.pdf",
+        init: { headers: {} },
+        limits: QUICK,
+        http,
+      }),
+    ).rejects.toBeInstanceOf(FetchRefused);
+  });
+
+  it("stops following after five redirects", async () => {
+    const { http } = scripted([moved("/again")]);
+    await expect(
+      fetchWithLimits({ url: "https://cag.gov.in/", init: { headers: {} }, limits: QUICK, http }),
+    ).rejects.toThrow(/more than 5 redirects/);
+  });
+
+  it("fetches a 303's target with GET", async () => {
+    const { http, asked } = scripted([moved("/result", 303), reply("done")]);
+    await fetchWithLimits({
+      url: "https://lgdirectory.gov.in/search",
+      init: { headers: {}, method: "POST", body: "q=1" },
+      limits: QUICK,
+      http,
+    });
+    expect(asked.map((a) => a.method)).toEqual(["POST", "GET"]);
+  });
+});
+
+describe("a failure that may pass is tried again", () => {
+  const waits: number[] = [];
+  const sleep = (ms: number): Promise<void> => {
+    waits.push(ms);
+    return Promise.resolve();
+  };
+  const run = (steps: readonly Step[], method = "GET") => {
+    waits.length = 0;
+    const { http, asked } = scripted(steps);
+    return {
+      asked,
+      result: fetchWithLimits({
+        url: "https://wbtenders.gov.in/nicgep/app",
+        init: { headers: {}, method },
+        limits: QUICK,
+        http,
+        retry: RETRY_IDEMPOTENT,
+        sleep,
+      }),
+    };
+  };
+
+  it("retries a dropped connection, then succeeds", async () => {
+    const { result, asked } = run([new TypeError("fetch failed"), reply("landing")]);
+    expect(textOf(await result)).toBe("landing");
+    expect(asked).toHaveLength(2);
+    expect(waits).toEqual([2_000]);
+  });
+
+  it("retries a 503, honouring Retry-After but never past the cap", async () => {
+    const { result } = run([
+      reply("busy", { status: 503, headers: { "retry-after": "5" } }),
+      reply("busy", { status: 503, headers: { "retry-after": "3600" } }),
+      reply("landing"),
+    ]);
+    expect((await result).status).toBe(200);
+    expect(waits).toEqual([5_000, 60_000]);
+  });
+
+  it("hands back the server's own answer when the last try is still refused", async () => {
+    const { result, asked } = run([reply("busy", { status: 503 })]);
+    const response = await result;
+    expect(response.status).toBe(503);
+    expect(textOf(response)).toBe("busy");
+    expect(asked).toHaveLength(3);
+  });
+
+  it("does not retry a 404, which will be a 404 again", async () => {
+    const { result, asked } = run([reply("gone", { status: 404 })]);
+    expect((await result).status).toBe(404);
+    expect(asked).toHaveLength(1);
+  });
+
+  it("does not retry a body that passed its limit", async () => {
+    const { result, asked } = run([reply("x".repeat(200))]);
+    await expect(result).rejects.toBeInstanceOf(FetchLimitExceeded);
+    expect(asked).toHaveLength(1);
+  });
+
+  it("never retries a POST, which may have taken effect", async () => {
+    const { result, asked } = run([new TypeError("fetch failed"), reply("ok")], "POST");
+    await expect(result).rejects.toBeInstanceOf(TypeError);
+    expect(asked).toHaveLength(1);
+  });
+
+  it("does not retry without a policy", async () => {
+    const { http, asked } = scripted([new TypeError("fetch failed"), reply("ok")]);
+    await expect(
+      fetchWithLimits({ url: "https://x.gov.in/", init: { headers: {} }, limits: QUICK, http }),
+    ).rejects.toBeInstanceOf(TypeError);
+    expect(asked).toHaveLength(1);
   });
 });
