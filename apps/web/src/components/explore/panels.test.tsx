@@ -42,6 +42,7 @@ const overview = (over: Partial<TenderOverview> = {}): TenderOverview => {
     placed: {
       tenders: (over.districts ?? []).reduce((sum, d) => sum + d.tenderCount, 0),
       districts: (over.districts ?? []).length,
+      inferred: over.placed?.inferred ?? 0,
     },
   };
 };
@@ -81,7 +82,7 @@ describe("the tender total comes from the server", () => {
               { adminUnitId: 1, districtName: "Jabalpur", tenderCount: 3, departments: [] },
             ],
           }),
-          placed: { tenders: 11, districts: 4 },
+          placed: { tenders: 11, districts: 4, inferred: 0 },
         }}
         failed={false}
         department={null}
@@ -366,6 +367,7 @@ const tender = {
   organisationChain: "PWD||Division 1",
   districtName: "Somewhere",
   districtSource: "chain_unit",
+  districtEvidenceKey: null,
   sourceUrl: "https://etenders.kerala.gov.in/nicgep/app",
 };
 
@@ -404,6 +406,27 @@ describe("tender details are withheld under the portals' terms", () => {
       <TenderList heading="Tenders" tenders={[tender]} loading={false} detailsWithheld={false} />,
     );
     expect(markup).toContain("Improvement of Road from A to B");
+  });
+
+  it("says a district was inferred, and from what, never as the office's own statement", () => {
+    const inferred = { ...tender, districtSource: "pincode", districtEvidenceKey: "605602" };
+    const markup = renderToStaticMarkup(
+      <TenderList heading="Tenders" tenders={[inferred]} loading={false} detailsWithheld={false} />,
+    );
+    expect(markup).toContain("Not named by the issuing office");
+    expect(markup).toContain("pincode 605602");
+    expect(markup).not.toContain("The issuing office names this district");
+  });
+
+  it("says how much of the shading is inference", () => {
+    const markup = tenderPanel({
+      collection: collection({ status: "collected", portalCode: "tripura" }),
+      districts: [
+        { adminUnitId: 1, districtName: "West Tripura", tenderCount: 5, departments: [] },
+      ],
+      placed: { tenders: 5, districts: 1, inferred: 3 },
+    });
+    expect(markup).toContain("3 of these are placed by inference");
   });
 
   it("offers no way to open the unplaced list while details are withheld", () => {

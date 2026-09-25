@@ -61,6 +61,31 @@ export const tenderCopy = {
   portalLink: "Read these tenders on the state's e-procurement portal",
 
   unplacedWithheld: "Their details are not shown, for the same reason as other tenders.",
+
+  /**
+   * How a tender's district was reached (ADR-067). An inferred district always
+   * says it was inferred and from what: it is never shown as the tender's own.
+   */
+  placement: (method: string, evidenceKey: string | null): string => {
+    switch (method) {
+      case "chain_unit":
+        return "The issuing office names this district.";
+      case "office_code":
+        return "Read from an office name, which may cover more than one district.";
+      case "pincode":
+        return `Not named by the issuing office. Inferred from its pincode${evidenceKey === null ? "" : ` ${evidenceKey}`}, which the Department of Posts lists only in this district.`;
+      case "place_name":
+        return `Not named by the issuing office. Inferred from its location, which matches ${evidenceKey === null ? "a post office" : `the ${evidenceKey} post office`} only in this district.`;
+      case "manual":
+        return "Not named by the issuing office. Placed by a reviewer.";
+      default:
+        return "";
+    }
+  },
+
+  /** How much of the shading is inference rather than the offices' own statement. */
+  inferredShading: (count: number): string =>
+    `${String(count)} of these ${count === 1 ? "is" : "are"} placed by inference from a pincode or place name, not named by the issuing office.`,
 } as const;
 
 export const boundaryCopy = {

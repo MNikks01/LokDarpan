@@ -4,6 +4,13 @@ import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run"
 import { districtKey, type TenderDetail } from "./detail";
 import type { FetchedArtifact } from "./fetch";
 import type { ParsedTender } from "./landing";
+import {
+  EMPTY_DIRECTORY,
+  directoryForState,
+  resolveDistrict,
+  type Resolution,
+  type StateDirectory,
+} from "./resolve";
 
 /**
  * Writing tenders into the ledger.
@@ -48,21 +55,6 @@ export interface LoadResult {
 }
 
 /**
- * How far to trust a district placement.
- *
- * `chain_unit` is a segment of the organisation chain that IS a district, as
- * the portal itself wrote it. `office_code` is a district name found inside an
- * office name like `CE-Tirunelveli`, and such an office covers more than its
- * own district — so that placement is plausible rather than stated, and the
- * number says so. Neither is 1.0: even a clean segment names the issuing
- * office, not the work site.
- */
-const LINKAGE_CONFIDENCE: Readonly<Record<"chain_unit" | "office_code", number>> = {
-  chain_unit: 0.9,
-  office_code: 0.6,
-};
-
-/**
  * The districts of one state, keyed by `districtKey`.
  *
  * Scoped to a single state deliberately. The normalisation collapses eighteen
@@ -85,29 +77,44 @@ export async function districtsOfState(
   return byName;
 }
 
-interface Placement {
-  readonly adminUnitId: number | null;
-  readonly source: string | null;
-  readonly confidence: number | null;
-}
-
-const UNPLACED: Placement = { adminUnitId: null, source: null, confidence: null };
-
+/**
+ * Where a tender belongs, by the resolver's order: the district its chain
+ * names, then its pincode, then its location, else unresolved (see
+ * `resolve.ts`). A tender whose detail page could not be read has no clues.
+ */
 export function placementFor(
   detail: TenderDetail | null,
   districts: ReadonlyMap<string, number>,
-): Placement {
-  const name = detail?.districtName;
-  const source = detail?.districtSource;
-  if (name === undefined || name === null || source === undefined || source === null) {
-    return UNPLACED;
-  }
-  const id = districts.get(districtKey(name));
-  // A name that does not resolve leaves the tender unplaced rather than
-  // approximately placed. Missing is never zero, and a wrong district is a
-  // false statement about where public money is going.
-  if (id === undefined) return UNPLACED;
-  return { adminUnitId: id, source, confidence: LINKAGE_CONFIDENCE[source] };
+  directory: StateDirectory = EMPTY_DIRECTORY,
+): Resolution {
+  if (detail === null) return resolveDistrict(NO_CLUES, districts, EMPTY_DIRECTORY);
+  return resolveDistrict(
+    {
+      districtName: detail.districtName,
+      districtSource: detail.districtSource,
+      pincode: detail.pincode,
+      location: detail.location,
+    },
+    districts,
+    directory,
+  );
+}
+
+const NO_CLUES = { districtName: null, districtSource: null, pincode: null, location: null };
+
+/** What a tender is resolved against: its state's districts, and the directory for that state. */
+interface Places {
+  readonly districts: ReadonlyMap<string, number>;
+  readonly directory: StateDirectory;
+}
+
+/** The ledger's English name for a state, which the directory is matched against. */
+async function stateNameOf(db: pg.ClientBase, stateLgdCode: string): Promise<string | null> {
+  const result = await db.query<{ name_en: string }>(
+    `SELECT name_en FROM admin_unit WHERE level = 'state' AND lgd_code = $1`,
+    [stateLgdCode],
+  );
+  return result.rows[0]?.name_en ?? null;
 }
 
 /**
@@ -135,7 +142,7 @@ function detailParameters(detail: TenderDetail | null, districtSource: string | 
 
 function parameters(
   record: TenderRecord,
-  place: Placement,
+  place: Resolution,
   context: { portalCode: string; sha256: string; datasetVersionId: string },
 ): unknown[] {
   return [
@@ -152,7 +159,9 @@ function parameters(
     // The reading of the page is unambiguous; this is not a claim that the
     // government's own figures are right.
     0.95,
-    ...detailParameters(record.detail, place.source),
+    ...detailParameters(record.detail, place.method),
+    place.evidenceSha256,
+    place.evidenceKey,
   ];
 }
 
@@ -163,10 +172,12 @@ const UPSERT = `
     source_sha256, dataset_version_id, extraction_confidence,
     department, organisation_chain, district_source,
     location, pincode, tender_category, product_category, tender_type,
-    tender_value_paise, emd_paise, first_seen_at, last_seen_at
+    tender_value_paise, emd_paise, district_evidence_sha256, district_evidence_key,
+    district_resolved_at, first_seen_at, last_seen_at
   ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-    $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, now(), now()
+    $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23,
+    CASE WHEN $7::bigint IS NULL THEN NULL ELSE now() END, now(), now()
   )
   ON CONFLICT (portal_code, portal_tender_id) DO UPDATE SET
     last_seen_at = now(),
@@ -192,9 +203,29 @@ const UPSERT = `
     -- failed to load produces nulls for every one of these. Without the
     -- fallback, one unreachable page would quietly erase a department and a
     -- placement we already held and reported the run as a success.
+    --
+    -- The placement is one fact in six columns, so it moves as one: a new
+    -- placement replaces all six, and no placement keeps all six. Coalescing
+    -- them one by one would let a new explicit district keep an old
+    -- inference's evidence and misdescribe how it was reached.
     admin_unit_id = COALESCE(EXCLUDED.admin_unit_id, tender.admin_unit_id),
-    linkage_confidence = COALESCE(EXCLUDED.linkage_confidence, tender.linkage_confidence),
-    district_source = COALESCE(EXCLUDED.district_source, tender.district_source),
+    linkage_confidence = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+      THEN tender.linkage_confidence ELSE EXCLUDED.linkage_confidence END,
+    district_source = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+      THEN tender.district_source ELSE EXCLUDED.district_source END,
+    district_evidence_sha256 = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+      THEN tender.district_evidence_sha256 ELSE EXCLUDED.district_evidence_sha256 END,
+    district_evidence_key = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+      THEN tender.district_evidence_key ELSE EXCLUDED.district_evidence_key END,
+    -- Re-dated only when the placement itself changes, so the time says when
+    -- this district was decided, not when the tender was last seen.
+    district_resolved_at = CASE
+      WHEN EXCLUDED.admin_unit_id IS NULL THEN tender.district_resolved_at
+      WHEN EXCLUDED.admin_unit_id IS NOT DISTINCT FROM tender.admin_unit_id
+       AND EXCLUDED.district_source IS NOT DISTINCT FROM tender.district_source
+       AND tender.district_resolved_at IS NOT NULL
+      THEN tender.district_resolved_at
+      ELSE EXCLUDED.district_resolved_at END,
     department = COALESCE(EXCLUDED.department, tender.department),
     organisation_chain = COALESCE(EXCLUDED.organisation_chain, tender.organisation_chain),
     location = COALESCE(EXCLUDED.location, tender.location),
@@ -276,12 +307,12 @@ async function openArtifactAndVersion(db: pg.Client, options: LoadOptions): Prom
 async function writeOne(
   db: pg.Client,
   record: TenderRecord,
-  districts: ReadonlyMap<string, number>,
+  places: Places,
   context: { portalCode: string; sha256: string; datasetVersionId: string },
 ): Promise<{ readonly inserted: boolean; readonly placed: boolean }> {
   await db.query("SAVEPOINT tender");
   try {
-    const place = placementFor(record.detail, districts);
+    const place = placementFor(record.detail, places.districts, places.directory);
     const row = await db.query<{ inserted: boolean }>(UPSERT, parameters(record, place, context));
     await db.query("RELEASE SAVEPOINT tender");
     return { inserted: row.rows[0]?.inserted === true, placed: place.adminUnitId !== null };
@@ -301,7 +332,7 @@ async function writeOne(
 async function writeAll(
   db: pg.Client,
   records: readonly TenderRecord[],
-  districts: ReadonlyMap<string, number>,
+  places: Places,
   context: { portalCode: string; sha256: string; datasetVersionId: string },
 ): Promise<{
   readonly inserted: number;
@@ -316,7 +347,7 @@ async function writeAll(
 
   for (const record of records) {
     try {
-      const one = await writeOne(db, record, districts, context);
+      const one = await writeOne(db, record, places, context);
       if (one.placed) placed++;
       if (one.inserted) inserted++;
       else updated++;
@@ -401,12 +432,19 @@ export async function loadTenders(db: pg.Client, options: LoadOptions): Promise<
     const datasetVersionId = await openArtifactAndVersion(db, options);
 
     const districts = await districtsOfState(db, stateLgdCode);
+    const stateName = await stateNameOf(db, stateLgdCode);
+    const directory = stateName === null ? EMPTY_DIRECTORY : await directoryForState(db, stateName);
 
-    const written = await writeAll(db, records, districts, {
-      portalCode,
-      sha256: artifact.sha256,
-      datasetVersionId,
-    });
+    const written = await writeAll(
+      db,
+      records,
+      { districts, directory },
+      {
+        portalCode,
+        sha256: artifact.sha256,
+        datasetVersionId,
+      },
+    );
     inserted = written.inserted;
     updated = written.updated;
     placed = written.placed;
