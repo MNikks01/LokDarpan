@@ -77,3 +77,15 @@ Checked in headless Chromium against the local ledger:
 - Madhya Pradesh shades Katni, Jabalpur and Indore.
 - Choosing _Rural Engineering Service_ leaves only Jabalpur shaded.
 - There are no console errors.
+
+## Addendum · 2026-09-25 — the first draw on a real GPU
+
+The first draw's "over budget" came from the measuring machine, not the app. Measured against
+production (`/explore?state=23`, 7 cold runs, cache disabled) in Chrome on an Apple M2, with
+WebGL through ANGLE's Metal renderer, the first boundaries draw a **median 222 ms** after
+`map:load` (runs: 904, 192, 167, 440, 222, 218, 417). That is inside the 500 ms target.
+
+The ~800 ms in the table above was headless Chromium on SwiftShader, which renders WebGL in
+software, as ADR-062 warned its numbers would be pessimistic. `perf:runtime` still records the GPU
+string with every run, so a SwiftShader figure is recognisable for what it is. No change to the
+drawing path is needed.
