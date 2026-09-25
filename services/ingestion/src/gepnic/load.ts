@@ -172,6 +172,16 @@ const UPSERT = `
     last_seen_at = now(),
     dataset_version_id = EXCLUDED.dataset_version_id,
 
+    -- What the listing says, taken as the listing now says it. A deadline the
+    -- office extended is the change ADR-049 exists to keep, and the trigger can
+    -- only file the old date as a version if the new one reaches the row. A
+    -- date we could not read arrives as null and tells us nothing, so it does
+    -- not erase one we could.
+    tender_reference = EXCLUDED.tender_reference,
+    title = EXCLUDED.title,
+    closing_at = COALESCE(EXCLUDED.closing_at, tender.closing_at),
+    bid_opening_at = COALESCE(EXCLUDED.bid_opening_at, tender.bid_opening_at),
+
     -- COALESCE, IN THAT ORDER, FOR TWO DIFFERENT REASONS.
     --
     -- The new value wins where there is one, because these fields are DERIVED
