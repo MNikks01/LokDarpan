@@ -66,6 +66,8 @@ export interface TenderOverview {
   readonly collectionState: DataState | null;
   /** True while the portals' terms keep tender details off the page (ADR-056). */
   readonly detailsWithheld: boolean;
+  /** How many open tenders the shading accounts for, and across how many districts. Summed by the server. */
+  readonly placed: { readonly tenders: number; readonly districts: number };
   /** The portals the counts come from, and their terms (ADR-055). The map draws nothing without them. */
   readonly sources: readonly SourceDescriptor[];
 }
@@ -78,6 +80,7 @@ const EMPTY: TenderOverview = {
   collection: null,
   collectionState: null,
   detailsWithheld: true,
+  placed: { tenders: 0, districts: 0 },
   sources: [],
 };
 
@@ -123,18 +126,6 @@ function NotCollected({ stateName }: { readonly stateName: string }): React.JSX.
       </p>
     </>
   );
-}
-
-/**
- * How many open tenders the shading accounts for.
- *
- * Only ever rendered for a state that is collected. For one that is not, the
- * sum is zero and means nothing about the state, which is why it is computed
- * inside the branch that may show it rather than beside the branch that must
- * not.
- */
-function shadedCount(overview: TenderOverview): number {
-  return overview.districts.reduce((sum, d) => sum + d.tenderCount, 0);
 }
 
 /**
@@ -339,16 +330,16 @@ export function TendersPanel({
               ))}
             </select>
 
-            {overview.districts.length === 0 ? (
+            {overview.placed.districts === 0 ? (
               <p style={{ fontSize: 12, margin: "10px 0 0" }}>
                 {tenderCopy.noneShaded(stateName ?? "India")}
               </p>
             ) : (
               <p style={{ fontSize: 12, margin: "10px 0 0" }}>
-                <strong>{shadedCount(overview)}</strong> open{" "}
-                {shadedCount(overview) === 1 ? "tender" : "tenders"} across{" "}
-                {overview.districts.length}{" "}
-                {overview.districts.length === 1 ? "district" : "districts"}.
+                <strong>{overview.placed.tenders}</strong> open{" "}
+                {overview.placed.tenders === 1 ? "tender" : "tenders"} across{" "}
+                {overview.placed.districts}{" "}
+                {overview.placed.districts === 1 ? "district" : "districts"}.
               </p>
             )}
 

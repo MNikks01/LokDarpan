@@ -38,6 +38,11 @@ const overview = (over: Partial<TenderOverview> = {}): TenderOverview => {
     ...over,
     collection: stateCollection,
     collectionState: stateCollection === null ? null : tenderCollectionState(stateCollection),
+    // As the server computes it: the panel renders these and sums nothing.
+    placed: {
+      tenders: (over.districts ?? []).reduce((sum, d) => sum + d.tenderCount, 0),
+      districts: (over.districts ?? []).length,
+    },
   };
 };
 
@@ -55,6 +60,40 @@ const tenderPanel = (over: Partial<TenderOverview> = {}, stateName = "Maharashtr
       stateName={stateName}
     />,
   );
+
+describe("the tender total comes from the server", () => {
+  // Rule A (ADR-059): client code does no arithmetic on what it shows. The
+  // fixture's placed total deliberately disagrees with its districts, so only a
+  // panel that renders the server's figure passes.
+  it("renders the server's placed total, not a sum of its own", () => {
+    const markup = renderToStaticMarkup(
+      <TendersPanel
+        overview={{
+          ...overview({
+            collection: collection({
+              status: "collected",
+              portalCode: "madhyaprades",
+              collectingSince: "2026-09-01",
+              lastSuccessAt: "2026-09-23T00:00:00Z",
+              lastCheckedAt: "2026-09-23T00:00:00Z",
+            }),
+            districts: [
+              { adminUnitId: 1, districtName: "Jabalpur", tenderCount: 3, departments: [] },
+            ],
+          }),
+          placed: { tenders: 11, districts: 4 },
+        }}
+        failed={false}
+        department={null}
+        onSelectDepartment={noop}
+        showingUnplaced={false}
+        onToggleUnplaced={noop}
+        stateName="Madhya Pradesh"
+      />,
+    );
+    expect(markup).toContain("<strong>11</strong> open tenders across 4 districts.");
+  });
+});
 
 describe("a collected state with nothing to shade", () => {
   // The regression behind it: the panel under Odisha said "0 open tenders
