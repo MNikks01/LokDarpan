@@ -5,8 +5,8 @@ import { test, expect, type Page } from "@playwright/test";
  * actually sees when the page is served.
  *
  * TWO LEGITIMATE STATES, AND THE TESTS KNOW WHICH IS WHICH
- * Boundary geometry is fetched at setup and gitignored, because the upstream
- * dataset declares no licence. So a checkout without it — CI, and a fresh clone
+ * Boundary geometry is generated from the ledger at build time and gitignored,
+ * being derived data. So a checkout without it — CI, and a fresh clone
  * — renders a page explaining the command instead of a map. That is not a
  * failure, and asserting the map unconditionally would make CI red for a
  * deliberate design decision.

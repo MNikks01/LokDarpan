@@ -8,6 +8,7 @@ import { ApiError, getJson } from "@/lib/api";
 import { ProvenanceNote } from "@/components/Provenance";
 import { FactCard, Scope } from "@/components/PublishedFacts";
 import { color, space } from "@/ui/tokens";
+import { documentsCopy } from "@/copy/pages";
 
 export const dynamic = "force-dynamic";
 
@@ -80,8 +81,7 @@ export default async function DocumentPage({
 
       {pages.length === 0 ? (
         <p style={{ color: color.text.secondary, fontSize: 15 }}>
-          Nothing from this document is published yet. The document itself is linked below and can
-          be read in full.
+          {documentsCopy.nothingPublished}
         </p>
       ) : (
         pages.map((page) => (

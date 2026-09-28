@@ -90,6 +90,15 @@ export const tenderCopy = {
 
   unplacedWithheld: "Their details are not shown, for the same reason as other tenders.",
 
+  /** What the shading counts: where the issuing office is, not where the work is. */
+  shadingLead: "Shading counts tenders advertised by government offices",
+  shadingLocatedIn: "located in",
+  shadingTail:
+    "each district. It does not say where the work will be done — an office often tenders for work across several districts.",
+
+  noValue: "No value published for this tender.",
+  sourceLink: "Source: the portal this was read from",
+
   /**
    * How a tender's district was reached (ADR-067). An inferred district always
    * says it was inferred and from what: it is never shown as the tender's own.

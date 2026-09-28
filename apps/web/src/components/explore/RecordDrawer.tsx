@@ -8,6 +8,7 @@ import { FactCard, Scope } from "@/components/PublishedFacts";
 import { Button, Skeleton, controlStyles } from "@/components/ui";
 import { cx } from "@/ui/cx";
 import styles from "./explorer.module.css";
+import { exploreCopy } from "@/copy/explore";
 
 /**
  * One source document, and the facts a person has verified in it.
@@ -167,8 +168,7 @@ function RecordBody({
       {pages.length === 0 ? (
         <p style={{ fontSize: 13.5, color: "var(--ld-text-secondary)", marginTop: 18 }}>
           <span aria-hidden="true">▤ </span>
-          Nothing in this document has been verified yet, so nothing from it is shown. Its
-          candidates are extracted and awaiting review.
+          {exploreCopy.documentNothingVerified}
         </p>
       ) : (
         pages.map((page) => (

@@ -4,6 +4,7 @@ import type React from "react";
 import type { DocumentSummary } from "@lokdarpan/domain";
 import { Button, controlStyles } from "@/components/ui";
 import styles from "./explorer.module.css";
+import { recordsCopy } from "@/copy/explore";
 
 /**
  * What LokDarpan actually holds for the selected place.
@@ -44,7 +45,7 @@ export function RecordsPanel({
 
           {!hasPlace ? (
             <p style={{ fontSize: 13, color: "var(--ld-text-secondary)", margin: 0 }}>
-              Select a state to see the records held for it.
+              {recordsCopy.selectState}
             </p>
           ) : loading ? (
             <p style={{ fontSize: 13, color: "var(--ld-text-secondary)", margin: 0 }} role="status">
@@ -52,13 +53,13 @@ export function RecordsPanel({
             </p>
           ) : failed ? (
             <p style={{ fontSize: 13, margin: 0 }} role="alert">
-              Records could not be loaded. This is a fault here, not an absence of records.
+              {recordsCopy.loadFailed}
             </p>
           ) : documents.length === 0 ? (
             <>
               <p style={{ fontSize: 13, color: "var(--ld-text-secondary)", margin: 0 }}>
                 <span aria-hidden="true">▤ </span>
-                No records are currently attributed to {scopeLabel}.
+                {recordsCopy.noneAttributed(scopeLabel)}
               </p>
               {/*
                 The sentence that stops the first one being read as a finding.
@@ -72,9 +73,7 @@ export function RecordsPanel({
                   margin: "6px 0 0",
                 }}
               >
-                That describes what is held here, not what has been audited or spent in this area.
-                Reports are attributed only where the source establishes the geography they concern
-                — the office that issued a report is not the area it audits.
+                {recordsCopy.noneAttributedMeaning}
               </p>
             </>
           ) : (
@@ -162,8 +161,7 @@ function NoWorksRegister(): React.JSX.Element {
         <h2 className={styles.panelTitle}>Works on the map</h2>
         <p style={{ fontSize: 13, color: "var(--ld-text-secondary)", margin: "0 0 10px" }}>
           <span aria-hidden="true">▤ </span>
-          None. No register of individual works has been located for this area, so there is nothing
-          to draw.
+          {recordsCopy.noWorks}
         </p>
         <ul
           style={{
@@ -177,31 +175,29 @@ function NoWorksRegister(): React.JSX.Element {
           }}
         >
           <li>
-            <strong>Works register</strong> — the state PWD site publishes none; its “Projects”
-            section is a photo gallery.
+            <strong>Works register</strong> {recordsCopy.worksRegister}
           </li>
           <li>
-            <strong>Tenders and awards</strong> — the procurement portals gate search and bid awards
-            behind a CAPTCHA.
+            <strong>Tenders and awards</strong> {recordsCopy.tendersAndAwards}
           </li>
           <li>
-            <strong>Road geometry</strong> — no government source located.
+            <strong>Road geometry</strong> {recordsCopy.roadGeometry}
           </li>
           <li>
-            <strong>PMGSY rural roads</strong> — located, but its terms forbid republication.
+            <strong>PMGSY rural roads</strong> {recordsCopy.pmgsy}
           </li>
         </ul>
         <p style={{ fontSize: 11.5, color: "var(--ld-text-tertiary)", margin: "10px 0 0" }}>
-          Recorded in{" "}
+          {recordsCopy.recordedIn}{" "}
           <a
             className={controlStyles.link}
             style={{ fontSize: 11.5 }}
             href="https://github.com/MNikks01/LokDarpan/blob/main/.docs/06-government-sources/data-availability-matrix.md"
             rel="noreferrer noopener"
           >
-            the data availability matrix
+            {recordsCopy.matrixLink}
           </a>
-          , with the date each source was checked.
+          {recordsCopy.recordedWhen}
         </p>
       </div>
     </div>

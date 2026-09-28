@@ -1,6 +1,7 @@
 import type React from "react";
 import type { ServerText } from "@lokdarpan/neutrality";
 import { color } from "@/ui/tokens";
+import { observationCopy } from "@/copy/figures";
 
 /**
  * <Observation> accepts ONLY ServerText — text generated server-side from
@@ -49,7 +50,7 @@ export function Observation({ text, severity, confidence }: ObservationProps): R
 export function ObservationDisclaimer(): React.JSX.Element {
   return (
     <p style={{ fontSize: 13, color: color.text.secondary, maxWidth: "60ch" }}>
-      ⓘ These are data-consistency observations from official records, not findings of wrongdoing.
+      {observationCopy.disclaimer}
     </p>
   );
 }

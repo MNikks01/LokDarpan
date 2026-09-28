@@ -6,6 +6,7 @@ import type { DocumentSummary } from "@lokdarpan/domain";
 
 import { getJson } from "@/lib/api";
 import { color, radius, space } from "@/ui/tokens";
+import { documentsCopy } from "@/copy/pages";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +33,11 @@ export default async function DocumentsPage(): Promise<React.JSX.Element> {
     <main style={{ maxWidth: 760, margin: "0 auto", padding: space[7] }}>
       <h1 style={{ fontSize: 26, margin: 0, color: color.text.primary }}>Source documents</h1>
       <p style={{ color: color.text.secondary, fontSize: 14, lineHeight: 1.6 }}>
-        Documents published by government bodies and held here in full. A figure appears on this
-        site only after a person has checked it against the page it was read from.
+        {documentsCopy.intro}
       </p>
 
       {documents.length === 0 ? (
-        <p style={{ color: color.text.secondary }}>No documents have been collected yet.</p>
+        <p style={{ color: color.text.secondary }}>{documentsCopy.noneCollected}</p>
       ) : (
         <ul style={{ padding: 0, margin: `${String(space[4])}px 0 0` }}>
           {documents.map((doc) => (
