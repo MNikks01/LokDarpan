@@ -462,10 +462,16 @@ export async function loadTenders(db: pg.Client, options: LoadOptions): Promise<
 
     // How many versions the trigger wrote during this run — that is, how many
     // tenders the portal actually changed. Counted once against a high-water
-    // mark rather than per tender, so the loop stays one statement each.
+    // mark rather than per tender, so the loop stays one statement each, and
+    // only for this portal's tenders: a load of another portal running at the
+    // same time writes versions too, and counting those produced a negative
+    // `unchanged` that the database rightly refused.
     const versions = await db.query<{ count: string }>(
-      `SELECT count(*)::text AS count FROM tender_version WHERE id > $1::bigint`,
-      [highWaterMark],
+      `SELECT count(*)::text AS count
+         FROM tender_version v
+         JOIN tender t ON t.id = v.tender_id
+        WHERE v.id > $1::bigint AND t.portal_code = $2`,
+      [highWaterMark, portalCode],
     );
     changed = Number(versions.rows[0]?.count ?? "0");
 

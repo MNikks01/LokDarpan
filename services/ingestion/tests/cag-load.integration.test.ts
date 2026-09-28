@@ -100,7 +100,6 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     });
 
     beforeEach(async () => {
-      await db().query("BEGIN");
       // TRUNCATE rather than DELETE, and inside the transaction the afterEach
       // rolls back, so the real ledger is untouched.
       //
@@ -111,9 +110,27 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       // document ingested. A test whose setup cost grows with the corpus is a
       // test that eventually fails for a reason that has nothing to do with
       // what it checks.
-      await db().query(
-        "TRUNCATE document, document_page, document_text_item, document_fact CASCADE",
-      );
+      //
+      // TRUNCATE locks four tables one after another, and the other suites
+      // running alongside lock them in other orders — a reader facts first, a
+      // writer documents first — so no order is safe against all of them; CI
+      // deadlocked both ways on 2026-09-28. Postgres resolves a deadlock by
+      // rolling one side back, so the setup takes that as a reason to try again
+      // rather than a failure of the test. Anything else still fails it.
+      for (let attempt = 1; ; attempt++) {
+        await db().query("BEGIN");
+        try {
+          await db().query(
+            "TRUNCATE document_fact, document_text_item, document_page, document CASCADE",
+          );
+          break;
+        } catch (error: unknown) {
+          await db().query("ROLLBACK");
+          const deadlocked = (error as { code?: string }).code === "40P01";
+          if (!deadlocked || attempt >= 5) throw error;
+          await new Promise((done) => setTimeout(done, 100 * attempt));
+        }
+      }
       await db().query(
         `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
        VALUES ($1,'cag',$2, now(), 10, 'cag/t') ON CONFLICT (sha256) DO NOTHING`,

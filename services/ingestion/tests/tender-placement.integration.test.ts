@@ -5,6 +5,7 @@ import type { TenderDetail } from "../src/gepnic/detail";
 import type { FetchedArtifact } from "../src/gepnic/fetch";
 import { loadTenders } from "../src/gepnic/load";
 import { decidePlacement, MANUAL_CONFIDENCE, PlacementRefused } from "../src/gepnic/place";
+import { unplacedForReview } from "../src/gepnic/review";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
 /** Decisions are made as the reviewer when CI provides one, to prove the grants suffice. */
@@ -221,6 +222,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         PlacementRefused,
       );
       await expect(decide({ portalTenderId: "missing" })).rejects.toBeInstanceOf(PlacementRefused);
+    });
+
+    it("leaves decided tenders off the review list", async () => {
+      if (owner === undefined) return;
+      // A was placed by a reviewer and B recorded as unplaceable: neither is listed.
+      const listed = (await unplacedForReview(owner, STATE)).map((r) => r.portalTenderId);
+      expect(listed).not.toContain("A");
+      expect(listed).not.toContain("B");
     });
 
     it.skipIf(process.env["DATABASE_URL_REVIEWER"] === undefined)(
