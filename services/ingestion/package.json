@@ -27,7 +27,8 @@
     "backfill:portal-states": "tsx src/gepnic/backfill-states.ts",
     "ingest:pincodes": "tsx src/pincode/cli.ts",
     "tenders:resolve": "tsx src/gepnic/resolve-cli.ts",
-    "tenders:place": "tsx src/gepnic/place-cli.ts"
+    "tenders:place": "tsx src/gepnic/place-cli.ts",
+    "tenders:review": "tsx src/gepnic/review-cli.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",

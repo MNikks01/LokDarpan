@@ -9,6 +9,7 @@ import { putArtifact } from "../raw-store.js";
 import { readDirectoryFromApi } from "./api.js";
 import { replaceDirectory } from "./load.js";
 import { parseApiRecords, parseDirectory, type ParsedDirectory } from "./parse.js";
+import { cliArgs } from "../cli-args.js";
 
 /**
  * Load the Department of Posts pincode directory, by one of two routes.
@@ -97,6 +98,7 @@ async function readFromFile(values: {
 
 async function main(): Promise<void> {
   const { values } = parseArgs({
+    args: cliArgs(),
     options: {
       api: { type: "boolean" },
       file: { type: "string" },

@@ -26,10 +26,9 @@ import {
  * A tender a reviewer has decided (migration 0035) — placed, or recorded as
  * one that cannot be placed — is not listed again.
  *
- * What stays unresolved is printed with the clues a person would read — the
- * chain, the location, the pincode — as the review list. Nothing is placed by
- * hand from here; a `manual` placement is reserved in the schema for a review
- * tool that records who decided (see ADR-067).
+ * What stays unresolved is counted per state; `tenders:review` lists it,
+ * grouped by issuing office, and `tenders:place` records a reviewer's decision
+ * (ADR-068).
  */
 interface Unplaced {
   readonly id: string;
@@ -133,15 +132,10 @@ async function main(): Promise<void> {
         `${state.name_en}: ${String(placed)} ${would}placed, ` +
           `${String(remaining.length)} unresolved${hasDirectory ? "" : " · no directory loaded"}\n`,
       );
-      for (const row of remaining.slice(0, 5)) {
-        process.stdout.write(
-          `  review ${row.portal_tender_id} · ${row.organisation_chain ?? "(no chain)"} · ` +
-            `${row.location ?? "(no location)"} · ${row.pincode ?? "(no pincode)"}\n`,
-        );
-      }
     }
     process.stdout.write(
-      `${String(placedTotal)} ${would}placed, ${String(remainingTotal)} left for review\n`,
+      `${String(placedTotal)} ${would}placed, ${String(remainingTotal)} left for review ` +
+        "(tenders:review lists them)\n",
     );
   } finally {
     await db.end();
