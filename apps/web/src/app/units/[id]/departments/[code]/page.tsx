@@ -9,6 +9,7 @@ import { ApiError, getJson } from "@/lib/api";
 import { treasuryFiguresArePublishable } from "@/server/publishable";
 import { ProvenanceNote } from "@/components/Provenance";
 import { color, figureFontFeatures, radius, space } from "@/ui/tokens";
+import { departmentCopy } from "@/copy/pages";
 
 export const dynamic = "force-dynamic";
 
@@ -176,8 +177,7 @@ export default async function DepartmentPage({
         // Not published and not collected are different claims. Saying which
         // one this is keeps the page from implying the state publishes nothing.
         <p style={{ color: color.text.secondary, fontSize: 13, marginTop: 0 }}>
-          The treasury system publishes this department by code only. Its name is not part of the
-          published data.
+          {departmentCopy.nameByCodeOnly}
         </p>
       )}
 
@@ -197,8 +197,7 @@ export default async function DepartmentPage({
                 paddingTop: space[3],
               }}
             >
-              Release variance is released minus spent. Allocation variance is allocated minus
-              spent. They answer different questions and are not interchangeable.
+              {departmentCopy.varianceCaption}
             </caption>
             <thead>
               <tr>
@@ -242,11 +241,8 @@ export default async function DepartmentPage({
             fontSize: 13,
           }}
         >
-          <strong>Expenditure is not shown before FY {BEAMS_FIRST}.</strong> The treasury system
-          records a zero against most schemes in those years rather than an amount, so the figures
-          it publishes do not describe what was spent. Allocation and release are shown as
-          published; expenditure and the two variances are withheld rather than presented as a
-          comparison that would not be accurate.
+          <strong>{departmentCopy.expenditureWithheldHeading(BEAMS_FIRST)}</strong>{" "}
+          {departmentCopy.expenditureWithheld}
         </aside>
       )}
 
@@ -264,24 +260,22 @@ export default async function DepartmentPage({
             fontSize: 13,
           }}
         >
-          <strong>† Two government reports publish different allocation figures.</strong> For{" "}
-          {conflicts.length === 1
-            ? `FY ${String(conflicts[0]?.fiscalYear)}`
-            : `${String(conflicts.length)} of these years`}
-          , the departmental actuals report and the scheme-wise budget export do not agree. The
-          figure shown is from the actuals report; the scheme-wise export gives{" "}
-          {conflicts
-            .slice(0, 3)
-            .map((y) =>
-              y.allocatedInrAlternate === null
-                ? ""
-                : `${Money.fromDecimalString(y.allocatedInrAlternate).format()} for FY ${String(y.fiscalYear)}`,
-            )
-            .filter((t) => t !== "")
-            .join(", ")}
-          . Released and spent agree exactly between the two reports; only the allocation differs,
-          and which definition each uses has not been established. The{" "}
-          <em>allocated minus spent</em> column inherits this uncertainty.
+          <strong>{departmentCopy.conflictHeading}</strong>{" "}
+          {departmentCopy.conflictBody(
+            conflicts.length === 1
+              ? `FY ${String(conflicts[0]?.fiscalYear)}`
+              : `${String(conflicts.length)} of these years`,
+            conflicts
+              .slice(0, 3)
+              .map((y) =>
+                y.allocatedInrAlternate === null
+                  ? ""
+                  : `${Money.fromDecimalString(y.allocatedInrAlternate).format()} for FY ${String(y.fiscalYear)}`,
+              )
+              .filter((t) => t !== "")
+              .join(", "),
+          )}{" "}
+          <em>{departmentCopy.conflictColumn}</em> {departmentCopy.conflictTail}
         </aside>
       )}
 

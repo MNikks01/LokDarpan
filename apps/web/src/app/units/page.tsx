@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { listUnitsByLevel } from "@/lib/api";
 import { ProvenanceNote } from "@/components/Provenance";
 import { color, radius, space } from "@/ui/tokens";
+import { unitsCopy } from "@/copy/pages";
 
 /**
  * Rendered per request, not prerendered at build.
@@ -32,7 +33,7 @@ export default async function UnitsIndexPage(): Promise<React.JSX.Element> {
     <>
       <h1 style={{ fontSize: 26, marginBottom: space[1] }}>States and Union Territories</h1>
       <p style={{ color: color.text.secondary, fontSize: 14, marginTop: 0 }}>
-        {data.units.length} units, from the Local Government Directory.
+        {unitsCopy.fromDirectory(data.units.length)}
       </p>
 
       <ul

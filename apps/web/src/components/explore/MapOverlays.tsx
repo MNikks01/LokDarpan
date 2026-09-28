@@ -3,6 +3,7 @@
 import type React from "react";
 import { AreaTooltip, type HoverTarget } from "./AreaTooltip";
 import styles from "./explorer.module.css";
+import { exploreCopy } from "@/copy/explore";
 
 /**
  * Everything drawn on top of the map canvas: the hover card, the attribution,
@@ -33,8 +34,8 @@ export function MapOverlays({
     <>
       {hover !== null && <AreaTooltip target={hover} />}
       <p className={styles.attribution}>
-        {basemapAttribution === null ? "No base map shown" : `Base map: ${basemapAttribution}`} ·
-        Boundaries © OpenStreetMap contributors (ODbL) · MapLibre GL
+        {basemapAttribution === null ? "No base map shown" : `Base map: ${basemapAttribution}`} ·{" "}
+        {exploreCopy.attributionTail}
       </p>
       {loading && (
         <p className={styles.attribution} style={{ left: 12, right: "auto" }} role="status">
@@ -52,11 +53,10 @@ export function MapUnavailable({ reason }: { readonly reason: string }): React.J
   return (
     <div className={styles.mapUnavailable} role="alert">
       <div style={{ maxWidth: "46ch" }}>
-        <p style={{ fontWeight: 600, marginBottom: 8 }}>The map could not be drawn</p>
+        <p style={{ fontWeight: 600, marginBottom: 8 }}>{exploreCopy.mapUnavailableHeading}</p>
         <p style={{ fontSize: 13.5, color: "var(--ld-text-secondary)" }}>{reason}</p>
         <p style={{ fontSize: 13, color: "var(--ld-text-tertiary)", marginTop: 12 }}>
-          Every record on this page is also reachable from the works list, which does not need the
-          map.
+          {exploreCopy.mapUnavailableFallback}
         </p>
       </div>
     </div>

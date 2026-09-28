@@ -5,6 +5,7 @@ import { datasetVersionOpenedAt, geographyRepository } from "@/server/container"
 import { ExploreShell } from "@/components/explore/ExploreShell";
 import { parseExplorerState, reconcile, reconcilePin, toSearchParams } from "@/state/explorer-url";
 import { color } from "@/ui/tokens";
+import { exploreSetupCopy } from "@/copy/pages";
 
 export const metadata: Metadata = {
   title: "Explore official records by place — LokDarpan",
@@ -64,9 +65,10 @@ export default async function ExplorePage({
 }
 
 /**
- * Boundary geometry is fetched at setup rather than committed, because the
- * upstream dataset declares no licence. When it has not been fetched the page
- * says exactly that and gives the command, instead of rendering a blank map.
+ * Boundary geometry is generated from the ledger at build time (`geo:fetch`)
+ * rather than committed: it is derived data, and a copy in the repository would
+ * drift from the ledger it came from. When it has not been fetched the page says
+ * exactly that and gives the command, instead of rendering a blank map.
  */
 function GeometryMissing({
   error,
@@ -75,7 +77,7 @@ function GeometryMissing({
 }): React.JSX.Element {
   return (
     <div style={{ maxWidth: "62ch", margin: "0 auto", padding: 24 }}>
-      <h1 style={{ fontSize: 22 }}>The map needs its boundary geometry</h1>
+      <h1 style={{ fontSize: 22 }}>{exploreSetupCopy.heading}</h1>
       <p style={{ color: color.text.secondary }}>{error.message}</p>
       <pre
         style={{
@@ -89,12 +91,7 @@ function GeometryMissing({
       >
         {error.command}
       </pre>
-      <p style={{ fontSize: 13, color: color.text.tertiary }}>
-        Administrative boundaries are not committed to this repository: the upstream dataset
-        declares no licence, and <code>.docs/17-legal/legal-ethical-rules.md</code> does not permit
-        republishing material whose terms have not been established. The command above fetches and
-        simplifies it into <code>apps/web/public/geo</code>, which is gitignored.
-      </p>
+      <p style={{ fontSize: 13, color: color.text.tertiary }}>{exploreSetupCopy.notCommitted}</p>
     </div>
   );
 }

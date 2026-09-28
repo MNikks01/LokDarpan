@@ -4,6 +4,7 @@ import { formatAmount, formatAmountSpoken } from "@lokdarpan/money";
 import { isReviewComplete, type DocumentFactsView, type PublishedFact } from "@lokdarpan/domain";
 
 import { color, figureFontFeatures, radius, space } from "@/ui/tokens";
+import { publishedFactsCopy } from "@/copy/figures";
 
 /**
  * Presentation for verified facts, kept out of the route so it can be rendered
@@ -90,7 +91,7 @@ export function FactCard({ fact }: { readonly fact: PublishedFact }): React.JSX.
         {fact.origin === "corrected_by_reviewer" && (
           // Stated, never silent. A reader comparing this to the PDF must know
           // the figure shown is the reviewer's reading, not the extractor's.
-          <> · corrected by the reviewer against the page</>
+          <>{publishedFactsCopy.correctedByReviewer}</>
         )}
       </div>
     </li>
@@ -128,15 +129,10 @@ export function Scope({ view }: { readonly view: DocumentFactsView }): React.JSX
           ? "Every candidate extracted from this document has been reviewed."
           : `${String(view.awaitingReview)} further extracted candidates are awaiting review and are not shown.`}
       </p>
-      <p style={{ margin: "8px 0 0" }}>
-        This is not a summary of the document, and absence here does not mean the document is silent
-        on a subject — it means nobody has confirmed a reading of it yet. An audit report examines
-        selected matters; it is not a register of all of them.
-      </p>
+      <p style={{ margin: "8px 0 0" }}>{publishedFactsCopy.notASummary}</p>
       {view.pagesWithoutText > 0 && (
         <p style={{ margin: "8px 0 0" }}>
-          {view.pagesWithoutText} of {view.pageCount} pages carried no readable text and were not
-          searched. They may contain figures this page does not show.
+          {publishedFactsCopy.pagesWithoutText(view.pagesWithoutText, view.pageCount)}
         </p>
       )}
     </aside>

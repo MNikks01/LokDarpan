@@ -4,6 +4,7 @@ import type React from "react";
 import type { BoundarySourceKind, GeoUnit } from "@lokdarpan/domain";
 import type { OutlineSource } from "./ExploreShell";
 import styles from "./explorer.module.css";
+import { exploreCopy } from "@/copy/explore";
 
 /**
  * Where the lines on the map came from.
@@ -54,7 +55,7 @@ export function BoundarySources({
         {byKind.size === 0 ? (
           <p style={{ fontSize: 12.5, color: "var(--ld-text-secondary)", margin: 0 }}>
             <span aria-hidden="true">▤ </span>
-            No boundary is held for anything inside this place.
+            {exploreCopy.noBoundaryHeld}
           </p>
         ) : (
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 8 }}>

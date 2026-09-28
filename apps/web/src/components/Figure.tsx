@@ -2,6 +2,7 @@ import type React from "react";
 import type { Provenance, Figure as FigureData } from "@lokdarpan/contracts";
 import { formatAmount, formatAmountSpoken } from "@lokdarpan/money";
 import { color, figureFontFeatures } from "@/ui/tokens";
+import { figureCopy } from "@/copy/figures";
 
 /**
  * <Figure> — the ONLY way to display a monetary fact.
@@ -38,8 +39,7 @@ export function Figure({ label, data, emphasis = "md" }: FigureProps): React.JSX
           {data.missingReason}
         </div>
         <p style={{ fontSize: 13, color: color.text.secondary, margin: "8px 0 0" }}>
-          This does not mean no money was spent — it means the record has not been published or
-          collected yet.
+          {figureCopy.missingIsNotZero}
         </p>
         {data.expectedSource && (
           <div style={{ fontSize: 12, color: color.text.tertiary, marginTop: 6 }}>

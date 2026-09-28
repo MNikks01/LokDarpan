@@ -22,6 +22,7 @@ import { BoundarySources } from "./BoundarySources";
 import { TenderList, TendersPanel, useTenderOverview, useTendersFor } from "./tenders";
 import { useExplorerGeography, type LevelCoverage, type RecordsState } from "./use-explorer-data";
 import styles from "./explorer.module.css";
+import { exploreCopy } from "@/copy/explore";
 
 /**
  * The map, loaded after the page is interactive (ADR-062).
@@ -246,8 +247,7 @@ export function ExploreShell({
       <div>
         <p className={styles.notice}>
           <span aria-hidden="true">◆</span>
-          Official records only. Every figure shown has been checked by a person against the page it
-          was read from.
+          {exploreCopy.notice}
         </p>
         <PinNotice pinnedVersion={pinnedVersion} pinnedAt={pinnedAt} />
       </div>

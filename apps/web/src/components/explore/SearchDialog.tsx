@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { SearchResult, SearchResultKind } from "@lokdarpan/domain";
 import { Skeleton, controlStyles } from "@/components/ui";
 import styles from "./explorer.module.css";
+import { searchCopy } from "@/copy/explore";
 
 const GROUP_ORDER: readonly SearchResultKind[] = ["place", "record"];
 const GROUP_LABEL: Readonly<Record<SearchResultKind, string>> = {
@@ -155,13 +156,12 @@ export function SearchDialog({
           )}
           {failed && (
             <p style={{ fontSize: 13, padding: 10, margin: 0 }} role="alert">
-              Search is unavailable. The place selectors still work.
+              {searchCopy.unavailable}
             </p>
           )}
           {!loading && !failed && term.trim().length >= 2 && grouped.length === 0 && (
             <p style={{ fontSize: 13, padding: 10, margin: 0, color: "var(--ld-text-secondary)" }}>
-              Nothing held matches “{term.trim()}”. Only places and records already ingested are
-              searchable.
+              {searchCopy.noMatch(term.trim())}
             </p>
           )}
           {!loading &&

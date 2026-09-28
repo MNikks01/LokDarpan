@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ApiError, getUnit, type AdminUnit } from "@/lib/api";
 import { ProvenanceNote } from "@/components/Provenance";
 import { color, radius, space } from "@/ui/tokens";
+import { unitsCopy } from "@/copy/pages";
 
 /**
  * Rendered per request, not prerendered at build.
@@ -141,8 +142,7 @@ export default async function UnitPage({
           // neither is "none". Saying which one this is keeps the page from
           // implying the government publishes nothing here.
           <p style={{ color: color.text.secondary, fontSize: 14, marginBottom: 0 }}>
-            Sub-units for this unit have not been collected yet. The Local Government Directory
-            publishes them; they are not part of the current dataset.
+            {unitsCopy.subUnitsNotCollected}
           </p>
         ) : (
           <ul style={{ listStyle: "none", padding: 0, margin: `${String(space[3])}px 0 0` }}>
