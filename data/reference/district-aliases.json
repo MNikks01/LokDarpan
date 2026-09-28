@@ -7,9 +7,9 @@
       "district_lgd_code": "39",
       "district_name": "Sri Muktsar Sahib",
       "evidence": "Punjab has one district containing the name: Sri Muktsar Sahib. A Water Supply and Sanitation tender whose chain reads 'Division No. 2, Muktsar' gives its location as 'Sri Muktsar Sahib' (local collection, 2026-09).",
-      "status": "proposed",
-      "reviewed_by": null,
-      "reviewed_on": null
+      "status": "approved",
+      "reviewed_by": "MNikks01 (maintainer)",
+      "reviewed_on": "2026-09-29"
     },
     {
       "state_lgd_code": "5",
@@ -17,9 +17,9 @@
       "district_lgd_code": "52",
       "district_name": "Pauri Garhwal",
       "evidence": "Uttarakhand has one district containing the name: Pauri Garhwal. Chains read '12th Circle Pauri' and 'SPO Pauri'.",
-      "status": "proposed",
-      "reviewed_by": null,
-      "reviewed_on": null
+      "status": "approved",
+      "reviewed_by": "MNikks01 (maintainer)",
+      "reviewed_on": "2026-09-29"
     },
     {
       "state_lgd_code": "5",
@@ -27,9 +27,9 @@
       "district_lgd_code": "55",
       "district_name": "Tehri Garhwal",
       "evidence": "Uttarakhand has one district containing the name: Tehri Garhwal. Tenders give 'Tehri' as a location; no chain seen yet names it, so this alias places nothing until one does.",
-      "status": "proposed",
-      "reviewed_by": null,
-      "reviewed_on": null
+      "status": "approved",
+      "reviewed_by": "MNikks01 (maintainer)",
+      "reviewed_on": "2026-09-29"
     }
   ]
 }
