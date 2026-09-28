@@ -4,6 +4,7 @@ import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run"
 import { districtKey, type TenderDetail } from "./detail";
 import type { FetchedArtifact } from "./fetch";
 import type { ParsedTender } from "./landing";
+import { aliasesOfState, NO_ALIASES, type ResolvedAlias } from "./aliases";
 import {
   EMPTY_DIRECTORY,
   directoryForState,
@@ -86,6 +87,7 @@ export function placementFor(
   detail: TenderDetail | null,
   districts: ReadonlyMap<string, number>,
   directory: StateDirectory = EMPTY_DIRECTORY,
+  aliases: ReadonlyMap<string, ResolvedAlias> = NO_ALIASES,
 ): Resolution {
   if (detail === null) return resolveDistrict(NO_CLUES, districts, EMPTY_DIRECTORY);
   return resolveDistrict(
@@ -97,6 +99,7 @@ export function placementFor(
     },
     districts,
     directory,
+    aliases,
   );
 }
 
@@ -106,6 +109,7 @@ const NO_CLUES = { districtName: null, districtSource: null, pincode: null, loca
 interface Places {
   readonly districts: ReadonlyMap<string, number>;
   readonly directory: StateDirectory;
+  readonly aliases: ReadonlyMap<string, ResolvedAlias>;
 }
 
 /** The ledger's English name for a state, which the directory is matched against. */
@@ -208,19 +212,24 @@ const UPSERT = `
     -- placement replaces all six, and no placement keeps all six. Coalescing
     -- them one by one would let a new explicit district keep an old
     -- inference's evidence and misdescribe how it was reached.
-    admin_unit_id = COALESCE(EXCLUDED.admin_unit_id, tender.admin_unit_id),
-    linkage_confidence = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+    --
+    -- A reviewer's placement (0035) is never replaced here: a rule that could
+    -- not place the tender before does not outrank the person who did.
+    admin_unit_id = CASE WHEN tender.district_source = 'manual'
+      THEN tender.admin_unit_id ELSE COALESCE(EXCLUDED.admin_unit_id, tender.admin_unit_id) END,
+    linkage_confidence = CASE WHEN EXCLUDED.admin_unit_id IS NULL OR tender.district_source = 'manual'
       THEN tender.linkage_confidence ELSE EXCLUDED.linkage_confidence END,
-    district_source = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+    district_source = CASE WHEN EXCLUDED.admin_unit_id IS NULL OR tender.district_source = 'manual'
       THEN tender.district_source ELSE EXCLUDED.district_source END,
-    district_evidence_sha256 = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+    district_evidence_sha256 = CASE WHEN EXCLUDED.admin_unit_id IS NULL OR tender.district_source = 'manual'
       THEN tender.district_evidence_sha256 ELSE EXCLUDED.district_evidence_sha256 END,
-    district_evidence_key = CASE WHEN EXCLUDED.admin_unit_id IS NULL
+    district_evidence_key = CASE WHEN EXCLUDED.admin_unit_id IS NULL OR tender.district_source = 'manual'
       THEN tender.district_evidence_key ELSE EXCLUDED.district_evidence_key END,
     -- Re-dated only when the placement itself changes, so the time says when
     -- this district was decided, not when the tender was last seen.
     district_resolved_at = CASE
-      WHEN EXCLUDED.admin_unit_id IS NULL THEN tender.district_resolved_at
+      WHEN EXCLUDED.admin_unit_id IS NULL OR tender.district_source = 'manual'
+      THEN tender.district_resolved_at
       WHEN EXCLUDED.admin_unit_id IS NOT DISTINCT FROM tender.admin_unit_id
        AND EXCLUDED.district_source IS NOT DISTINCT FROM tender.district_source
        AND tender.district_resolved_at IS NOT NULL
@@ -312,7 +321,7 @@ async function writeOne(
 ): Promise<{ readonly inserted: boolean; readonly placed: boolean }> {
   await db.query("SAVEPOINT tender");
   try {
-    const place = placementFor(record.detail, places.districts, places.directory);
+    const place = placementFor(record.detail, places.districts, places.directory, places.aliases);
     const row = await db.query<{ inserted: boolean }>(UPSERT, parameters(record, place, context));
     await db.query("RELEASE SAVEPOINT tender");
     return { inserted: row.rows[0]?.inserted === true, placed: place.adminUnitId !== null };
@@ -435,10 +444,11 @@ export async function loadTenders(db: pg.Client, options: LoadOptions): Promise<
     const stateName = await stateNameOf(db, stateLgdCode);
     const directory = stateName === null ? EMPTY_DIRECTORY : await directoryForState(db, stateName);
 
+    const aliases = await aliasesOfState(db, stateLgdCode);
     const written = await writeAll(
       db,
       records,
-      { districts, directory },
+      { districts, directory, aliases },
       {
         portalCode,
         sha256: artifact.sha256,

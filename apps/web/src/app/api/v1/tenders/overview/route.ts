@@ -68,7 +68,7 @@ export function GET(request: Request): Promise<Response> {
         placed: {
           tenders: districts.reduce((sum, d) => sum + d.tenderCount, 0),
           districts: districts.length,
-          // Placed by pincode or place name, not named by the issuing office.
+          // Not named by the issuing office: placed from a pincode, a place name or a reviewer.
           inferred: districts.reduce((sum, d) => sum + d.inferredCount, 0),
         },
         // The terms each portal's material is held under (ADR-055). For the whole

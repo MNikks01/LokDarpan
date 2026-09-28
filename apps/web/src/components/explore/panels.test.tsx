@@ -418,6 +418,18 @@ describe("tender details are withheld under the portals' terms", () => {
     expect(markup).not.toContain("The issuing office names this district");
   });
 
+  it("says when the office's own name was read through a reviewed alias", () => {
+    const aliased = {
+      ...tender,
+      districtSource: "chain_unit",
+      districtEvidenceKey: "alias:Muktsar → Sri Muktsar Sahib",
+    };
+    const markup = renderToStaticMarkup(
+      <TenderList heading="Tenders" tenders={[aliased]} loading={false} detailsWithheld={false} />,
+    );
+    expect(markup).toContain("names Muktsar, read as this district under a reviewed alias");
+  });
+
   it("says how much of the shading is inference", () => {
     const markup = tenderPanel({
       collection: collection({ status: "collected", portalCode: "tripura" }),
@@ -426,7 +438,7 @@ describe("tender details are withheld under the portals' terms", () => {
       ],
       placed: { tenders: 5, districts: 1, inferred: 3 },
     });
-    expect(markup).toContain("3 of these are placed by inference");
+    expect(markup).toContain("3 of these are not named by the issuing office");
   });
 
   it("offers no way to open the unplaced list while details are withheld", () => {

@@ -3,6 +3,7 @@ import pg from "pg";
 import { parseDetail } from "./detail";
 import { CrawlNotPermitted, PortalSession, isStaleSession } from "./fetch";
 import { parseLanding } from "./landing";
+import { aliasesOfState } from "./aliases";
 import { districtsOfState, loadTenders, type TenderRecord } from "./load";
 import { GEPNIC_SWEEP_LOCK, sweepLockHolder, takeSweepLock } from "../advisory-lock";
 import { openRun } from "../ingestion-run";
@@ -160,7 +161,11 @@ async function collectPortal(client: pg.Client, target: Target): Promise<PortalO
     return { ...empty, advertised: tenders.length, refusal: "no districts held for this state" };
   }
 
-  const records = await collectDetails(session, baseUrl, tenders, new Set(districts.keys()));
+  // An approved alias is a name the chain may use for a district, so the
+  // parser must recognise it as one (see `aliases.ts`).
+  const aliases = await aliasesOfState(client, stateLgdCode);
+  const known = new Set([...districts.keys(), ...aliases.keys()]);
+  const records = await collectDetails(session, baseUrl, tenders, known);
   const result = await loadTenders(client, {
     portalCode,
     stateLgdCode,
