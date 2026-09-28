@@ -1,7 +1,14 @@
 import pg from "pg";
 
+import { aliasesOfState } from "./aliases.js";
+import { districtFromChain } from "./detail.js";
 import { districtsOfState } from "./load.js";
-import { directoryForState, resolveDistrict, type StateDirectory } from "./resolve.js";
+import {
+  directoryForState,
+  resolveDistrict,
+  type StateDirectory,
+  type TenderClues,
+} from "./resolve.js";
 
 /**
  * Re-resolve held tenders that are still unplaced, then list what remains.
@@ -10,10 +17,14 @@ import { directoryForState, resolveDistrict, type StateDirectory } from "./resol
  *   … tenders:resolve -- --dry-run
  *
  * The collector resolves every tender it sees, so a tender still listed is
- * placed on its next sighting. This reaches the ones no longer listed. It only
- * adds inferred placements to unplaced rows: an explicit district was already
- * tried when the tender was read, and a placement already held is never
- * replaced here.
+ * placed on its next sighting. This reaches the ones no longer listed, and
+ * those read before a rule improved: the explicit step is re-run over each
+ * stored organisation chain, with the district names and approved aliases the
+ * ledger holds now, before the pincode and place-name steps. It only touches
+ * unplaced rows; a placement already held is never replaced here.
+ *
+ * A tender a reviewer has decided (migration 0035) — placed, or recorded as
+ * one that cannot be placed — is not listed again.
  *
  * What stays unresolved is printed with the clues a person would read — the
  * chain, the location, the pincode — as the review list. Nothing is placed by
@@ -28,6 +39,20 @@ interface Unplaced {
   readonly pincode: string | null;
 }
 
+/** What a stored tender says, with its chain read again by today's rules. */
+function cluesOf(row: Unplaced, known: ReadonlySet<string>): TenderClues {
+  const named =
+    row.organisation_chain === null
+      ? null
+      : districtFromChain(row.organisation_chain.split("||"), known);
+  return {
+    districtName: named?.name ?? null,
+    districtSource: named?.source ?? null,
+    pincode: row.pincode,
+    location: row.location,
+  };
+}
+
 /** One state's unplaced tenders, resolved; returns how many placed and those left. */
 async function resolveState(
   db: pg.Client,
@@ -40,11 +65,14 @@ async function resolveState(
 }> {
   const districts = await districtsOfState(db, state.state_lgd_code);
   const directory: StateDirectory = await directoryForState(db, state.name_en);
+  const aliases = await aliasesOfState(db, state.state_lgd_code);
+  const known = new Set([...districts.keys(), ...aliases.keys()]);
   const unplaced = await db.query<Unplaced>(
     `SELECT t.id, t.portal_tender_id, t.organisation_chain, t.location, t.pincode
        FROM tender t
        JOIN tender_collection_window w ON w.portal_code = t.portal_code
       WHERE w.state_lgd_code = $1 AND t.admin_unit_id IS NULL
+        AND NOT EXISTS (SELECT 1 FROM tender_district_decision d WHERE d.tender_id = t.id)
       ORDER BY t.id`,
     [state.state_lgd_code],
   );
@@ -52,11 +80,7 @@ async function resolveState(
   let placed = 0;
   const remaining: Unplaced[] = [];
   for (const row of unplaced.rows) {
-    const result = resolveDistrict(
-      { districtName: null, districtSource: null, pincode: row.pincode, location: row.location },
-      districts,
-      directory,
-    );
+    const result = resolveDistrict(cluesOf(row, known), districts, directory, aliases);
     if (result.adminUnitId === null) {
       remaining.push(row);
       continue;

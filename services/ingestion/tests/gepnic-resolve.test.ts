@@ -129,3 +129,48 @@ describe("a place name", () => {
     expect(placeKey("Pune")).not.toBe(placeKey("Panna"));
   });
 });
+
+describe("a reviewed alias", () => {
+  const ALIASES = new Map([
+    [
+      districtKey("Muktsar"),
+      { adminUnitId: 9, alias: "Muktsar", districtName: "Sri Muktsar Sahib" },
+    ],
+  ]);
+
+  it("places a district the chain names by another name, and says which", () => {
+    const result = resolveDistrict(
+      clues({ districtName: "Muktsar", districtSource: "chain_unit" }),
+      DISTRICTS,
+      EMPTY_DIRECTORY,
+      ALIASES,
+    );
+    expect(result).toEqual({
+      adminUnitId: 9,
+      method: "chain_unit",
+      confidence: 0.9,
+      evidenceSha256: null,
+      evidenceKey: "alias:Muktsar → Sri Muktsar Sahib",
+    });
+  });
+
+  it("gives way to the ledger's own spelling, and does nothing unapproved", () => {
+    // A name the ledger holds is never read through an alias.
+    expect(
+      resolveDistrict(
+        clues({ districtName: "Cuddalore", districtSource: "chain_unit" }),
+        DISTRICTS,
+        EMPTY_DIRECTORY,
+        ALIASES,
+      ).evidenceKey,
+    ).toBeNull();
+    // Without the alias, the same chain places nothing.
+    expect(
+      resolveDistrict(
+        clues({ districtName: "Muktsar", districtSource: "chain_unit" }),
+        DISTRICTS,
+        EMPTY_DIRECTORY,
+      ).adminUnitId,
+    ).toBeNull();
+  });
+});

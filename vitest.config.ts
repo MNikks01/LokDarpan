@@ -65,6 +65,7 @@ export default defineConfig({
         "services/ingestion/src/osm/cli.ts",
         "services/ingestion/src/pincode/cli.ts",
         "services/ingestion/src/gepnic/resolve-cli.ts",
+        "services/ingestion/src/gepnic/place-cli.ts",
         "services/ingestion/src/gepnic/cli.ts",
         "services/ingestion/src/gepnic/sample-window.ts",
         "services/ingestion/src/gepnic/backfill-states.ts",
