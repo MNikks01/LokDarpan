@@ -6,13 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **LokDarpan (लोकदर्पण)** — a public-finance, governance and infrastructure intelligence platform for India, built entirely on official government records. It links revenue → budget → allocation → release → expenditure → tender → contractor → work progress → audit into one traceable ledger and runs mathematical-consistency checks over it.
 
-**Implementation has begun, and is thin.** `apps/web` is a working Next.js scaffold (W1) with 38 tests; `packages/money`, `packages/neutrality` and `packages/contracts` are real. Everything under `services/` is an empty skeleton. There is **no backend and no ingested data** — every figure the app renders is fixture data, labelled as such.
+**It is deployed and holds real data** (as of 29 September 2026). The site runs on Vercel, reading a PostgreSQL + PostGIS ledger on Neon; a GitHub Actions job collects tenders nightly. The ledger holds the LGD state hierarchy with OpenStreetMap district geometry, CAG audit reports with person-verified facts, BEAMS actuals for Maharashtra (collected, not displayed), and open tenders from 21 state e-procurement portals, placed in districts where the evidence allows (ADR-067, ADR-068). Only the example project page (`/project/[id]`) renders fixture data, and it says so.
+
+What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
 
 ```bash
-pnpm install && pnpm test          # 38 tests
+pnpm install && pnpm test          # ~1,340 tests; integration suites need a database
 pnpm dev                           # web client
-pnpm neutrality apps packages      # docs/15 language gate
+pnpm neutrality apps packages      # the language gate
+pnpm architecture                  # import rules and rule B (no sentences in components)
 ```
+
+Integration tests run against the Docker Postgres (`docker compose up`, host port 5433) with `DATABASE_URL`, `DATABASE_URL_READONLY`, `DATABASE_URL_REVIEWER` and `DATABASE_URL_ETL` set; without them they skip, and coverage falls below its floor.
 
 **The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The build order is in `.docs/01-product/sprint-plan.md` (cross-functional; supersedes `roadmap-web.md`). This reversed an earlier mobile-only decision, so **treat everything under `.docs/10-mobile/` and `adr/001`–`010` as the deferred mobile specification, not the active plan**. `.docs/decisions/web-first-pivot.md` records what changed and, more usefully, what did not.
 
@@ -28,12 +33,12 @@ One documentation root. `.docs/` is the source of truth for product and engineer
                 07-analytics · 08-risk · 09-ai · 10-mobile · 11-api
                 12-security · 13-observability · 14-testing · 15-scalability
                 16-operations · 17-legal · adr/ · wireframes/ · diagrams/ · decisions/
-apps/web/       Next.js public site — the first product, W1 built
+apps/web/       Next.js public site and /api/v1 — deployed
 apps/mobile/    React Native / Expo — deferred until after web launch
-services/       ingestion · normalization · entity-resolution · analytics
-                risk-engine · ai · api
-packages/       money · neutrality · contracts · domain
-                config · database · observability · errors
+services/       ingestion · api · ocr (real)
+                normalization · entity-resolution · analytics · risk-engine · ai (skeletons)
+packages/       money · neutrality · contracts · domain · database
+                observability · errors · architecture (import and copy rules)
 data/           raw (immutable) · staging · normalized · reference · fixtures · samples
 database/       migrations · seeds · functions · views
 ```
@@ -97,11 +102,11 @@ These come from cross-referencing several documents; each is load-bearing.
 
 **Mobile, deferred** (`.docs/02-architecture/mobile-architecture.md`): Expo + React Native, four enforced layers, four bottom tabs. Stands for when mobile resumes; revalidate the toolchain at that point.
 
-Twelve ADRs in `.docs/adr/` record technology decisions with alternatives and trade-offs. **ADRs append; they are never rewritten.** 011–012 are active; 001–010 carry a `Deferred` status header and stay.
+ADRs in `.docs/adr/` (001–068) record decisions with alternatives and trade-offs. **ADRs append; they are never rewritten** — a change is a new ADR or a dated addendum. 001–010 are the deferred mobile specification; 011 onward are active.
 
 ## Working with the data-source registry
 
-`.docs/06-government-sources/` catalogues 99 curated sources (96 verified) plus a 6,466-row catalogue crawled from the Integrated Government Online Directory.
+`.docs/06-government-sources/` catalogues 100 curated sources (97 verified) plus a 6,466-row catalogue crawled from the Integrated Government Online Directory.
 
 **The rule the registry is built on:** never record "the government does not publish X" because you could not find X. Record "X was not identified in the sources reviewed as of \[date\]."
 
@@ -116,14 +121,24 @@ Fields with no evidence are `null` or `"unknown"` — never guessed. If you add 
 Do not treat these as settled; they are tracked in `.docs/README.md` and `.docs/06-government-sources/SOURCE-DISCOVERY-REPORT.md`.
 
 - **The execution-data gap — located, and licence-blocked.** No _usable_ source exists for physical progress, financial progress, work orders, completion or per-project expenditure, so `.docs/07-analytics/analytics-engine.md`'s central `Released − Utilized` variance still has no source it may draw on, and the project-level Money Trail depends on it. But the blocker is no longer discovery: PMGSY's **OMMAS was found reachable on 28 August** at `pmgsy.dord.gov.in` (the discovered host `online.omms.nic.in` is gone from public DNS), publishing exactly that register at work level across 92 public report routes with no login. **NRIDA's terms forbid copying or republishing it without prior written permission** — the most restrictive licence of any source examined. `.docs/06-government-sources/pmgsy-ommas-findings.md` has the evidence.
-- **Three of four sources now turn on permission.** LGD and CAG permit republication; BEAMS and PMGSY do not. Every remaining route to the execution half runs through a written request to a government body, and **no request has been sent**. This is a decision, not a discovery task.
-- **Backend P0 items** (`.docs/11-api/client-api-contract.md` §7, re-prioritised for web in `.docs/01-product/roadmap-web.md` §Backend dependencies): a search endpoint (absent entirely from `.docs/11-api/api-documentation.md`), money as decimal strings, both variances, three confidences, provenance page anchors, no inline geometry, and a CGNAT-safe rate tier — per-IP limits misfire on Indian carrier NAT, which affects web users too. The composite BFF dropped from P0 to P2: a server-rendered client can make parallel calls.
+- **Permission, not discovery, is the blocker.** LGD and CAG permit republication; BEAMS, PMGSY and the tender portals' issuing departments do not. Drafts exist and are tracked in `.docs/06-government-sources/permission-requests.json` (checked by a test), but **no request has been sent**. Until one is granted, BEAMS figures and tender details stay withheld (`PUBLISH_BEAMS_FIGURES`, `PUBLISH_TENDER_DETAILS` — never set them in production without a recorded permission).
+- **Backend P0 items** (`.docs/11-api/client-api-contract.md` §7, re-prioritised for web in `.docs/01-product/roadmap-web.md` §Backend dependencies). Some have landed — `/api/v1/search` exists and money crosses the wire as decimal strings — so check the code before assuming any is missing. The list: a search endpoint, money as decimal strings, both variances, three confidences, provenance page anchors, no inline geometry, and a CGNAT-safe rate tier — per-IP limits misfire on Indian carrier NAT, which affects web users too. The composite BFF dropped from P0 to P2: a server-rendered client can make parallel calls.
 - ~~Mobile-only removes the desktop workflow for researchers and journalists~~ — **resolved.** PR-1 was the reason for the web-first pivot; the researcher surfaces (tables, bulk export, API access) ship before launch in W9.
 - **A second platform pivot would be expensive.** Web-first should be treated as settled through launch.
 
+## Operating what is deployed
+
+Runbooks are in `.docs/16-operations/`. What catches people out:
+
+- **Neon has two connection strings.** Migrations, admin and the nightly collector use the **direct** one (no `-pooler`): the collector's advisory lock does not survive PgBouncer. The site uses the **pooled** one, as the read-only `lokdarpan_api` user. Migrations are applied by hand with the owner credential before a release that needs them; nothing in CI touches production.
+- **Credentials never enter the repository, a commit, a tool argument or a chat.** Pass them through environment variables or files outside the repo.
+- **Branches:** a feature branch rebases into `development`; a release is a merge commit from `development` into `main`, after which `development` is fast-forwarded to `main`. Wait for all checks, including Vercel, before merging. Commit scopes are limited by `commitlint.config.*`.
+- **`robots.txt` is honoured, always.** `data.gov.in` is `Disallow: /`, so it is read only through its API (which needs a key). Two state tender portals disallow crawling and are not collected.
+
 ## Conventions
 
-- `docs/` is the platform spec; `.docs/` is the mobile spec; `.docs/adr/` holds decisions. Code comments explain _why_; `.docs/` explains _what and how_.
+- `.docs/` is the one documentation root, and `.docs/adr/` holds decisions. Code comments explain _why_; `.docs/` explains _what and how_.
+- Reader-facing sentences live in `apps/web/src/copy/`, never in a component or route: rule B of ADR-059 is strict (`pnpm architecture`), and the neutrality gate reviews them there.
 - A change to an architectural decision updates the relevant `.docs/` file or adds an ADR **in the same PR**. A decision that lives only in a commit message will be silently reversed within two quarters.
 - Every document in `.docs/` is intended to have at least one automated check backing it once code exists (`.docs/02-architecture/repository-structure.md` maps them). A specification with no enforcement mechanism becomes fiction.
 - When code lands, `apps/web` joins the monorepo of `.docs/02-architecture/deliverables-and-risk.md` (with `apps/mobile` added later) — not separate repositories — so the neutrality word list, API contract, domain types and money formatting are shared packages rather than duplicated copies that drift.

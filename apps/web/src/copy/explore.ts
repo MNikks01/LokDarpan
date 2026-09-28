@@ -12,8 +12,12 @@ export const exploreCopy = {
 
   attributionTail: "Boundaries © OpenStreetMap contributors (ODbL) · MapLibre GL",
   mapUnavailableHeading: "The map could not be drawn",
+  /**
+   * Only the map canvas fails; the panels beside it keep working. There is no
+   * works list — no register of works exists — so this names what does remain.
+   */
   mapUnavailableFallback:
-    "Every record on this page is also reachable from the works list, which does not need the map.",
+    "The records and tenders held for a place do not need the map: choose the place with the selectors beside it, or use search.",
 
   documentNothingVerified:
     "Nothing in this document has been verified yet, so nothing from it is shown. Its candidates are extracted and awaiting review.",
