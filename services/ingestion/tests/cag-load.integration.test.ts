@@ -111,8 +111,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       // document ingested. A test whose setup cost grows with the corpus is a
       // test that eventually fails for a reason that has nothing to do with
       // what it checks.
+      //
+      // The tables are named fact first, and TRUNCATE locks them in the order
+      // given. A reader joining facts to their documents — the reviewer-role
+      // suite, running alongside — takes its locks fact first too, so it can
+      // only make this wait. Named document first, the two took each other's
+      // second lock and deadlocked (CI, 2026-09-28).
       await db().query(
-        "TRUNCATE document, document_page, document_text_item, document_fact CASCADE",
+        "TRUNCATE document_fact, document_text_item, document_page, document CASCADE",
       );
       await db().query(
         `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
