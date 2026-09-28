@@ -84,3 +84,12 @@ intended before it was reverted.
 
 Still not in this change: moving the 57 into `copy/`. The ratchet makes that work visible and
 one-way, and each move is a wording review in its own right.
+
+## Addendum · 2026-09-29 — the baseline is empty
+
+The 57 sentences the ratchet began with have been moved into `apps/web/src/copy/` (`about.ts`,
+`pages.ts`, `explore.ts`, `figures.ts`, and `data-state.ts` for tenders), and `copy-baseline.json` is
+now `{}`. Rule B is therefore strict: any run of six or more words of JSX text in a component or
+route fails the check. The move changed no wording except three statements that had become false:
+the home page's notice that the site shows only fixture data, the About page's claim that nothing is
+held against a district, and the setup screen's claim that the boundary dataset declares no licence.

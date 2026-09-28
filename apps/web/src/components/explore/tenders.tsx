@@ -310,9 +310,8 @@ export function TendersPanel({
         {notice ?? (
           <>
             <p style={{ fontSize: 12, color: "var(--ld-text-secondary)", margin: "0 0 10px" }}>
-              Shading counts tenders advertised by government offices <strong>located in</strong>{" "}
-              each district. It does not say where the work will be done — an office often tenders
-              for work across several districts.
+              {tenderCopy.shadingLead} <strong>{tenderCopy.shadingLocatedIn}</strong>{" "}
+              {tenderCopy.shadingTail}
             </p>
 
             <label
@@ -546,7 +545,7 @@ export function TenderList({
                   style={{ display: "block", color: "var(--ld-text-tertiary)", fontSize: 11.5 }}
                 >
                   <span aria-hidden="true">▤ </span>
-                  No value published for this tender.
+                  {tenderCopy.noValue}
                 </span>
               )}
               {tender.location !== null && (
@@ -568,7 +567,7 @@ export function TenderList({
                 rel="noreferrer noopener"
                 style={{ fontSize: 11.5 }}
               >
-                Source: the portal this was read from
+                {tenderCopy.sourceLink}
               </a>
             </li>
           ))}

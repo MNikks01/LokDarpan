@@ -3,6 +3,7 @@ import type { FinanceChain } from "@lokdarpan/contracts";
 import { formatAmount } from "@lokdarpan/money";
 import { Figure } from "./Figure";
 import { color } from "@/ui/tokens";
+import { observationCopy } from "@/copy/figures";
 
 /**
  * MoneyTrail — the signature component (.docs/wireframes/08-financial-flow.md).
@@ -113,15 +114,16 @@ export function MoneyTrail({ finance }: { readonly finance: FinanceChain }): Rea
               maxWidth: "60ch",
             }}
           >
-            Allocated ≥ Released ≥ Utilized holds. The {finance.releaseDeviationPct.toFixed(1)}% gap
-            between released and utilized exceeds the {finance.thresholdPct}% threshold configured
-            for this category.
+            {observationCopy.moneyTrailGap(
+              finance.releaseDeviationPct.toFixed(1),
+              finance.thresholdPct,
+            )}
           </p>
         )}
         <p
           style={{ fontSize: 13, color: color.text.secondary, margin: "8px 0 0", maxWidth: "60ch" }}
         >
-          ⓘ This is an arithmetic observation. It does not indicate that anything is wrong.
+          {observationCopy.arithmeticOnly}
         </p>
       </div>
     </section>
