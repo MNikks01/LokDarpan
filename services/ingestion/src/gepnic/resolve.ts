@@ -1,5 +1,6 @@
 import type pg from "pg";
 
+import { NO_ALIASES, type ResolvedAlias } from "./aliases";
 import { districtKey, normalise } from "./detail";
 
 /**
@@ -107,20 +108,28 @@ function only<T>(values: ReadonlySet<T> | undefined): T | undefined {
   return value;
 }
 
-/** 1. The tender names its district. */
+/**
+ * 1. The tender names its district — as the ledger spells it, or by a reviewed
+ * alias. An alias keeps the method the chain earned and records itself in the
+ * evidence key, so a reader is told the office's name was read as another.
+ */
 function explicitly(
   clues: TenderClues,
   districts: ReadonlyMap<string, number>,
+  aliases: ReadonlyMap<string, ResolvedAlias>,
 ): Resolution | undefined {
   if (clues.districtName === null || clues.districtSource === null) return undefined;
-  const id = districts.get(districtKey(clues.districtName));
-  if (id === undefined) return undefined;
+  const key = districtKey(clues.districtName);
+  const id = districts.get(key);
+  const alias = id === undefined ? aliases.get(key) : undefined;
+  const adminUnitId = id ?? alias?.adminUnitId;
+  if (adminUnitId === undefined) return undefined;
   return {
-    adminUnitId: id,
+    adminUnitId,
     method: clues.districtSource,
     confidence: CONFIDENCE[clues.districtSource],
     evidenceSha256: null,
-    evidenceKey: null,
+    evidenceKey: alias === undefined ? null : `alias:${alias.alias} → ${alias.districtName}`,
   };
 }
 
@@ -169,8 +178,9 @@ export function resolveDistrict(
   clues: TenderClues,
   districts: ReadonlyMap<string, number>,
   directory: StateDirectory,
+  aliases: ReadonlyMap<string, ResolvedAlias> = NO_ALIASES,
 ): Resolution {
-  const named = explicitly(clues, districts);
+  const named = explicitly(clues, districts, aliases);
   if (named !== undefined) return named;
   if (directory.sha256 === null) return UNRESOLVED;
   // 4. Unresolved: held, counted as unplaced, and listed for review.

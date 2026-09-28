@@ -20,6 +20,34 @@ function levelNoun(level: AdminUnitLevel): string {
   return level === "gram_panchayat" ? label : label.toLowerCase();
 }
 
+/**
+ * The office's own name from an alias evidence key,
+ * `alias:Muktsar → Sri Muktsar Sahib` → `Muktsar`; null for any other key.
+ */
+function aliasedName(evidenceKey: string | null): string | null {
+  if (evidenceKey?.startsWith("alias:") !== true) return null;
+  return evidenceKey.slice("alias:".length).split(" → ")[0] ?? null;
+}
+
+/** The office's name was read as the district under a reviewed alias (ADR-068). */
+const ALIASED_NOTE: Readonly<Record<"chain_unit" | "office_code", (name: string) => string>> = {
+  chain_unit: (name) =>
+    `The issuing office names ${name}, read as this district under a reviewed alias.`,
+  office_code: (name) =>
+    `Read from an office name, ${name}, taken as this district under a reviewed alias. An office may cover more than one district.`,
+};
+
+/** How a district was reached, for every method (ADR-067, ADR-068). */
+const PLACEMENT_NOTE: Readonly<Record<string, (evidenceKey: string | null) => string>> = {
+  chain_unit: () => "The issuing office names this district.",
+  office_code: () => "Read from an office name, which may cover more than one district.",
+  pincode: (key) =>
+    `Not named by the issuing office. Inferred from its pincode${key === null ? "" : ` ${key}`}, which the Department of Posts lists only in this district.`,
+  place_name: (key) =>
+    `Not named by the issuing office. Inferred from its location, which matches ${key === null ? "a post office" : `the ${key} post office`} only in this district.`,
+  manual: () => "Not named by the issuing office. Placed by a reviewer.",
+};
+
 export const tenderCopy = {
   /** The request failed. Nothing is implied about any portal. */
   unavailable:
@@ -67,25 +95,16 @@ export const tenderCopy = {
    * says it was inferred and from what: it is never shown as the tender's own.
    */
   placement: (method: string, evidenceKey: string | null): string => {
-    switch (method) {
-      case "chain_unit":
-        return "The issuing office names this district.";
-      case "office_code":
-        return "Read from an office name, which may cover more than one district.";
-      case "pincode":
-        return `Not named by the issuing office. Inferred from its pincode${evidenceKey === null ? "" : ` ${evidenceKey}`}, which the Department of Posts lists only in this district.`;
-      case "place_name":
-        return `Not named by the issuing office. Inferred from its location, which matches ${evidenceKey === null ? "a post office" : `the ${evidenceKey} post office`} only in this district.`;
-      case "manual":
-        return "Not named by the issuing office. Placed by a reviewer.";
-      default:
-        return "";
+    const aliased = aliasedName(evidenceKey);
+    if (aliased !== null && (method === "chain_unit" || method === "office_code")) {
+      return ALIASED_NOTE[method](aliased);
     }
+    return PLACEMENT_NOTE[method]?.(evidenceKey) ?? "";
   },
 
-  /** How much of the shading is inference rather than the offices' own statement. */
+  /** How much of the shading is LokDarpan's reading rather than the offices' own statement. */
   inferredShading: (count: number): string =>
-    `${String(count)} of these ${count === 1 ? "is" : "are"} placed by inference from a pincode or place name, not named by the issuing office.`,
+    `${String(count)} of these ${count === 1 ? "is" : "are"} not named by the issuing office: placed from a pincode, a place name or a reviewer's reading.`,
 } as const;
 
 export const boundaryCopy = {
