@@ -50,3 +50,13 @@ background and the map says no base map is shown.
   OpenStreetMap relations matched to LGD codes, labelled "Open dataset — usable, not
   authoritative". Replacing it with Survey of India geometry is separate work and depends on finding
   a source whose terms permit it.
+
+## Addendum · 2026-09-29 — a place is named once
+
+Where a district and its headquarters town share a name (Nagpur, Nashik, Latur, Kohima), the map
+drew the name twice: the ledger's label (ADR-057) and the base map's town label. The base map's
+`place` layers now also skip any name the ledger is drawing, compared on the fields the base map
+labels with (`name:latin`, `name:en`, `name`) and without the ledger's administrative word
+("Churachandpur district" is compared as "Churachandpur"). The ledger's name is the one with a
+source, so it is the one kept. With the ledger's names switched off in Layers, the base map's
+return. `basemapNameFilters` in `apps/web/src/map/style.ts`.

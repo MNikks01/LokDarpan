@@ -149,3 +149,24 @@ describe("a figure with no stated unit", () => {
     expect(money("Total annual rent of ₹1,53,427 was paid.")).toEqual(["15342700"]);
   });
 });
+
+describe("a figure the ledger cannot hold exactly", () => {
+  it("is kept for a person to read, with no value, never rounded to one", () => {
+    // A tenth of a paisa. Rounding would store a figure the page never stated;
+    // aborting would lose every other candidate on a long report.
+    expect(amountToPaise("0.001", undefined, "rupees")).toBeNull();
+    const found = extractFacts([
+      { pageNumber: 1, content: "A sum of ₹ 0.001 was recorded against the scheme in 2019." },
+    ]);
+    expect(found.map((c) => [c.kind, c.normalisedValue])).toEqual([["monetary_amount", null]]);
+  });
+});
+
+describe("a contractor capture that names no one", () => {
+  it("makes no candidate, since a name made only of joining words misleads a reviewer", () => {
+    const found = extractFacts([
+      { pageNumber: 1, content: "The contract was awarded to M/s. and for ₹ 5 crore in 2019." },
+    ]);
+    expect(found.some((c) => c.kind === "contractor_reference")).toBe(false);
+  });
+});

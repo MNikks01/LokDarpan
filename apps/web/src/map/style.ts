@@ -92,6 +92,63 @@ export interface Basemap {
   readonly style: StyleSpecification;
   /** Shown on the map; a provider's terms and the data's licence both require it. */
   readonly attribution: string;
+  /** The base map's place-name layers, with the filters they carry once stripped. */
+  readonly placeLayers: readonly PlaceLayer[];
+}
+
+export interface PlaceLayer {
+  readonly id: string;
+  readonly filter: FilterSpecification | undefined;
+}
+
+/** The place-name layers of a stripped style, and their filters. */
+function placeLayersOf(style: StyleSpecification): PlaceLayer[] {
+  return style.layers.flatMap((layer) => {
+    const sourceLayer = "source-layer" in layer ? layer["source-layer"] : undefined;
+    if (sourceLayer !== "place") return [];
+    return [{ id: layer.id, filter: "filter" in layer ? layer.filter : undefined }];
+  });
+}
+
+/**
+ * Filters that keep the base map from naming a place the ledger is naming.
+ *
+ * Where a district and its headquarters town share a name — Nagpur, Kohima,
+ * Shimla — the map drew it twice: once from the ledger, once from the base map.
+ * The ledger's name is the one with a source, so the base map's gives way.
+ * Compared on the same fields the base map draws from, exactly; the ledger's
+ * administrative word ("Churachandpur district") is dropped first, since the
+ * base map names the town without it. With no names, each layer gets back the
+ * filter it had.
+ */
+export function basemapNameFilters(
+  placeLayers: readonly PlaceLayer[],
+  ledgerNames: readonly string[],
+): { readonly id: string; readonly filter: FilterSpecification | undefined }[] {
+  const names = [
+    ...new Set(
+      ledgerNames.flatMap((name) => {
+        const bare = name.replace(/\s+district$/iu, "").trim();
+        return bare === name ? [name] : [name, bare];
+      }),
+    ),
+  ];
+  if (names.length === 0) return placeLayers.map(({ id, filter }) => ({ id, filter }));
+  const notTheLedgers: FilterSpecification = [
+    "!",
+    [
+      "in",
+      ["coalesce", ["get", "name:latin"], ["get", "name:en"], ["get", "name"]],
+      ["literal", names],
+    ],
+  ];
+  return placeLayers.map(({ id, filter }) => ({
+    id,
+    filter:
+      filter === undefined
+        ? notTheLedgers
+        : (["all", notTheLedgers, filter] as FilterSpecification),
+  }));
 }
 
 /**
@@ -154,9 +211,11 @@ export async function fetchBasemap(url: string): Promise<Basemap | null> {
       return null;
     }
     const complete = style as StyleSpecification;
+    const stripped = withoutAdministrativeClaims(complete);
     return {
-      style: withoutAdministrativeClaims(complete),
+      style: stripped,
       attribution: attributionOf(complete, url),
+      placeLayers: placeLayersOf(stripped),
     };
   } catch {
     return null;

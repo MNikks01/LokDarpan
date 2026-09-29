@@ -2,6 +2,20 @@
 
 **Date:** 5 September 2026 · **Answers blocker 3** of [`README.md`](../README.md) · **Reconciles** [`01-product/sprint-plan.md`](../01-product/sprint-plan.md) and [`07-analytics/analytics-engine.md`](../07-analytics/analytics-engine.md) **with what may actually be published**
 
+> **Update · 29 September 2026.** Two things below have changed, and the rest stands.
+>
+> - **The decision was reversed on 25 September:** permission is to be sought, without blocking on
+>   the answer. Requests to NRIDA, the Maharashtra Finance Department and the tender portals'
+>   issuing departments are drafted; **none has been sent**
+>   ([`decisions/2026-09-25-seven-decisions.md`](../decisions/2026-09-25-seven-decisions.md),
+>   [`06-government-sources/permission-requests.json`](../06-government-sources/permission-requests.json)).
+>   Until an answer, BEAMS figures and tender details stay withheld, as below.
+> - **The ledger now holds open tenders** from 21 state e-procurement portals, collected nightly.
+>   Their details are withheld under the portals' terms (ADR-056), but each is counted and placed in a
+>   district where the evidence allows (ADR-067, ADR-068): on 29 September, 714 open tenders were
+>   placed across 199 districts, 200 of them from the tender's location rather than the issuing
+>   office's name, and 486 were not yet placed.
+
 Every roadmap document in this repository was written while one question was
 open: whether to ask three government bodies for permission. That question is
 now answered, and the answer changes what the product can be at launch. This

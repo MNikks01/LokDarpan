@@ -240,3 +240,15 @@ describe("the text as the page states it", () => {
     expect(parseLanding(html).tenders[0]?.title).toBe("Roads &# Bridges");
   });
 });
+
+describe("a date that is not a date is refused, not approximated", () => {
+  it("refuses a three-letter month that is not a month", () => {
+    expect(parseIstDateTime("14-Foo-2026 02:00 PM")).toBeNull();
+  });
+
+  it("refuses an hour or a minute a clock does not show", () => {
+    expect(parseIstDateTime("14-Sep-2026 13:00 PM")).toBeNull();
+    expect(parseIstDateTime("14-Sep-2026 00:30 AM")).toBeNull();
+    expect(parseIstDateTime("14-Sep-2026 02:60 PM")).toBeNull();
+  });
+});
