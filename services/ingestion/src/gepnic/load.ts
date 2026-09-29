@@ -4,11 +4,12 @@ import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run"
 import { districtKey, type TenderDetail } from "./detail";
 import type { FetchedArtifact } from "./fetch";
 import type { ParsedTender } from "./landing";
-import { aliasesOfState, NO_ALIASES, type ResolvedAlias } from "./aliases";
+import { aliasesOfState, type ResolvedAlias } from "./aliases";
 import {
   EMPTY_DIRECTORY,
   directoryForState,
   resolveDistrict,
+  type ResolveExtras,
   type Resolution,
   type StateDirectory,
 } from "./resolve";
@@ -87,7 +88,7 @@ export function placementFor(
   detail: TenderDetail | null,
   districts: ReadonlyMap<string, number>,
   directory: StateDirectory = EMPTY_DIRECTORY,
-  aliases: ReadonlyMap<string, ResolvedAlias> = NO_ALIASES,
+  extras: ResolveExtras = {},
 ): Resolution {
   if (detail === null) return resolveDistrict(NO_CLUES, districts, EMPTY_DIRECTORY);
   return resolveDistrict(
@@ -99,7 +100,7 @@ export function placementFor(
     },
     districts,
     directory,
-    aliases,
+    extras,
   );
 }
 
@@ -110,6 +111,22 @@ interface Places {
   readonly districts: ReadonlyMap<string, number>;
   readonly directory: StateDirectory;
   readonly aliases: ReadonlyMap<string, ResolvedAlias>;
+  readonly districtNames: ReadonlyMap<string, string>;
+}
+
+/** The state's district names, keyed as the ledger compares them, for the location step. */
+export async function districtNamesOfState(
+  db: pg.ClientBase,
+  stateLgdCode: string,
+): Promise<ReadonlyMap<string, string>> {
+  const result = await db.query<{ name_en: string }>(
+    `SELECT d.name_en
+       FROM admin_unit d
+       JOIN admin_unit s ON s.id = d.parent_id
+      WHERE d.level = 'district' AND s.level = 'state' AND s.lgd_code = $1`,
+    [stateLgdCode],
+  );
+  return new Map(result.rows.map((r) => [districtKey(r.name_en), r.name_en]));
 }
 
 /** The ledger's English name for a state, which the directory is matched against. */
@@ -321,7 +338,10 @@ async function writeOne(
 ): Promise<{ readonly inserted: boolean; readonly placed: boolean }> {
   await db.query("SAVEPOINT tender");
   try {
-    const place = placementFor(record.detail, places.districts, places.directory, places.aliases);
+    const place = placementFor(record.detail, places.districts, places.directory, {
+      aliases: places.aliases,
+      districtNames: places.districtNames,
+    });
     const row = await db.query<{ inserted: boolean }>(UPSERT, parameters(record, place, context));
     await db.query("RELEASE SAVEPOINT tender");
     return { inserted: row.rows[0]?.inserted === true, placed: place.adminUnitId !== null };
@@ -445,10 +465,11 @@ export async function loadTenders(db: pg.Client, options: LoadOptions): Promise<
     const directory = stateName === null ? EMPTY_DIRECTORY : await directoryForState(db, stateName);
 
     const aliases = await aliasesOfState(db, stateLgdCode);
+    const districtNames = await districtNamesOfState(db, stateLgdCode);
     const written = await writeAll(
       db,
       records,
-      { districts, directory, aliases },
+      { districts, directory, aliases, districtNames },
       {
         portalCode,
         sha256: artifact.sha256,
