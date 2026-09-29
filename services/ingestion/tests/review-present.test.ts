@@ -174,3 +174,41 @@ describe("presentBatch evidence window", () => {
     expect(presentBatch(page, 0, 1, "confirmed_in_context")).not.toContain("no other reading");
   });
 });
+
+describe("what the reviewer is told about a candidate's sentence", () => {
+  it("names the check's finding, and shows an unknown one as written rather than hiding it", () => {
+    expect(presentCandidate(candidate, 1, 5, "mismatch")).toContain(
+      "this amount is not derivable from the sentence",
+    );
+    expect(presentCandidate(candidate, 1, 5, "something-new")).toContain("something-new");
+    expect(presentCandidate(candidate, 1, 5)).not.toContain("derivable");
+  });
+});
+
+describe("a page of candidates shows the evidence around each figure", () => {
+  const far = {
+    ...candidate,
+    rawText: `${"The committee examined the records at length. ".repeat(8)}contract value of ₹ 15.14 crore`,
+  };
+
+  it("centres the line on the figure being judged, marking what it cut", () => {
+    // The evidence line, not the value column, must carry the figure.
+    const evidence = presentBatch([far], 0, 1).split("\n").at(-1) ?? "";
+    expect(evidence).toContain("₹ 15.14 crore");
+    expect(evidence).toContain("…");
+  });
+
+  it("starts from the beginning when the figure cannot be found, or there is none", () => {
+    const unfindable = { ...far, normalisedValue: "99900" };
+    expect(presentBatch([unfindable], 0, 1)).toContain("The committee examined");
+    const unread = { ...far, normalisedValue: null };
+    expect(presentBatch([unread], 0, 1)).toContain("The committee examined");
+  });
+
+  it("says which partition is on screen, and falls back to the plainest claim", () => {
+    expect(presentBatch([candidate], 0, 1, "confirmed_in_context")).toContain(
+      "recorded as facts of their own",
+    );
+    expect(presentBatch([candidate], 0, 1, "unheard-of")).toContain("by no other reading of it");
+  });
+});
