@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
 
 ```bash
-pnpm install && pnpm test          # ~1,340 tests; integration suites need a database
+pnpm install && pnpm test          # ~1,370 tests; integration suites need a database
 pnpm dev                           # web client
 pnpm neutrality apps packages      # the language gate
 pnpm architecture                  # import rules and rule B (no sentences in components)

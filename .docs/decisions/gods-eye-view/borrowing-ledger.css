@@ -1,0 +1,91 @@
+:root{
+  --canvas:#FBFBFA; --surface:#FFFFFF; --raised:#F4F5F4; --sunken:#F0F1F0;
+  --hair:#E3E5E3; --strong:#C9CDC9;
+  --ink:#14181A; --ink2:#55605F; --ink3:#7A8483;
+  --accent:#0F766E; --accent-soft:#E6F2F0; --accent-fg:#0B4F49;
+  --amber-bg:#EFE3CB; --amber-fg:#6B4E14;
+  --slate-bg:#F0F1F0; --slate-fg:#55605F;
+  --code-bg:#F2F4F3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --canvas:#0E1312; --surface:#141A19; --raised:#19201F; --sunken:#111716;
+    --hair:#243029; --strong:#34423E;
+    --ink:#E4E9E7; --ink2:#A4AFAC; --ink3:#7C8885;
+    --accent:#52B5A9; --accent-soft:#12302C; --accent-fg:#9EDBD2;
+    --amber-bg:#3A2F1B; --amber-fg:#E7CB8E;
+    --slate-bg:#1C2322; --slate-fg:#A4AFAC;
+    --code-bg:#172020;
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#0E1312; --surface:#141A19; --raised:#19201F; --sunken:#111716;
+  --hair:#243029; --strong:#34423E;
+  --ink:#E4E9E7; --ink2:#A4AFAC; --ink3:#7C8885;
+  --accent:#52B5A9; --accent-soft:#12302C; --accent-fg:#9EDBD2;
+  --amber-bg:#3A2F1B; --amber-fg:#E7CB8E;
+  --slate-bg:#1C2322; --slate-fg:#A4AFAC;
+  --code-bg:#172020;
+}
+*{box-sizing:border-box}
+body{background:var(--canvas);color:var(--ink);font:15px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;margin:0;padding-inline:20px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 96px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px}
+@media (max-width:960px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px}.toc{position:static!important;max-height:none!important}}
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;max-height:calc(100vh - 48px);overflow:auto;font-size:12.5px;line-height:1.45;padding-right:8px}
+.toc p{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:0 0 10px;font-weight:600}
+.toc ol{margin:0;padding-left:22px;display:grid;gap:4px;color:var(--ink3)}
+.toc a{color:var(--ink2);text-decoration:none}
+.toc a:hover{color:var(--accent)}
+main{min-width:0}
+header.doc{border-bottom:1px solid var(--hair);padding-bottom:28px;margin-bottom:12px}
+.eyebrow{font:500 11.5px/1 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:12px 0 14px;font-weight:700;text-wrap:balance;max-width:24ch}
+.lede{font-size:17px;color:var(--ink2);max-width:66ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:18px;font:12.5px/1.4 "IBM Plex Mono",ui-monospace,monospace;color:var(--ink3)}
+section{padding-top:44px;scroll-margin-top:16px}
+h2{font-size:23px;line-height:1.25;letter-spacing:-.012em;margin:0 0 14px;font-weight:650;text-wrap:balance;display:flex;gap:12px;align-items:baseline}
+h2 .n{font:500 13px/1 "IBM Plex Mono",ui-monospace,monospace;color:var(--ink3);min-width:2ch}
+h3{font-size:16.5px;margin:30px 0 8px;font-weight:650;letter-spacing:-.005em;text-wrap:balance}
+h4{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin:20px 0 6px;font-weight:600}
+p,li{max-width:70ch}
+p{margin:0 0 12px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:3px 0}
+a{color:var(--accent)}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{background:var(--code-bg);border:1px solid var(--hair);border-radius:8px;padding:14px 16px;overflow-x:auto;font:12.5px/1.55 "IBM Plex Mono",ui-monospace,monospace;margin:0 0 16px}
+pre code{background:none;padding:0;font-size:inherit}
+.tbl{overflow-x:auto;margin:0 0 18px;border:1px solid var(--hair);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.45}
+th{text-align:left;font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3);background:var(--raised)}
+th,td{padding:9px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.wide table{min-width:980px}
+.mid table{min-width:720px}
+.chip{display:inline-flex;align-items:center;gap:5px;font:600 11px/1 Inter,system-ui,sans-serif;letter-spacing:.03em;text-transform:uppercase;padding:4px 7px;border-radius:5px;white-space:nowrap}
+.borrow{background:var(--accent);color:var(--canvas)}
+.reimpl{background:var(--accent-soft);color:var(--accent-fg);box-shadow:inset 0 0 0 1px var(--accent)}
+.adapt{background:var(--amber-bg);color:var(--amber-fg)}
+.no{background:var(--slate-bg);color:var(--slate-fg);box-shadow:inset 0 0 0 1px var(--strong)}
+.p{font:500 11.5px/1 "IBM Plex Mono",ui-monospace,monospace;padding:3px 6px;border-radius:4px;background:var(--raised);color:var(--ink2);white-space:nowrap}
+.p0{background:var(--ink);color:var(--canvas)}
+.callout{border:1px solid var(--hair);background:var(--surface);border-radius:10px;padding:16px 18px;margin:0 0 18px}
+.callout.key{background:var(--accent-soft);border-color:transparent}
+.callout.key strong{color:var(--accent-fg)}
+.callout.warn{background:var(--amber-bg);border-color:transparent;color:var(--amber-fg)}
+.callout p:last-child,.callout ul:last-child{margin-bottom:0}
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 18px}
+.finding{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:14px 16px}
+.finding .k{font:500 11px/1 "IBM Plex Mono",ui-monospace,monospace;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em}
+.finding p{margin:6px 0 0;font-size:13.5px}
+.finding b{display:block;margin-top:6px;font-size:14.5px}
+.algo{border-top:1px solid var(--hair);padding-top:6px;margin-top:26px}
+dl.spec{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 16px;margin:10px 0 0;font-size:14px}
+dl.spec dt{color:var(--ink3);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding-top:3px}
+dl.spec dd{margin:0;max-width:70ch}
+@media (max-width:560px){dl.spec{grid-template-columns:minmax(0,1fr)}dl.spec dt{padding-top:10px}h1{font-size:27px}}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:13px;color:var(--ink2);margin:0 0 14px}
+.muted{color:var(--ink3)}
+:where(a,button,[tabindex]):focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}

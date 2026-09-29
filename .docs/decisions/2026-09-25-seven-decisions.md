@@ -38,7 +38,13 @@ Explicit district → pincode → place name → unresolved/review, each placeme
 source, confidence and time, and each inferred placement saying so to the reader.
 
 **External step:** a data.gov.in API key, from registering an account. Until then no directory is
-loaded and nothing is inferred.
+loaded and nothing is inferred from a pincode or a post office name. The data.gov.in API was
+failing on 28 and 29 September (`pincode-directory-findings.md`).
+
+**Built since, needing no outside data** (ADR-067 addendum, ADR-068): a step that reads a district
+named in the tender's own location, which placed 208 production tenders once one wrong placement was
+corrected; reviewed district aliases; a grouped review list (`tenders:review`); and signed manual
+decisions (`tenders:place`).
 
 ## 4. Permissions
 

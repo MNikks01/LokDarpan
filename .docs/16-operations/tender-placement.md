@@ -138,5 +138,6 @@ SELECT district_source, count(*) FROM tender GROUP BY 1 ORDER BY 2 DESC;
 SELECT count(*) FROM tender_district_decision;
 ```
 
-`district_source` is null for unplaced tenders; `pincode`, `place_name` and `manual` are the ones
-the issuing office did not name, and the map says how many of those it shades.
+`district_source` is null for unplaced tenders. `chain_unit` and `office_code` are named by the
+issuing office; `location_district`, `pincode`, `place_name` and `manual` are not, and the map says
+how many of those it shades.
