@@ -1,7 +1,8 @@
-import type { LayerSpecification, StyleSpecification } from "maplibre-gl";
+import type { FilterSpecification, LayerSpecification, StyleSpecification } from "maplibre-gl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_BASEMAP_STYLE,
+  basemapNameFilters,
   basemapStyleUrl,
   buildStyle,
   fetchBasemap,
@@ -147,7 +148,11 @@ describe("fetching the provider's style", () => {
 describe("composing the style", () => {
   it("puts the ledger's layers over the base map, with the base's fonts and icons", () => {
     const style = buildStyle({
-      basemap: { style: withoutAdministrativeClaims(PROVIDER), attribution: "x" },
+      basemap: {
+        style: withoutAdministrativeClaims(PROVIDER),
+        attribution: "x",
+        placeLayers: [],
+      },
     });
     expect(style.glyphs).toBe(PROVIDER.glyphs);
     expect(style.sprite).toBe(PROVIDER.sprite);
@@ -156,5 +161,51 @@ describe("composing the style", () => {
     expect(ids[0]).toBe("background");
     expect(ids).not.toContain("ld-background");
     expect(ids.indexOf("water")).toBeLessThan(ids.length - 1);
+  });
+});
+
+describe("a place is named once", () => {
+  const town = ["==", ["get", "class"], "town"] as const;
+  const layers = [
+    { id: "label_town", filter: town as unknown as FilterSpecification },
+    { id: "label_any", filter: undefined },
+  ];
+  const nameTest = (names: string[]) => [
+    "!",
+    [
+      "in",
+      ["coalesce", ["get", "name:latin"], ["get", "name:en"], ["get", "name"]],
+      ["literal", names],
+    ],
+  ];
+
+  it("keeps the base map from naming what the ledger names, keeping each layer's own filter", () => {
+    expect(basemapNameFilters(layers, ["Nagpur", "Kohima"])).toEqual([
+      { id: "label_town", filter: ["all", nameTest(["Nagpur", "Kohima"]), town] },
+      { id: "label_any", filter: nameTest(["Nagpur", "Kohima"]) },
+    ]);
+  });
+
+  it("compares the town's name without the ledger's administrative word", () => {
+    const [first] = basemapNameFilters(layers, ["Churachandpur district"]);
+    expect(first?.filter).toEqual([
+      "all",
+      nameTest(["Churachandpur district", "Churachandpur"]),
+      town,
+    ]);
+  });
+
+  it("gives the base map its names back when the ledger names nothing", () => {
+    expect(basemapNameFilters(layers, [])).toEqual(layers);
+  });
+
+  it("finds the place-name layers of a fetched style", async () => {
+    answer(new Response(JSON.stringify(PROVIDER)));
+    const basemap = await fetchBasemap(DEFAULT_BASEMAP_STYLE);
+    expect(basemap?.placeLayers.map((l) => l.id)).toEqual([
+      "label_country_1",
+      "label_town",
+      "label_any",
+    ]);
   });
 });
