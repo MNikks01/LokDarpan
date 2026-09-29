@@ -67,18 +67,18 @@ describe("the tender ingestion workflow", () => {
 
   // Migration 0037: the runner's disk is deleted with the job, so bytes kept
   // there are bytes lost. The sweep must be told a durable store is required.
+  // The names are the ones configured in the repository on 2026-09-29. A
+  // mismatch here is silent in CI and fatal at 20:00 UTC: the sweep would read
+  // four empty values and exit 78.
   it("requires the object store, and gives its credentials to the same step", () => {
     const withEnv = (scheduled.jobs["gepnic"]?.steps ?? []).filter((s) => s.env !== undefined);
     const env = withEnv[0]?.env ?? {};
     expect(env["RAW_STORE_REQUIRE_OBJECT"]).toBe("true");
-    for (const name of [
-      "RAW_STORE_S3_ENDPOINT",
-      "RAW_STORE_S3_BUCKET",
-      "RAW_STORE_S3_ACCESS_KEY_ID",
-      "RAW_STORE_S3_SECRET_ACCESS_KEY",
-    ]) {
-      expect(env[name]).toBe(`\${{ secrets.${name} }}`);
-    }
+    expect(env["RAW_STORE_S3_ENDPOINT"]).toBe("${{ vars.R2_ENDPOINT }}");
+    expect(env["RAW_STORE_S3_BUCKET"]).toBe("${{ vars.R2_BUCKET }}");
+    // The key pair is secret, never a variable a log would print.
+    expect(env["RAW_STORE_S3_ACCESS_KEY_ID"]).toBe("${{ secrets.R2_ACCESS_KEY_ID }}");
+    expect(env["RAW_STORE_S3_SECRET_ACCESS_KEY"]).toBe("${{ secrets.R2_SECRET_ACCESS_KEY }}");
   });
 
   it("never writes the credential into a command", () => {
