@@ -1,5 +1,7 @@
 import "server-only";
 
+import { INTERNAL_HEADER } from "@/server/rate-limit";
+
 /**
  * The API is called from Server Components only. Nothing here reaches the
  * browser: no API host, no fetch waterfall on the client, and the page ships
@@ -78,9 +80,20 @@ function protectionBypass(): Record<string, string> {
   return secret === undefined || secret === "" ? {} : { "x-vercel-protection-bypass": secret };
 }
 
+/**
+ * Marks this fetch as one of our own pages, so the API's rate limit does not
+ * count it (`server/rate-limit.ts`). Every page arrives from the same few Vercel
+ * addresses; counted, they would share one bucket and throttle the whole site.
+ * Server-only, like the rest of this module: the token never reaches a browser.
+ */
+function internalCaller(): Record<string, string> {
+  const token = process.env["INTERNAL_API_TOKEN"];
+  return token === undefined || token === "" ? {} : { [INTERNAL_HEADER]: token };
+}
+
 async function get(path: string): Promise<{ data: unknown; datasetVersion: number }> {
   const response = await fetch(`${apiOrigin()}${path}`, {
-    headers: { accept: "application/json", ...protectionBypass() },
+    headers: { accept: "application/json", ...protectionBypass(), ...internalCaller() },
     // Revalidated by datasetVersion cache tag, never by a timer.
     next: { tags: ["dataset"], revalidate: false },
   });

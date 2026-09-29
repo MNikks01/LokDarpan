@@ -25,10 +25,11 @@ The second command creates the login user the site connects as. **Change the pas
 
 ## 2. Environment variables
 
-| Variable       | Value                                   | Notes                                                                            |
-| -------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
-| `DATABASE_URL` | Neon **pooled** URL for `lokdarpan_api` | **Must be the read-only user.** ETL is the only write path; see migration `0002` |
-| `API_BASE_URL` | _unset_                                 | Only set to point at a separately hosted `services/api`                          |
+| Variable             | Value                                   | Notes                                                                                                                  |
+| -------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`       | Neon **pooled** URL for `lokdarpan_api` | **Must be the read-only user.** ETL is the only write path; see migration `0002`                                       |
+| `API_BASE_URL`       | _unset_                                 | Only set to point at a separately hosted `services/api`                                                                |
+| `INTERNAL_API_TOKEN` | 64 hex characters, **Sensitive**        | Exempts the site's own pages from the API rate limit. Never `NEXT_PUBLIC_`. See [`rate-limiting.md`](rate-limiting.md) |
 
 Optional, for the base map ([ADR-066](../adr/066-the-base-map-is-hosted-and-claims-no-boundary.md)):
 `NEXT_PUBLIC_BASEMAP_STYLE_URL` (unset means OpenFreeMap; empty means no base map) and

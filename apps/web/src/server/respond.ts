@@ -3,6 +3,7 @@ import "server-only";
 import { AppError, toEnvelope } from "@lokdarpan/errors";
 import { randomUUID } from "node:crypto";
 import { datasetVersionOpenedAt } from "./container";
+import { RETRY_AFTER_SECONDS, originLimited } from "./rate-limit";
 
 export interface Produced {
   readonly data: unknown;
@@ -53,10 +54,15 @@ async function asOfFor(produced: Produced): Promise<string | null> {
 export async function respond(
   request: Request,
   produce: () => Promise<Produced>,
+  limited: (request: Request) => Promise<boolean> = originLimited,
 ): Promise<Response> {
   const requestId = request.headers.get("x-request-id") ?? randomUUID();
 
   try {
+    // Before the database is touched: the limit exists to spare it (rate-limit.ts).
+    if (await limited(request)) {
+      throw new AppError("RATE_LIMITED", "Too many requests. Please try again in a minute.");
+    }
     const produced = await produce();
     const { data, datasetVersion } = produced;
     const asOf = await asOfFor(produced);
@@ -83,7 +89,11 @@ export async function respond(
     );
     return Response.json(body, {
       status,
-      headers: { "x-request-id": requestId, "cache-control": "no-store" },
+      headers: {
+        "x-request-id": requestId,
+        "cache-control": "no-store",
+        ...(status === 429 ? { "retry-after": String(RETRY_AFTER_SECONDS) } : {}),
+      },
     });
   }
 }
