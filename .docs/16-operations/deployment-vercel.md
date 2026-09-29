@@ -44,6 +44,13 @@ using the deployment's read-only `DATABASE_URL`, and is not committed. `next.con
 `public/geo/manifest.json` in `outputFileTracingIncludes`, because `/explore` reads it from disk at
 runtime.
 
+**Every build reads the production ledger, previews included.** On Neon's free plan the data sent out
+of the database is metered. Until 29 September 2026 `geo:fetch` pulled every boundary at full
+resolution (about 83 MB per build) and simplified it on the build machine; a day of PR previews
+exhausted the quota, the database refused connections, and the live site returned 500s. It now
+simplifies in the database first (about 9 MB per build, the same map). Keep it that way: anything
+the build reads from the ledger is paid for once per deployment.
+
 The defaults only need:
 
 - **Framework preset:** Next.js
@@ -97,6 +104,8 @@ curl -si "$URL/api/v1/units/999999" | head -1            # 404, not a 500
 ```
 
 If the first returns `INTERNAL`, the usual cause is `DATABASE_URL` pointing at the direct rather than pooled Neon endpoint, or at a user without `SELECT`.
+
+A build that fails in `geo:fetch` with `Your account or project has exceeded the quota` (Postgres code `53000`), or a live site answering `INTERNAL` everywhere, means Neon's plan limit is spent. It is not a code fault. The Neon console's Usage page names the limit; it resets at the start of the billing period, or immediately on a paid plan.
 
 ## Leaving Vercel
 
