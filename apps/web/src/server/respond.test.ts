@@ -37,6 +37,23 @@ describe("respond: what may be cached, and where", () => {
     expect(body.meta).toEqual({ datasetVersion: 7, asOf: "2026-09-29T00:00:00.000Z" });
   });
 
+  // The limit exists to spare the database, so a limited request must not
+  // reach it — and the refusal must not be cached, or the CDN would go on
+  // refusing everyone who asks for that URL.
+  it("refuses a limited client before any database work, and says when to retry", async () => {
+    const produce = vi.fn(() => Promise.resolve({ data: {}, datasetVersion: 7 }));
+    const response = await respond(request(), produce, () => Promise.resolve(true));
+
+    expect(response.status).toBe(429);
+    expect(produce).not.toHaveBeenCalled();
+    expect(response.headers.get("retry-after")).toBe("60");
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("vercel-cdn-cache-control")).toBeNull();
+    const body = (await response.json()) as { error: { code: string; requestId: string } };
+    expect(body.error.code).toBe("RATE_LIMITED");
+    expect(body.error.requestId).toBeTruthy();
+  });
+
   // A cached error would keep answering "not found" or "failed" after the cause
   // was gone, and the CDN's stale-if-error must have a good answer to fall back to.
   it("never lets an error be cached, anywhere", async () => {
