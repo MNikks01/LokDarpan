@@ -218,3 +218,41 @@ describe("an href becomes a URL the server answers to", () => {
     expect(urls[0]).toContain("a&b'c.pdf");
   });
 });
+
+describe("the CAG client refuses what it cannot vouch for", () => {
+  const listing = (...hrefs: string[]): string =>
+    `<html><body>${hrefs.map((h) => `<a href="${h}">r</a>`).join("")}</body></html>`;
+
+  it("refuses a state filter page that did not load", async () => {
+    const client = new CagClient("https://cag.test", stub(404, "missing", "text/html"));
+    await expect(client.listStates()).rejects.toThrow(/HTTP 404/);
+  });
+
+  it("lists a report once however often the page links it, and keeps an absolute link as given", async () => {
+    const path = "/webroot/uploads/download_audit_report/2026/Report-No.-1-of-2026.pdf";
+    const absolute = "https://cdn.cag.test/webroot/uploads/download_audit_report/2025/Report-2.pdf";
+    const client = new CagClient(
+      "https://x.test",
+      stub(200, listing(path, path, absolute), "text/html"),
+    );
+    expect((await client.listStateReports()).map((r) => r.url)).toEqual([
+      `https://x.test${path}`,
+      absolute,
+    ]);
+  });
+
+  it("refuses a report that did not load, without reading it", async () => {
+    await expect(
+      new CagClient("https://x.test", stub(404, "gone", "application/pdf")).fetchReport(
+        "https://x.test/r.pdf",
+      ),
+    ).rejects.toThrow(/HTTP 404/);
+  });
+
+  it("refuses a report that states no content type", async () => {
+    const bare: HttpLike = () => Promise.resolve(new Response(new Uint8Array([37, 80, 68, 70])));
+    await expect(
+      new CagClient("https://x.test", bare).fetchReport("https://x.test/r.pdf"),
+    ).rejects.toThrow(/Expected a PDF/);
+  });
+});
