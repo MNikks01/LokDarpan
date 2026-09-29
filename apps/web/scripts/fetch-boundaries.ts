@@ -35,6 +35,23 @@ const TOLERANCE_NATIONAL = 0.02;
 const TOLERANCE_STATE = 0.004;
 
 /**
+ * WHAT LEAVES THE DATABASE
+ * Until 29 September 2026 this read every boundary at full resolution and
+ * simplified it here, so each build — every PR preview included — pulled the
+ * whole OSM geometry out of Neon to keep a few percent of its vertices. On the
+ * free plan that transfer is metered, and a day of deploys is the likely reason
+ * the database began refusing connections and the live site returned 500s.
+ *
+ * The database now does a first, lighter pass at a quarter of each final
+ * tolerance, and sends six decimal places (about 10 cm; the map is drawn at
+ * tolerances of hundreds of metres). The pass below is unchanged, so the
+ * shapes written are the ones it would have written, from a fraction of the
+ * bytes. `PreserveTopology` keeps the pre-pass from producing invalid rings.
+ */
+const PREPASS_FRACTION = 0.25;
+const COORDINATE_DIGITS = 6;
+
+/**
  * Boundaries, as the ledger holds them.
  *
  * Not a URL: the geometry has already been ingested, validated and attributed
@@ -172,11 +189,13 @@ async function ledgerGeography(): Promise<{
   await client.connect();
   try {
     const stateRows = await client.query<{ code: string; name: string; geometry: string }>(
-      `SELECT u.lgd_code AS code, u.name_en AS name, ST_AsGeoJSON(b.geometry) AS geometry
+      `SELECT u.lgd_code AS code, u.name_en AS name,
+              ST_AsGeoJSON(ST_SimplifyPreserveTopology(b.geometry, $1), $2) AS geometry
          FROM admin_unit u
          JOIN admin_unit_boundary b ON b.admin_unit_id = u.id
         WHERE u.level = 'state'
         ORDER BY u.name_en`,
+      [TOLERANCE_NATIONAL * PREPASS_FRACTION, COORDINATE_DIGITS],
     );
     if (stateRows.rows.length === 0) {
       // Writing an empty map would look like a working setup with no states in
@@ -194,12 +213,13 @@ async function ledgerGeography(): Promise<{
     }>(
       `SELECT s.lgd_code AS state_code, s.name_en AS state_name,
               d.id AS unit_id, d.lgd_code AS code, d.name_en AS name,
-              ST_AsGeoJSON(b.geometry) AS geometry
+              ST_AsGeoJSON(ST_SimplifyPreserveTopology(b.geometry, $1), $2) AS geometry
          FROM admin_unit d
          JOIN admin_unit s ON s.id = d.parent_id AND s.level = 'state'
          JOIN admin_unit_boundary b ON b.admin_unit_id = d.id
         WHERE d.level = 'district'
         ORDER BY s.name_en, d.name_en`,
+      [TOLERANCE_STATE * PREPASS_FRACTION, COORDINATE_DIGITS],
     );
 
     return {
