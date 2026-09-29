@@ -83,3 +83,9 @@ no reference data and runs before the directory exists.
   office's name does not." It counts among the tenders the map says the office did not name.
 - Measured on the local ledger: **44 of 289** unplaced tenders placed. Every one was checked by hand
   against its location and chain.
+- **Corrected the same day.** In production the step placed 209 tenders; checked by hand, one was
+  wrong. "Rangpo, Kitchudumra Namchi, Gyalshing, Kewzing" names Namchi inside a longer piece as well
+  as Gyalshing, and was placed in Gyalshing alone. A district now also counts when a single word is
+  its exact name, but only to **refuse**: a placement needs one district from whole pieces and no
+  other anywhere in the text. Re-read with the fix, the other 208 are unchanged; the one was
+  unplaced.

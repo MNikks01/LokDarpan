@@ -156,12 +156,12 @@ function strictKey(name: string): string {
 const MIN_LOOSE_MATCH = 6;
 
 /**
- * The districts a piece of free text names: each comma-, slash- or
+ * The districts free text names as whole pieces: each comma-, slash- or
  * bracket-separated piece compared whole, exact with vowels kept, or
- * vowel-less when the piece is long enough to trust. Used by the location
- * step and by the review list's hints, so the two cannot disagree.
+ * vowel-less when the piece is long enough to trust. This is what may place a
+ * tender.
  */
-export function districtsNamedIn<T extends { readonly name: string }>(
+export function districtsNamedByPieces<T extends { readonly name: string }>(
   text: string | null,
   index: ReadonlyMap<string, T>,
 ): T[] {
@@ -179,6 +179,34 @@ export function districtsNamedIn<T extends { readonly name: string }>(
 }
 
 /**
+ * Every district the text names: the whole pieces above, and any single word
+ * that is a district's name exactly. The words are there to catch a second
+ * district hidden in a longer piece — "Rangpo, Kitchudumra Namchi, Gyalshing"
+ * names Namchi as well as Gyalshing, and read piece by piece it placed a tender
+ * spanning both in Gyalshing alone (production, 2026-09-29). Used by the review
+ * hints, and by the location step only to refuse.
+ */
+export function districtsNamedIn<T extends { readonly name: string }>(
+  text: string | null,
+  index: ReadonlyMap<string, T>,
+): T[] {
+  if (text === null) return [];
+  const named = new Map<string, T>();
+  for (const entry of districtsNamedByPieces(text, index)) {
+    named.set(districtKey(entry.name), entry);
+  }
+  for (const word of text.split(/[^A-Za-z]+/u)) {
+    if (word.length < 4) continue;
+    const key = districtKey(word);
+    const entry = key === "" ? undefined : index.get(key);
+    if (entry !== undefined && strictKey(word) === strictKey(entry.name)) {
+      named.set(districtKey(entry.name), entry);
+    }
+  }
+  return [...named.values()];
+}
+
+/**
  * 2. Its location names exactly one district of this state — "Kokrajhar",
  * "Nalbari, Belsor", "Sepahijala District". Two districts named, or none,
  * places nothing. The matched text is the evidence.
@@ -190,9 +218,12 @@ function byLocation(
 ): Resolution | undefined {
   if (clues.location === null || names.size === 0) return undefined;
   const index = new Map([...names].map(([key, name]) => [key, { key, name }]));
-  const found = districtsNamedIn(clues.location, index);
+  // One district from whole pieces, and no other anywhere in the text: a word
+  // may veto a placement, never make one.
+  const found = districtsNamedByPieces(clues.location, index);
   const [only1] = found;
   if (found.length !== 1 || only1 === undefined) return undefined;
+  if (districtsNamedIn(clues.location, index).length !== 1) return undefined;
   const id = districts.get(only1.key);
   if (id === undefined) return undefined;
   return {
