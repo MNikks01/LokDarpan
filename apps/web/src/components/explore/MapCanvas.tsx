@@ -12,7 +12,13 @@ import { INDIA_BBOX } from "@/domain/geography";
 import type { StateOption } from "@/data/geography";
 import { CAMERA_MS, fitTo, framePadding } from "@/map/camera";
 import { GeometryUnavailableError, fetchStateOutlines } from "@/map/geometry-source";
-import { basemapStyleUrl, buildStyle, fetchBasemap } from "@/map/style";
+import {
+  basemapNameFilters,
+  basemapStyleUrl,
+  buildStyle,
+  fetchBasemap,
+  type PlaceLayer,
+} from "@/map/style";
 import { createBinder, type Binder, type MapPort } from "@/map/engine/binder";
 import type { MapInput } from "@/map/layers/types";
 import { CHILD_SOURCE } from "@/map/layers/child-boundaries";
@@ -136,6 +142,7 @@ export function MapCanvas({
   const [failure, setFailure] = useState<string | null>(null);
   const [hover, setHover] = useState<HoverTarget | null>(null);
   const [basemapAttribution, setBasemapAttribution] = useState<string | null>(null);
+  const [basemapPlaceLayers, setBasemapPlaceLayers] = useState<readonly PlaceLayer[]>([]);
 
   // Callbacks are read through a ref inside long-lived MapLibre handlers, so a
   // re-render never forces the map to tear its listeners down and rebind them.
@@ -168,6 +175,7 @@ export function MapCanvas({
       const basemap = configured === null ? null : await fetchBasemap(configured);
       if (cancelled()) return;
       setBasemapAttribution(basemap?.attribution ?? null);
+      setBasemapPlaceLayers(basemap?.placeLayers ?? []);
 
       const style = buildStyle({ basemap });
       if (cancelled()) return;
@@ -367,6 +375,18 @@ export function MapCanvas({
   useEffect(() => {
     labelLayerRef.current?.setVisible(layers.placeNames);
   }, [layers.placeNames, ready]);
+
+  // The base map stops naming a place while the ledger names it, so a district
+  // and its headquarters town are not both drawn. With the ledger's names
+  // switched off, the base map's come back.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map === null || !ready || basemapPlaceLayers.length === 0) return;
+    const names = layers.placeNames ? labels.map((label) => label.text) : [];
+    for (const { id, filter } of basemapNameFilters(basemapPlaceLayers, names)) {
+      if (map.getLayer(id) !== undefined) map.setFilter(id, filter ?? null);
+    }
+  }, [basemapPlaceLayers, labels, layers.placeNames, ready]);
 
   /* --------------------------------------------------------------- camera */
   const frame = useCallback(() => {
