@@ -17,8 +17,9 @@ export interface DistrictTenderCount {
   readonly districtName: string;
   readonly tenderCount: number;
   /**
-   * Of those, the ones the issuing office did not name — placed from a pincode,
-   * a place name or a reviewer's reading. Counted so the map can say so.
+   * Of those, the ones the issuing office did not name — placed from the
+   * tender's location, a pincode, a place name or a reviewer's reading.
+   * Counted so the map can say so.
    */
   readonly inferredCount: number;
   /** Distinct departments issuing here, so a reader can see the mix. */
@@ -183,7 +184,9 @@ export class PostgresTenderRepository {
        SELECT t.admin_unit_id,
               d.name_en AS district_name,
               count(*)::text AS tender_count,
-              count(*) FILTER (WHERE t.district_source IN ('pincode', 'place_name', 'manual'))::text
+              count(*) FILTER (
+                WHERE t.district_source IN ('location_district', 'pincode', 'place_name', 'manual')
+              )::text
                 AS inferred_count,
               array_agg(DISTINCT t.department) FILTER (WHERE t.department IS NOT NULL) AS departments
          FROM tender t

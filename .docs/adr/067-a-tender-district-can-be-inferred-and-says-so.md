@@ -62,3 +62,24 @@ the schema for a review tool that records who decided; that tool is not built.
 - Some unplaced tenders name their district in a form `districtKey` does not reach (a chain naming
   "Kanpur" where the ledger holds "Kanpur Nagar"). That is the explicit step's gap, separate from
   inference, and unchanged here.
+
+## Addendum · 2026-09-29 — the location step
+
+The review list (`tenders:review`) showed that many tenders the chain cannot place state their
+district in the location field: "Kokrajhar", "Nalbari, Belsor", "Sepahijala District". The order is
+now **chain → location names a district → pincode → place name → unresolved**. It is the
+town/village/admin step of the 25 September decision, taken from the tender's own text, so it needs
+no reference data and runs before the directory exists.
+
+- A tender is placed only when its location names **exactly one** district of the portal's state.
+  Each comma-, slash- or bracket-separated piece is compared whole: exactly with vowels kept, or
+  vowel-less only on a piece of six letters or more, because "Singa" and "Siang" collide otherwise.
+  The review list's hints use the same matcher, so a hint and a placement cannot disagree.
+- Method `location_district` (migration 0036), confidence **0.7**: the tender's own text, and more
+  often the work site than the issuing office is, but free text rather than a district field. The
+  location text is the evidence key. The chain still wins where it names a district; the location
+  wins over a pincode.
+- The reader sees: "The tender's location, “Nalbari, Belsor”, names this district; the issuing
+  office's name does not." It counts among the tenders the map says the office did not name.
+- Measured on the local ledger: **44 of 289** unplaced tenders placed. Every one was checked by hand
+  against its location and chain.

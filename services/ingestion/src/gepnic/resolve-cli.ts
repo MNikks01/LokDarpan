@@ -2,7 +2,7 @@ import pg from "pg";
 
 import { aliasesOfState } from "./aliases.js";
 import { districtFromChain } from "./detail.js";
-import { districtsOfState } from "./load.js";
+import { districtNamesOfState, districtsOfState } from "./load.js";
 import {
   directoryForState,
   resolveDistrict,
@@ -65,6 +65,7 @@ async function resolveState(
   const districts = await districtsOfState(db, state.state_lgd_code);
   const directory: StateDirectory = await directoryForState(db, state.name_en);
   const aliases = await aliasesOfState(db, state.state_lgd_code);
+  const districtNames = await districtNamesOfState(db, state.state_lgd_code);
   const known = new Set([...districts.keys(), ...aliases.keys()]);
   const unplaced = await db.query<Unplaced>(
     `SELECT t.id, t.portal_tender_id, t.organisation_chain, t.location, t.pincode
@@ -79,7 +80,10 @@ async function resolveState(
   let placed = 0;
   const remaining: Unplaced[] = [];
   for (const row of unplaced.rows) {
-    const result = resolveDistrict(cluesOf(row, known), districts, directory, aliases);
+    const result = resolveDistrict(cluesOf(row, known), districts, directory, {
+      aliases,
+      districtNames,
+    });
     if (result.adminUnitId === null) {
       remaining.push(row);
       continue;
