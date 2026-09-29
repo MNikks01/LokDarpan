@@ -73,7 +73,9 @@ jobs:
           # to start without the bucket rather than hash bytes it cannot keep
           # (migration 0037, `.docs/16-operations/raw-store.md`).
           RAW_STORE_REQUIRE_OBJECT: "true"
-          RAW_STORE_S3_ENDPOINT: ${{ secrets.RAW_STORE_S3_ENDPOINT }}
-          RAW_STORE_S3_BUCKET: ${{ secrets.RAW_STORE_S3_BUCKET }}
-          RAW_STORE_S3_ACCESS_KEY_ID: ${{ secrets.RAW_STORE_S3_ACCESS_KEY_ID }}
-          RAW_STORE_S3_SECRET_ACCESS_KEY: ${{ secrets.RAW_STORE_S3_SECRET_ACCESS_KEY }}
+          # The bucket and its endpoint are not secret, so they are repository
+          # variables and show in the log; the key pair is secret.
+          RAW_STORE_S3_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+          RAW_STORE_S3_BUCKET: ${{ vars.R2_BUCKET }}
+          RAW_STORE_S3_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RAW_STORE_S3_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
