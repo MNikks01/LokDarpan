@@ -2,6 +2,15 @@
 
 **Date:** 5 September 2026 · **Answers blocker 3** of [`README.md`](../README.md) · **Reconciles** [`01-product/sprint-plan.md`](../01-product/sprint-plan.md) and [`07-analytics/analytics-engine.md`](../07-analytics/analytics-engine.md) **with what may actually be published**
 
+> **Correction · 29 September 2026. Everything this document counts is the local database, not
+> production.** A read-only count of the production ledger on 29 September found **no documents,
+> no pages, no facts and no BEAMS rows**: the CAG and BEAMS loaders have only ever been run
+> against a local database. The "What that actually is" table below describes that local ledger,
+> which has since grown to 30 reports and 6,339 pages (published facts still 5,088; 3,848
+> monetary candidates now await review). On production, the only populated surface is the tender
+> map. Loading the audit corpus into production is the first item in
+> [`product-audit-2026-09-29.md`](./product-audit-2026-09-29.md).
+>
 > **Update · 29 September 2026.** Two things below have changed, and the rest stands.
 >
 > - **The decision was reversed on 25 September:** permission is to be sought, without blocking on

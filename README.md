@@ -13,17 +13,19 @@ LokDarpan links official records into one traceable ledger — revenue → budge
 
 ## Status
 
-**Specification-complete; implementation just begun.** The web client is first; the mobile app follows after launch ([`.docs/decisions/web-first-pivot.md`](.docs/decisions/web-first-pivot.md)).
+**Deployed, with a narrow ledger.** The web client is first; the mobile app follows after launch ([`.docs/decisions/web-first-pivot.md`](.docs/decisions/web-first-pivot.md)). The full picture, measured on 29 September 2026, is in [`.docs/00-overview/product-audit-2026-09-29.md`](.docs/00-overview/product-audit-2026-09-29.md).
 
-|                            |                                                                                         |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| Documentation              | Complete — 110 documents in [`.docs/`](.docs)                                           |
-| Government source registry | 99 sources, 96 verified ([`.docs/06-government-sources/`](.docs/06-government-sources)) |
-| `apps/web`                 | W1 foundation — builds, 38 tests passing, **fixture data only**                         |
-| `services/*`               | Not yet implemented                                                                     |
-| Backend / database         | Not yet implemented                                                                     |
+|                            |                                                                                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Government source registry | 100 sources, 97 verified ([`.docs/06-government-sources/`](.docs/06-government-sources))                                     |
+| `apps/web`                 | Deployed on Vercel. Map explorer, unit, department and document pages; `/api/v1`                                             |
+| `services/ingestion`       | Real: LGD, OpenStreetMap, CAG, BEAMS and GePNIC collectors; tenders collected nightly                                        |
+| `services/ocr`             | Real (Python, Tesseract); benchmarked, not yet feeding the ledger                                                            |
+| Database                   | PostgreSQL + PostGIS on Neon, 36 migrations                                                                                  |
+| Production ledger          | States and districts with boundaries; 1,318 open tenders from 21 states. **No audit reports or budget figures loaded yet**   |
+| Not yet started            | `services/{ai,analytics,entity-resolution,normalization,risk-engine}`; project and contractor data (no permitted source yet) |
 
-**No real government data is ingested yet.** Every figure the app renders is fixture data, labelled as such.
+**Only the example project page renders fixture data**, and it says so.
 
 ## Layout
 
@@ -42,7 +44,7 @@ infrastructure/ docker · kubernetes · terraform · monitoring
 
 ```bash
 pnpm install
-pnpm test                 # 75 tests: money, neutrality, contracts, palette, database
+pnpm test                 # ~1,370 tests; integration suites skip without a database
 pnpm dev                  # web client at http://localhost:3000
 pnpm neutrality apps packages   # docs/15 language gate — a hit blocks release
 ```
