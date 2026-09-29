@@ -21,6 +21,7 @@
     "ingest:gepnic-sample": "tsx src/gepnic/sample-window.ts",
     "link:figures": "tsx src/cag/figure-link-cli.ts",
     "reprocess:cag": "tsx src/cag/reprocess-cli.ts",
+    "promote:cag": "tsx src/cag/promote-cli.ts",
     "ocr:manifest": "tsx src/ocr/manifest-cli.ts",
     "ocr:score": "tsx src/ocr/score-cli.ts",
     "corpus:build": "tsx src/cag/corpus-cli.ts",

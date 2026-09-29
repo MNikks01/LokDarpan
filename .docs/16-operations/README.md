@@ -10,6 +10,7 @@ collection on GitHub Actions.
 | [`collection-schedule.md`](collection-schedule.md)                           | The nightly collection: schedule, credentials, monitoring, recovery                |
 | [`rate-limiting.md`](rate-limiting.md)                                       | The API rate limit: the Firewall rule, the internal token, watching it             |
 | [`tender-placement.md`](tender-placement.md)                                 | Placing tenders: the pincode directory, backfill, aliases, manual decisions        |
+| [`promoting-the-cag-corpus.md`](promoting-the-cag-corpus.md)                 | Copying the reviewed audit reports and figures into production (`promote:cag`)     |
 | [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037   |
 
 Elsewhere:
