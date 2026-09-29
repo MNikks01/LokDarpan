@@ -37,6 +37,21 @@ reuse with attribution. No permission is needed.
 - **Not by a program fetching the site.** `data.gov.in` serves `Disallow: /`
   ([`access-and-permissions.md`](./access-and-permissions.md)).
 
+## Availability, as observed
+
+The API route has not been usable since the resource was identified:
+
+| When (UTC)             | `data.gov.in/robots.txt` | `api.data.gov.in/lists`                 |
+| ---------------------- | ------------------------ | --------------------------------------- |
+| 2026-09-25             | 200                      | 200 in under a second                   |
+| 2026-09-28 19:19–19:21 | 200                      | 502 Bad Gateway, and 30-second timeouts |
+| 2026-09-29 04:42–04:44 | 200                      | 502 once, then 30-second timeouts       |
+
+The web server answers while the API does not, so the application behind it is failing rather than
+the host being unreachable from here. The account signup, which redirects through the same
+application to Jan Parichay, failed for the maintainer over the same days. Recorded as observed from
+this vantage point; existence and future availability not disproven.
+
 ## A lapse, recorded
 
 While identifying the dataset on 25 September, the catalogue page and the CSV download path were

@@ -142,11 +142,11 @@ otherwise interpret.
 **Expected output** ends with:
 
 ```
-applying 0035_a_reviewer_places_what_no_rule_could.sql … ok
-35 migration(s) applied
+applying 0036_a_location_can_name_its_district.sql … ok
+36 migration(s) applied
 ```
 
-The count is the number of files in `database/migrations/` (35 as of 29 September
+The count is the number of files in `database/migrations/` (36 as of 29 September
 2026). If it says fewer, you are on an older checkout: pull `main` and run it
 again. Several read paths depend on recent migrations — the explorer's level
 endpoint on 0033, the tender list on 0034 — so a database behind the code fails
@@ -159,7 +159,7 @@ SELECT count(*) AS migrations FROM schema_migration;
 SELECT unnest(enum_range(NULL::ingestion_run_status))::text AS status;
 ```
 
-You want the number of files in `database/migrations/` (35 as of 29 September
+You want the number of files in `database/migrations/` (36 as of 29 September
 2026), and the four statuses `running, succeeded, failed, skipped`.
 
 ---
