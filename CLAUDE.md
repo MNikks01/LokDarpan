@@ -6,7 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **LokDarpan (लोकदर्पण)** — a public-finance, governance and infrastructure intelligence platform for India, built entirely on official government records. It links revenue → budget → allocation → release → expenditure → tender → contractor → work progress → audit into one traceable ledger and runs mathematical-consistency checks over it.
 
-**It is deployed and holds real data** (as of 29 September 2026). The site runs on Vercel, reading a PostgreSQL + PostGIS ledger on Neon; a GitHub Actions job collects tenders nightly. The ledger holds the LGD state hierarchy with OpenStreetMap district geometry, CAG audit reports with person-verified facts, BEAMS actuals for Maharashtra (collected, not displayed), and open tenders from 21 state e-procurement portals, placed in districts where the evidence allows (ADR-067, ADR-068). Only the example project page (`/project/[id]`) renders fixture data, and it says so.
+**It is deployed and holds real data** (as of 29 September 2026). The site runs on Vercel, reading a PostgreSQL + PostGIS ledger on Neon; a GitHub Actions job collects tenders nightly. Only the example project page (`/project/[id]`) renders fixture data, and it says so.
+
+**Production and the local database do not hold the same things — check which one you mean.** Measured 29 September 2026:
+
+| Ledger contents                                        | Production (Neon)                 | Local Docker       |
+| ------------------------------------------------------ | --------------------------------- | ------------------ |
+| LGD states · districts, with OSM geometry              | 36 · 787                          | 36 · 787           |
+| Sub-districts · villages · urban local bodies          | **none**                          | 355 · 40 · 18      |
+| CAG audit reports · pages · published facts            | **none**                          | 30 · 6,339 · 5,088 |
+| BEAMS departments · schemes (collected, not displayed) | **none**                          | 33 · 524           |
+| Open tenders, 21 portals, placed where evidence allows | 1,318 (nightly; ADR-067, ADR-068) | a stale subset     |
+
+So on the live site `/documents` is empty and the department page has nothing to show. The CAG and BEAMS loaders are operator CLIs that have only ever been run locally. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
 
 What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
 
