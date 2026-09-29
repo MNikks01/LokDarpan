@@ -26,6 +26,7 @@ const artifact: RawArtifact = {
   contentType: "application/pdf",
   byteSize: 10,
   storagePath: "cag/ee/ee/x",
+  storedIn: "file",
 };
 
 const extracted: ExtractedDocument = {
@@ -142,8 +143,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         }
       }
       await db().query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-       VALUES ($1,'cag',$2, now(), 10, 'cag/t') ON CONFLICT (sha256) DO NOTHING`,
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+       VALUES ($1,'cag',$2, now(), 10, 'cag/t', 'file') ON CONFLICT (sha256) DO NOTHING`,
         [ARTIFACT, artifact.sourceUrl],
       );
       const v = await db().query<{ id: string }>(

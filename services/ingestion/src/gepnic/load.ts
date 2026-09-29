@@ -3,6 +3,7 @@ import type pg from "pg";
 import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run";
 import { districtKey, type TenderDetail } from "./detail";
 import type { FetchedArtifact } from "./fetch";
+import type { Retained } from "../raw-store";
 import type { ParsedTender } from "./landing";
 import { aliasesOfState, type ResolvedAlias } from "./aliases";
 import {
@@ -33,7 +34,8 @@ export interface LoadOptions {
   readonly portalCode: string;
   readonly stateLgdCode: string;
   readonly records: readonly TenderRecord[];
-  readonly artifact: FetchedArtifact;
+  /** The landing page, already put in the raw store: a row must not name bytes nobody kept. */
+  readonly artifact: FetchedArtifact & Retained;
   readonly datasetDescription: string;
 }
 
@@ -301,8 +303,8 @@ async function recordSuccessfulCollection(
 async function openArtifactAndVersion(db: pg.Client, options: LoadOptions): Promise<string> {
   const { portalCode, artifact } = options;
   await db.query(
-    `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path)
-     VALUES ($1, $2, $3, $4, 200, 'text/html', $5, $6)
+    `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path, stored_in)
+     VALUES ($1, $2, $3, $4, 200, 'text/html', $5, $6, $7)
      ON CONFLICT (sha256) DO NOTHING`,
     [
       artifact.sha256,
@@ -310,7 +312,8 @@ async function openArtifactAndVersion(db: pg.Client, options: LoadOptions): Prom
       artifact.sourceUrl,
       artifact.retrievedAt,
       artifact.byteSize,
-      `gepnic/${portalCode}/${artifact.sha256}.html`,
+      artifact.storagePath,
+      artifact.storedIn,
     ],
   );
 

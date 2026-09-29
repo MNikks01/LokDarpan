@@ -30,6 +30,7 @@ const artifact = (sha: string): RawArtifact => ({
   contentType: "text/html;charset=UTF-8",
   byteSize: 42,
   storagePath: `lgd/${sha.slice(0, 2)}/${sha.slice(2, 4)}/${sha}`,
+  storedIn: "file",
 });
 
 const state = (over: Partial<LgdState> = {}): LgdState => ({

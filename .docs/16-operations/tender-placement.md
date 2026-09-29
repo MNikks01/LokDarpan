@@ -36,7 +36,8 @@ DATABASE_URL='<direct owner string>' pnpm --filter @lokdarpan/ingestion ingest:p
 
 Never fetch data.gov.in pages or files with a program: its `robots.txt` is `Disallow: /`. The API
 is the sanctioned channel. Each load replaces the previous one in a single transaction; the raw
-bytes are kept in the raw store, so every inferred district traces to them.
+bytes are kept in the raw store, so every inferred district traces to them. Run it with the R2
+variables set when loading production, or the bytes stay on your machine ([`raw-store.md`](raw-store.md)).
 
 ## 2. Backfill
 

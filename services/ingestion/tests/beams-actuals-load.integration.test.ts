@@ -26,6 +26,7 @@ const artifact: RawArtifact = {
   contentType: "text/html",
   byteSize: 10,
   storagePath: "beams/dd/dd/x",
+  storedIn: "file",
 };
 
 const actuals = (over: Partial<DepartmentActuals> = {}): DepartmentActuals => ({
@@ -83,8 +84,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await db().query("DELETE FROM budget_scheme");
       await db().query("DELETE FROM department");
       await db().query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES ($1,'beams',$2, now(), 10, 'beams/t') ON CONFLICT (sha256) DO NOTHING`,
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1,'beams',$2, now(), 10, 'beams/t', 'file') ON CONFLICT (sha256) DO NOTHING`,
         [ARTIFACT, artifact.sourceUrl],
       );
       const v = await db().query<{ id: string }>(

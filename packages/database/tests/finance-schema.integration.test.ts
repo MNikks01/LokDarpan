@@ -48,8 +48,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await db().query("BEGIN");
       artifact = "b".repeat(64);
       await db().query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-       VALUES ($1,'beams','https://beams.mahakosh.gov.in/', now(), 1, 'raw/beams/t')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+       VALUES ($1,'beams','https://beams.mahakosh.gov.in/', now(), 1, 'raw/beams/t', 'file')
        ON CONFLICT (sha256) DO NOTHING`,
         [artifact],
       );
