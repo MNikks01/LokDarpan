@@ -1,6 +1,7 @@
 import type pg from "pg";
 
 import { districtKey } from "./detail";
+import { districtsNamedIn as namedIn } from "./resolve";
 
 /**
  * The review list: every held tender no rule could place and no reviewer has
@@ -61,42 +62,15 @@ export interface ReviewGroup {
 const NO_PLACE =
   /^(?:as per (?:the )?tender(?: document)?|services?|n\.?\s?a\.?|nil|-+|various|state ?wide)$/iu;
 
-/** A name with its vowels kept: letters only, repeats collapsed, the district word dropped. */
-function strictKey(name: string): string {
-  return name
-    .replace(/\b(?:district|distt?|zilla|zila|jilla|jila)\b\.?/giu, " ")
-    .toLowerCase()
-    .replace(/[^a-z]/gu, "")
-    .replace(/(.)\1+/gu, "$1");
-}
-
 /**
- * Shortest word whose vowel-less match is trusted as a hint. The ledger's
- * comparison drops vowels, which is safe for a state's few dozen district names
- * and not for the towns in a location: "Singa" and "Siang" collide. A shorter
- * word must match with its vowels.
- */
-const MIN_LOOSE_HINT = 6;
-
-/**
- * The districts a piece of the tender's own text names. A match must be exact
- * with vowels kept, or a vowel-less match on a word long enough to trust.
+ * The districts a piece of the tender's own text names — the resolver's own
+ * matcher (`resolve.ts`), so a hint and a placement cannot disagree.
  */
 export function districtsNamedIn(
   text: string | null,
   districts: ReadonlyMap<string, District>,
 ): District[] {
-  if (text === null) return [];
-  const named = new Map<string, District>();
-  const pieces = text.split(/[,|/()]+|\s-\s|\band\b/iu).map((p) => p.trim());
-  for (const piece of pieces) {
-    const key = districtKey(piece);
-    const district = key === "" ? undefined : districts.get(key);
-    if (district === undefined) continue;
-    const exact = strictKey(piece) === strictKey(district.name);
-    if (exact || strictKey(piece).length >= MIN_LOOSE_HINT) named.set(district.lgdCode, district);
-  }
-  return [...named.values()];
+  return namedIn(text, districts);
 }
 
 /** Whether a tender says anything about where at all: a real location or a pincode. */

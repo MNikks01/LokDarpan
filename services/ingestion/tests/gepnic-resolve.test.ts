@@ -143,7 +143,7 @@ describe("a reviewed alias", () => {
       clues({ districtName: "Muktsar", districtSource: "chain_unit" }),
       DISTRICTS,
       EMPTY_DIRECTORY,
-      ALIASES,
+      { aliases: ALIASES },
     );
     expect(result).toEqual({
       adminUnitId: 9,
@@ -161,7 +161,7 @@ describe("a reviewed alias", () => {
         clues({ districtName: "Cuddalore", districtSource: "chain_unit" }),
         DISTRICTS,
         EMPTY_DIRECTORY,
-        ALIASES,
+        { aliases: ALIASES },
       ).evidenceKey,
     ).toBeNull();
     // Without the alias, the same chain places nothing.
@@ -172,5 +172,80 @@ describe("a reviewed alias", () => {
         EMPTY_DIRECTORY,
       ).adminUnitId,
     ).toBeNull();
+  });
+});
+
+describe("a district the location names", () => {
+  const NAMES: ReadonlyMap<string, string> = new Map(
+    ["Viluppuram", "Cuddalore", "Kanniyakumari"].map((n) => [districtKey(n), n]),
+  );
+  const extras = { districtNames: NAMES };
+
+  it("places a tender whose location names one district, quoting what it read", () => {
+    expect(
+      resolveDistrict(clues({ location: "Cuddalore" }), DISTRICTS, EMPTY_DIRECTORY, extras),
+    ).toEqual({
+      adminUnitId: 2,
+      method: "location_district",
+      confidence: 0.7,
+      evidenceSha256: null,
+      evidenceKey: "Cuddalore",
+    });
+  });
+
+  it("reads a spelling variant of a long name, and a district among other words", () => {
+    expect(
+      resolveDistrict(clues({ location: "Villupuram" }), DISTRICTS, EMPTY_DIRECTORY, extras)
+        .adminUnitId,
+    ).toBe(1);
+    expect(
+      resolveDistrict(
+        clues({ location: "Block Office, Kanniyakumari" }),
+        DISTRICTS,
+        EMPTY_DIRECTORY,
+        extras,
+      ).adminUnitId,
+    ).toBe(3);
+  });
+
+  it("places nothing from a location naming two districts, or a short look-alike", () => {
+    expect(
+      resolveDistrict(
+        clues({ location: "Cuddalore, Viluppuram" }),
+        DISTRICTS,
+        EMPTY_DIRECTORY,
+        extras,
+      ).adminUnitId,
+    ).toBeNull();
+    const short = new Map([[districtKey("Siang"), "Siang"]]);
+    expect(
+      resolveDistrict(
+        clues({ location: "Singa" }),
+        new Map([[districtKey("Siang"), 9]]),
+        EMPTY_DIRECTORY,
+        { districtNames: short },
+      ).adminUnitId,
+    ).toBeNull();
+  });
+
+  it("comes after the chain and before the pincode", () => {
+    // The chain names Cuddalore; the location names Viluppuram. The chain wins.
+    expect(
+      resolveDistrict(
+        clues({ districtName: "Cuddalore", districtSource: "chain_unit", location: "Viluppuram" }),
+        DISTRICTS,
+        DIRECTORY,
+        extras,
+      ).method,
+    ).toBe("chain_unit");
+    // The pincode points at Viluppuram; the location names Cuddalore. The location wins.
+    expect(
+      resolveDistrict(
+        clues({ pincode: "605602", location: "Cuddalore" }),
+        DISTRICTS,
+        DIRECTORY,
+        extras,
+      ),
+    ).toMatchObject({ adminUnitId: 2, method: "location_district" });
   });
 });

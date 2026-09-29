@@ -5,7 +5,8 @@ How a tender reaches a district, and the operator's part in it. The rules are
 [ADR-068](../adr/068-a-reviewer-decides-what-no-rule-can.md); this is the runbook.
 
 The collector resolves every tender it reads, in a fixed order: the district its chain names (as
-the ledger spells it, or by an approved alias) → its pincode → its location → unresolved. Nothing
+the ledger spells it, or by an approved alias) → a district its location names → its pincode → its
+location as a post office → unresolved. Nothing
 here is needed for that to happen each night. What follows is the reference data it reads, the
 backfill for tenders no longer listed, and the review of what no rule can place.
 

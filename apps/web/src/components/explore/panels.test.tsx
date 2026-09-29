@@ -430,6 +430,19 @@ describe("tender details are withheld under the portals' terms", () => {
     expect(markup).toContain("names Muktsar, read as this district under a reviewed alias");
   });
 
+  it("quotes the location a district was read from", () => {
+    const located = {
+      ...tender,
+      districtSource: "location_district",
+      districtEvidenceKey: "Nalbari, Belsor",
+    };
+    const markup = renderToStaticMarkup(
+      <TenderList heading="Tenders" tenders={[located]} loading={false} detailsWithheld={false} />,
+    );
+    expect(markup).toContain("location, “Nalbari, Belsor”, names this district");
+    expect(markup).toContain("the issuing office&#x27;s name does not");
+  });
+
   it("says how much of the shading is inference", () => {
     const markup = tenderPanel({
       collection: collection({ status: "collected", portalCode: "tripura" }),

@@ -41,6 +41,8 @@ const ALIASED_NOTE: Readonly<Record<"chain_unit" | "office_code", (name: string)
 const PLACEMENT_NOTE: Readonly<Record<string, (evidenceKey: string | null) => string>> = {
   chain_unit: () => "The issuing office names this district.",
   office_code: () => "Read from an office name, which may cover more than one district.",
+  location_district: (key) =>
+    `The tender's location${key === null ? "" : `, “${key}”,`} names this district; the issuing office's name does not.`,
   pincode: (key) =>
     `Not named by the issuing office. Inferred from its pincode${key === null ? "" : ` ${key}`}, which the Department of Posts lists only in this district.`,
   place_name: (key) =>
@@ -113,7 +115,7 @@ export const tenderCopy = {
 
   /** How much of the shading is LokDarpan's reading rather than the offices' own statement. */
   inferredShading: (count: number): string =>
-    `${String(count)} of these ${count === 1 ? "is" : "are"} not named by the issuing office: placed from a pincode, a place name or a reviewer's reading.`,
+    `${String(count)} of these ${count === 1 ? "is" : "are"} not named by the issuing office: placed from the tender's location, a pincode, a place name or a reviewer's reading.`,
 } as const;
 
 export const boundaryCopy = {

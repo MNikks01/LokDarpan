@@ -7,7 +7,8 @@ import { districtKey, normalise } from "./detail";
  * Which district a tender belongs to, and how that was decided.
  *
  * ORDER, AND WHY IT IS NOT A SCORE
- * explicit district → pincode → place name → unresolved. The first rule that
+ * explicit district → a district the location names → pincode → place name →
+ * unresolved. The first rule that
  * answers wins; no rule is weighed against another. A tender whose chain names
  * a district is placed there even when its pincode says otherwise, because the
  * chain is the portal's statement and the pincode is our reading of a
@@ -29,7 +30,7 @@ import { districtKey, normalise } from "./detail";
  * elsewhere in the state: 0.4.
  */
 
-export type Method = "chain_unit" | "office_code" | "pincode" | "place_name";
+export type Method = "chain_unit" | "office_code" | "location_district" | "pincode" | "place_name";
 
 export interface Resolution {
   readonly adminUnitId: number | null;
@@ -52,6 +53,10 @@ export const UNRESOLVED: Resolution = {
 const CONFIDENCE: Readonly<Record<Method, number>> = {
   chain_unit: 0.9,
   office_code: 0.6,
+  // The tender's own location text naming one district of its state. The
+  // location is where the work is more often than the issuing office is, and
+  // it is still free text, not a stated district field.
+  location_district: 0.7,
   pincode: 0.6,
   place_name: 0.4,
 };
@@ -133,7 +138,73 @@ function explicitly(
   };
 }
 
-/** 2. Its pincode sits in exactly one district of this state. */
+/** A name with its vowels kept: letters only, repeats collapsed, the district word dropped. */
+function strictKey(name: string): string {
+  return name
+    .replace(/\b(?:district|distt?|zilla|zila|jilla|jila)\b\.?/giu, " ")
+    .toLowerCase()
+    .replace(/[^a-z]/gu, "")
+    .replace(/(.)\1+/gu, "$1");
+}
+
+/**
+ * Shortest word whose vowel-less match is trusted. `districtKey` drops vowels,
+ * which is safe for a state's few dozen district names and not for the towns
+ * in a location: "Singa" and "Siang" collide. A shorter word must match with
+ * its vowels.
+ */
+const MIN_LOOSE_MATCH = 6;
+
+/**
+ * The districts a piece of free text names: each comma-, slash- or
+ * bracket-separated piece compared whole, exact with vowels kept, or
+ * vowel-less when the piece is long enough to trust. Used by the location
+ * step and by the review list's hints, so the two cannot disagree.
+ */
+export function districtsNamedIn<T extends { readonly name: string }>(
+  text: string | null,
+  index: ReadonlyMap<string, T>,
+): T[] {
+  if (text === null) return [];
+  const named = new Map<string, T>();
+  const pieces = text.split(/[,|/()]+|\s-\s|\band\b/iu).map((p) => p.trim());
+  for (const piece of pieces) {
+    const key = districtKey(piece);
+    const entry = key === "" ? undefined : index.get(key);
+    if (entry === undefined) continue;
+    const exact = strictKey(piece) === strictKey(entry.name);
+    if (exact || strictKey(piece).length >= MIN_LOOSE_MATCH) named.set(key, entry);
+  }
+  return [...named.values()];
+}
+
+/**
+ * 2. Its location names exactly one district of this state — "Kokrajhar",
+ * "Nalbari, Belsor", "Sepahijala District". Two districts named, or none,
+ * places nothing. The matched text is the evidence.
+ */
+function byLocation(
+  clues: TenderClues,
+  districts: ReadonlyMap<string, number>,
+  names: ReadonlyMap<string, string>,
+): Resolution | undefined {
+  if (clues.location === null || names.size === 0) return undefined;
+  const index = new Map([...names].map(([key, name]) => [key, { key, name }]));
+  const found = districtsNamedIn(clues.location, index);
+  const [only1] = found;
+  if (found.length !== 1 || only1 === undefined) return undefined;
+  const id = districts.get(only1.key);
+  if (id === undefined) return undefined;
+  return {
+    adminUnitId: id,
+    method: "location_district",
+    confidence: CONFIDENCE.location_district,
+    evidenceSha256: null,
+    evidenceKey: clues.location.trim(),
+  };
+}
+
+/** 3. Its pincode sits in exactly one district of this state. */
 function byPincode(
   clues: TenderClues,
   districts: ReadonlyMap<string, number>,
@@ -153,7 +224,7 @@ function byPincode(
   };
 }
 
-/** 3. Its location is the name of post offices in exactly one district. */
+/** 4. Its location is the name of post offices in exactly one district. */
 function byPlace(
   clues: TenderClues,
   districts: ReadonlyMap<string, number>,
@@ -174,16 +245,26 @@ function byPlace(
   };
 }
 
+/** What the resolver reads besides the districts and the directory. */
+export interface ResolveExtras {
+  /** Approved aliases of the state (ADR-068). */
+  readonly aliases?: ReadonlyMap<string, ResolvedAlias>;
+  /** The state's district names, keyed by `districtKey`, for the location step. */
+  readonly districtNames?: ReadonlyMap<string, string>;
+}
+
 export function resolveDistrict(
   clues: TenderClues,
   districts: ReadonlyMap<string, number>,
   directory: StateDirectory,
-  aliases: ReadonlyMap<string, ResolvedAlias> = NO_ALIASES,
+  extras: ResolveExtras = {},
 ): Resolution {
-  const named = explicitly(clues, districts, aliases);
+  const named = explicitly(clues, districts, extras.aliases ?? NO_ALIASES);
   if (named !== undefined) return named;
+  const located = byLocation(clues, districts, extras.districtNames ?? new Map());
+  if (located !== undefined) return located;
   if (directory.sha256 === null) return UNRESOLVED;
-  // 4. Unresolved: held, counted as unplaced, and listed for review.
+  // 5. Unresolved: held, counted as unplaced, and listed for review.
   return (
     byPincode(clues, districts, directory) ?? byPlace(clues, districts, directory) ?? UNRESOLVED
   );
