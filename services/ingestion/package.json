@@ -36,6 +36,7 @@
     "@lokdarpan/database": "workspace:*",
     "@lokdarpan/domain": "workspace:*",
     "@lokdarpan/money": "workspace:*",
+    "aws4fetch": "^1.0.20",
     "node-html-parser": "^6.1.13",
     "pg": "^8.13.1",
     "unpdf": "^1.8.1"

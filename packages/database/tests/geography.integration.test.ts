@@ -58,8 +58,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       repository = new PostgresGeographyRepository(pool);
 
       await pool.query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-       VALUES ($1, 'test-geography', 'https://example.invalid/geo', now(), 1, 'test/geo.json')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+       VALUES ($1, 'test-geography', 'https://example.invalid/geo', now(), 1, 'test/geo.json', 'file')
        ON CONFLICT (sha256) DO NOTHING`,
         [ARTIFACT],
       );

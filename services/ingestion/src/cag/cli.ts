@@ -1,16 +1,14 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import pg from "pg";
 
 import { openDatasetVersion, recordArtifact, sealDatasetVersion } from "../lgd/load";
-import { putArtifact } from "../raw-store";
+import { putArtifact, rawStoreFromEnv } from "../raw-store";
 import { CagClient, MAHARASHTRA_STATE_ID } from "./client";
 import { extractDocument } from "./extract";
 import { loadDocument } from "./load";
 
-const RAW_ROOT =
-  process.env["RAW_STORE_ROOT"] ??
-  resolve(dirname(fileURLToPath(import.meta.url)), "../../../../data/raw");
+// `RAW_STORE_S3_*` selects the object store; otherwise `RAW_STORE_ROOT` or
+// `data/raw` at the repository root (see `raw-store.ts`).
+const RAW_STORE = rawStoreFromEnv();
 
 /** These are multi-megabyte documents from one government host. */
 const POLITE_DELAY_MS = 5_000;
@@ -142,7 +140,7 @@ async function main(): Promise<void> {
 
       // Original bytes stored before anything is parsed. Re-extraction with a
       // better parser must stay possible from what was actually retrieved.
-      const artifact = await putArtifact(RAW_ROOT, fetched.body, {
+      const artifact = await putArtifact(RAW_STORE, fetched.body, {
         sourceId: "cag",
         sourceUrl: fetched.url,
         retrievedAt: new Date(),

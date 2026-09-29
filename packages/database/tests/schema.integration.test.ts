@@ -33,8 +33,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")("schema (inte
       await applyMigration(c, migration);
     }
     await c.query(
-      `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-       VALUES ($1,'lgd','https://lgdirectory.gov.in/', now(), 100, 'raw/lgd/test')
+      `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+       VALUES ($1,'lgd','https://lgdirectory.gov.in/', now(), 100, 'raw/lgd/test', 'file')
        ON CONFLICT (sha256) DO NOTHING`,
       [ARTIFACT],
     );
@@ -99,6 +99,35 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")("schema (inte
       ],
     );
   };
+
+  // Migration 0037. Production held 162 artefact rows whose bytes were never
+  // written anywhere, and nothing in the row said so.
+  describe("an artefact says where its bytes are", () => {
+    const insertArtifact = (storedIn: string | null): Promise<unknown> =>
+      db().query(
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1, 'test-stored-in', 'https://example.invalid/', now(), 1, 'test/x', $2)`,
+        [`${"f".repeat(63)}1`, storedIn],
+      );
+
+    it("refuses a new artefact that names no store", async () => {
+      await expect(insertArtifact(null)).rejects.toThrow(/source_artifact_bytes_stored/);
+    });
+
+    it("refuses a store it cannot read as one", async () => {
+      await db().query("SAVEPOINT s");
+      await expect(insertArtifact("my laptop")).rejects.toThrow(/source_artifact_bytes_stored/);
+      await db().query("ROLLBACK TO SAVEPOINT s");
+      await expect(insertArtifact("s3://")).rejects.toThrow(/source_artifact_bytes_stored/);
+    });
+
+    it("accepts a local directory or a named bucket", async () => {
+      await db().query("SAVEPOINT s");
+      await expect(insertArtifact("file")).resolves.toBeDefined();
+      await db().query("ROLLBACK TO SAVEPOINT s");
+      await expect(insertArtifact("s3://lokdarpan-raw")).resolves.toBeDefined();
+    });
+  });
 
   it("has PostGIS available", async () => {
     const r = await db().query(`SELECT extname FROM pg_extension WHERE extname = 'postgis'`);

@@ -9,6 +9,7 @@ import { GEPNIC_SWEEP_LOCK, sweepLockHolder, takeSweepLock } from "../advisory-l
 import { openRun } from "../ingestion-run";
 import { EXIT_ALL_REFUSED, sweepExitCode, type PortalOutcome } from "./outcome";
 import { PORTALS, portalByCode } from "./portals";
+import { RawStoreMisconfigured, rawStoreFromEnv, retain, type RawStore } from "../raw-store";
 
 /**
  * Collect one GePNIC portal's currently advertised tenders.
@@ -123,7 +124,11 @@ function resolveTarget(): Target {
  * past a portal that refuses us or falls over. A single run still surfaces
  * everything through the summary printed by the caller.
  */
-async function collectPortal(client: pg.Client, target: Target): Promise<PortalOutcome> {
+async function collectPortal(
+  client: pg.Client,
+  store: RawStore,
+  target: Target,
+): Promise<PortalOutcome> {
   const { portalCode, baseUrl, stateLgdCode } = target;
   const empty = {
     portal: portalCode,
@@ -166,11 +171,24 @@ async function collectPortal(client: pg.Client, target: Target): Promise<PortalO
   const aliases = await aliasesOfState(client, stateLgdCode);
   const known = new Set([...districts.keys(), ...aliases.keys()]);
   const records = await collectDetails(session, baseUrl, tenders, known);
+
+  // The page is kept before anything cites it. A store that cannot take it
+  // costs this portal's run, not the sweep: the tenders are advertised again
+  // tomorrow, and a row pointing at bytes nobody kept is the defect migration
+  // 0037 records.
+  let retained;
+  try {
+    retained = await retain(store, `gepnic-${portalCode}`, landing, "text/html");
+  } catch (error: unknown) {
+    const reason = error instanceof Error ? error.message.slice(0, 70) : "raw store failed";
+    return { ...empty, advertised: tenders.length, refusal: reason };
+  }
+
   const result = await loadTenders(client, {
     portalCode,
     stateLgdCode,
     records,
-    artifact: landing,
+    artifact: { ...landing, ...retained },
     datasetDescription: `gepnic ${portalCode} landing ${landing.retrievedAt}`,
   });
 
@@ -229,6 +247,19 @@ async function main(): Promise<void> {
     process.exit(EXIT_MISCONFIGURED);
   }
 
+  // Chosen before anything is fetched, so a misconfigured store costs nothing
+  // but this message. The schedule sets RAW_STORE_REQUIRE_OBJECT: its runner's
+  // disk is deleted with the job.
+  let store: RawStore;
+  try {
+    store = rawStoreFromEnv();
+  } catch (error: unknown) {
+    if (!(error instanceof RawStoreMisconfigured)) throw error;
+    process.stderr.write(`${error.message}\n`);
+    process.exit(EXIT_MISCONFIGURED);
+  }
+  process.stdout.write(`raw store: ${store.location}\n`);
+
   const sweep = process.argv.includes("--all");
   const targets: readonly Target[] = sweep
     ? PORTALS.map((p) => ({
@@ -255,7 +286,7 @@ async function main(): Promise<void> {
     for (const [index, target] of targets.entries()) {
       if (index > 0) await sleep(BETWEEN_PORTALS_MS);
       process.stdout.write(`${target.portalCode} …\n`);
-      const outcome = await collectPortal(client, target);
+      const outcome = await collectPortal(client, store, target);
       outcomes.push(outcome);
       process.stdout.write(line(outcome));
     }

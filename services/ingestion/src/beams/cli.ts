@@ -1,16 +1,14 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import pg from "pg";
 
-import { putArtifact } from "../raw-store";
+import { putArtifact, rawStoreFromEnv } from "../raw-store";
 import { openDatasetVersion, recordArtifact, sealDatasetVersion } from "../lgd/load";
 import { BeamsClient } from "./client";
 import { loadBeamsRows } from "./load";
 import { parseBeamsExport } from "./parse";
 
-const RAW_ROOT =
-  process.env["RAW_STORE_ROOT"] ??
-  resolve(dirname(fileURLToPath(import.meta.url)), "../../../../data/raw");
+// `RAW_STORE_S3_*` selects the object store; otherwise `RAW_STORE_ROOT` or
+// `data/raw` at the repository root (see `raw-store.ts`).
+const RAW_STORE = rawStoreFromEnv();
 
 /** BEAMS labels FY 2024-25 as 2024. Both bounds verified reachable. */
 const FIRST_YEAR = 2017;
@@ -49,7 +47,7 @@ async function main(): Promise<void> {
 
       // Bytes are stored before anything is parsed: if extraction is wrong, the
       // fix must be re-derivable from what was actually retrieved.
-      const artifact = await putArtifact(RAW_ROOT, page.body, {
+      const artifact = await putArtifact(RAW_STORE, page.body, {
         sourceId: "beams",
         sourceUrl: page.url,
         retrievedAt: new Date(),

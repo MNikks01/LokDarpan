@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { districtKey, type TenderDetail } from "../src/gepnic/detail";
 import type { FetchedArtifact } from "../src/gepnic/fetch";
+import type { Retained } from "../src/raw-store";
 import type { ParsedTender } from "../src/gepnic/landing";
 import { loadTenders, placementFor, type TenderRecord } from "../src/gepnic/load";
 
@@ -82,12 +83,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     let seedVersionId = 0;
     let districtId = 0;
 
-    const artifact = (sha: string): FetchedArtifact => ({
+    const artifact = (sha: string): FetchedArtifact & Retained => ({
       body: "<html></html>",
       sha256: sha,
       retrievedAt: "2026-09-25T00:00:00.000Z",
       sourceUrl: "https://tenders.example.invalid/nicgep/app",
       byteSize: 13,
+      storagePath: `gepnic-test/${sha}`,
+      storedIn: "file",
     });
 
     const listed = (id: string, over: Partial<ParsedTender> = {}): ParsedTender => ({
@@ -130,8 +133,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       client = new pg.Client({ connectionString: DATABASE_URL });
       await client.connect();
       await client.query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES ($1, 'test-gepnic-load', 'https://example.invalid/lgd', now(), 1, 'test/lgd.json')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1, 'test-gepnic-load', 'https://example.invalid/lgd', now(), 1, 'test/lgd.json', 'file')
          ON CONFLICT (sha256) DO NOTHING`,
         [SEED_ARTIFACT],
       );
@@ -158,8 +161,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       // The directory, as the Department of Posts would list one office in
       // this state. Spelled its way: upper case, and without the ledger's word.
       await client.query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES ($1, 'pincode-directory', 'https://www.data.gov.in/example', now(), 1, 'test/p.csv')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1, 'pincode-directory', 'https://www.data.gov.in/example', now(), 1, 'test/p.csv', 'file')
          ON CONFLICT (sha256) DO NOTHING`,
         [DIRECTORY_ARTIFACT],
       );

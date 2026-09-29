@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { TenderDetail } from "../src/gepnic/detail";
 import type { FetchedArtifact } from "../src/gepnic/fetch";
+import type { Retained } from "../src/raw-store";
 import { loadTenders } from "../src/gepnic/load";
 import { decidePlacement, MANUAL_CONFIDENCE, PlacementRefused } from "../src/gepnic/place";
 import { unplacedForReview } from "../src/gepnic/review";
@@ -51,12 +52,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       emdPaise: null,
     };
 
-    const artifact: FetchedArtifact = {
+    const artifact: FetchedArtifact & Retained = {
       body: "<html></html>",
       sha256: LANDING,
       retrievedAt: "2026-09-29T00:00:00.000Z",
       sourceUrl: "https://tenders.example.invalid/nicgep/app",
       byteSize: 13,
+      storagePath: `gepnic-test/${LANDING}`,
+      storedIn: "file",
     };
 
     const load = (db: pg.Client, id: string, detail: TenderDetail | null) =>
@@ -99,8 +102,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       reviewer = new pg.Client({ connectionString: REVIEWER_URL });
       await reviewer.connect();
       await owner.query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES ($1, 'test-placement', 'https://example.invalid/lgd', now(), 1, 'test/lgd.json')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1, 'test-placement', 'https://example.invalid/lgd', now(), 1, 'test/lgd.json', 'file')
          ON CONFLICT (sha256) DO NOTHING`,
         [SEED],
       );

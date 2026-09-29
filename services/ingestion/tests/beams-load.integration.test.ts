@@ -27,6 +27,7 @@ const artifact: RawArtifact = {
   contentType: "application/vnd.ms-excel",
   byteSize: 10,
   storagePath: "beams/cc/cc/x",
+  storedIn: "file",
 };
 
 const row = (over: Partial<BeamsRow> = {}): BeamsRow => ({
@@ -89,8 +90,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await db().query("DELETE FROM budget_scheme");
       await db().query("DELETE FROM department");
       await db().query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-       VALUES ($1,'beams',$2, now(), 10, 'beams/t') ON CONFLICT (sha256) DO NOTHING`,
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+       VALUES ($1,'beams',$2, now(), 10, 'beams/t', 'file') ON CONFLICT (sha256) DO NOTHING`,
         [ARTIFACT, artifact.sourceUrl],
       );
       const v = await db().query<{ id: string }>(

@@ -1,6 +1,7 @@
 import type pg from "pg";
 import { OSM_ATTRIBUTION, OSM_LICENCE, type FetchedArtifact } from "./overpass";
 import { lgdKindMatchesLevel, type ParsedUnit } from "./boundaries";
+import type { Retained } from "../raw-store";
 
 /**
  * Load parsed OSM boundaries into the ledger.
@@ -25,7 +26,8 @@ export interface LoadResult {
 
 export interface LoadOptions {
   readonly units: readonly ParsedUnit[];
-  readonly artifact: FetchedArtifact;
+  /** The Overpass response, already put in the raw store. */
+  readonly artifact: FetchedArtifact & Retained;
   readonly datasetDescription: string;
   /** Ledger id of the unit these sit inside, when known. */
   readonly parentId: number | null;
@@ -76,15 +78,16 @@ export async function loadBoundaries(db: pg.Client, options: LoadOptions): Promi
   await db.query("BEGIN");
   try {
     await db.query(
-      `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path)
-       VALUES ($1, 'openstreetmap-overpass', $2, $3, 200, 'application/json', $4, $5)
+      `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path, stored_in)
+       VALUES ($1, 'openstreetmap-overpass', $2, $3, 200, 'application/json', $4, $5, $6)
        ON CONFLICT (sha256) DO NOTHING`,
       [
         artifact.sha256,
         artifact.sourceUrl,
         artifact.retrievedAt,
         artifact.byteSize,
-        `osm/${artifact.sha256}.json`,
+        artifact.storagePath,
+        artifact.storedIn,
       ],
     );
 

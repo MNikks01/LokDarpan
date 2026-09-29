@@ -1,11 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import pg from "pg";
 
 import { openDatasetVersion, recordArtifact, sealDatasetVersion } from "../lgd/load.js";
-import { putArtifact } from "../raw-store.js";
+import { putArtifact, rawStoreFromEnv } from "../raw-store.js";
 import { readDirectoryFromApi } from "./api.js";
 import { replaceDirectory } from "./load.js";
 import { parseApiRecords, parseDirectory, type ParsedDirectory } from "./parse.js";
@@ -34,9 +32,9 @@ import { cliArgs } from "../cli-args.js";
  * provenance record whose origin was guessed is worse than none. Either way the
  * exact bytes are stored, so every inferred district traces to them.
  */
-const RAW_ROOT =
-  process.env["RAW_STORE_ROOT"] ??
-  resolve(dirname(fileURLToPath(import.meta.url)), "../../../../data/raw");
+// `RAW_STORE_S3_*` selects the object store; otherwise `RAW_STORE_ROOT` or
+// `data/raw` at the repository root (see `raw-store.ts`).
+const RAW_STORE = rawStoreFromEnv();
 
 interface Read {
   readonly bytes: Buffer;
@@ -121,7 +119,7 @@ async function main(): Promise<void> {
   }
   if (parsed.entries.length === 0) throw new Error("No office could be read. Nothing loaded.");
 
-  const artifact = await putArtifact(RAW_ROOT, bytes, {
+  const artifact = await putArtifact(RAW_STORE, bytes, {
     sourceId: "pincode-directory",
     sourceUrl,
     retrievedAt: when,

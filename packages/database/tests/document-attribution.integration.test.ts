@@ -38,8 +38,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       repository = new PostgresPublishedFactRepository(pool);
 
       await pool.query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES ($1, 'test-attribution', 'https://example.invalid/a', now(), 1, 'test/a.pdf')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1, 'test-attribution', 'https://example.invalid/a', now(), 1, 'test/a.pdf', 'file')
          ON CONFLICT (sha256) DO NOTHING`,
         [ARTIFACT],
       );
@@ -79,8 +79,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         nextArtifact += 1;
         const sha = String(nextArtifact).padStart(2, "8").repeat(32).slice(0, 64);
         await pool?.query(
-          `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-           VALUES ($1, 'test-attribution', 'https://example.invalid/a', now(), 1, 'test/a.pdf')
+          `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+           VALUES ($1, 'test-attribution', 'https://example.invalid/a', now(), 1, 'test/a.pdf', 'file')
            ON CONFLICT (sha256) DO NOTHING`,
           [sha],
         );

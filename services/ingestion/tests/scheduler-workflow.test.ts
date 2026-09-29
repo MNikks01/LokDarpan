@@ -65,6 +65,22 @@ describe("the tender ingestion workflow", () => {
     expect(withEnv[0]?.env?.["DATABASE_URL"]).toBe("${{ secrets.INGEST_DATABASE_URL }}");
   });
 
+  // Migration 0037: the runner's disk is deleted with the job, so bytes kept
+  // there are bytes lost. The sweep must be told a durable store is required.
+  it("requires the object store, and gives its credentials to the same step", () => {
+    const withEnv = (scheduled.jobs["gepnic"]?.steps ?? []).filter((s) => s.env !== undefined);
+    const env = withEnv[0]?.env ?? {};
+    expect(env["RAW_STORE_REQUIRE_OBJECT"]).toBe("true");
+    for (const name of [
+      "RAW_STORE_S3_ENDPOINT",
+      "RAW_STORE_S3_BUCKET",
+      "RAW_STORE_S3_ACCESS_KEY_ID",
+      "RAW_STORE_S3_SECRET_ACCESS_KEY",
+    ]) {
+      expect(env[name]).toBe(`\${{ secrets.${name} }}`);
+    }
+  });
+
   it("never writes the credential into a command", () => {
     for (const step of scheduled.jobs["gepnic"]?.steps ?? []) {
       // A secret on a command line reaches the process table and, on failure,

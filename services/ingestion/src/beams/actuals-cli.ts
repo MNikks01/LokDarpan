@@ -1,16 +1,14 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import pg from "pg";
 
 import { openDatasetVersion, recordArtifact, sealDatasetVersion } from "../lgd/load";
-import { putArtifact } from "../raw-store";
+import { putArtifact, rawStoreFromEnv } from "../raw-store";
 import { loadDepartmentActuals } from "./actuals-load";
 import { parseDepartmentActuals } from "./actuals-parse";
 import { BeamsClient } from "./client";
 
-const RAW_ROOT =
-  process.env["RAW_STORE_ROOT"] ??
-  resolve(dirname(fileURLToPath(import.meta.url)), "../../../../data/raw");
+// `RAW_STORE_S3_*` selects the object store; otherwise `RAW_STORE_ROOT` or
+// `data/raw` at the repository root (see `raw-store.ts`).
+const RAW_STORE = rawStoreFromEnv();
 
 const FIRST_YEAR = 2019;
 const LAST_YEAR = 2026;
@@ -58,7 +56,7 @@ async function main(): Promise<void> {
       await client.openSession();
       const page = await client.fetchDepartmentActuals(year);
 
-      const artifact = await putArtifact(RAW_ROOT, page.body, {
+      const artifact = await putArtifact(RAW_STORE, page.body, {
         sourceId: "beams",
         sourceUrl: page.url,
         retrievedAt: new Date(),
