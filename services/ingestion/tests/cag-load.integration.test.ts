@@ -111,24 +111,34 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       // test that eventually fails for a reason that has nothing to do with
       // what it checks.
       //
-      // TRUNCATE locks four tables one after another, and the other suites
-      // running alongside lock them in other orders — a reader facts first, a
-      // writer documents first — so no order is safe against all of them; CI
-      // deadlocked both ways on 2026-09-28. Postgres resolves a deadlock by
-      // rolling one side back, so the setup takes that as a reason to try again
-      // rather than a failure of the test. Anything else still fails it.
+      // TRUNCATE locks each table one after another, and the suites running
+      // alongside lock them in other orders — a reader facts first, a writer
+      // documents first — so no order is safe against all of them: CI and local
+      // runs deadlocked both ways on 2026-09-28 and 29, and Postgres rolled back
+      // whichever side it chose, sometimes another suite's test.
+      //
+      // So this setup never waits while holding a lock. It asks for every table
+      // the cascade reaches with NOWAIT; if any is busy it releases the lot and
+      // tries again shortly. A session that never waits cannot be part of a
+      // deadlock, and the other suites' transactions are brief. Anything but a
+      // busy lock still fails the test.
       for (let attempt = 1; ; attempt++) {
         await db().query("BEGIN");
         try {
           await db().query(
-            "TRUNCATE document_fact, document_text_item, document_page, document CASCADE",
+            `LOCK TABLE document, document_page, document_text_item, document_fact,
+                        document_fact_review_history
+               IN ACCESS EXCLUSIVE MODE NOWAIT`,
+          );
+          await db().query(
+            "TRUNCATE document, document_page, document_text_item, document_fact CASCADE",
           );
           break;
         } catch (error: unknown) {
           await db().query("ROLLBACK");
-          const deadlocked = (error as { code?: string }).code === "40P01";
-          if (!deadlocked || attempt >= 5) throw error;
-          await new Promise((done) => setTimeout(done, 100 * attempt));
+          const busy = (error as { code?: string }).code === "55P03"; // lock_not_available
+          if (!busy || attempt >= 200) throw error;
+          await new Promise((done) => setTimeout(done, 25 * Math.min(attempt, 8)));
         }
       }
       await db().query(

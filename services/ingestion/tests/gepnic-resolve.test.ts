@@ -228,6 +228,31 @@ describe("a district the location names", () => {
     ).toBeNull();
   });
 
+  it("places nothing when a second district hides inside a longer piece", () => {
+    // Production, 2026-09-29: "Rangpo, Kitchudumra Namchi, Gyalshing, Kewzing"
+    // spans Namchi and Gyalshing, and piece by piece was placed in Gyalshing.
+    const sikkim = new Map(["Gyalshing", "Namchi"].map((n) => [districtKey(n), n]));
+    const ids = new Map([
+      [districtKey("Gyalshing"), 1],
+      [districtKey("Namchi"), 2],
+    ]);
+    expect(
+      resolveDistrict(
+        clues({ location: "Rangpo,Kitchudumra Namchi, Gyalshing, Kewzing" }),
+        ids,
+        EMPTY_DIRECTORY,
+        { districtNames: sikkim },
+      ).adminUnitId,
+    ).toBeNull();
+    // A word may refuse a placement but never make one: a district named only
+    // inside a longer piece is left for review.
+    expect(
+      resolveDistrict(clues({ location: "Kitchudumra Namchi" }), ids, EMPTY_DIRECTORY, {
+        districtNames: sikkim,
+      }).adminUnitId,
+    ).toBeNull();
+  });
+
   it("comes after the chain and before the pincode", () => {
     // The chain names Cuddalore; the location names Viluppuram. The chain wins.
     expect(

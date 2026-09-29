@@ -67,12 +67,17 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
   () => {
     let client: pg.Client | undefined;
 
-    /** Distinct from every other suite's fixtures, and from real codes. */
+    /**
+     * Distinct from every other suite's fixtures, and from real codes. The
+     * artefact hashes especially: suites run side by side, and this one's
+     * cleanup deletes its artefacts. It once shared "6"×64 with the tender
+     * repository suite, and whichever cleaned up first broke the other.
+     */
     const PORTAL = "test-gepnic-load";
     const LGD_STATE = "9960001";
     const LGD_DISTRICT = "9960002";
-    const SEED_ARTIFACT = "5".repeat(64);
-    const DIRECTORY_ARTIFACT = "6".repeat(64);
+    const SEED_ARTIFACT = "c5".repeat(32);
+    const DIRECTORY_ARTIFACT = "c6".repeat(32);
     const DESCRIPTION = "gepnic load integration test";
     let seedVersionId = 0;
     let districtId = 0;
@@ -181,7 +186,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         DESCRIPTION,
       ]);
       await client?.query(`DELETE FROM source_artifact WHERE sha256 = ANY($1)`, [
-        [SEED_ARTIFACT, DIRECTORY_ARTIFACT, "1".repeat(64), "2".repeat(64), "3".repeat(64)],
+        [SEED_ARTIFACT, DIRECTORY_ARTIFACT, "c1".repeat(32), "c2".repeat(32), "c3".repeat(32)],
       ]);
       await client?.end();
     });
@@ -195,7 +200,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
           { listed: listed("B"), detail: detail({ districtName: "Nowhere" }) },
           { listed: listed("C"), detail: null },
         ],
-        "1".repeat(64),
+        "c1".repeat(32),
       );
       expect(result).toMatchObject({ inserted: 3, updated: 0, changed: 0, placed: 1, failed: [] });
 
@@ -245,7 +250,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
           // A date the database cannot read fails this row alone.
           { listed: listed("D", { closingAt: "not a date" }), detail: null },
         ],
-        "2".repeat(64),
+        "c2".repeat(32),
       );
       expect(result.inserted).toBe(0);
       expect(result.updated).toBe(2);
@@ -282,7 +287,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     it("infers a district from a pincode, says so, and gives way to a district the tender names", async () => {
       if (client === undefined) return;
       const unnamed = detail({ districtName: null, districtSource: null, pincode: "799001" });
-      const first = await load(client, [{ listed: listed("F"), detail: unnamed }], "1".repeat(64));
+      const first = await load(client, [{ listed: listed("F"), detail: unnamed }], "c1".repeat(32));
       expect(first.placed).toBe(1);
 
       const read = async () =>
@@ -312,14 +317,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
       // Seen again with the chain naming the district: the placement is
       // replaced whole, so no directory evidence is left describing it.
-      await load(client, [{ listed: listed("F"), detail: detail() }], "2".repeat(64));
+      await load(client, [{ listed: listed("F"), detail: detail() }], "c2".repeat(32));
       const named = await read();
       expect(named?.district_source).toBe("chain_unit");
       expect(named?.district_evidence_sha256).toBeNull();
       expect(named?.district_evidence_key).toBeNull();
 
       // Seen again with nothing readable: the placement already held stays whole.
-      await load(client, [{ listed: listed("F"), detail: null }], "2".repeat(64));
+      await load(client, [{ listed: listed("F"), detail: null }], "c2".repeat(32));
       expect(await read()).toEqual(named);
     });
 
@@ -331,7 +336,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
           portalCode: PORTAL,
           stateLgdCode: LGD_STATE,
           records: [{ listed: listed("E"), detail: null }],
-          artifact: { ...artifact("3".repeat(64)), retrievedAt: "not a date" },
+          artifact: { ...artifact("c3".repeat(32)), retrievedAt: "not a date" },
           datasetDescription: DESCRIPTION,
         }),
       ).rejects.toThrow();
