@@ -75,9 +75,9 @@ describe("grouping the review list", () => {
 
   it("says how many of a group name the district, so one tender's answer is not taken for all", () => {
     const hint = byOffice.get("DIV Kokrajhar")?.hint;
-    // Pieces of text are compared whole, so the office "DIV Kokrajhar" is not
-    // read as naming the district; only the tender whose location says so does.
-    expect(hint).toMatchObject({ kind: "names_district", namedBy: 1, of: 2 });
+    // The office "DIV Kokrajhar" names the district by an exact word, so both
+    // tenders name it: one by its location, both by their office.
+    expect(hint).toMatchObject({ kind: "names_district", namedBy: 2, of: 2 });
     const mixed = groupForReview(
       [
         row({ portalTenderId: "E1", organisationChain: "Police||Housing", location: "Baragarh" }),
