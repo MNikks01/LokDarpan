@@ -1,0 +1,116 @@
+# Daily check that tender collection is healthy, and an issue when it is not.
+#
+# WHY
+# On 29 September 2026 the database refused connections for a day and the
+# nightly sweep failed with nobody told. A failed scheduled run emails, at best,
+# whoever last edited its schedule; a run that never starts tells nobody. This
+# reads the ledger's own record of collection — the same rule the site shows
+# readers — and opens an issue, which notifies the repository's watchers.
+#
+# WHAT IT DOES NOT DO
+# It never writes to the database, and it does not retry the sweep: recovery is
+# a person's decision (`.docs/16-operations/collection-schedule.md` §Recovery).
+name: Check collection
+
+on:
+  schedule:
+    # 02:30 UTC — 08:00 IST, six and a half hours after the 20:00 UTC sweep.
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+# Read-only by default. Only the two jobs that open or close the alert may
+# write, and only to issues.
+permissions:
+  contents: read
+
+concurrency:
+  group: check-collection
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "9.12.0"
+  ALERT_LABEL: collection-alert
+
+jobs:
+  check:
+    name: Collection health
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: "${{ env.PNPM_VERSION }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      # Exit 1 when anything is wrong — including the database refusing the
+      # connection, which is itself the outage to report.
+      - name: Check
+        run: pnpm --filter @lokdarpan/ingestion check:collection --report="$RUNNER_TEMP/report.md"
+        env:
+          DATABASE_URL: ${{ secrets.INGEST_DATABASE_URL }}
+
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: collection-report
+          path: ${{ runner.temp }}/report.md
+          if-no-files-found: ignore
+          retention-days: 14
+
+  alert:
+    name: Open or update the alert
+    needs: check
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with: { name: collection-report, path: report }
+      - name: Open or comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -f report/report.md ]; then cp report/report.md body.md
+          else echo "**The collection check could not run.** The database may be unreachable." > body.md
+          fi
+          printf '\n\nRun: %s\n' "$RUN_URL" >> body.md
+          # Blue: the palette reserves red for destructive actions.
+          gh label create "$ALERT_LABEL" --color 1D76DB \
+            --description "Tender collection needs attention" 2>/dev/null || true
+          open=$(gh issue list --label "$ALERT_LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body-file body.md
+          else
+            gh issue create --title "Tender collection needs attention" \
+              --label "$ALERT_LABEL" --body-file body.md
+          fi
+
+  resolve:
+    name: Close the alert when healthy again
+    needs: check
+    if: success()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Close
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          for n in $(gh issue list --label "$ALERT_LABEL" --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Collection is healthy again: $RUN_URL"
+          done

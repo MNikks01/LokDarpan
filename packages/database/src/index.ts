@@ -10,3 +10,9 @@ export type { AppliedMigration, Migration, SqlClient } from "./migrator";
 export { PostgresAdminUnitRepository } from "./admin-unit.repository";
 export type { RepositoryOptions } from "./admin-unit.repository";
 export { PostgresDepartmentFinanceRepository } from "./department-finance.repository";
+export {
+  PostgresTenderRepository,
+  STALE_AFTER_HOURS,
+  collectionStatusOf,
+} from "./tender.repository";
+export type { CollectionStatus, CollectionWindow } from "./tender.repository";
