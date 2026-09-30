@@ -1,6 +1,6 @@
 {
   "$comment": "Permission and access requests to government bodies. Checked by services/ingestion/tests/permission-registry.test.ts. A request is recorded as sent only with the date and reference of the actual request; nothing here is inferred, and silence is never recorded as consent. Statuses: not_sent, draft_ready, sent, acknowledged, granted, refused, not_required, credential_needed.",
-  "updated": "2026-09-25",
+  "updated": "2026-09-30",
   "requests": [
     {
       "id": "nrida-pmgsy-ommas",
@@ -61,7 +61,7 @@
       "department": "Government of Maharashtra (mahatenders.gov.in operator; addressee to be confirmed)",
       "dataset": "Maharashtra tenders and award-of-contract data",
       "access_method": "None permitted: robots.txt serves Disallow: /",
-      "restrictions": "robots.txt Disallow: / (verified 2026-08-25). Not collected.",
+      "restrictions": "robots.txt Disallow: / (verified 2026-08-25, re-verified 2026-09-30). Not collected.",
       "request": {
         "status": "draft_ready",
         "date": null,
@@ -70,7 +70,7 @@
         "draft": "mahatenders-access-request-draft.md"
       },
       "response": { "date": null, "summary": null },
-      "last_verified": "2026-08-25",
+      "last_verified": "2026-09-30",
       "evidence": "access-and-permissions.md",
       "not_collected_meanwhile": true
     },
@@ -90,6 +90,24 @@
       "response": { "date": null, "summary": null },
       "last_verified": "2026-09-25",
       "evidence": "pincode-directory-findings.md",
+      "not_collected_meanwhile": true
+    },
+    {
+      "id": "maharashtra-pwd",
+      "department": "Public Works Department, Government of Maharashtra (Joint Secretary (Services), Mantralaya — the office named as Web Information Manager on pwd.maharashtra.gov.in)",
+      "dataset": "(1) Notices Inviting Tender at mahapwd.gov.in/nit/ — PWD works by region and district; (2) reproduction of documents on pwd.maharashtra.gov.in — Roads & Bridges project lists, performance budgets",
+      "access_method": "(1) None permitted: mahapwd.gov.in serves robots.txt Disallow: /. (2) pwd.maharashtra.gov.in permits crawling (Disallow: /wp-admin/ only); documents on cdnbbsr.s3waas.gov.in",
+      "restrictions": "(1) robots.txt Disallow: / (verified 2026-09-30). (2) Website copyright policy: reproduction free of charge after permission obtained by email; accurately, not derogatory or misleading, source acknowledged (read 2026-09-30).",
+      "request": {
+        "status": "draft_ready",
+        "date": null,
+        "reference": null,
+        "channel": null,
+        "draft": "pwd-nit-access-request-draft.md"
+      },
+      "response": { "date": null, "summary": null },
+      "last_verified": "2026-09-30",
+      "evidence": "maharashtra-tenders/maharashtra-tender-data.md",
       "not_collected_meanwhile": true
     }
   ]

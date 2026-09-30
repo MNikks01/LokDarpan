@@ -98,7 +98,8 @@ One entry per source. **Confidence** follows the research document: _Verified_ (
 | Fields                   | Works list: region, code, road class, work description with district, taluka, road number and chainage, CRIF job number, five numeric columns (meaning Unknown)    |
 | Freshness                | Rare                                                                                                                                                               |
 | robots.txt               | `pwd.maharashtra.gov.in`: `Disallow: /wp-admin/` only. `cdnbbsr.s3waas.gov.in`: none (404)                                                                         |
-| Recommended usage        | **Ingest** as Work and Budget documents                                                                                                                            |
+| Copyright policy         | Reproduction free of charge **after permission by email**, accurately, not derogatory or misleading, source acknowledged (_Website Policies_, read 2026-09-30)     |
+| Recommended usage        | **Ingest** as Work and Budget documents; **display only after permission** ([request draft](../pwd-nit-access-request-draft.md))                                   |
 | Last verified            | 2026-09-30                                                                                                                                                         |
 
 ## 4. MSIDC
