@@ -1,10 +1,17 @@
 import { inLedger } from "@/server/container";
-import { respond } from "@/server/respond";
+import { AppError, respond } from "@/server/respond";
 
 export const dynamic = "force-dynamic";
 
-/** How many results a reader can usefully scan before the list stops helping. */
-const LIMIT = 12;
+/** Results per kind: places, reports, figures and pages each get their own. */
+const LIMIT = 8;
+
+/**
+ * Longer than any place name or phrase a reader types. A search term is the one
+ * input here a script controls entirely, and every character of it reaches a
+ * full-text query; bounding it bounds that.
+ */
+const MAX_TERM_LENGTH = 100;
 
 /**
  * Search across places and records.
@@ -17,6 +24,9 @@ const LIMIT = 12;
 export function GET(request: Request): Promise<Response> {
   return respond(request, async () => {
     const term = new URL(request.url).searchParams.get("q") ?? "";
+    if (term.length > MAX_TERM_LENGTH) {
+      throw AppError.badRequest(`A search term is at most ${String(MAX_TERM_LENGTH)} characters.`);
+    }
     return inLedger(async ({ geography }) => ({
       results: await geography.search(term, LIMIT),
     }));
