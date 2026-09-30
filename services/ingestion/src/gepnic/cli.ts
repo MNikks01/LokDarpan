@@ -64,7 +64,7 @@ function detailUrl(baseUrl: string, portalTenderId: string): string {
 
 async function collectDetails(
   session: PortalSession,
-  baseUrl: string,
+  target: { readonly portalCode: string; readonly baseUrl: string; readonly store: RawStore },
   tenders: readonly TenderRecord["listed"][],
   known: ReadonlySet<string>,
 ): Promise<TenderRecord[]> {
@@ -72,17 +72,32 @@ async function collectDetails(
   for (const listed of tenders) {
     await sleep(PAUSE_MS);
     let detail: TenderRecord["detail"] = null;
+    let detailPage: TenderRecord["detailPage"] = null;
     try {
-      const page = await session.get(detailUrl(baseUrl, listed.portalTenderId));
+      const page = await session.get(detailUrl(target.baseUrl, listed.portalTenderId));
       // A lapsed session answers 200 with a notice. Parsed as data it would say
       // this office advertised nothing, which is false.
-      detail = isStaleSession(page.body) ? null : parseDetail(page.body, known);
+      if (!isStaleSession(page.body)) {
+        const parsed = parseDetail(page.body, known);
+        // The page is kept before anything read from it is recorded; a page
+        // the store will not take is treated as a page we could not read, so
+        // no field ever cites bytes nobody holds (migration 0038).
+        const retained = await retain(
+          target.store,
+          `gepnic-${target.portalCode}`,
+          page,
+          "text/html",
+        );
+        detail = parsed;
+        detailPage = { ...page, ...retained };
+      }
     } catch {
-      // One unreachable detail page must not cost us the tender. It is held
-      // from the landing row, unplaced, and picked up on a later run.
+      // One unreachable or unkeepable detail page must not cost us the tender.
+      // It is held from the landing row, unplaced, and read on a later run.
       detail = null;
+      detailPage = null;
     }
-    records.push({ listed, detail });
+    records.push({ listed, detail, detailPage });
   }
   return records;
 }
@@ -170,7 +185,7 @@ async function collectPortal(
   // parser must recognise it as one (see `aliases.ts`).
   const aliases = await aliasesOfState(client, stateLgdCode);
   const known = new Set([...districts.keys(), ...aliases.keys()]);
-  const records = await collectDetails(session, baseUrl, tenders, known);
+  const records = await collectDetails(session, { portalCode, baseUrl, store }, tenders, known);
 
   // The page is kept before anything cites it. A store that cannot take it
   // costs this portal's run, not the sweep: the tenders are advertised again

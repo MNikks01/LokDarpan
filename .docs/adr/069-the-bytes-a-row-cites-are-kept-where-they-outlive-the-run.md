@@ -69,3 +69,19 @@ deleted with the runner. Local runs without the variables keep using `data/raw`.
   is not yet possible.
 - Release order matters: migration 0037 and the code that writes `stored_in` must reach production
   between two nightly runs (runbook §3).
+
+## Addendum · 2026-09-30 · Detail pages are kept and cited
+
+The consequence above, that each tender's detail page was read without being stored, is closed by
+migration 0038. The collector now puts every detail page it parses into the raw store and records
+it as an artefact, and `tender.detail_sha256` names the page the tender's details were last read
+from. A page that cannot be stored is treated as a page that could not be read, so no field cites
+bytes nobody holds. A superseded reading keeps its page in `tender_version.detail_sha256`.
+
+What it does not claim: a page that omits a field does not erase an earlier reading (the upsert's
+existing COALESCE), so a blank field on the newest page keeps a value an earlier page gave. The
+earlier page is in the history. Whether an omitted field should instead be recorded as omitted is
+an open question, not decided here.
+
+Cost: about 20 detail pages per portal per night, so a few hundred artefacts and some megabytes of
+R2 per night, well inside the free tier for years; identical pages are stored once.

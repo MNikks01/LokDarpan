@@ -59,7 +59,11 @@ You do this yourself. No credential is ever pasted into a chat, a commit or a fi
    The first line printed is `raw store: s3://lokdarpan-raw`, and the R2 dashboard then shows a
    `gepnic-kerala/…` object.
 
-## 3. Releasing migration 0037 (order matters)
+## 3. Releasing migrations 0037 and 0038 (order matters)
+
+Migration 0038 (`tender.detail_sha256`) follows the same rule as 0037 below: the sweep that writes
+the column and the migration that adds it land together, between two nightly runs. Apply both in the
+same step; the migrator applies them in order.
 
 Migration 0037 adds `source_artifact.stored_in` and requires it on new rows. The old sweep does not
 write it, and the new sweep writes a column the old schema does not have, so **the migration and the
@@ -87,8 +91,8 @@ release must both land between two nightly runs** (the sweep starts at 20:00 UTC
 
 ## 4. What is not covered yet
 
-- **Tender detail pages** are read without being stored; each tender's fields cite the landing
-  page's hash. Fixing that is the next change.
+- ~~Tender detail pages~~: stored and cited since migration 0038 (`tender.detail_sha256`; ADR-069
+  addendum).
 - **`cag:reprocess`** reads bytes from the local directory only.
 - **Backfilling old rows.** A row whose bytes still exist (today, the one LGD page on the machine
   that loaded it) may be given a `stored_in` only after those bytes are put in the bucket and hash to
