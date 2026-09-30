@@ -25,8 +25,9 @@ stays local is what the extractor needs to find figures, and extraction and revi
 ## Before you run it
 
 - [ ] Neon is serving connections again. The transfer quota reset at 00:00 UTC on 1 October 2026.
-- [ ] PR #152 is released and migration 0037 is applied (`raw-store.md` §3). The tool refuses to
-      run if the two databases are on different migrations.
+- [ ] The release carrying #152, #158 and #159 is on `main`, and migrations 0037, 0038 and 0039
+      are applied to production (`raw-store.md` §3). The tool refuses to run if the two databases
+      are on different migrations, and your local database already has all three.
 - [ ] Your local database holds the reviewed corpus: `SELECT count(*) FROM published_fact` should
       match the figure you expect (5,088 on 30 September 2026).
 
