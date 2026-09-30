@@ -45,7 +45,7 @@ export function SiteHeader(): React.JSX.Element {
         <Link href={REPORTS_HREF}>{nav.reports}</Link>
       </li>
       <li>
-        <Link href={ABOUT_HREF}>{nav.about}</Link>
+        <Link href={ABOUT_HREF}>{nav.sources}</Link>
       </li>
       <li>
         <a href={GITHUB_HREF} rel="noopener noreferrer">
@@ -55,7 +55,7 @@ export function SiteHeader(): React.JSX.Element {
     </>
   );
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-home-header="">
       <nav className={cx(styles.wrap, styles.headerInner)} aria-label="Main">
         <Link href="/" className={styles.brand}>
           Lok<span>Darpan</span>
@@ -81,10 +81,11 @@ export function SiteFooter(): React.JSX.Element {
     <footer className={styles.footer}>
       <div className={cx(styles.wrap, styles.footerGrid)}>
         <div>
-          <strong style={{ color: "var(--ld-text)" }}>LokDarpan</strong>
+          <Link href="/" className={styles.brand}>
+            Lok<span>Darpan</span>
+          </Link>
           <p className={styles.fine}>{footer.tagline}</p>
           <p className={styles.fine}>{footer.independence}</p>
-          <p className={styles.fine}>{footer.built}</p>
         </div>
         <nav aria-label="Footer">
           <ul className={styles.footerLinks}>
@@ -95,7 +96,7 @@ export function SiteFooter(): React.JSX.Element {
               <Link href={REPORTS_HREF}>{footer.links.reports}</Link>
             </li>
             <li>
-              <Link href={ABOUT_HREF}>{footer.links.about}</Link>
+              <Link href={ABOUT_HREF}>{footer.links.methodology}</Link>
             </li>
             <li>
               <a href={GITHUB_HREF} rel="noopener noreferrer">
@@ -109,6 +110,9 @@ export function SiteFooter(): React.JSX.Element {
             </li>
           </ul>
         </nav>
+      </div>
+      <div className={cx(styles.wrap, styles.footerBase)}>
+        <span>{footer.copyright}</span>
       </div>
     </footer>
   );
