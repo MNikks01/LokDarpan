@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import { fetchWithLimits, textOf, RETRY_IDEMPOTENT } from "../net/fetch-with-limits";
 import { GEPNIC_PAGE, ROBOTS_TXT } from "../net/limits";
+import { readRobots, refusesEverything } from "../net/robots";
 
 /**
  * Fetching from a GePNIC deployment, politely and only where permitted.
@@ -59,11 +60,11 @@ export class CrawlNotPermitted extends Error {
 /**
  * Does this host's `robots.txt` permit us?
  *
- * Deliberately simple and deliberately strict: any `Disallow: /` under a
- * wildcard agent stops the run. A more permissive reading — parsing paths,
- * matching the most specific rule — would be defensible for a search crawler
- * and is the wrong instinct here. Where a publisher's intent is ambiguous, the
- * answer is to not collect.
+ * Deliberately simple and deliberately strict: a site-wide `Disallow: /`
+ * addressed to us stops the run. The path-by-path reading the Maharashtra
+ * agency sources need lives in `net/robots.ts`; this is its whole-host
+ * question, kept under its old name because the GePNIC connector asks nothing
+ * finer — where a publisher's intent is ambiguous, the answer is to not collect.
  *
  * A 404 means no policy is stated, which the access findings record as
  * permitted; thirty-four of thirty-six portals are in that position. Any other
@@ -71,20 +72,7 @@ export class CrawlNotPermitted extends Error {
  * policy we may assume.
  */
 export function permitsCrawling(robotsTxt: string, status: number): boolean {
-  if (status === 404) return true;
-  if (status !== 200) return false;
-
-  let wildcardAgent = false;
-  for (const raw of robotsTxt.split(/\r?\n/)) {
-    const line = raw.split("#")[0]?.trim() ?? "";
-    const [field, ...rest] = line.split(":");
-    const key = (field ?? "").trim().toLowerCase();
-    const value = rest.join(":").trim();
-
-    if (key === "user-agent") wildcardAgent = value === "*";
-    else if (key === "disallow" && wildcardAgent && value === "/") return false;
-  }
-  return true;
+  return !refusesEverything(readRobots(robotsTxt, status));
 }
 
 function digest(body: string, url: string): FetchedArtifact {
