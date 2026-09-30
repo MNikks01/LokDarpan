@@ -307,94 +307,11 @@
   color: var(--ld-text-secondary);
 }
 
-/* ─── The chain ──────────────────────────────────────────────────────── */
-
-.twoCol {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(32px, 5vw, 64px);
-  align-items: start;
-}
-
-.chainBox {
-  border: 1px solid var(--ld-hair);
-  border-radius: 14px;
-  background: var(--ld-surface);
-  padding: 20px;
-}
-
-.chainTitle {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0 0 14px;
-  color: var(--ld-text-secondary);
-}
-
-.chain {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.chain li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 9px 0 9px 22px;
-  position: relative;
-  font-size: 15px;
-}
-
-/* The connecting line down the left edge. */
-.chain li::before {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 0;
-  bottom: 0;
-  border-left: 1px solid var(--ld-border-strong);
-}
-
-.chain li::after {
-  content: "";
-  position: absolute;
-  left: 1px;
-  top: 50%;
-  width: 9px;
-  height: 9px;
-  margin-top: -4.5px;
-  border-radius: 50%;
-  background: var(--ld-surface);
-  border: 1.5px solid var(--ld-text-secondary);
-}
-
-.chain li:first-child::before {
-  top: 50%;
-}
-
-.chain li:last-child::before {
-  bottom: 50%;
-}
-
-.chain li[data-status="planned"] {
-  color: var(--ld-text-tertiary);
-}
-
-.chain li[data-status="planned"]::after {
-  border-style: dashed;
-}
-
 /* ─── Cards ──────────────────────────────────────────────────────────── */
 
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 32px;
-}
-
 .grid5 {
+  list-style: none;
+  padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
@@ -434,79 +351,6 @@
   margin: 0;
 }
 
-/* ─── Journey ────────────────────────────────────────────────────────── */
-
-.journey {
-  margin-top: 36px;
-  display: grid;
-  gap: 18px;
-}
-
-.journeyRow {
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-}
-
-.journeyLabel {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ld-text-tertiary);
-}
-
-.steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.steps li {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.steps li + li::before {
-  content: "→";
-  color: var(--ld-text-tertiary);
-}
-
-.stepNow,
-.stepLater {
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 14.5px;
-  font-weight: 600;
-}
-
-.stepNow {
-  background: var(--ld-surface);
-  border: 1px solid var(--ld-border-strong);
-}
-
-.stepLater {
-  border: 1px dashed var(--ld-border-strong);
-  color: var(--ld-text-tertiary);
-  font-weight: 500;
-}
-
-/* ─── How it works ───────────────────────────────────────────────────── */
-
-.number {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13px;
-  color: var(--ld-accent);
-  display: block;
-  margin-bottom: 12px;
-}
-
 /* ─── Transparency / today ───────────────────────────────────────────── */
 
 .notBox {
@@ -532,23 +376,6 @@
   color: var(--ld-accent);
   font-weight: 600;
   font-size: 14.5px;
-}
-
-.todayList {
-  margin: 24px 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 12px;
-}
-
-.todayList li {
-  padding: 14px 16px;
-  border: 1px solid var(--ld-hair);
-  border-radius: 10px;
-  background: var(--ld-surface);
-  font-size: 15px;
-  line-height: 1.55;
 }
 
 /* ─── Final CTA ──────────────────────────────────────────────────────── */
@@ -610,7 +437,962 @@
   max-width: 60ch;
 }
 
+.footerBase {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ld-hair);
+  font-size: 12.5px;
+  color: var(--ld-text-tertiary);
+}
+
+/* ─── Shared layout ──────────────────────────────────────────────────── */
+
+.twoCol {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: start;
+}
+
+.sectionTinted {
+  background: var(--ld-raised);
+}
+
+.chainTitle {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  color: var(--ld-text-secondary);
+}
+
+.unavailableBox {
+  margin: 28px 0 0;
+  padding: 16px 18px;
+  border: 1px dashed var(--ld-border-strong);
+  border-radius: 10px;
+  color: var(--ld-text-secondary);
+  font-size: 14.5px;
+  line-height: 1.55;
+  max-width: 70ch;
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 12.5px;
+  color: var(--ld-text-secondary);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.swatchHeld {
+  background: var(--ld-accent-soft);
+  border: 1.5px solid var(--ld-accent);
+}
+
+.swatchDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ld-text);
+  box-shadow: 0 0 0 2px var(--ld-surface);
+}
+
+.swatchDistrict {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ld-surface);
+  border: 1.2px solid var(--ld-accent);
+}
+
+/* ─── Hero ───────────────────────────────────────────────────────────── */
+
+.heroBand {
+  background:
+    radial-gradient(60% 70% at 85% 30%, var(--ld-accent-soft), transparent 70%), var(--ld-canvas);
+  border-bottom: 1px solid var(--ld-hair);
+}
+
+.mapFigure {
+  margin: 0;
+}
+
+.mapStage {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+.mapSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mapStates path {
+  fill: var(--ld-surface);
+  stroke: var(--ld-border-strong);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+  transition: fill 160ms ease;
+}
+
+.mapStates path.mapHeld {
+  fill: var(--ld-accent-soft);
+  stroke: var(--ld-accent);
+  stroke-width: 1.2;
+}
+
+.mapDots circle {
+  fill: var(--ld-text);
+  stroke: var(--ld-surface);
+  stroke-width: 1.5;
+}
+
+.mapLeaders line {
+  stroke: var(--ld-accent);
+  stroke-width: 1.2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.mapAnchors circle {
+  fill: var(--ld-accent);
+  stroke: var(--ld-surface);
+  stroke-width: 2;
+}
+
+.mapCard {
+  box-sizing: border-box;
+  position: absolute;
+  transform: translateY(-50%);
+  width: 30%;
+  min-width: 132px;
+  display: grid;
+  gap: 2px;
+  padding: 9px 11px;
+  border: 1px solid var(--ld-hair);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ld-surface) 90%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgb(20 24 26 / 7%);
+  color: var(--ld-text);
+  text-decoration: none;
+  font-size: 12px;
+  line-height: 1.35;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.mapCard strong {
+  font-size: 13px;
+}
+
+.mapCard span {
+  color: var(--ld-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.mapCard:hover,
+.mapCard:focus-visible {
+  border-color: var(--ld-accent);
+  box-shadow: 0 8px 24px rgb(15 118 110 / 14%);
+}
+
+.mapCardLeft {
+  left: 0;
+}
+
+.mapCardRight {
+  right: 0;
+}
+
+.mapCaption {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.mapUnavailable {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ld-text-secondary);
+}
+
+.mapList {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 8px;
+}
+
+.mapList li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--ld-hair);
+  border-radius: 8px;
+  background: var(--ld-surface);
+}
+
+.mapList a {
+  color: var(--ld-accent);
+  font-weight: 600;
+}
+
+.mapList span {
+  color: var(--ld-text-secondary);
+  font-size: 13px;
+}
+
+.credit {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ld-text-tertiary);
+}
+
+/* ─── Strip ──────────────────────────────────────────────────────────── */
+
+.strip {
+  padding-block: 36px 32px;
+  background: var(--ld-surface);
+  border-bottom: 1px solid var(--ld-hair);
+}
+
+.stripHeading {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ld-text-tertiary);
+  margin: 0 0 18px;
+}
+
+.stripGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+}
+
+.stripItem {
+  padding: 4px 20px;
+  border-left: 1px solid var(--ld-hair);
+  display: flex;
+  flex-direction: column;
+}
+
+.stripItem:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.stripItem dt {
+  order: 2;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ld-text);
+  margin-top: 4px;
+}
+
+.stripValue {
+  order: 1;
+  margin: 0;
+  font-size: clamp(28px, 3.2vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.stripNote {
+  order: 3;
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ld-text-tertiary);
+}
+
+.notRead {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ld-text-tertiary);
+  letter-spacing: 0;
+}
+
+.stripFoot {
+  margin: 20px 0 0;
+  font-size: 12.5px;
+  color: var(--ld-text-tertiary);
+}
+
+/* ─── Flow ───────────────────────────────────────────────────────────── */
+
+.flow {
+  list-style: none;
+  margin: 36px 0 20px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  counter-reset: flow;
+}
+
+.flowStep {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 18px 16px;
+  border: 1px solid var(--ld-hair);
+  border-radius: 12px;
+  background: var(--ld-surface);
+  transition:
+    border-color 140ms ease,
+    transform 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.flowStep:hover {
+  border-color: var(--ld-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgb(20 24 26 / 6%);
+}
+
+/* The connector to the next step. */
+.flowStep:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 38px;
+  right: -15px;
+  width: 16px;
+  border-top: 1.5px solid var(--ld-accent);
+}
+
+.flowStep[data-status="planned"] {
+  border-style: dashed;
+  background: transparent;
+}
+
+.flowStep[data-status="planned"]:not(:last-child)::after,
+.flowStep[data-status="partial"]:not(:last-child)::after {
+  border-top-style: dashed;
+  border-top-color: var(--ld-border-strong);
+}
+
+.flowIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--ld-accent-soft);
+  color: var(--ld-accent-fg);
+}
+
+[data-status="planned"] .flowIcon {
+  background: var(--ld-sunken);
+  color: var(--ld-text-tertiary);
+}
+
+.flowLabel {
+  font-size: 16px;
+  margin: 2px 0 0;
+  letter-spacing: -0.01em;
+}
+
+.flowBody {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ld-text-secondary);
+  flex: 1;
+}
+
+/* ─── Preview ────────────────────────────────────────────────────────── */
+
+.previewFigure {
+  margin: 36px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.frame {
+  border: 1px solid var(--ld-border-strong);
+  border-radius: 14px;
+  background: var(--ld-surface);
+  box-shadow:
+    0 1px 0 rgb(20 24 26 / 3%),
+    0 24px 60px rgb(20 24 26 / 8%);
+  overflow: hidden;
+}
+
+.frameBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ld-hair);
+  background: var(--ld-raised);
+}
+
+.frameBar span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ld-border-strong);
+}
+
+.frameBar em {
+  margin-left: 12px;
+  font-style: normal;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--ld-text-tertiary);
+}
+
+.frameBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+
+.previewMap {
+  padding: 24px;
+  display: grid;
+  gap: 12px;
+  align-content: center;
+  background:
+    linear-gradient(var(--ld-hair) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--ld-hair) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--ld-canvas);
+}
+
+.previewMap svg {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+}
+
+.previewState {
+  fill: var(--ld-accent-soft);
+  stroke: var(--ld-accent);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.previewDistrict {
+  fill: var(--ld-surface);
+  stroke: var(--ld-accent);
+  stroke-width: 1.2;
+}
+
+.previewTender {
+  fill: var(--ld-text);
+  stroke: var(--ld-surface);
+  stroke-width: 2;
+}
+
+.previewPanel {
+  padding: 28px;
+  border-left: 1px solid var(--ld-hair);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.previewPanel h3 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.previewStats {
+  margin: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.previewStats div {
+  padding: 12px 14px;
+  border: 1px solid var(--ld-hair);
+  border-radius: 10px;
+  background: var(--ld-canvas);
+}
+
+.previewStats dt {
+  font-size: 12px;
+  color: var(--ld-text-secondary);
+}
+
+.previewStats dd {
+  margin: 4px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.previewNote {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ld-text-tertiary);
+}
+
+/* ─── Source trail ───────────────────────────────────────────────────── */
+
+.trailBox {
+  border: 1px solid var(--ld-hair);
+  border-radius: 14px;
+  background: var(--ld-surface);
+  padding: 22px;
+}
+
+.trail {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+.trailStep {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 14px;
+  padding-bottom: 16px;
+}
+
+.trailStep:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 17.5px;
+  top: 36px;
+  bottom: 0;
+  border-left: 1.5px solid var(--ld-accent-soft);
+}
+
+.trailIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ld-accent-soft);
+  color: var(--ld-accent-fg);
+}
+
+.trailLabel {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ld-text-tertiary);
+  margin: 2px 0 3px;
+}
+
+.trailBody {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ld-text);
+  padding-top: 7px;
+}
+
+.trailLabel + .trailBody {
+  padding-top: 0;
+}
+
+.trailFigure {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.trailQuote {
+  display: block;
+  color: var(--ld-text-secondary);
+  border-left: 2px solid var(--ld-border-strong);
+  padding-left: 10px;
+}
+
+.trailMeta {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ld-text-tertiary);
+}
+
+.trailLink {
+  color: var(--ld-accent);
+  overflow-wrap: anywhere;
+}
+
+/* ─── Matrix ─────────────────────────────────────────────────────────── */
+
+.matrix {
+  width: 100%;
+  margin-top: 32px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--ld-hair);
+  border-radius: 12px;
+  background: var(--ld-surface);
+  font-size: 14.5px;
+  overflow: hidden;
+}
+
+.matrix th,
+.matrix td {
+  text-align: left;
+  vertical-align: top;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ld-hair);
+}
+
+.matrix thead th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ld-text-secondary);
+  background: var(--ld-raised);
+}
+
+.matrix tbody tr:last-child th,
+.matrix tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.matrix tbody th {
+  font-weight: 600;
+}
+
+.matrix tbody td {
+  color: var(--ld-text-secondary);
+}
+
+.matrix tbody tr:hover {
+  background: var(--ld-canvas);
+}
+
+.matrix tr[data-status="planned"] th {
+  color: var(--ld-text-secondary);
+}
+
+/* ─── Places ─────────────────────────────────────────────────────────── */
+
+.levels {
+  list-style: none;
+  margin: 32px 0 36px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.level {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 14px;
+  align-items: start;
+  padding: 18px;
+  border: 1px solid var(--ld-hair);
+  border-radius: 12px;
+  background: var(--ld-surface);
+}
+
+.level > :last-child {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.level:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ld-accent);
+  font-size: 14px;
+}
+
+.statesHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-bottom: 12px;
+}
+
+.statesHead .chainTitle {
+  margin: 0;
+}
+
+.stateGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+
+.stateLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--ld-hair);
+  border-radius: 8px;
+  background: var(--ld-surface);
+  color: var(--ld-text);
+  text-decoration: none;
+  font-size: 14px;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.stateLink:hover {
+  border-color: var(--ld-accent);
+  background: var(--ld-accent-soft);
+}
+
+.markers {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.marker {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.markerReports {
+  background: var(--ld-accent);
+}
+
+.markerTenders {
+  background: transparent;
+  border: 1.5px solid var(--ld-text-secondary);
+}
+
+/* ─── Audience, limits, coverage ─────────────────────────────────────── */
+
+.grid5 .card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.example {
+  margin: auto 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed var(--ld-hair);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ld-text-tertiary);
+}
+
+.limitList {
+  margin: 20px 0 0;
+  padding: 0 0 0 18px;
+  display: grid;
+  gap: 8px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ld-text-secondary);
+}
+
+.coverageGrid {
+  list-style: none;
+  margin: 28px 0 20px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.coverageCard {
+  padding: 18px;
+  border: 1px solid var(--ld-hair);
+  border-radius: 12px;
+  background: var(--ld-surface);
+}
+
+.coverageName {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ld-text);
+  text-decoration: none;
+}
+
+.coverageName:hover {
+  color: var(--ld-accent);
+}
+
+.coverageCard dl {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.coverageCard dt {
+  font-size: 12px;
+  color: var(--ld-text-secondary);
+}
+
+.coverageCard dd {
+  margin: 2px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Closing ────────────────────────────────────────────────────────── */
+
+.final {
+  background:
+    linear-gradient(var(--ld-hair) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, var(--ld-hair) 1px, transparent 1px) 0 0 / 32px 32px,
+    radial-gradient(50% 80% at 50% 50%, var(--ld-accent-soft), transparent 75%),
+    var(--ld-surface);
+}
+
+/* ─── Focus ──────────────────────────────────────────────────────────── */
+
+.page a:focus-visible,
+.page summary:focus-visible {
+  outline: 2px solid var(--ld-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ─── Motion ─────────────────────────────────────────────────────────── */
+
+/*
+ * Everything below moves only for a reader who has not asked for reduced
+ * motion, and the scroll-driven parts only where the browser supports them.
+ * Without either, every element is simply where it ends up.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .mapLeaders line {
+    stroke-dashoffset: 1;
+    animation: draw 900ms 300ms ease-out forwards;
+  }
+
+  .mapCard {
+    animation: rise 500ms ease-out both;
+  }
+
+  .mapDots circle {
+    animation: fade 700ms 600ms ease-out both;
+  }
+
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .header {
+      animation: compact linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 120px;
+    }
+
+    .headerInner {
+      animation: compactInner linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 120px;
+    }
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes compact {
+  to {
+    box-shadow: 0 6px 20px rgb(20 24 26 / 6%);
+  }
+}
+
+@keyframes compactInner {
+  from {
+    min-height: 68px;
+  }
+  to {
+    min-height: 54px;
+  }
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 1020px) {
+  .flow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .flowStep:nth-child(3)::after {
+    display: none;
+  }
+  .stripGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 22px;
+  }
+  .stripItem:nth-child(4) {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
 
 @media (max-width: 860px) {
   .heroVisual {
@@ -618,14 +1400,27 @@
   }
   .hero,
   .twoCol,
-  .footerGrid {
+  .footerGrid,
+  .frameBody {
     grid-template-columns: minmax(0, 1fr);
   }
-  .grid3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .previewPanel {
+    border-left: 0;
+    border-top: 1px solid var(--ld-hair);
   }
   .footerLinks {
     justify-content: flex-start;
+  }
+  .levels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .level:not(:last-child)::after {
+    content: "↓";
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: -14px;
+    transform: none;
   }
 }
 
@@ -636,33 +1431,90 @@
   .menu {
     display: block;
   }
+  .flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .flowStep::after {
+    display: none;
+  }
+  .stripGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stripItem,
+  .stripItem:nth-child(4) {
+    border-left: 0;
+    padding-left: 0;
+    padding-right: 12px;
+  }
+
+  /* The matrix becomes one card per record. */
+  .matrix,
+  .matrix tbody,
+  .matrix tr,
+  .matrix th,
+  .matrix td {
+    display: block;
+  }
+  .matrix thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .matrix tbody tr {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ld-hair);
+  }
+  .matrix tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .matrix th,
+  .matrix td {
+    padding: 0;
+    border: 0;
+  }
+  .matrix tbody td {
+    margin-top: 6px;
+  }
+  .matrix td[data-label]::before {
+    content: attr(data-label) " · ";
+    color: var(--ld-text-tertiary);
+    font-size: 12.5px;
+  }
 }
 
 @media (max-width: 560px) {
-  .grid3,
   .grid5 {
     grid-template-columns: minmax(0, 1fr);
   }
-  .journeyRow {
+  .flow {
     grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-  .steps {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .steps li {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .steps li + li::before {
-    content: "↓";
-    text-align: center;
   }
   .ctas > a {
     flex: 1 1 100%;
   }
   .headerCta {
     display: none;
+  }
+  /* Floating cards need room; on a phone the same states are listed below. */
+  .mapCard,
+  .mapLeaders,
+  .mapAnchors {
+    display: none;
+  }
+  .mapList {
+    display: grid;
+  }
+  .previewMap,
+  .previewPanel {
+    padding: 18px;
+  }
+  .stateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .stateLink {
+    font-size: 13px;
+    padding: 8px 10px;
   }
 }

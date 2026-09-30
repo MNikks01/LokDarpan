@@ -236,7 +236,7 @@ function toFact(row: FactRow): PublishedFact | null {
  * A reviewer's correction is trusted to be paise like the parser's reading; a
  * value that is not an integer is refused rather than guessed at.
  */
-function toRupees(paise: string): string | null {
+export function toRupees(paise: string): string | null {
   if (!/^-?\d+$/u.test(paise.trim())) return null;
   return Money.fromPaise(BigInt(paise.trim())).toDecimalString();
 }
