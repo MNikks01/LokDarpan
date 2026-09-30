@@ -189,7 +189,15 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         DESCRIPTION,
       ]);
       await client?.query(`DELETE FROM source_artifact WHERE sha256 = ANY($1)`, [
-        [SEED_ARTIFACT, DIRECTORY_ARTIFACT, "c1".repeat(32), "c2".repeat(32), "c3".repeat(32)],
+        [
+          SEED_ARTIFACT,
+          DIRECTORY_ARTIFACT,
+          "c1".repeat(32),
+          "c2".repeat(32),
+          "c3".repeat(32),
+          "d1".repeat(32),
+          "d2".repeat(32),
+        ],
       ]);
       await client?.end();
     });
@@ -285,6 +293,75 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         records_unchanged: 1,
         records_rejected: 1,
       });
+    });
+
+    // Migration 0038. The details are read from the tender's own page, so that
+    // page — not the landing page, which states none of them — is the citation.
+    it("cites the detail page its details were read from, and keeps that citation through a page it could not read", async () => {
+      if (client === undefined) return;
+      const db = client;
+      const D1 = "d1".repeat(32);
+      const D2 = "d2".repeat(32);
+      const page = (sha: string): FetchedArtifact & Retained => ({
+        ...artifact(sha),
+        sourceUrl: "https://tenders.example.invalid/nicgep/app?sp=P",
+      });
+      const cited = async (): Promise<string | null> =>
+        (
+          await db.query<{ detail_sha256: string | null }>(
+            `SELECT detail_sha256 FROM tender WHERE portal_code = $1 AND portal_tender_id = 'P'`,
+            [PORTAL],
+          )
+        ).rows[0]?.detail_sha256 ?? null;
+
+      await load(
+        client,
+        [{ listed: listed("P"), detail: detail(), detailPage: page(D1) }],
+        "c1".repeat(32),
+      );
+      expect(await cited()).toBe(D1);
+      const stored = await client.query<{ source_id: string; stored_in: string }>(
+        `SELECT source_id, stored_in FROM source_artifact WHERE sha256 = $1`,
+        [D1],
+      );
+      expect(stored.rows[0]).toEqual({ source_id: `gepnic-${PORTAL}`, stored_in: "file" });
+
+      // Unreadable: the citation stays with the values that page gave.
+      await load(
+        client,
+        [{ listed: listed("P"), detail: null, detailPage: null }],
+        "c1".repeat(32),
+      );
+      expect(await cited()).toBe(D1);
+
+      // A page kept but not parsed into details is not a citation for them.
+      await load(
+        client,
+        [{ listed: listed("P"), detail: null, detailPage: page(D2) }],
+        "c1".repeat(32),
+      );
+      expect(await cited()).toBe(D1);
+
+      // A new page with a new value: the old reading becomes a version, with its page.
+      await load(
+        client,
+        [
+          {
+            listed: listed("P"),
+            detail: detail({ tenderValuePaise: 60_000_000n }),
+            detailPage: page(D2),
+          },
+        ],
+        "c1".repeat(32),
+      );
+      expect(await cited()).toBe(D2);
+      const history = await client.query<{ detail_sha256: string | null; value: string }>(
+        `SELECT v.detail_sha256, v.tender_value_paise::text AS value
+           FROM tender_version v JOIN tender t ON t.id = v.tender_id
+          WHERE t.portal_code = $1 AND t.portal_tender_id = 'P'`,
+        [PORTAL],
+      );
+      expect(history.rows).toEqual([{ detail_sha256: D1, value: "59200000.00" }]);
     });
 
     it("infers a district from a pincode, says so, and gives way to a district the tender names", async () => {
