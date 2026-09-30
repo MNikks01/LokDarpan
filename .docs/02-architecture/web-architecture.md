@@ -70,6 +70,8 @@ ETL publishes v141 → dataset.published → revalidate webhook
 
 Scope-tagged revalidation matters at national scale — a Maharashtra ingest must not invalidate every page in India.
 
+**Addendum, 30 September 2026 — the homepage revalidates hourly, by timer.** The `dataset.published` webhook above is not built yet, so no page can be revalidated by tag. Entity pages are rendered per request (`force-dynamic`) until it is. The homepage is the exception: it is the page most visitors load first, it now shows counts read from the ledger (`apps/web/src/server/home-summary.ts`), and per-request rendering would put one ledger query behind every visit on a database whose monthly transfer allowance ran out on 29 September. It is therefore ISR with `revalidate = 3600`. Every count it shows states the dataset version and date it was read at, so staleness is visible rather than silent. When the ledger cannot be read at build or revalidation, the page renders boundaries only and says "Not read" in place of each count — never a zero, never a number from an earlier build. When the webhook lands, the homepage moves to a tag like every other page and this addendum is superseded.
+
 ## Page structure
 
 The **level-agnostic Unit page** from `.docs/01-product/screen-inventory.md` S-23 carries over, replacing `.docs/01-product/dashboard-design-legacy.md`'s six separate dashboards. Same six sections, at every hierarchy level, rendered denser on desktop.
