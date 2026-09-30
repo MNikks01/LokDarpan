@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }): React
         <a href="#main" style={{ position: "absolute", left: -9999, top: 0 }}>
           Skip to main content
         </a>
-        <main id="main" style={{ maxWidth: 880, margin: "0 auto", padding: 24 }}>
+        <main id="main" className="ld-main">
           {children}
         </main>
       </body>

@@ -54,3 +54,20 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The reading column every page sits in. A class rather than an inline style
+   on <main>, because an inline style cannot be overridden where a page needs
+   the full width. */
+.ld-main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* The homepage lays out its own full-width sections. Every other page keeps the
+   reading column; this lifts it only where <main> holds the homepage. Browsers
+   without :has() keep the column, which still reads correctly. */
+main.ld-main:has(> [data-page="home"]) {
+  max-width: none;
+  padding: 0;
+}
