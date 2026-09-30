@@ -7,10 +7,12 @@ import { Skeleton, controlStyles } from "@/components/ui";
 import styles from "./explorer.module.css";
 import { searchCopy } from "@/copy/explore";
 
-const GROUP_ORDER: readonly SearchResultKind[] = ["place", "record"];
+const GROUP_ORDER: readonly SearchResultKind[] = ["place", "record", "figure", "passage"];
 const GROUP_LABEL: Readonly<Record<SearchResultKind, string>> = {
   place: "Places",
   record: "Records",
+  figure: "Verified figures",
+  passage: "In report pages",
 };
 
 /**
@@ -131,7 +133,7 @@ export function SearchDialog({
             onChange={(event) => {
               setTerm(event.target.value);
             }}
-            placeholder="A district, a municipal body, an audit report…"
+            placeholder="A district, a municipal body, a report, words in a report…"
             autoComplete="off"
             aria-controls={listId}
             style={{
@@ -176,8 +178,8 @@ export function SearchDialog({
                       <button
                         type="button"
                         onClick={() => {
-                          if (result.kind === "record") onSelectRecord(result.id);
-                          else onSelectPlace(result);
+                          if (result.kind === "place") onSelectPlace(result);
+                          else onSelectRecord(result.documentId ?? result.id);
                         }}
                         style={{
                           display: "block",
@@ -197,6 +199,22 @@ export function SearchDialog({
                           {result.context !== null && ` · ${result.context}`}
                           {result.kind === "place" && !result.hasBoundary && " · no boundary held"}
                         </span>
+                        {result.excerpt !== null && (
+                          // The page's own words, as printed: source text, never ours.
+                          <span
+                            style={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              fontSize: 12,
+                              marginTop: 2,
+                              color: "var(--ld-text-secondary)",
+                            }}
+                          >
+                            {result.excerpt}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
