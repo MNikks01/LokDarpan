@@ -4103,19 +4103,19 @@
     "access_method": "PUBLIC_WEB_PAGE",
     "api_available": "unknown",
     "historical_data": "unknown",
-    "captcha": "unknown",
+    "captcha": "yes",
     "authentication_required": "partial",
     "machine_readability": "C",
     "update_frequency": "unknown",
     "identifier_fields": ["tender_id", "nit_number", "organisation_chain"],
     "discovered_from": "CPPP States_eProc_relatedlinks.pdf + IGOD crawl + WebSearch (gov.in-restricted)",
-    "verified_at": "2026-08-21",
+    "verified_at": "2026-09-30",
     "verification_status": "VERIFIED",
     "http_status": 200,
     "final_url": "https://mahatenders.gov.in",
     "page_title": null,
     "verification_channel": "http_head_get_sandbox",
-    "notes": "Platform: GePNIC. Standard GePNIC public pages observed across deployments: FrontEndTendersByOrganisation, FrontEndTendersByClassification, FrontEndListTendersbyDate, WebTenderStatusLists, StandardBiddingDocuments.",
+    "notes": "Platform: GePNIC. Standard GePNIC public pages observed across deployments: FrontEndTendersByOrganisation, FrontEndTendersByClassification, FrontEndListTendersbyDate, WebTenderStatusLists, StandardBiddingDocuments. | 2026-09-30: robots.txt re-verified `User-agent: * / Disallow: /` — not collected; identifier namespace and link target only (maharashtra-tenders/maharashtra-tender-data.md §8).",
     "cppp_listed_url": "https://mahatenders.gov.in",
     "platform": "GePNIC"
   },
@@ -5301,19 +5301,30 @@
     "relevance": "CRITICAL",
     "data_domains": ["roads", "works", "projects"],
     "procurement": {
-      "available": "unknown",
+      "available": "no",
       "fields_observed": [],
-      "notes": null
+      "notes": "No tender listing on this site. The NIT service page links only to http://mahapwd.gov.in/nit/default.asp (see mh-pwd-nit); the homepage links tenders to mahatenders.gov.in."
     },
     "financial_data": {
-      "available": "unknown",
-      "fields_observed": [],
-      "notes": null
+      "available": "partial",
+      "fields_observed": ["performance_budget"],
+      "notes": "Performance Budgets 2021-22→2024-25 and budget books from 2011-12 under /document-category/अर्थसंकल्प/; contents not examined."
     },
     "project_data": {
-      "available": "unknown",
-      "fields_observed": [],
-      "notes": "Departmental site verified live. Whether a public works-MIS with work-level physical/financial progress is exposed was NOT determined in this pass — this is the single most important open question for Phase 1."
+      "available": "partial",
+      "fields_observed": [
+        "region",
+        "budget_head",
+        "road_class",
+        "work_description",
+        "district",
+        "taluka",
+        "road_number",
+        "km_chainage",
+        "crif_job_number",
+        "numeric_columns_unlabelled"
+      ],
+      "notes": "Roads & Bridges project lists per region under /document-category/रस्ते-आणि-पूल/ (PDFs on cdnbbsr.s3waas.gov.in; legacy Devanagari font). Numeric column meanings not established."
     },
     "contractor_data": {
       "available": "unknown",
@@ -5340,23 +5351,23 @@
       "fields_observed": [],
       "notes": null
     },
-    "formats": ["HTML"],
+    "formats": ["HTML", "PDF"],
     "access_method": "PUBLIC_WEB_PAGE",
     "api_available": "unknown",
-    "historical_data": "unknown",
-    "captcha": "unknown",
-    "authentication_required": "unknown",
+    "historical_data": "2011→ (budgets)",
+    "captcha": "no",
+    "authentication_required": "no",
     "machine_readability": "unknown",
     "update_frequency": "unknown",
     "identifier_fields": [],
     "discovered_from": "IGOD crawl (sg/MH) 2026-08-21",
-    "verified_at": "2026-08-21",
+    "verified_at": "2026-09-30",
     "verification_status": "VERIFIED",
     "http_status": 200,
     "final_url": "https://pwd.maharashtra.gov.in",
     "page_title": "मुख्यपृष्ठ | सार्वजनिक बांधकाम विभाग | महाराष्ट्र शासन | भारत",
-    "verification_channel": "http_head_get_sandbox",
-    "notes": "PRIMARY Phase-1 source. docs/03 assumes an 'MH PWD — Works' feed; that specific dataset/endpoint is NOT yet located and must be confirmed before the ingestion design is fixed.",
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: Disallow /wp-admin/ only. Website copyright policy: reproduction free of charge after permission by email (read 2026-09-30); permission requested via maharashtra-pwd draft. maharashtra-tenders/maharashtra-tender-data.md",
     "cppp_listed_url": null,
     "platform": null
   },
@@ -5928,19 +5939,19 @@
     "access_method": "PUBLIC_WEB_PAGE",
     "api_available": "unknown",
     "historical_data": "unknown",
-    "captcha": "unknown",
+    "captcha": "yes",
     "authentication_required": "unknown",
     "machine_readability": "C",
     "update_frequency": "unknown",
     "identifier_fields": ["tender_id", "nit_number"],
     "discovered_from": "IGOD crawl (sg/MH) 2026-08-21",
-    "verified_at": "2026-08-21",
+    "verified_at": "2026-09-30",
     "verification_status": "VERIFIED",
     "http_status": 200,
     "final_url": "https://mahatenders.gov.in",
     "page_title": null,
     "verification_channel": "http_head_get_sandbox",
-    "notes": "Phase-1 primary procurement source. Note: the official CPPP list also names a secondary state system (maharashtra.etenders.in) which was NOT verified in this pass.",
+    "notes": "Phase-1 primary procurement source. Note: the official CPPP list also names a secondary state system (maharashtra.etenders.in) which was NOT verified in this pass. | 2026-09-30: robots.txt re-verified `User-agent: * / Disallow: /` — not collected; identifier namespace and link target only (maharashtra-tenders/maharashtra-tender-data.md §8).",
     "cppp_listed_url": null,
     "platform": null
   },
@@ -6177,9 +6188,15 @@
     "relevance": "HIGH",
     "data_domains": ["roads", "projects"],
     "procurement": {
-      "available": "unknown",
-      "fields_observed": [],
-      "notes": null
+      "available": "yes",
+      "fields_observed": [
+        "department",
+        "tender_no",
+        "tender_name",
+        "publication_date",
+        "last_submission_date"
+      ],
+      "notes": "https://msrdc.in/site/common/TenderView.aspx; tender numbers like T 2943; detail pages not examined."
     },
     "financial_data": {
       "available": "unknown",
@@ -6220,19 +6237,19 @@
     "access_method": "PUBLIC_WEB_PAGE",
     "api_available": "unknown",
     "historical_data": "unknown",
-    "captcha": "unknown",
-    "authentication_required": "unknown",
+    "captcha": "no",
+    "authentication_required": "no",
     "machine_readability": "unknown",
     "update_frequency": "unknown",
     "identifier_fields": [],
     "discovered_from": "IGOD crawl (sg/MH) 2026-08-21",
-    "verified_at": "2026-08-21",
+    "verified_at": "2026-09-30",
     "verification_status": "VERIFIED",
     "http_status": 200,
     "final_url": "https://msrdc.in:443/1307/Home",
     "page_title": null,
-    "verification_channel": "http_head_get_sandbox",
-    "notes": "State road PSU on a .com-style domain (msrdc.in) — listed in IGOD as the official MSRDC site.",
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: Allow /. maharashtra-tenders/maharashtra-tender-data.md",
     "cppp_listed_url": null,
     "platform": null
   },
@@ -6615,9 +6632,17 @@
     "relevance": "LOW",
     "data_domains": ["housing"],
     "procurement": {
-      "available": "unknown",
-      "fields_observed": [],
-      "notes": null
+      "available": "yes",
+      "fields_observed": [
+        "e_publication_date",
+        "notice_number",
+        "reference_or_tender_no",
+        "board",
+        "document_description",
+        "closing_date",
+        "pdf"
+      ],
+      "notes": "https://www.mhada.gov.in/mr/tenders (?page=0…454), about 4,547 notices back to 2016-07-25. 2016 references follow the GePNIC tender-ID shape (२०१६-म्हाडा-१४०९४५-१)."
     },
     "financial_data": {
       "available": "unknown",
@@ -6654,23 +6679,23 @@
       "fields_observed": [],
       "notes": null
     },
-    "formats": ["HTML"],
+    "formats": ["HTML", "PDF"],
     "access_method": "PUBLIC_WEB_PAGE",
     "api_available": "unknown",
-    "historical_data": "unknown",
-    "captcha": "unknown",
-    "authentication_required": "unknown",
-    "machine_readability": "unknown",
-    "update_frequency": "unknown",
+    "historical_data": "2016-07-25→",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "html_table",
+    "update_frequency": "daily",
     "identifier_fields": [],
     "discovered_from": "IGOD crawl (sg/MH) 2026-08-21",
-    "verified_at": "2026-08-21",
+    "verified_at": "2026-09-30",
     "verification_status": "VERIFIED",
     "http_status": 200,
     "final_url": "https://www.mhada.gov.in/mr",
     "page_title": "MHADA | Maharashtra Housing and Area Development Authority",
-    "verification_channel": "http_head_get_sandbox",
-    "notes": null,
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: Drupal default (admin, search, user paths); tender pages permitted. Recommended: ingest first. maharashtra-tenders/maharashtra-tender-data.md",
     "cppp_listed_url": null,
     "platform": null
   },
@@ -6980,9 +7005,9 @@
     "relevance": "LOW",
     "data_domains": ["energy"],
     "procurement": {
-      "available": "unknown",
-      "fields_observed": [],
-      "notes": null
+      "available": "yes",
+      "fields_observed": ["particulars", "notice_pdf", "quotation_pdf"],
+      "notes": "https://mahaurja.maharashtra.gov.in/Site/1607/Tenders-EoI-Offers, about 760 rows; PDFs under /Site/Upload/pdf/."
     },
     "financial_data": {
       "available": "unknown",
@@ -7019,23 +7044,23 @@
       "fields_observed": [],
       "notes": null
     },
-    "formats": ["HTML"],
+    "formats": ["HTML", "PDF"],
     "access_method": "PUBLIC_WEB_PAGE",
     "api_available": "unknown",
     "historical_data": "unknown",
-    "captcha": "unknown",
-    "authentication_required": "unknown",
+    "captcha": "no",
+    "authentication_required": "no",
     "machine_readability": "unknown",
     "update_frequency": "unknown",
     "identifier_fields": [],
     "discovered_from": "IGOD crawl (sg/MH) 2026-08-21",
-    "verified_at": "2026-08-21",
+    "verified_at": "2026-09-30",
     "verification_status": "VERIFIED",
     "http_status": 200,
     "final_url": "https://www.mahaurja.maharashtra.gov.in",
     "page_title": "मुख्य पृष्ठ - महाराष्ट्र ऊर्जा विकास एजन्सी",
-    "verification_channel": "http_head_get_sandbox",
-    "notes": null,
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt disallows /search and /admin. reCAPTCHA script loaded site-wide but the tender table renders without interaction. maharashtra-tenders/maharashtra-tender-data.md",
     "cppp_listed_url": null,
     "platform": null
   },
@@ -7340,6 +7365,544 @@
     "page_title": null,
     "verification_channel": "http_get_sandbox",
     "notes": "Resource answers {\"error\": \"Authorization field missing\"} without an API key (issued to a registered account). Licence: Government Open Data License - India. Used to infer a tender's district (ADR-067). See pincode-directory-findings.md.",
+    "cppp_listed_url": null,
+    "platform": null
+  },
+  {
+    "id": "mh-pwd-nit",
+    "name": "PWD Maharashtra — Notice Inviting Tenders (legacy system)",
+    "official_url": "http://mahapwd.gov.in/nit/default.asp",
+    "government_level": "state",
+    "state": "Maharashtra",
+    "ministry": null,
+    "department": "Public Works Department",
+    "organization": null,
+    "category": "infrastructure",
+    "subcategories": [],
+    "relevance": "CRITICAL",
+    "data_domains": ["procurement", "works"],
+    "procurement": {
+      "available": "yes",
+      "fields_observed": ["name_of_work", "office_division", "estimated_cost"],
+      "notes": "Landing page only (one fetch before robots.txt was read). Regions, 36 districts, detail pages /nit/Tender.asp?nitno=<n>. 35 notices / 85 works on 2026-09-30."
+    },
+    "financial_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "project_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "contractor_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "progress_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "audit_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "gis_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "administrative_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "formats": ["HTML", "PDF"],
+    "access_method": "NOT_PERMITTED",
+    "api_available": "no",
+    "historical_data": "unknown",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "html_table",
+    "update_frequency": "unknown",
+    "identifier_fields": [],
+    "discovered_from": "Agency homepage link or gov.in-restricted search, 2026-09-30",
+    "verified_at": "2026-09-30",
+    "verification_status": "VERIFIED",
+    "http_status": 200,
+    "final_url": "http://mahapwd.gov.in/nit/default.asp",
+    "page_title": "Notice Inviting Tenders",
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: `User-agent: * / Disallow: /` — NOT collected (evidence-mahapwd-robots.txt). HTTPS certificate chain incomplete; HTTP 200. Permission requested via maharashtra-pwd draft. maharashtra-tenders/maharashtra-tender-data.md",
+    "cppp_listed_url": null,
+    "platform": null
+  },
+  {
+    "id": "mh-msidc",
+    "name": "Maharashtra State Infrastructure Development Corporation (MSIDC)",
+    "official_url": "https://msidc.org/tenders/",
+    "government_level": "state",
+    "state": "Maharashtra",
+    "ministry": null,
+    "department": null,
+    "organization": "MSIDC",
+    "category": "infrastructure",
+    "subcategories": [],
+    "relevance": "CRITICAL",
+    "data_domains": ["procurement", "roads", "buildings"],
+    "procurement": {
+      "available": "yes",
+      "fields_observed": [
+        "publication_date",
+        "last_date_of_submission",
+        "name_of_work",
+        "notice_pdf",
+        "notice_number",
+        "office_reference",
+        "pre_bid_date",
+        "opening_date",
+        "tender_fee",
+        "emd"
+      ],
+      "notes": "Page titled 'E-Tenders for Maharashtra PWD Projects'; 290 notices 2024-02-26→2026-07-06 on one page; born-digital PDFs; listing dates contain errors — trust the PDF."
+    },
+    "financial_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "project_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "contractor_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "progress_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "audit_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "gis_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "administrative_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "formats": ["HTML", "PDF"],
+    "access_method": "PUBLIC_WEB_PAGE",
+    "api_available": "no",
+    "historical_data": "2024-02-26→",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "html_table",
+    "update_frequency": "unknown",
+    "identifier_fields": [],
+    "discovered_from": "Agency homepage link or gov.in-restricted search, 2026-09-30",
+    "verified_at": "2026-09-30",
+    "verification_status": "VERIFIED",
+    "http_status": 200,
+    "final_url": "https://msidc.org/tenders/",
+    "page_title": "E-Tenders for Maharashtra PWD Projects - MSIDC",
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: /wp-admin/ only; sitemaps published. Recommended: ingest first. maharashtra-tenders/maharashtra-tender-data.md",
+    "cppp_listed_url": null,
+    "platform": null
+  },
+  {
+    "id": "mh-mmrda",
+    "name": "Mumbai Metropolitan Region Development Authority (MMRDA)",
+    "official_url": "https://mmrda.maharashtra.gov.in/mr/tenders/tender-notices/archive",
+    "government_level": "state",
+    "state": "Maharashtra",
+    "ministry": null,
+    "department": null,
+    "organization": "MMRDA",
+    "category": "infrastructure",
+    "subcategories": [],
+    "relevance": "HIGH",
+    "data_domains": ["procurement", "urban"],
+    "procurement": {
+      "available": "yes",
+      "fields_observed": [
+        "tender_reference",
+        "division",
+        "type",
+        "title",
+        "issue_date",
+        "end_date",
+        "pdf"
+      ],
+      "notes": "Current list script-rendered; archive server-rendered, 21 pages; includes corrigenda."
+    },
+    "financial_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "project_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "contractor_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "progress_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "audit_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "gis_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "administrative_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "formats": ["HTML", "PDF"],
+    "access_method": "PUBLIC_WEB_PAGE",
+    "api_available": "no",
+    "historical_data": "unknown",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "html_table",
+    "update_frequency": "unknown",
+    "identifier_fields": [],
+    "discovered_from": "Agency homepage link or gov.in-restricted search, 2026-09-30",
+    "verified_at": "2026-09-30",
+    "verification_status": "VERIFIED",
+    "http_status": 200,
+    "final_url": "https://mmrda.maharashtra.gov.in/mr/tenders/tender-notices/archive",
+    "page_title": null,
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: Drupal default; tender pages permitted. maharashtra-tenders/maharashtra-tender-data.md",
+    "cppp_listed_url": null,
+    "platform": null
+  },
+  {
+    "id": "mh-msedcl-etender",
+    "name": "MSEDCL e-Tendering (Mahavitaran)",
+    "official_url": "https://etender.mahadiscom.in/eatApp/latestTendersWorks",
+    "government_level": "state",
+    "state": "Maharashtra",
+    "ministry": null,
+    "department": null,
+    "organization": "MSEDCL",
+    "category": "infrastructure",
+    "subcategories": [],
+    "relevance": "MEDIUM",
+    "data_domains": ["procurement", "power"],
+    "procurement": {
+      "available": "partial",
+      "fields_observed": [
+        "tender_no",
+        "description",
+        "purchase_from_date",
+        "purchase_to_date",
+        "technical_bid_open_date",
+        "submission_due",
+        "tender_fee"
+      ],
+      "notes": "Own e-tender system, not GePNIC. Server HTML carries column headers only; rows load by script. Data endpoint not examined — ask for a feed."
+    },
+    "financial_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "project_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "contractor_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "progress_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "audit_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "gis_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "administrative_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "formats": ["HTML", "PDF"],
+    "access_method": "PUBLIC_WEB_PAGE",
+    "api_available": "no",
+    "historical_data": "unknown",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "script_rendered",
+    "update_frequency": "unknown",
+    "identifier_fields": [],
+    "discovered_from": "Agency homepage link or gov.in-restricted search, 2026-09-30",
+    "verified_at": "2026-09-30",
+    "verification_status": "VERIFIED",
+    "http_status": 200,
+    "final_url": "https://etender.mahadiscom.in/eatApp/latestTendersWorks",
+    "page_title": null,
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: none served (404). maharashtra-tenders/maharashtra-tender-data.md",
+    "cppp_listed_url": null,
+    "platform": null
+  },
+  {
+    "id": "mh-dgipr",
+    "name": "Directorate General of Information and Public Relations (DGIPR)",
+    "official_url": "https://dgipr.maharashtra.gov.in/notices",
+    "government_level": "state",
+    "state": "Maharashtra",
+    "ministry": null,
+    "department": null,
+    "organization": "DGIPR",
+    "category": "infrastructure",
+    "subcategories": [],
+    "relevance": "LOW",
+    "data_domains": ["procurement", "notices"],
+    "procurement": {
+      "available": "partial",
+      "fields_observed": ["date", "subject", "type", "pdf"],
+      "notes": "Mixed office orders and few procurement notices; PDFs are image scans (OCR needed)."
+    },
+    "financial_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "project_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "contractor_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "progress_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "audit_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "gis_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "administrative_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "formats": ["HTML", "PDF"],
+    "access_method": "PUBLIC_WEB_PAGE",
+    "api_available": "no",
+    "historical_data": "unknown",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "html_table",
+    "update_frequency": "unknown",
+    "identifier_fields": [],
+    "discovered_from": "Agency homepage link or gov.in-restricted search, 2026-09-30",
+    "verified_at": "2026-09-30",
+    "verification_status": "VERIFIED",
+    "http_status": 200,
+    "final_url": "https://dgipr.maharashtra.gov.in/notices",
+    "page_title": null,
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: Drupal default; /notices permitted. maharashtra-tenders/maharashtra-tender-data.md",
+    "cppp_listed_url": null,
+    "platform": null
+  },
+  {
+    "id": "mh-midc",
+    "name": "Maharashtra Industrial Development Corporation (MIDC)",
+    "official_url": "https://wms1.midcindia.org/vendorportal/midcportal/tenderlist.aspx?isexternalProject=1",
+    "government_level": "state",
+    "state": "Maharashtra",
+    "ministry": null,
+    "department": null,
+    "organization": "MIDC",
+    "category": "infrastructure",
+    "subcategories": [],
+    "relevance": "MEDIUM",
+    "data_domains": ["procurement", "industrial"],
+    "procurement": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": "Tender list is a zone + work-type form (ASP.NET); not examined further."
+    },
+    "financial_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "project_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "contractor_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "progress_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "audit_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "gis_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "administrative_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "formats": ["HTML", "PDF"],
+    "access_method": "PUBLIC_WEB_PAGE",
+    "api_available": "no",
+    "historical_data": "unknown",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "form",
+    "update_frequency": "unknown",
+    "identifier_fields": [],
+    "discovered_from": "Agency homepage link or gov.in-restricted search, 2026-09-30",
+    "verified_at": "2026-09-30",
+    "verification_status": "VERIFIED",
+    "http_status": 200,
+    "final_url": "https://wms1.midcindia.org/vendorportal/midcportal/tenderlist.aspx?isexternalProject=1",
+    "page_title": null,
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt: midc.maharashtra.gov.in WordPress admin only; wms1.midcindia.org none served. maharashtra-tenders/maharashtra-tender-data.md",
+    "cppp_listed_url": null,
+    "platform": null
+  },
+  {
+    "id": "mh-cidco",
+    "name": "City and Industrial Development Corporation of Maharashtra (CIDCO)",
+    "official_url": "https://cidco.maharashtra.gov.in/Page?Token=DE0E063C112",
+    "government_level": "state",
+    "state": "Maharashtra",
+    "ministry": null,
+    "department": null,
+    "organization": "CIDCO",
+    "category": "infrastructure",
+    "subcategories": [],
+    "relevance": "LOW",
+    "data_domains": ["procurement", "urban"],
+    "procurement": {
+      "available": "partial",
+      "fields_observed": ["date", "name", "description", "pdf"],
+      "notes": "'Tender Notices' page: 18 rows, 2022–2025; sparse."
+    },
+    "financial_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "project_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "contractor_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "progress_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "audit_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "gis_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "administrative_data": {
+      "available": "unknown",
+      "fields_observed": [],
+      "notes": null
+    },
+    "formats": ["HTML", "PDF"],
+    "access_method": "PUBLIC_WEB_PAGE",
+    "api_available": "no",
+    "historical_data": "2022→",
+    "captcha": "no",
+    "authentication_required": "no",
+    "machine_readability": "html_table",
+    "update_frequency": "unknown",
+    "identifier_fields": [],
+    "discovered_from": "Agency homepage link or gov.in-restricted search, 2026-09-30",
+    "verified_at": "2026-09-30",
+    "verification_status": "VERIFIED",
+    "http_status": 200,
+    "final_url": "https://cidco.maharashtra.gov.in/Page?Token=DE0E063C112",
+    "page_title": "Tender Notices - Cidco",
+    "verification_channel": "direct_get_india_2026-09-30",
+    "notes": "robots.txt disallows /login, /search, /*?q=. maharashtra-tenders/maharashtra-tender-data.md",
     "cppp_listed_url": null,
     "platform": null
   }

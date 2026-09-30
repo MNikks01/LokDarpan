@@ -28,7 +28,7 @@ Only official Government of India, State, UT, and government-body sources. News 
 
 | File                                                                                                   | Contents                                                                                    |
 | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| **[`.docs/06-government-sources/source-registry.json`](./source-registry.json)**                       | 99 curated sources, full schema per §28                                                     |
+| **[`.docs/06-government-sources/source-registry.json`](./source-registry.json)**                       | 107 curated sources, full schema per §28                                                    |
 | **[`.docs/06-government-sources/source-registry.csv`](./source-registry.csv)**                         | The same, flattened                                                                         |
 | **[`.docs/06-government-sources/igod-organization-catalogue.csv`](./igod-organization-catalogue.csv)** | **6,466 government organisations** crawled from IGOD — all 36 States/UTs + Union Government |
 | [`.docs/06-government-sources/data/union-ministries.json`](./data/union-ministries.json)               | 106 Union ministries/departments with URLs, addresses, sub-organisation counts              |
