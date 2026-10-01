@@ -4,7 +4,7 @@ import type { RawArtifact } from "../raw-store";
 import type { ExtractedDocument } from "./extract";
 
 export interface DocumentMeta {
-  readonly docType: "audit_report" | "government_resolution" | "other";
+  readonly docType: "audit_report" | "government_resolution" | "tender_notice" | "other";
   readonly title: string;
   readonly issuingAuthority: string | null;
   /** As stated by the document. `null` when it states none. */

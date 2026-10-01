@@ -143,6 +143,7 @@ const PACKAGES: AgencyListing<PackageRow> = {
   ],
   documentsOf: (row) => [row.document],
   factsOf: (row) => ({ name_of_work: row.work }),
+  noticeMetaOf: () => ({ title: "Shared notice", issuingAuthority: "Test", publishedOn: null }),
 };
 
 describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(

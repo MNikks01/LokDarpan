@@ -1,6 +1,7 @@
 import { parse as parseHtml, type HTMLElement } from "node-html-parser";
 
 import type { AgencyListing } from "./collect";
+import { factText, type NoticeMeta } from "./documents";
 import type { ListingFacts } from "./load";
 
 /**
@@ -157,6 +158,21 @@ export function msidcFactsOf(row: MsidcListingRow): ListingFacts {
   };
 }
 
+/**
+ * An MSIDC notice's document metadata, from the first listing row that pointed
+ * to it. For a notice shared by several package rows, that row's name of work
+ * titles the document; every row's name stays in its own sighting.
+ */
+export function msidcNoticeMeta(facts: ListingFacts): NoticeMeta {
+  return {
+    title:
+      factText(facts, "name_of_work") ??
+      `MSIDC notice, listing row ${factText(facts, "serial") ?? "unnumbered"}`,
+    issuingAuthority: "Maharashtra State Infrastructure Development Corporation Ltd (MSIDC)",
+    publishedOn: factText(facts, "published_on"),
+  };
+}
+
 /** MSIDC's listing, as the shared collector reads it: one page. */
 export const MSIDC: AgencyListing<MsidcListingRow> = {
   sourceId: MSIDC_SOURCE_ID,
@@ -165,4 +181,5 @@ export const MSIDC: AgencyListing<MsidcListingRow> = {
   parse: parseMsidcListing,
   documentsOf: (row) => row.documents,
   factsOf: msidcFactsOf,
+  noticeMetaOf: msidcNoticeMeta,
 };
