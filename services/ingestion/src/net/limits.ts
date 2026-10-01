@@ -113,3 +113,24 @@ export const OVERPASS_STATUS: FetchLimits = {
   idleTimeoutMs: 30 * SECOND,
   totalTimeoutMs: 1 * MINUTE,
 };
+
+/**
+ * Maharashtra agency listing pages (MHADA, MSIDC, MMRDA…). Measured on
+ * 2026-09-30: largest 593 KB (MSIDC's single page of 290 notices) → 4× → 4 MiB.
+ */
+export const AGENCY_PAGE: FetchLimits = {
+  maxBytes: 4 * MIB,
+  ...PATIENT,
+  totalTimeoutMs: 2 * MINUTE,
+};
+
+/**
+ * Documents an agency listing points to: notice PDFs and PWD's works lists.
+ * Measured on 2026-09-30: notices under 1 MB, PWD works lists up to 10 MB → 4× →
+ * 64 MiB.
+ */
+export const AGENCY_DOCUMENT: FetchLimits = {
+  maxBytes: 64 * MIB,
+  ...PATIENT,
+  totalTimeoutMs: 10 * MINUTE,
+};
