@@ -3,25 +3,36 @@ import type pg from "pg";
 import { AGENCY_DOCUMENT, AGENCY_PAGE } from "../net/limits";
 import { putArtifact, type RawStore } from "../raw-store";
 import { PathNotPermitted, type PoliteClient } from "./http";
-import { heldDocumentUrls, recordArtifact, recordSighting } from "./load";
-import {
-  MHADA_SOURCE_ID,
-  listingFactsOf,
-  listingPageUrl,
-  parseMhadaListing,
-  type MhadaListingRow,
-} from "./mhada";
+import { heldDocumentUrls, recordArtifact, recordSighting, type ListingFacts } from "./load";
 
 /**
- * One MHADA collection: listing pages, then the notices they point to.
+ * One collection from an agency's tender listing: listing pages, then the
+ * notices they point to.
  *
- * Every listing page read is itself retained — it is the evidence for the
+ * An agency is described by an `AgencyListing` — where its pages are, how to
+ * read one, and what each row points to — so MHADA, MSIDC and the agencies
+ * after them share one collector rather than each growing its own.
+ *
+ * Every listing page read is itself retained: it is the evidence for the
  * listing facts recorded against each notice. A notice already held is not
- * fetched again. On the nightly run (`stopWhenAllHeld`) collection stops at the
- * first page whose every notice is already held: MHADA lists newest first, so
- * everything after it is older and was collected before. A backfill passes an
- * explicit page range and reads it all.
+ * fetched again. With `stopWhenAllHeld`, collection stops at the first page
+ * whose every notice is already held — listings run newest first, so
+ * everything after it was collected before. A backfill passes an explicit page
+ * range and reads it all.
  */
+
+export interface AgencyListing<Row> {
+  /** Registry id, also the raw store's prefix and `ingestion_run.source_id`. */
+  readonly sourceId: string;
+  /** The last listing page; 0 for a single-page listing. */
+  readonly lastPage: number;
+  pageUrl(page: number): string;
+  /** Throws if the page is not the listing it expects: never "no notices". */
+  parse(html: string): readonly Row[];
+  documentsOf(row: Row): readonly string[];
+  /** What the row says, as printed, for `artifact_sighting.listing_facts`. */
+  factsOf(row: Row): ListingFacts;
+}
 
 export interface CollectOptions {
   readonly fromPage: number;
@@ -47,7 +58,18 @@ export interface CollectCounts {
   readonly failed: number;
 }
 
-type Outcome = "fetched" | "notPermitted" | "failed";
+/** Why a notice was not retained. */
+type Outcome = "notPermitted" | "failed";
+
+/** A notice fetched this run: enough to record another row's sighting of it. */
+interface Retained {
+  readonly sha256: string;
+  readonly url: string;
+  readonly retrievedAt: Date;
+  readonly status: number;
+  readonly etag: string | null;
+  readonly lastModified: string | null;
+}
 
 interface Tally {
   pages: number;
@@ -63,27 +85,34 @@ interface Listing {
   readonly sha256: string | null;
 }
 
-interface Context {
+/** What a collection runs against. */
+export interface Collector {
   readonly client: PoliteClient;
   readonly db: pg.ClientBase;
   readonly store: RawStore;
 }
 
-async function retainListing(
-  { client, db, store }: Context,
+interface Context<Row> extends Collector {
+  readonly agency: AgencyListing<Row>;
+}
+
+async function retainListing<Row>(
+  { agency, client, db, store }: Context<Row>,
   page: number,
   dryRun: boolean,
-): Promise<{ readonly listing: Listing; readonly rows: readonly MhadaListingRow[] }> {
-  const fetched = await client.get(listingPageUrl(page), AGENCY_PAGE);
+): Promise<{ readonly listing: Listing; readonly rows: readonly Row[] }> {
+  const fetched = await client.get(agency.pageUrl(page), AGENCY_PAGE);
   if (fetched.status !== 200) {
-    throw new Error(`MHADA listing page ${String(page)} answered HTTP ${String(fetched.status)}`);
+    throw new Error(
+      `${agency.sourceId} listing page ${String(page)} answered HTTP ${String(fetched.status)}`,
+    );
   }
   // Parsed before anything is written: a page not understood records nothing.
-  const { rows } = parseMhadaListing(fetched.body.toString("utf8"));
+  const rows = agency.parse(fetched.body.toString("utf8"));
   if (dryRun) return { listing: { url: fetched.url, sha256: null }, rows };
 
   const artifact = await putArtifact(store, fetched.body, {
-    sourceId: MHADA_SOURCE_ID,
+    sourceId: agency.sourceId,
     sourceUrl: fetched.url,
     retrievedAt: fetched.retrievedAt,
     httpStatus: fetched.status,
@@ -93,12 +122,13 @@ async function retainListing(
   return { listing: { url: fetched.url, sha256: artifact.sha256 }, rows };
 }
 
-async function retainNotice(
-  { client, db, store }: Context,
+async function retainNotice<Row>(
+  context: Context<Row>,
   document: string,
-  row: MhadaListingRow,
+  row: Row,
   listing: Listing,
-): Promise<Outcome> {
+): Promise<Outcome | Retained> {
+  const { agency, client, db, store } = context;
   let fetched;
   try {
     fetched = await client.get(document, AGENCY_DOCUMENT);
@@ -108,37 +138,61 @@ async function retainNotice(
   if (fetched.status !== 200) return "failed";
 
   const artifact = await putArtifact(store, fetched.body, {
-    sourceId: MHADA_SOURCE_ID,
+    sourceId: agency.sourceId,
     sourceUrl: fetched.url,
     retrievedAt: fetched.retrievedAt,
     httpStatus: fetched.status,
     contentType: fetched.contentType,
   });
   await recordArtifact(db, artifact);
-  await recordSighting(db, {
+  const retained: Retained = {
     sha256: artifact.sha256,
-    sourceId: MHADA_SOURCE_ID,
-    sourceUrl: document,
-    discoveredFrom: listing.url,
-    discoveredFromSha256: listing.sha256,
-    listingFacts: listingFactsOf(row),
-    seenAt: fetched.retrievedAt,
-    httpStatus: fetched.status,
+    url: document,
+    retrievedAt: fetched.retrievedAt,
+    status: fetched.status,
     etag: fetched.etag,
     lastModified: fetched.lastModified,
-  });
-  return "fetched";
+  };
+  await recordRowSighting(context, retained, row, listing);
+  return retained;
 }
 
-export async function collectMhada(
-  client: PoliteClient,
-  db: pg.ClientBase,
-  store: RawStore,
+/**
+ * One row's sighting of a notice. Called again, without refetching, when a
+ * later row on the same run points to the same file — MSIDC lists each package
+ * of a multi-package notice as its own row, sharing one PDF, and each row's
+ * name of work is worth keeping.
+ */
+async function recordRowSighting<Row>(
+  { agency, db }: Context<Row>,
+  retained: Retained,
+  row: Row,
+  listing: Listing,
+): Promise<void> {
+  await recordSighting(db, {
+    sha256: retained.sha256,
+    sourceId: agency.sourceId,
+    sourceUrl: retained.url,
+    discoveredFrom: listing.url,
+    discoveredFromSha256: listing.sha256,
+    listingFacts: agency.factsOf(row),
+    seenAt: retained.retrievedAt,
+    httpStatus: retained.status,
+    etag: retained.etag,
+    lastModified: retained.lastModified,
+  });
+}
+
+export async function collectListing<Row>(
+  agency: AgencyListing<Row>,
+  collector: Collector,
   options: CollectOptions,
 ): Promise<CollectCounts> {
-  const context: Context = { client, db, store };
+  const context: Context<Row> = { agency, ...collector };
+  const { db } = collector;
   const log = options.log ?? ((): void => undefined);
-  const held = new Set(await heldDocumentUrls(db, MHADA_SOURCE_ID));
+  const held = new Set(await heldDocumentUrls(db, agency.sourceId));
+  const fetchedThisRun = new Map<string, Retained>();
   const tally: Tally = {
     pages: 0,
     listed: 0,
@@ -147,28 +201,43 @@ export async function collectMhada(
     notPermitted: 0,
     failed: 0,
   };
+  const lastPage = Math.min(options.toPage, agency.lastPage);
 
-  for (let page = options.fromPage; page <= options.toPage; page += 1) {
+  for (let page = options.fromPage; page <= lastPage; page += 1) {
     const { listing, rows } = await retainListing(context, page, options.dryRun);
     tally.pages += 1;
     let newOnPage = 0;
 
     for (const row of rows) {
-      for (const document of row.documents) {
+      for (const document of agency.documentsOf(row)) {
         tally.listed += 1;
+        const thisRun = fetchedThisRun.get(document);
+        if (thisRun !== undefined) {
+          // Another row of this run pointed to the same file: keep its facts too.
+          await recordRowSighting(context, thisRun, row, listing);
+          tally.alreadyHeld += 1;
+          continue;
+        }
         if (held.has(document)) {
           tally.alreadyHeld += 1;
           continue;
         }
         newOnPage += 1;
         if (options.dryRun) {
+          // Counted as a real run would: a later row sharing this file is not new.
+          held.add(document);
           log(`would fetch ${document}`);
           continue;
         }
         const outcome = await retainNotice(context, document, row, listing);
-        tally[outcome] += 1;
-        if (outcome === "fetched") held.add(document);
-        else log(`${outcome}: ${document}`);
+        if (typeof outcome === "string") {
+          tally[outcome] += 1;
+          log(`${outcome}: ${document}`);
+        } else {
+          tally.fetched += 1;
+          held.add(document);
+          fetchedThisRun.set(document, outcome);
+        }
       }
     }
 
