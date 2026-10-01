@@ -1,6 +1,8 @@
 import { parse as parseHtml, type HTMLElement } from "node-html-parser";
 
 import type { AgencyListing } from "./collect";
+import { factText, type NoticeMeta } from "./documents";
+import type { ListingFacts } from "./load";
 
 /**
  * MHADA's tender listing, read as MHADA prints it.
@@ -178,6 +180,27 @@ export function listingFactsOf(row: MhadaListingRow): Record<string, string | nu
   };
 }
 
+/**
+ * A MHADA notice's document metadata, from its listing row: MHADA's own
+ * description of the document as the title, the board as part of the issuer.
+ * A row with no description is titled by its notice title, then its serial —
+ * never by a guess at what the notice is.
+ */
+export function mhadaNoticeMeta(facts: ListingFacts): NoticeMeta {
+  const board = factText(facts, "board");
+  return {
+    title:
+      factText(facts, "description") ??
+      factText(facts, "title") ??
+      `MHADA notice, listing row ${factText(facts, "serial") ?? "unnumbered"}`,
+    issuingAuthority:
+      board === null
+        ? "Maharashtra Housing and Area Development Authority"
+        : `Maharashtra Housing and Area Development Authority — ${board}`,
+    publishedOn: factText(facts, "published_on"),
+  };
+}
+
 /** MHADA's listing, as the shared collector reads it. */
 export const MHADA: AgencyListing<MhadaListingRow> = {
   sourceId: MHADA_SOURCE_ID,
@@ -186,4 +209,5 @@ export const MHADA: AgencyListing<MhadaListingRow> = {
   parse: (html) => parseMhadaListing(html).rows,
   documentsOf: (row) => row.documents,
   factsOf: listingFactsOf,
+  noticeMetaOf: mhadaNoticeMeta,
 };
