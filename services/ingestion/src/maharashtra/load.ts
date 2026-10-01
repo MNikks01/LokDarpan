@@ -32,6 +32,9 @@ export async function recordArtifact(db: pg.ClientBase, artifact: RawArtifact): 
   );
 }
 
+/** What a listing row says, as printed: text, or a flag the reader raised about it. */
+export type ListingFacts = Readonly<Record<string, string | boolean | null>>;
+
 export interface Sighting {
   readonly sha256: string;
   readonly sourceId: string;
@@ -39,7 +42,7 @@ export interface Sighting {
   readonly discoveredFrom: string | null;
   readonly discoveredFromSha256: string | null;
   /** What the listing row said, as printed. Requires `discoveredFromSha256`. */
-  readonly listingFacts: Readonly<Record<string, string | null>> | null;
+  readonly listingFacts: ListingFacts | null;
   readonly seenAt: Date;
   readonly httpStatus: number;
   readonly etag: string | null;

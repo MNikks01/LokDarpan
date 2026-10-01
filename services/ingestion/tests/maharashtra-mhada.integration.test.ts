@@ -4,9 +4,9 @@ import { join } from "node:path";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { collectMhada, type CollectCounts } from "../src/maharashtra/collect";
+import { collectListing, type AgencyListing, type CollectCounts } from "../src/maharashtra/collect";
 import { PoliteClient } from "../src/maharashtra/http";
-import { MHADA_SOURCE_ID } from "../src/maharashtra/mhada";
+import { MHADA, MHADA_SOURCE_ID } from "../src/maharashtra/mhada";
 import { FileRawStore } from "../src/raw-store";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
@@ -62,9 +62,9 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       rawDir = mkdtempSync(join(tmpdir(), "mhada-raw-"));
       const store = new FileRawStore(rawDir);
       const options = { fromPage: 0, toPage: 0, stopWhenAllHeld: true, dryRun: false } as const;
-      first = await collectMhada(client(), db, store, options);
+      first = await collectListing(MHADA, { client: client(), db, store }, options);
       requested.length = 0;
-      second = await collectMhada(client(), db, store, options);
+      second = await collectListing(MHADA, { client: client(), db, store }, options);
     });
 
     afterAll(async () => {
@@ -120,6 +120,78 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         [MHADA_SOURCE_ID],
       );
       expect(Number(result?.rows[0]?.n)).toBeGreaterThanOrEqual(10);
+    });
+  },
+);
+
+interface PackageRow {
+  readonly work: string;
+  readonly document: string;
+}
+
+/**
+ * MSIDC lists each package of a multi-package notice as its own row, all
+ * pointing to one PDF. The file is fetched once; each row's facts are kept.
+ */
+const PACKAGES: AgencyListing<PackageRow> = {
+  sourceId: "test-shared-notice",
+  lastPage: 0,
+  pageUrl: () => "https://packages.example.gov.in/tenders/",
+  parse: () => [
+    { work: "Package A, MDR-130", document: "https://packages.example.gov.in/notice.pdf" },
+    { work: "Package B, MDR-131", document: "https://packages.example.gov.in/notice.pdf" },
+  ],
+  documentsOf: (row) => [row.document],
+  factsOf: (row) => ({ name_of_work: row.work }),
+};
+
+describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
+  "rows sharing one notice (integration)",
+  { timeout: 30_000 },
+  () => {
+    let pool: pg.Pool | undefined;
+    let db: pg.PoolClient | undefined;
+    let rawDir = "";
+    const pdfRequests: string[] = [];
+    let counts: CollectCounts | undefined;
+
+    beforeAll(async () => {
+      pool = new pg.Pool({ connectionString: DATABASE_URL, max: 1 });
+      db = await pool.connect();
+      await db.query("BEGIN");
+      rawDir = mkdtempSync(join(tmpdir(), "shared-raw-"));
+      const client = new PoliteClient({
+        sleep: () => Promise.resolve(),
+        http: (url) => {
+          const { pathname } = new URL(url);
+          if (pathname === "/robots.txt") return Promise.resolve(new Response("", { status: 404 }));
+          if (pathname === "/notice.pdf") pdfRequests.push(pathname);
+          return Promise.resolve(new Response("%PDF-1.4 one notice, two packages"));
+        },
+      });
+      counts = await collectListing(
+        PACKAGES,
+        { client, db, store: new FileRawStore(rawDir) },
+        { fromPage: 0, toPage: 0, stopWhenAllHeld: false, dryRun: false },
+      );
+    });
+
+    afterAll(async () => {
+      await db?.query("ROLLBACK");
+      db?.release();
+      await pool?.end();
+      rmSync(rawDir, { recursive: true, force: true });
+    });
+
+    it("fetches the shared file once and keeps every row's facts", async () => {
+      expect(pdfRequests).toHaveLength(1);
+      expect(counts).toMatchObject({ listed: 2, fetched: 1, alreadyHeld: 1, failed: 0 });
+      const rows = await db?.query<{ work: string; sha256: string }>(
+        `SELECT listing_facts->>'name_of_work' AS work, sha256 FROM artifact_sighting
+          WHERE source_id = 'test-shared-notice' ORDER BY id`,
+      );
+      expect(rows?.rows.map((r) => r.work)).toEqual(["Package A, MDR-130", "Package B, MDR-131"]);
+      expect(new Set(rows?.rows.map((r) => r.sha256)).size).toBe(1);
     });
   },
 );
