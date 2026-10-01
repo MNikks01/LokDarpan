@@ -61,10 +61,21 @@ jobs:
       #   0  every portal collected, or some refused while others collected
       #   69 every portal refused — nothing was collected
       #   75 another sweep holds the lock; this one did nothing
-      #   78 DATABASE_URL absent or empty
+      #   78 DATABASE_URL absent or empty, or the raw store is not configured
       #   64 usage
       #   77 a publisher's robots.txt forbids us, and we stopped
       - name: Collect
         run: pnpm --filter @lokdarpan/ingestion ingest:gepnic --all
         env:
           DATABASE_URL: ${{ secrets.INGEST_DATABASE_URL }}
+          # Every page the sweep reads is kept in the R2 bucket before a row cites
+          # it. This runner's disk is deleted with the job, so the sweep refuses
+          # to start without the bucket rather than hash bytes it cannot keep
+          # (migration 0037, `.docs/16-operations/raw-store.md`).
+          RAW_STORE_REQUIRE_OBJECT: "true"
+          # The bucket and its endpoint are not secret, so they are repository
+          # variables and show in the log; the key pair is secret.
+          RAW_STORE_S3_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+          RAW_STORE_S3_BUCKET: ${{ vars.R2_BUCKET }}
+          RAW_STORE_S3_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RAW_STORE_S3_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

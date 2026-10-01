@@ -368,8 +368,11 @@ SELECT
   (SELECT count(*) FROM tender_collection_window WHERE state_lgd_code='27') AS mh_windows;
 ```
 
-Expected on a database that holds the full ledger: **36**, **30**, **5088**, and
-**0**.
+Run it before and after the first scheduled run: the four numbers must not change.
+They depend on what that database holds. On the full local ledger they are **36**,
+**30**, **5088** and **0**. On production, which has never had the audit corpus
+loaded (as of 29 September 2026), they are **36**, **0**, **0** and **0**. A zero
+there means "never loaded", not "lost".
 
 That last zero is not a defect. **Maharashtra has no collection window because no
 Maharashtra portal is collected**, and the explorer says

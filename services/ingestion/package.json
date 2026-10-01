@@ -21,6 +21,7 @@
     "ingest:gepnic-sample": "tsx src/gepnic/sample-window.ts",
     "link:figures": "tsx src/cag/figure-link-cli.ts",
     "reprocess:cag": "tsx src/cag/reprocess-cli.ts",
+    "promote:cag": "tsx src/cag/promote-cli.ts",
     "ocr:manifest": "tsx src/ocr/manifest-cli.ts",
     "ocr:score": "tsx src/ocr/score-cli.ts",
     "corpus:build": "tsx src/cag/corpus-cli.ts",
@@ -28,13 +29,15 @@
     "ingest:pincodes": "tsx src/pincode/cli.ts",
     "tenders:resolve": "tsx src/gepnic/resolve-cli.ts",
     "tenders:place": "tsx src/gepnic/place-cli.ts",
-    "tenders:review": "tsx src/gepnic/review-cli.ts"
+    "tenders:review": "tsx src/gepnic/review-cli.ts",
+    "check:collection": "tsx src/freshness/cli.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",
     "@lokdarpan/database": "workspace:*",
     "@lokdarpan/domain": "workspace:*",
     "@lokdarpan/money": "workspace:*",
+    "aws4fetch": "^1.0.20",
     "node-html-parser": "^6.1.13",
     "pg": "^8.13.1",
     "unpdf": "^1.8.1"

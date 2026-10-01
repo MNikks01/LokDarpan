@@ -126,6 +126,27 @@ red for one refusing portal in twenty would go red most days and stop being read
 
 ## Monitoring
 
+**You are told when something is wrong.** Every day at 02:30 UTC (08:00 IST),
+Actions → **Check collection** reads the ledger and opens an issue labelled
+`collection-alert` when:
+
+- a portal is **failing** (last tried after it last succeeded) or **stale** (no
+  success in 48 hours) — the same rule the site shows readers
+  (`collectionStatusOf` in `tender.repository.ts`);
+- **no sweep has started in 26 hours**, so the schedule may not be firing;
+- a run has been **stuck in `running`** for over two hours;
+- or the check **cannot reach the database** at all.
+
+A later failure comments on the open issue rather than opening another; the
+first healthy check closes it. Watch the repository (or at least issues) to be
+emailed. Run it by hand with **Run workflow**, or locally:
+
+```bash
+DATABASE_URL='<connection string>' pnpm --filter @lokdarpan/ingestion check:collection
+```
+
+It reads only, and uses the same `INGEST_DATABASE_URL` secret as the sweep.
+
 **Did today's run happen, and how did it go?** Actions → Ingest tenders. The log
 names every portal with counts, and the refusals separately.
 

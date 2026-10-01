@@ -81,8 +81,8 @@ describe.skipIf(READONLY_URL === undefined || READONLY_URL === "")(
     it("cannot write to the raw-artefact store", async () => {
       await refuses(
         "INSERT source_artifact",
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES (repeat('9', 64), 'x', 'x', now(), 1, 'x')`,
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES (repeat('9', 64), 'x', 'x', now(), 1, 'x', 'file')`,
       );
     });
 

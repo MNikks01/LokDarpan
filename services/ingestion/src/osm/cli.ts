@@ -2,6 +2,7 @@ import pg from "pg";
 import { parseRelations } from "./boundaries";
 import type { OverpassRelation } from "./boundaries";
 import { loadBoundaries } from "./load";
+import { RawStoreMisconfigured, rawStoreFromEnv, retain, type RawStore } from "../raw-store";
 import {
   OverpassDeclined,
   boundariesInRelationQuery,
@@ -56,6 +57,7 @@ interface Options {
   readonly withinUnitId: number | null;
   readonly parentId: number | null;
   readonly levels: readonly number[];
+  readonly store: RawStore;
 }
 
 /** Parsed arguments, or a message and exit code when they do not make sense. */
@@ -63,6 +65,15 @@ function options(): Options {
   const connectionString = process.env["DATABASE_URL"];
   if (connectionString === undefined || connectionString === "") {
     process.stderr.write("DATABASE_URL is not set.\n");
+    process.exit(78);
+  }
+  // Chosen before any query, so a misconfigured store costs Overpass nothing.
+  let store: RawStore;
+  try {
+    store = rawStoreFromEnv();
+  } catch (error: unknown) {
+    if (!(error instanceof RawStoreMisconfigured)) throw error;
+    process.stderr.write(`${error.message}\n`);
     process.exit(78);
   }
   const relationId = numeric(arg("relation"));
@@ -80,6 +91,7 @@ function options(): Options {
   }
   return {
     connectionString,
+    store,
     relationId,
     withinUnitId,
     parentId: numeric(arg("parent")),
@@ -106,8 +118,8 @@ interface Ingested {
 /** One Overpass query, parsed and loaded under one parent. */
 async function ingestRelation(
   db: pg.Client,
-  relationId: number,
-  parentId: number | null,
+  store: RawStore,
+  { relationId, parentId }: { readonly relationId: number; readonly parentId: number | null },
   levels: readonly number[],
 ): Promise<Ingested> {
   const artifact = await runQuery(boundariesInRelationQuery(relationId, levels));
@@ -125,9 +137,11 @@ async function ingestRelation(
   for (const u of units) byLevel.set(u.level, (byLevel.get(u.level) ?? 0) + 1);
   if (units.length === 0) return { inserted: 0, updated: 0, failed: 0, byLevel };
 
+  // Kept before the rows that cite it are written.
+  const retained = await retain(store, "openstreetmap-overpass", artifact, "application/json");
   const result = await loadBoundaries(db, {
     units,
-    artifact,
+    artifact: { ...artifact, ...retained },
     parentId,
     datasetDescription: `OSM administrative boundaries inside relation ${String(relationId)}`,
   });
@@ -151,13 +165,19 @@ async function ingestRelation(
  */
 async function ingestWithRetries(
   db: pg.Client,
+  store: RawStore,
   target: { readonly id: number | null; readonly name: string; readonly relationId: number },
   levels: readonly number[],
 ): Promise<Ingested | null> {
   for (let attempt = 1; attempt <= ATTEMPTS_PER_DISTRICT; attempt++) {
     await waitForSlot();
     try {
-      return await ingestRelation(db, target.relationId, target.id, levels);
+      return await ingestRelation(
+        db,
+        store,
+        { relationId: target.relationId, parentId: target.id },
+        levels,
+      );
     } catch (error) {
       if (!(error instanceof OverpassDeclined)) throw error;
       process.stdout.write(
@@ -199,7 +219,8 @@ async function childrenToQuery(
 }
 
 async function main(): Promise<void> {
-  const { connectionString, relationId, withinUnitId, parentId, levels } = options();
+  const { connectionString, store, relationId, withinUnitId, parentId, levels } = options();
+  process.stdout.write(`raw store: ${store.location}\n`);
   const levelNote = levels.length === 0 ? " (all levels)" : ` at admin_level ${levels.join(", ")}`;
 
   const db = new pg.Client({ connectionString });
@@ -236,7 +257,7 @@ async function main(): Promise<void> {
 
     for (const target of targets) {
       process.stdout.write(`\n${target.name} (relation ${String(target.relationId)}) …\n`);
-      const one = await ingestWithRetries(db, target, levels);
+      const one = await ingestWithRetries(db, store, target, levels);
       if (one === null) {
         declined.push(target.name);
         continue;

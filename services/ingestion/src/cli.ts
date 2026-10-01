@@ -1,20 +1,18 @@
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import pg from "pg";
 
 import { LgdClient } from "./lgd/client.js";
 import { loadStates, openDatasetVersion, recordArtifact, sealDatasetVersion } from "./lgd/load.js";
 import { parseStates } from "./lgd/parse.js";
-import { putArtifact } from "./raw-store.js";
+import { putArtifact, rawStoreFromEnv } from "./raw-store.js";
 
 /**
  * Resolved from this module, not from `process.cwd()`: `pnpm --filter` runs a
  * script with the package directory as cwd, which would scatter the raw store
  * across `services/ingestion/data/raw` instead of the one store at the root.
  */
-const RAW_ROOT =
-  process.env["RAW_STORE_ROOT"] ??
-  resolve(dirname(fileURLToPath(import.meta.url)), "../../../data/raw");
+// `RAW_STORE_S3_*` selects the object store; otherwise `RAW_STORE_ROOT` or
+// `data/raw` at the repository root (see `raw-store.ts`).
+const RAW_STORE = rawStoreFromEnv();
 
 async function main(): Promise<void> {
   const connectionString = process.env["DATABASE_URL"];
@@ -29,7 +27,7 @@ async function main(): Promise<void> {
 
   // Raw bytes are stored before anything is parsed: if extraction is wrong, the
   // fix must be re-derivable from what was actually retrieved.
-  const artifact = await putArtifact(RAW_ROOT, page.body, {
+  const artifact = await putArtifact(RAW_STORE, page.body, {
     sourceId: "lgd",
     sourceUrl: page.url,
     retrievedAt: new Date(),

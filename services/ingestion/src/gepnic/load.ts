@@ -3,6 +3,7 @@ import type pg from "pg";
 import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run";
 import { districtKey, type TenderDetail } from "./detail";
 import type { FetchedArtifact } from "./fetch";
+import type { Retained } from "../raw-store";
 import type { ParsedTender } from "./landing";
 import { aliasesOfState, type ResolvedAlias } from "./aliases";
 import {
@@ -27,13 +28,20 @@ export interface TenderRecord {
   readonly listed: ParsedTender;
   /** Null where the detail page could not be read; the tender is still held. */
   readonly detail: TenderDetail | null;
+  /**
+   * The detail page `detail` was read from, already in the raw store. Absent
+   * when no page was read or it could not be kept: then the tender cites no
+   * detail page, rather than one nobody holds (migration 0038).
+   */
+  readonly detailPage?: (FetchedArtifact & Retained) | null;
 }
 
 export interface LoadOptions {
   readonly portalCode: string;
   readonly stateLgdCode: string;
   readonly records: readonly TenderRecord[];
-  readonly artifact: FetchedArtifact;
+  /** The landing page, already put in the raw store: a row must not name bytes nobody kept. */
+  readonly artifact: FetchedArtifact & Retained;
   readonly datasetDescription: string;
 }
 
@@ -183,6 +191,8 @@ function parameters(
     ...detailParameters(record.detail, place.method),
     place.evidenceSha256,
     place.evidenceKey,
+    // Cited only when the details were read from it.
+    record.detail === null ? null : (record.detailPage?.sha256 ?? null),
   ];
 }
 
@@ -194,10 +204,10 @@ const UPSERT = `
     department, organisation_chain, district_source,
     location, pincode, tender_category, product_category, tender_type,
     tender_value_paise, emd_paise, district_evidence_sha256, district_evidence_key,
-    district_resolved_at, first_seen_at, last_seen_at
+    detail_sha256, district_resolved_at, first_seen_at, last_seen_at
   ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-    $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23,
+    $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,
     CASE WHEN $7::bigint IS NULL THEN NULL ELSE now() END, now(), now()
   )
   ON CONFLICT (portal_code, portal_tender_id) DO UPDATE SET
@@ -260,7 +270,10 @@ const UPSERT = `
     product_category = COALESCE(EXCLUDED.product_category, tender.product_category),
     tender_type = COALESCE(EXCLUDED.tender_type, tender.tender_type),
     tender_value_paise = COALESCE(EXCLUDED.tender_value_paise, tender.tender_value_paise),
-    emd_paise = COALESCE(EXCLUDED.emd_paise, tender.emd_paise)
+    emd_paise = COALESCE(EXCLUDED.emd_paise, tender.emd_paise),
+    -- The page the details were last read from. A page that could not be read
+    -- or kept leaves the previous citation, alongside the values it gave.
+    detail_sha256 = COALESCE(EXCLUDED.detail_sha256, tender.detail_sha256)
     -- first_seen_at is deliberately absent: it records when we began holding
     -- this tender, and rewriting it would erase the collection history.
   RETURNING (xmax = 0) AS inserted`;
@@ -301,8 +314,8 @@ async function recordSuccessfulCollection(
 async function openArtifactAndVersion(db: pg.Client, options: LoadOptions): Promise<string> {
   const { portalCode, artifact } = options;
   await db.query(
-    `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path)
-     VALUES ($1, $2, $3, $4, 200, 'text/html', $5, $6)
+    `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path, stored_in)
+     VALUES ($1, $2, $3, $4, 200, 'text/html', $5, $6, $7)
      ON CONFLICT (sha256) DO NOTHING`,
     [
       artifact.sha256,
@@ -310,7 +323,8 @@ async function openArtifactAndVersion(db: pg.Client, options: LoadOptions): Prom
       artifact.sourceUrl,
       artifact.retrievedAt,
       artifact.byteSize,
-      `gepnic/${portalCode}/${artifact.sha256}.html`,
+      artifact.storagePath,
+      artifact.storedIn,
     ],
   );
 
@@ -338,6 +352,10 @@ async function writeOne(
 ): Promise<{ readonly inserted: boolean; readonly placed: boolean }> {
   await db.query("SAVEPOINT tender");
   try {
+    // The page first, so the tender's citation always names a row that exists.
+    if (record.detail !== null && record.detailPage) {
+      await recordDetailPage(db, context.portalCode, record.detailPage);
+    }
     const place = placementFor(record.detail, places.districts, places.directory, {
       aliases: places.aliases,
       districtNames: places.districtNames,
@@ -349,6 +367,28 @@ async function writeOne(
     await db.query("ROLLBACK TO SAVEPOINT tender");
     throw error;
   }
+}
+
+/** A detail page's artefact row, pointing at bytes the collector has already kept. */
+async function recordDetailPage(
+  db: pg.Client,
+  portalCode: string,
+  page: FetchedArtifact & Retained,
+): Promise<void> {
+  await db.query(
+    `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status, content_type, byte_size, storage_path, stored_in)
+     VALUES ($1, $2, $3, $4, 200, 'text/html', $5, $6, $7)
+     ON CONFLICT (sha256) DO NOTHING`,
+    [
+      page.sha256,
+      `gepnic-${portalCode}`,
+      page.sourceUrl,
+      page.retrievedAt,
+      page.byteSize,
+      page.storagePath,
+      page.storedIn,
+    ],
+  );
 }
 
 /**

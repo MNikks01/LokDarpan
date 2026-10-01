@@ -7,7 +7,7 @@ import type {
   SearchResult,
 } from "@lokdarpan/domain";
 import { LEVEL_LABEL } from "@lokdarpan/domain";
-import { displayTitle } from "@lokdarpan/domain";
+import { displayTitle, mayRepublish } from "@lokdarpan/domain";
 import type { Queryable } from "./published-fact.repository";
 
 /**
@@ -391,69 +391,109 @@ export class PostgresGeographyRepository implements GeographyRepository {
    * Nagpur before Nagpura — and then by how large the place is, because a
    * district is a more likely target than one of its villages.
    */
+  /**
+   * Places, reports, verified figures and report pages matching what a reader typed.
+   *
+   * Each kind has its own indexed query (migration 0039) and its own cap, so a
+   * common word cannot crowd out the one place a reader meant. Places match a
+   * substring or a near-miss spelling, in English or the local script. Figures
+   * and pages match whole words, as written, in any script.
+   *
+   * Only what may be shown is searched: a figure no person has verified is not
+   * a result, and a document whose publisher has not permitted republication
+   * is filtered exactly as its own page is (`mayRepublish`). Tender titles are
+   * not searched at all while their details are withheld (ADR-056).
+   */
   async search(term: string, limit: number): Promise<readonly SearchResult[]> {
-    const trimmed = term.trim();
+    const trimmed = term.trim().replace(/\s+/gu, " ");
     if (trimmed.length < 2) return [];
-    const pattern = `%${trimmed}%`;
-    const prefix = `${trimmed}%`;
+    // One after another: every read in a request shares the snapshot's client
+    // (ADR-053), and a client runs one query at a time.
+    const places = await this.searchPlaces(trimmed, limit);
+    const records = await this.searchRecords(trimmed, limit);
+    const figures = await this.searchFigures(trimmed, limit);
+    const passages = await this.searchPassages(trimmed, limit);
+    return [...places, ...records, ...figures, ...passages];
+  }
 
-    const [places, records] = await Promise.all([
-      this.db.query<{
-        id: string;
-        name_en: string;
-        level: AdminUnitLevel;
-        state_code: string | null;
-        state_name: string | null;
-        has_boundary: boolean;
-      }>(
-        `SELECT u.id, u.name_en, u.level::text AS level,
-                s.lgd_code AS state_code, s.name_en AS state_name,
-                (b.admin_unit_id IS NOT NULL) AS has_boundary
+  private async searchPlaces(term: string, limit: number): Promise<SearchResult[]> {
+    const escaped = term.replace(/[\\%_]/gu, (c) => `\\${c}`);
+    const result = await this.db.query<{
+      id: string;
+      name_en: string;
+      level: AdminUnitLevel;
+      state_code: string | null;
+      state_name: string | null;
+      has_boundary: boolean;
+    }>(
+      // The best matches first, then the state for those few alone: walking
+      // ancestors per candidate row would cost a recursive query for every
+      // village that shares a syllable with the term.
+      `WITH hits AS (
+         SELECT u.id, u.name_en, u.level,
+                (b.admin_unit_id IS NOT NULL) AS has_boundary,
+                -- coalesce: with no local-script name, false OR NULL is NULL,
+                -- and a descending sort puts NULL first — a non-match on top.
+                coalesce(u.name_en ILIKE $3 OR u.name_local ILIKE $3, false) AS prefix,
+                coalesce(u.name_en ILIKE $2 OR u.name_local ILIKE $2, false) AS contains,
+                greatest(similarity(u.name_en, $1), similarity(coalesce(u.name_local, ''), $1)) AS score,
+                coalesce(ST_Area(b.geometry), 0) AS area
            FROM admin_unit u
            LEFT JOIN admin_unit_boundary b ON b.admin_unit_id = u.id
-           -- The state a unit sits under, found by walking ancestors rather
-           -- than by looking a fixed number of levels up: a village may sit
-           -- four levels below its state, and a hard-coded depth silently drops
-           -- the context for anything deeper.
-           LEFT JOIN LATERAL (
-             WITH RECURSIVE up AS (
-               SELECT a.id, a.parent_id, a.level, a.lgd_code, a.name_en, 0 AS depth
-                 FROM admin_unit a WHERE a.id = u.id
-               UNION ALL
-               SELECT a.id, a.parent_id, a.level, a.lgd_code, a.name_en, up.depth + 1
-                 FROM admin_unit a JOIN up ON a.id = up.parent_id
-                WHERE up.depth < 10
-             )
-             SELECT lgd_code, name_en FROM up WHERE level = 'state' LIMIT 1
-           ) s ON TRUE
-          WHERE u.name_en ILIKE $1
-          ORDER BY (u.name_en ILIKE $2) DESC,
-                   COALESCE(ST_Area(b.geometry), 0) DESC,
-                   u.name_en
-          LIMIT $3`,
-        [pattern, prefix, limit],
-      ),
-      this.db.query<{ id: string; title: string; issuing_authority: string | null }>(
-        `SELECT id, title, issuing_authority
-           FROM document
-          WHERE title ILIKE $1
-          ORDER BY title
-          LIMIT $2`,
-        [pattern, limit],
-      ),
-    ]);
+          WHERE u.name_en ILIKE $2 OR u.name_local ILIKE $2
+             OR u.name_en % $1 OR u.name_local % $1
+          ORDER BY prefix DESC, contains DESC, score DESC, area DESC, u.name_en
+          LIMIT $4
+       )
+       SELECT h.id, h.name_en, h.level::text AS level, h.has_boundary,
+              s.lgd_code AS state_code, s.name_en AS state_name
+         FROM hits h
+         LEFT JOIN LATERAL (
+           WITH RECURSIVE up AS (
+             SELECT a.id, a.parent_id, a.level, a.lgd_code, a.name_en, 0 AS depth
+               FROM admin_unit a WHERE a.id = h.id
+             UNION ALL
+             SELECT a.id, a.parent_id, a.level, a.lgd_code, a.name_en, up.depth + 1
+               FROM admin_unit a JOIN up ON a.id = up.parent_id
+              WHERE up.depth < 10
+           )
+           SELECT lgd_code, name_en FROM up WHERE level = 'state' LIMIT 1
+         ) s ON TRUE
+        ORDER BY h.prefix DESC, h.contains DESC, h.score DESC, h.area DESC, h.name_en`,
+      [term, `%${escaped}%`, `${escaped}%`, limit],
+    );
+    return result.rows.map((r) => ({
+      kind: "place" as const,
+      id: Number(r.id),
+      title: r.name_en,
+      subtitle: LEVEL_LABEL[r.level],
+      context: r.state_name,
+      stateCode: r.state_code,
+      hasBoundary: r.has_boundary,
+      documentId: null,
+      pageNumber: null,
+      excerpt: null,
+    }));
+  }
 
-    return [
-      ...places.rows.map((r) => ({
-        kind: "place" as const,
-        id: Number(r.id),
-        title: r.name_en,
-        subtitle: LEVEL_LABEL[r.level],
-        context: r.state_name,
-        stateCode: r.state_code,
-        hasBoundary: r.has_boundary,
-      })),
-      ...records.rows.map((r) => ({
+  private async searchRecords(term: string, limit: number): Promise<SearchResult[]> {
+    const escaped = term.replace(/[\\%_]/gu, (c) => `\\${c}`);
+    const result = await this.db.query<{
+      id: string;
+      title: string;
+      issuing_authority: string | null;
+      source_id: string;
+    }>(
+      `SELECT d.id, d.title, d.issuing_authority, a.source_id
+         FROM document d JOIN source_artifact a ON a.sha256 = d.source_sha256
+        WHERE d.title ILIKE $2 OR d.title % $1
+        ORDER BY (d.title ILIKE $2) DESC, similarity(d.title, $1) DESC, d.title
+        LIMIT $3`,
+      [term, `%${escaped}%`, limit],
+    );
+    return result.rows
+      .filter((r) => mayRepublish(r.source_id))
+      .map((r) => ({
         kind: "record" as const,
         id: Number(r.id),
         title: displayTitle(r.title),
@@ -461,8 +501,101 @@ export class PostgresGeographyRepository implements GeographyRepository {
         context: r.issuing_authority,
         stateCode: null,
         hasBoundary: false,
-      })),
-    ];
+        documentId: Number(r.id),
+        pageNumber: null,
+        excerpt: null,
+      }));
+  }
+
+  private async searchFigures(term: string, limit: number): Promise<SearchResult[]> {
+    const result = await this.db.query<{
+      id: string;
+      document_id: string;
+      page_number: number;
+      raw_text: string;
+      title: string;
+      source_id: string;
+    }>(
+      // The predicate repeats the partial index's (0039), so the planner can
+      // use it; a figure with no value is not shown on its page, so not here.
+      // One sentence often states several verified figures: it is one result,
+      // not the same line repeated.
+      `SELECT id, document_id, page_number, raw_text, title, source_id FROM (
+         SELECT DISTINCT ON (f.document_id, f.page_number, f.raw_text)
+                f.id, f.document_id, f.page_number, f.raw_text, d.title, a.source_id,
+                ts_rank(to_tsvector('simple', f.raw_text), q) AS rank
+           FROM document_fact f
+           JOIN document d ON d.id = f.document_id
+           JOIN source_artifact a ON a.sha256 = d.source_sha256,
+                websearch_to_tsquery('simple', $1) q
+          WHERE f.verification_status IN ('verified', 'corrected')
+            AND to_tsvector('simple', f.raw_text) @@ q
+            AND coalesce(f.corrected_value, f.normalised_value) IS NOT NULL
+          ORDER BY f.document_id, f.page_number, f.raw_text, f.id
+       ) one_per_sentence
+       ORDER BY rank DESC, id
+       LIMIT $2`,
+      [term, limit],
+    );
+    return result.rows
+      .filter((r) => mayRepublish(r.source_id))
+      .map((r) => ({
+        kind: "figure" as const,
+        id: Number(r.id),
+        title: displayTitle(r.title),
+        subtitle: `Page ${String(r.page_number)} · verified figures`,
+        context: null,
+        stateCode: null,
+        hasBoundary: false,
+        documentId: Number(r.document_id),
+        pageNumber: r.page_number,
+        excerpt: r.raw_text,
+      }));
+  }
+
+  private async searchPassages(term: string, limit: number): Promise<SearchResult[]> {
+    const result = await this.db.query<{
+      document_id: string;
+      page_number: number;
+      title: string;
+      source_id: string;
+      excerpt: string | null;
+    }>(
+      // Ranked first and excerpted after: building an excerpt reads the whole
+      // page, so it is done for the few pages shown, not every page that matched.
+      `WITH q AS (SELECT websearch_to_tsquery('simple', $1) AS q),
+       ranked AS (
+         SELECT p.document_id, p.page_number, p.content,
+                ts_rank(to_tsvector('simple', coalesce(p.content, '')), q.q) AS rank
+           FROM document_page p, q
+          WHERE to_tsvector('simple', coalesce(p.content, '')) @@ q.q
+          ORDER BY rank DESC, p.document_id, p.page_number
+          LIMIT $2
+       )
+       SELECT r.document_id, r.page_number, d.title, a.source_id,
+              ts_headline('simple', r.content, q.q,
+                          'MaxFragments=1, MinWords=12, MaxWords=28, StartSel="", StopSel=""') AS excerpt
+         FROM ranked r, q
+         JOIN document d ON TRUE
+         JOIN source_artifact a ON a.sha256 = d.source_sha256
+        WHERE d.id = r.document_id
+        ORDER BY r.rank DESC, r.document_id, r.page_number`,
+      [term, limit],
+    );
+    return result.rows
+      .filter((r) => mayRepublish(r.source_id))
+      .map((r) => ({
+        kind: "passage" as const,
+        id: Number(r.document_id),
+        title: displayTitle(r.title),
+        subtitle: `Page ${String(r.page_number)}`,
+        context: null,
+        stateCode: null,
+        hasBoundary: false,
+        documentId: Number(r.document_id),
+        pageNumber: r.page_number,
+        excerpt: r.excerpt === null ? null : r.excerpt.replace(/\s+/gu, " ").trim(),
+      }));
   }
 
   /** Detailed geometry for one unit, for framing and highlighting it. */

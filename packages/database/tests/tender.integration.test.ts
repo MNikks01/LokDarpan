@@ -31,8 +31,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       repository = new PostgresTenderRepository(pool);
 
       await pool.query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES ($1, 'test-tender', 'https://example.invalid/tenders', now(), 1, 'test/t.html')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1, 'test-tender', 'https://example.invalid/tenders', now(), 1, 'test/t.html', 'file')
          ON CONFLICT (sha256) DO NOTHING`,
         [ARTIFACT],
       );

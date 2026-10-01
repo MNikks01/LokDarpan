@@ -135,13 +135,14 @@ export interface GeographyRepository {
  * guess. Each result says what kind of thing it is, so choosing one is an
  * informed choice.
  */
-export type SearchResultKind = "place" | "record";
+export type SearchResultKind = "place" | "record" | "figure" | "passage";
 
 export interface SearchResult {
   readonly kind: SearchResultKind;
+  /** The place, the document, or the figure. A passage has no id of its own: its document's. */
   readonly id: number;
   readonly title: string;
-  /** What this is, in the reader's terms: "District", "Audit report". */
+  /** What this is, in the reader's terms: "District", "Audit report", "Page 78". */
   readonly subtitle: string;
   /** Where the result sits, for a place: "Maharashtra". Null when unknown. */
   readonly context: string | null;
@@ -149,6 +150,15 @@ export interface SearchResult {
   readonly stateCode: string | null;
   /** True when a place has a boundary and can therefore be framed on the map. */
   readonly hasBoundary: boolean;
+  /** The document a figure or passage is in. Null for a place. */
+  readonly documentId: number | null;
+  /** The page a figure or passage is on, counted as a reader counts. */
+  readonly pageNumber: number | null;
+  /**
+   * The words that matched, as the page prints them — the evidence sentence of
+   * a figure, or a few lines of a page. Source text, never ours.
+   */
+  readonly excerpt: string | null;
 }
 
 export interface SearchRepository {

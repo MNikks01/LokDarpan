@@ -9,6 +9,7 @@ import { GEPNIC_SWEEP_LOCK, sweepLockHolder, takeSweepLock } from "../advisory-l
 import { openRun } from "../ingestion-run";
 import { EXIT_ALL_REFUSED, sweepExitCode, type PortalOutcome } from "./outcome";
 import { PORTALS, portalByCode } from "./portals";
+import { RawStoreMisconfigured, rawStoreFromEnv, retain, type RawStore } from "../raw-store";
 
 /**
  * Collect one GePNIC portal's currently advertised tenders.
@@ -63,7 +64,7 @@ function detailUrl(baseUrl: string, portalTenderId: string): string {
 
 async function collectDetails(
   session: PortalSession,
-  baseUrl: string,
+  target: { readonly portalCode: string; readonly baseUrl: string; readonly store: RawStore },
   tenders: readonly TenderRecord["listed"][],
   known: ReadonlySet<string>,
 ): Promise<TenderRecord[]> {
@@ -71,17 +72,32 @@ async function collectDetails(
   for (const listed of tenders) {
     await sleep(PAUSE_MS);
     let detail: TenderRecord["detail"] = null;
+    let detailPage: TenderRecord["detailPage"] = null;
     try {
-      const page = await session.get(detailUrl(baseUrl, listed.portalTenderId));
+      const page = await session.get(detailUrl(target.baseUrl, listed.portalTenderId));
       // A lapsed session answers 200 with a notice. Parsed as data it would say
       // this office advertised nothing, which is false.
-      detail = isStaleSession(page.body) ? null : parseDetail(page.body, known);
+      if (!isStaleSession(page.body)) {
+        const parsed = parseDetail(page.body, known);
+        // The page is kept before anything read from it is recorded; a page
+        // the store will not take is treated as a page we could not read, so
+        // no field ever cites bytes nobody holds (migration 0038).
+        const retained = await retain(
+          target.store,
+          `gepnic-${target.portalCode}`,
+          page,
+          "text/html",
+        );
+        detail = parsed;
+        detailPage = { ...page, ...retained };
+      }
     } catch {
-      // One unreachable detail page must not cost us the tender. It is held
-      // from the landing row, unplaced, and picked up on a later run.
+      // One unreachable or unkeepable detail page must not cost us the tender.
+      // It is held from the landing row, unplaced, and read on a later run.
       detail = null;
+      detailPage = null;
     }
-    records.push({ listed, detail });
+    records.push({ listed, detail, detailPage });
   }
   return records;
 }
@@ -123,7 +139,11 @@ function resolveTarget(): Target {
  * past a portal that refuses us or falls over. A single run still surfaces
  * everything through the summary printed by the caller.
  */
-async function collectPortal(client: pg.Client, target: Target): Promise<PortalOutcome> {
+async function collectPortal(
+  client: pg.Client,
+  store: RawStore,
+  target: Target,
+): Promise<PortalOutcome> {
   const { portalCode, baseUrl, stateLgdCode } = target;
   const empty = {
     portal: portalCode,
@@ -165,12 +185,25 @@ async function collectPortal(client: pg.Client, target: Target): Promise<PortalO
   // parser must recognise it as one (see `aliases.ts`).
   const aliases = await aliasesOfState(client, stateLgdCode);
   const known = new Set([...districts.keys(), ...aliases.keys()]);
-  const records = await collectDetails(session, baseUrl, tenders, known);
+  const records = await collectDetails(session, { portalCode, baseUrl, store }, tenders, known);
+
+  // The page is kept before anything cites it. A store that cannot take it
+  // costs this portal's run, not the sweep: the tenders are advertised again
+  // tomorrow, and a row pointing at bytes nobody kept is the defect migration
+  // 0037 records.
+  let retained;
+  try {
+    retained = await retain(store, `gepnic-${portalCode}`, landing, "text/html");
+  } catch (error: unknown) {
+    const reason = error instanceof Error ? error.message.slice(0, 70) : "raw store failed";
+    return { ...empty, advertised: tenders.length, refusal: reason };
+  }
+
   const result = await loadTenders(client, {
     portalCode,
     stateLgdCode,
     records,
-    artifact: landing,
+    artifact: { ...landing, ...retained },
     datasetDescription: `gepnic ${portalCode} landing ${landing.retrievedAt}`,
   });
 
@@ -229,6 +262,19 @@ async function main(): Promise<void> {
     process.exit(EXIT_MISCONFIGURED);
   }
 
+  // Chosen before anything is fetched, so a misconfigured store costs nothing
+  // but this message. The schedule sets RAW_STORE_REQUIRE_OBJECT: its runner's
+  // disk is deleted with the job.
+  let store: RawStore;
+  try {
+    store = rawStoreFromEnv();
+  } catch (error: unknown) {
+    if (!(error instanceof RawStoreMisconfigured)) throw error;
+    process.stderr.write(`${error.message}\n`);
+    process.exit(EXIT_MISCONFIGURED);
+  }
+  process.stdout.write(`raw store: ${store.location}\n`);
+
   const sweep = process.argv.includes("--all");
   const targets: readonly Target[] = sweep
     ? PORTALS.map((p) => ({
@@ -255,7 +301,7 @@ async function main(): Promise<void> {
     for (const [index, target] of targets.entries()) {
       if (index > 0) await sleep(BETWEEN_PORTALS_MS);
       process.stdout.write(`${target.portalCode} …\n`);
-      const outcome = await collectPortal(client, target);
+      const outcome = await collectPortal(client, store, target);
       outcomes.push(outcome);
       process.stdout.write(line(outcome));
     }

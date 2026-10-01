@@ -8,7 +8,10 @@ collection on GitHub Actions.
 | [`deployment-vercel.md`](deployment-vercel.md)                               | The site: project settings, environment, base map, protection bypass, verification |
 | [`provisioning-scheduled-ingestion.md`](provisioning-scheduled-ingestion.md) | The database: migrations, the ingestion credential, the first load                 |
 | [`collection-schedule.md`](collection-schedule.md)                           | The nightly collection: schedule, credentials, monitoring, recovery                |
+| [`rate-limiting.md`](rate-limiting.md)                                       | The API rate limit: the Firewall rule, the internal token, watching it             |
 | [`tender-placement.md`](tender-placement.md)                                 | Placing tenders: the pincode directory, backfill, aliases, manual decisions        |
+| [`promoting-the-cag-corpus.md`](promoting-the-cag-corpus.md)                 | Copying the reviewed audit reports and figures into production (`promote:cag`)     |
+| [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037   |
 
 Elsewhere:
 

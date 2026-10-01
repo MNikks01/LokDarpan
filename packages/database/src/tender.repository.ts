@@ -99,7 +99,28 @@ export interface StateCollection {
  * fresh data stale costs a reader nothing, and calling stale data fresh is the
  * failure this project exists to avoid.
  */
-const STALE_AFTER_HOURS = 48;
+export const STALE_AFTER_HOURS = 48;
+
+/**
+ * The one rule for how a collection is going, shared by the site and the alert.
+ *
+ * Pure, and taking `now`, so the page a reader sees and the alert an operator
+ * receives cannot disagree about whether a portal is failing: both call this.
+ * Attempted more recently than it last succeeded is `failing`, which an operator
+ * must act on; no success for `STALE_AFTER_HOURS` is `stale`, old data still
+ * shown. `not_collected` is decided by the caller: it means no window exists.
+ */
+export function collectionStatusOf(
+  window: { readonly lastSuccessAt: string | null; readonly lastCheckedAt: string | null },
+  now: Date,
+): Exclude<CollectionStatus, "not_collected"> {
+  const success = window.lastSuccessAt === null ? null : new Date(window.lastSuccessAt);
+  const checked = window.lastCheckedAt === null ? null : new Date(window.lastCheckedAt);
+  if (checked !== null && (success === null || checked > success)) return "failing";
+  const staleBefore = now.getTime() - STALE_AFTER_HOURS * 3_600_000;
+  if (success === null || success.getTime() < staleBefore) return "stale";
+  return "collected";
+}
 
 /**
  * Only tenders still open are counted.
@@ -362,23 +383,20 @@ export class PostgresTenderRepository {
    * somebody remembered to set a column, which is a claim that can go stale on
    * its own.
    */
-  async collectionForState(stateLgdCode: string): Promise<StateCollection> {
+  async collectionForState(stateLgdCode: string, now = new Date()): Promise<StateCollection> {
     const result = await this.db.query<{
       portal_code: string;
       collecting_since: string;
       last_success_at: string | null;
       last_checked_at: string | null;
-      stale: boolean;
     }>(
       `SELECT portal_code, collecting_since::text AS collecting_since,
-              last_success_at, last_checked_at,
-              (last_success_at IS NULL
-                 OR last_success_at < now() - ($2 || ' hours')::interval) AS stale
+              last_success_at, last_checked_at
          FROM tender_collection_window
         WHERE state_lgd_code = $1
         ORDER BY last_success_at DESC NULLS LAST
         LIMIT 1`,
-      [stateLgdCode, String(STALE_AFTER_HOURS)],
+      [stateLgdCode],
     );
 
     const row = result.rows[0];
@@ -393,17 +411,12 @@ export class PostgresTenderRepository {
       };
     }
 
-    // Checked later than it last succeeded means the most recent attempt did
-    // not complete. That is a different thing from old data, and it is the one
-    // an operator has to act on.
-    const attemptedSinceSuccess =
-      row.last_checked_at !== null &&
-      (row.last_success_at === null ||
-        new Date(row.last_checked_at) > new Date(row.last_success_at));
-
     return {
       stateLgdCode,
-      status: attemptedSinceSuccess ? "failing" : row.stale ? "stale" : "collected",
+      status: collectionStatusOf(
+        { lastSuccessAt: row.last_success_at, lastCheckedAt: row.last_checked_at },
+        now,
+      ),
       portalCode: row.portal_code,
       collectingSince: row.collecting_since,
       lastSuccessAt: row.last_success_at,

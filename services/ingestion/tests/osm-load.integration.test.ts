@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadBoundaries } from "../src/osm/load";
 import type { ParsedUnit } from "../src/osm/boundaries";
 import type { FetchedArtifact } from "../src/osm/overpass";
+import type { Retained } from "../src/raw-store";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
 
@@ -54,12 +55,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       [west, south],
     ];
 
-    const artifact: FetchedArtifact = {
+    const artifact: FetchedArtifact & Retained = {
       body: "{}",
       sha256: ARTIFACT,
       retrievedAt: "2026-08-28T00:00:00.000Z",
       sourceUrl: "https://overpass.example.invalid/api",
       byteSize: 2,
+      storagePath: `openstreetmap-overpass/${ARTIFACT}`,
+      storedIn: "file",
     };
 
     const unit = (over: Partial<ParsedUnit> = {}): ParsedUnit => ({
@@ -79,8 +82,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       // A unit as the directory leaves it: named and identified, no geometry,
       // and no idea that OpenStreetMap exists.
       await client.query(
-        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path)
-         VALUES ($1, 'test-osm-load', 'https://example.invalid/lgd', now(), 1, 'test/lgd.json')
+        `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
+         VALUES ($1, 'test-osm-load', 'https://example.invalid/lgd', now(), 1, 'test/lgd.json', 'file')
          ON CONFLICT (sha256) DO NOTHING`,
         [SEED_ARTIFACT],
       );
