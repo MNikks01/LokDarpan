@@ -1,8 +1,9 @@
 import pg from "pg";
 
-import { completeRun, failRun, openRun } from "../ingestion-run";
-import { RawStoreMisconfigured, rawStoreFromEnv, type RawStore } from "../raw-store";
+import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run";
+import { RawStoreMisconfigured, rawStoreFromEnv, type ReadableRawStore } from "../raw-store";
 import { collectListing, type AgencyListing, type CollectCounts } from "./collect";
+import { extractNotices, type ExtractCounts } from "./documents";
 import { PoliteClient } from "./http";
 import { MHADA } from "./mhada";
 import { MSIDC } from "./msidc";
@@ -13,6 +14,11 @@ import { MSIDC } from "./msidc";
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada                nightly: newest pages until all held
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --pages=0-454  backfill a range, every page read
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=msidc --dry-run      read listings, fetch no notice, write nothing
+ *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --extract-only make documents of notices already held
+ *
+ * After collecting, every held notice without a document is read back from the
+ * raw store and loaded as a `tender_notice` document with its pages
+ * (`documents.ts`). Scanned notices are reported: their pages await OCR.
  *
  * Sources: `mhada` (455 pages, July 2016 on) and `msidc` (one page, February
  * 2024 on). Not yet scheduled (backlog MHA-TENDER-015 adds them to the nightly
@@ -58,6 +64,14 @@ function pageRange(lastPage: number): {
   return { from, to, explicit: true };
 }
 
+function extractSummary(counts: ExtractCounts): string {
+  return (
+    `documents ${String(counts.documents)} · with text ${String(counts.withText)} · ` +
+    `scanned, awaiting OCR ${String(counts.scanned)} · not extracted ${String(counts.failed)} · ` +
+    `held elsewhere ${String(counts.elsewhere)}`
+  );
+}
+
 function summary(counts: CollectCounts): string {
   return (
     `pages ${String(counts.pages)} · notices listed ${String(counts.listed)} · ` +
@@ -66,7 +80,7 @@ function summary(counts: CollectCounts): string {
   );
 }
 
-function storeOrExit(): RawStore {
+function storeOrExit(): ReadableRawStore {
   try {
     return rawStoreFromEnv();
   } catch (error: unknown) {
@@ -74,6 +88,55 @@ function storeOrExit(): RawStore {
     process.stderr.write(`${error.message}\n`);
     process.exit(EXIT_MISCONFIGURED);
   }
+}
+
+interface RunOptions {
+  readonly from: number;
+  readonly to: number;
+  readonly explicit: boolean;
+  readonly dryRun: boolean;
+  readonly extractOnly: boolean;
+  readonly log: (line: string) => void;
+}
+
+/** The run log's counts: what the listing pointed to, and what became of it. */
+function runCountsOf(counts: CollectCounts | null): RunCounts {
+  return {
+    seen: counts?.listed ?? 0,
+    inserted: counts?.fetched ?? 0,
+    updated: 0,
+    unchanged: counts?.alreadyHeld ?? 0,
+    rejected: counts?.notPermitted ?? 0,
+    unresolved: 0,
+    errors: counts?.failed ?? 0,
+  };
+}
+
+/** Collect (unless `--extract-only`), then make documents of held notices (unless `--dry-run`). */
+async function runAgency(
+  agency: AgencyListing<never>,
+  collector: { readonly db: pg.Client; readonly store: ReadableRawStore },
+  options: RunOptions,
+): Promise<RunCounts> {
+  const { db, store } = collector;
+  const counts = options.extractOnly
+    ? null
+    : await collectListing(
+        agency,
+        { client: new PoliteClient(), db, store },
+        {
+          fromPage: options.from,
+          toPage: options.to,
+          stopWhenAllHeld: !options.explicit,
+          dryRun: options.dryRun,
+          log: options.log,
+        },
+      );
+  if (counts !== null) options.log(summary(counts));
+  if (!options.dryRun) {
+    options.log(extractSummary(await extractNotices(agency, db, store, options.log)));
+  }
+  return runCountsOf(counts);
 }
 
 async function main(): Promise<void> {
@@ -90,37 +153,25 @@ async function main(): Promise<void> {
     process.stdout.write(`${line}\n`);
   };
   log(
-    `${agency.sourceId} · raw store: ${store.location} · pages ${String(range.from)}–${String(range.to)}` +
-      (dryRun ? " · dry run" : ""),
+    `${agency.sourceId} · raw store: ${store.location} · ` +
+      `pages ${String(range.from)}–${String(range.to)}${dryRun ? " · dry run" : ""}`,
   );
 
   const db = new pg.Client({ connectionString });
   await db.connect();
   const runId = dryRun ? null : await openRun(db, agency.sourceId);
   try {
-    const counts = await collectListing(
+    const counts = await runAgency(
       agency,
-      { client: new PoliteClient(), db, store },
+      { db, store },
       {
-        fromPage: range.from,
-        toPage: range.to,
-        stopWhenAllHeld: !range.explicit,
+        ...range,
         dryRun,
+        extractOnly: process.argv.includes("--extract-only"),
         log,
       },
     );
-    log(summary(counts));
-    if (runId !== null) {
-      await completeRun(db, runId, {
-        seen: counts.listed,
-        inserted: counts.fetched,
-        updated: 0,
-        unchanged: counts.alreadyHeld,
-        rejected: counts.notPermitted,
-        unresolved: 0,
-        errors: counts.failed,
-      });
-    }
+    if (runId !== null) await completeRun(db, runId, counts);
   } catch (error: unknown) {
     const note = error instanceof Error ? error.message : String(error);
     if (runId !== null) await failRun(db, runId, note);

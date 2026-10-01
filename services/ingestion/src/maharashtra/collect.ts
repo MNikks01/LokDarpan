@@ -3,6 +3,7 @@ import type pg from "pg";
 import { AGENCY_DOCUMENT, AGENCY_PAGE } from "../net/limits";
 import { putArtifact, type RawStore } from "../raw-store";
 import { PathNotPermitted, type PoliteClient } from "./http";
+import type { NoticeMeta } from "./documents";
 import { heldDocumentUrls, recordArtifact, recordSighting, type ListingFacts } from "./load";
 
 /**
@@ -32,6 +33,8 @@ export interface AgencyListing<Row> {
   documentsOf(row: Row): readonly string[];
   /** What the row says, as printed, for `artifact_sighting.listing_facts`. */
   factsOf(row: Row): ListingFacts;
+  /** A notice document's title, issuer and date, from what its listing row said. */
+  noticeMetaOf(facts: ListingFacts): NoticeMeta;
 }
 
 export interface CollectOptions {
