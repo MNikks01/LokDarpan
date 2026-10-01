@@ -35,6 +35,13 @@
 
 ---
 
+### Addendum, 2026-10-01 — what collecting showed
+
+Running the first collectors (#165–#167) against the live sites, into a local ledger, established two things the listings did not show:
+
+- **MHADA's notices are scans.** All 10 notices collected from page 0 are image-only PDFs: 26 pages, none with a text layer. No fact can be read from a MHADA notice until OCR reads it (`services/ocr`). The listing's own fields — reference, board, dates — are text, and are kept as Tier-2 facts meanwhile.
+- **MSIDC uploads one notice under many names.** Its 290 rows link 227 distinct URLs, which hold only **86 distinct files**: in March 2024 each road-package row links a numbered copy (`1.pdf`, `2.pdf` …) of one region-wide EPC notice — one file has 28 names. Content hashing collapses them to one document each; every row's package and work name is kept in its own sighting. 80 of the 86 have text; 6 are scans.
+
 ## 2. LokDarpan Context
 
 LokDarpan links official records along Revenue → Budget → Department → State → District → Local body → Scheme → Work → Tender → Contractor → Award → Execution → Expenditure → Audit, and shows each fact with the document it came from ([`../../17-legal/legal-ethical-rules.md`](../../17-legal/legal-ethical-rules.md)). Phase 1 is Maharashtra PWD roads ([`../phase-1-maharashtra-roads.md`](../phase-1-maharashtra-roads.md)).
