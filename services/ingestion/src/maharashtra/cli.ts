@@ -2,34 +2,54 @@ import pg from "pg";
 
 import { completeRun, failRun, openRun } from "../ingestion-run";
 import { RawStoreMisconfigured, rawStoreFromEnv, type RawStore } from "../raw-store";
-import { collectMhada, type CollectCounts } from "./collect";
+import { collectListing, type AgencyListing, type CollectCounts } from "./collect";
 import { PoliteClient } from "./http";
-import { MHADA_SOURCE_ID } from "./mhada";
+import { MHADA } from "./mhada";
+import { MSIDC } from "./msidc";
 
 /**
- * Collect MHADA tender notices.
+ * Collect tender notices from a Maharashtra agency's own listing.
  *
- *   pnpm --filter @lokdarpan/ingestion ingest:mhada                  nightly: newest pages until all held
- *   pnpm --filter @lokdarpan/ingestion ingest:mhada -- --pages=0-454  backfill a range, every page read
- *   pnpm --filter @lokdarpan/ingestion ingest:mhada -- --dry-run     read listings, fetch no notice, write nothing
+ *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada                nightly: newest pages until all held
+ *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --pages=0-454  backfill a range, every page read
+ *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=msidc --dry-run      read listings, fetch no notice, write nothing
  *
- * Not yet scheduled (backlog MHA-TENDER-015 adds it to the nightly job, with
- * its own lock). Requests to `www.mhada.gov.in` are two seconds apart, so the
- * full backfill — 455 listing pages and about 4,500 notices — takes about five
- * hours and should be spread over several nights with `--pages`.
+ * Sources: `mhada` (455 pages, July 2016 on) and `msidc` (one page, February
+ * 2024 on). Not yet scheduled (backlog MHA-TENDER-015 adds them to the nightly
+ * job, with their own lock). Requests to one host are two seconds apart, so
+ * MHADA's full backfill — about 4,500 notices — takes about five hours and
+ * should be spread over several nights with `--pages`.
  */
 
+// The registry of agency listings this CLI collects. A new agency is one line here.
+const AGENCIES: Readonly<Record<string, AgencyListing<never>>> = {
+  mhada: MHADA as AgencyListing<never>,
+  msidc: MSIDC as AgencyListing<never>,
+};
+
 const EXIT_MISCONFIGURED = 2;
-/** The last listing page on 2026-09-30; the nightly run stops long before it. */
-const LAST_PAGE_SEEN = 454;
 
 function argument(name: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
 }
 
-function pageRange(): { readonly from: number; readonly to: number; readonly explicit: boolean } {
+function agencyOrExit(): AgencyListing<never> {
+  const name = argument("source") ?? "";
+  const agency = AGENCIES[name];
+  if (agency === undefined) {
+    process.stderr.write(`--source must be one of: ${Object.keys(AGENCIES).join(", ")}\n`);
+    process.exit(EXIT_MISCONFIGURED);
+  }
+  return agency;
+}
+
+function pageRange(lastPage: number): {
+  readonly from: number;
+  readonly to: number;
+  readonly explicit: boolean;
+} {
   const given = argument("pages");
-  if (given === undefined) return { from: 0, to: LAST_PAGE_SEEN, explicit: false };
+  if (given === undefined) return { from: 0, to: lastPage, explicit: false };
   const match = /^(\d+)-(\d+)$/u.exec(given);
   if (match === null) throw new Error(`--pages must be FROM-TO, e.g. --pages=0-20; got ${given}`);
   const from = Number(match[1]);
@@ -62,28 +82,33 @@ async function main(): Promise<void> {
     process.stderr.write("DATABASE_URL is not set.\n");
     process.exit(EXIT_MISCONFIGURED);
   }
+  const agency = agencyOrExit();
   const store = storeOrExit();
-  const range = pageRange();
+  const range = pageRange(agency.lastPage);
   const dryRun = process.argv.includes("--dry-run");
   const log = (line: string): void => {
     process.stdout.write(`${line}\n`);
   };
   log(
-    `raw store: ${store.location} · pages ${String(range.from)}–${String(range.to)}` +
+    `${agency.sourceId} · raw store: ${store.location} · pages ${String(range.from)}–${String(range.to)}` +
       (dryRun ? " · dry run" : ""),
   );
 
   const db = new pg.Client({ connectionString });
   await db.connect();
-  const runId = dryRun ? null : await openRun(db, MHADA_SOURCE_ID);
+  const runId = dryRun ? null : await openRun(db, agency.sourceId);
   try {
-    const counts = await collectMhada(new PoliteClient(), db, store, {
-      fromPage: range.from,
-      toPage: range.to,
-      stopWhenAllHeld: !range.explicit,
-      dryRun,
-      log,
-    });
+    const counts = await collectListing(
+      agency,
+      { client: new PoliteClient(), db, store },
+      {
+        fromPage: range.from,
+        toPage: range.to,
+        stopWhenAllHeld: !range.explicit,
+        dryRun,
+        log,
+      },
+    );
     log(summary(counts));
     if (runId !== null) {
       await completeRun(db, runId, {

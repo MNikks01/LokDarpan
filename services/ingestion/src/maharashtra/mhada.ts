@@ -1,5 +1,7 @@
 import { parse as parseHtml, type HTMLElement } from "node-html-parser";
 
+import type { AgencyListing } from "./collect";
+
 /**
  * MHADA's tender listing, read as MHADA prints it.
  *
@@ -21,6 +23,9 @@ import { parse as parseHtml, type HTMLElement } from "node-html-parser";
 export const MHADA_SOURCE_ID = "mh-mhada-tenders";
 export const MHADA_ORIGIN = "https://www.mhada.gov.in";
 export const MHADA_LISTING = `${MHADA_ORIGIN}/mr/tenders`;
+
+/** The last listing page on 2026-09-30; the nightly run stops long before it. */
+export const LAST_PAGE_SEEN = 454;
 
 export const listingPageUrl = (page: number): string =>
   page === 0 ? MHADA_LISTING : `${MHADA_LISTING}?page=${String(page)}`;
@@ -172,3 +177,13 @@ export function listingFactsOf(row: MhadaListingRow): Record<string, string | nu
     closing_on: row.closingOn,
   };
 }
+
+/** MHADA's listing, as the shared collector reads it. */
+export const MHADA: AgencyListing<MhadaListingRow> = {
+  sourceId: MHADA_SOURCE_ID,
+  lastPage: LAST_PAGE_SEEN,
+  pageUrl: listingPageUrl,
+  parse: (html) => parseMhadaListing(html).rows,
+  documentsOf: (row) => row.documents,
+  factsOf: listingFactsOf,
+};
