@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /search
+Disallow: /admin
+Allow: /
+
+Sitemap: https://mahaurja.maharashtra.gov.in/sitemap.xml
