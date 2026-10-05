@@ -5,6 +5,7 @@ import { RawStoreMisconfigured, rawStoreFromEnv, type ReadableRawStore } from ".
 import { collectListing, type AgencyListing, type CollectCounts } from "./collect";
 import { extractNotices, type ExtractCounts } from "./documents";
 import { PoliteClient } from "./http";
+import { readNoticeFacts, type NoticeFactCounts } from "./notice-facts";
 import { MHADA } from "./mhada";
 import { MSIDC } from "./msidc";
 
@@ -14,11 +15,13 @@ import { MSIDC } from "./msidc";
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada                nightly: newest pages until all held
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --pages=0-454  backfill a range, every page read
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=msidc --dry-run      read listings, fetch no notice, write nothing
- *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --extract-only make documents of notices already held
+ *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --extract-only make documents of notices already held, and read their facts
  *
  * After collecting, every held notice without a document is read back from the
  * raw store and loaded as a `tender_notice` document with its pages
  * (`documents.ts`). Scanned notices are reported: their pages await OCR.
+ * Then every notice with text is read for its facts — tender ID, notice
+ * number, EMD, fees, dates — as unverified candidates (`notice-facts.ts`).
  *
  * Sources: `mhada` (455 pages, July 2016 on) and `msidc` (one page, February
  * 2024 on). Not yet scheduled (backlog MHA-TENDER-015 adds them to the nightly
@@ -69,6 +72,14 @@ function extractSummary(counts: ExtractCounts): string {
     `documents ${String(counts.documents)} · with text ${String(counts.withText)} · ` +
     `scanned, awaiting OCR ${String(counts.scanned)} · not extracted ${String(counts.failed)} · ` +
     `held elsewhere ${String(counts.elsewhere)}`
+  );
+}
+
+function factSummary(counts: NoticeFactCounts): string {
+  return (
+    `notices read for facts ${String(counts.documents)} · with facts ${String(counts.withFacts)} · ` +
+    `new candidates ${String(counts.inserted)} · retired ${String(counts.retired)} · ` +
+    `decided facts no longer read ${String(counts.strandedDecisions)}`
   );
 }
 
@@ -135,6 +146,7 @@ async function runAgency(
   if (counts !== null) options.log(summary(counts));
   if (!options.dryRun) {
     options.log(extractSummary(await extractNotices(agency, db, store, options.log)));
+    options.log(factSummary(await readNoticeFacts(db, agency.sourceId)));
   }
   return runCountsOf(counts);
 }

@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { extractNotices, type ExtractCounts } from "../src/maharashtra/documents";
 import { recordArtifact, recordSighting } from "../src/maharashtra/load";
 import { MSIDC, MSIDC_SOURCE_ID } from "../src/maharashtra/msidc";
+import { readNoticeFacts, type NoticeFactCounts } from "../src/maharashtra/notice-facts";
 import { FileRawStore, putArtifact, storagePathFor } from "../src/raw-store";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
@@ -27,6 +28,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     let rawDir = "";
     let counts: ExtractCounts | undefined;
     let again: ExtractCounts | undefined;
+    let facts: NoticeFactCounts | undefined;
+    let factsAgain: NoticeFactCounts | undefined;
     let noticeSha = "";
     const listingSha = "a".repeat(64);
 
@@ -94,6 +97,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
       counts = await extractNotices(MSIDC, client, store);
       again = await extractNotices(MSIDC, client, store);
+      facts = await readNoticeFacts(client, MSIDC_SOURCE_ID);
+      factsAgain = await readNoticeFacts(client, MSIDC_SOURCE_ID);
     });
 
     afterAll(async () => {
@@ -147,6 +152,53 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         [MSIDC_SOURCE_ID],
       );
       expect(Number(docs?.rows[0]?.n)).toBe(1);
+    });
+
+    it("reads the notice's facts, each naming its field and page", async () => {
+      expect(facts).toMatchObject({ documents: 1, withFacts: 1, retired: 0 });
+      const rows = await db?.query<{
+        field: string;
+        kind: string;
+        page_number: number;
+        normalised_value: string;
+        parser_version: string;
+        verification_status: string;
+      }>(
+        `SELECT f.field, f.kind::text AS kind, f.page_number, f.normalised_value,
+                f.parser_version, f.verification_status::text AS verification_status
+           FROM document_fact f JOIN document d ON d.id = f.document_id
+          WHERE d.source_sha256 = $1
+          ORDER BY f.page_number, f.field`,
+        [noticeSha],
+      );
+      const byField = Object.fromEntries((rows?.rows ?? []).map((r) => [r.field, r]));
+      expect(byField["notice_number"]).toMatchObject({
+        kind: "tender_identifier",
+        page_number: 1,
+        normalised_value: "09 (2026-2027)",
+      });
+      expect(byField["emd"]).toMatchObject({
+        kind: "monetary_amount",
+        page_number: 1,
+        normalised_value: "60000000",
+      });
+      expect(byField["bid_submission_end"]).toMatchObject({
+        kind: "tender_date",
+        page_number: 2,
+        normalised_value: "2026-07-17T17:00+05:30",
+      });
+      // Candidates, every one: nothing read from a notice is published unreviewed.
+      expect(new Set(rows?.rows.map((r) => r.verification_status))).toEqual(
+        new Set(["unverified"]),
+      );
+      expect(new Set(rows?.rows.map((r) => r.parser_version))).toEqual(
+        new Set(["mh-notice-facts/1"]),
+      );
+    });
+
+    it("does not offer the same facts twice", () => {
+      expect(factsAgain).toMatchObject({ inserted: 0, retired: 0 });
+      expect(facts?.inserted).toBeGreaterThan(0);
     });
 
     it("does not make a document twice", () => {
