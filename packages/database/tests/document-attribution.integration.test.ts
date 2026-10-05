@@ -32,6 +32,8 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     let stateId = 0;
     let districtId = 0;
     let bodyId = 0;
+    // Every fixture artefact, so cleanup removes exactly these and nothing ingested.
+    const created: string[] = [];
 
     beforeAll(async () => {
       pool = new pg.Pool({ connectionString: DATABASE_URL, max: 2 });
@@ -71,18 +73,22 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       // its own bytes — which is right: two documents from one artefact would be
       // the same document counted twice.
       let nextArtifact = 0;
+      // Filed under `cag`, whose terms permit republication, unless told
+      // otherwise: the listing withholds every other source's documents.
       const document = async (
         title: string,
         adminUnitId: number | null,
         issuing: string,
+        sourceId = "cag",
       ): Promise<void> => {
         nextArtifact += 1;
         const sha = String(nextArtifact).padStart(2, "8").repeat(32).slice(0, 64);
+        created.push(sha);
         await pool?.query(
           `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, byte_size, storage_path, stored_in)
-           VALUES ($1, 'test-attribution', 'https://example.invalid/a', now(), 1, 'test/a.pdf', 'file')
+           VALUES ($1, $2, 'https://example.invalid/a', now(), 1, 'test/a.pdf', 'file')
            ON CONFLICT (sha256) DO NOTHING`,
-          [sha],
+          [sha, sourceId],
         );
         await pool?.query(
           `INSERT INTO document (doc_type, title, issuing_authority, admin_unit_id,
@@ -111,12 +117,20 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       await document("A district-attributed report", districtId, "Some authority");
       await document("A corporation-attributed report", bodyId, "Some authority");
       await document("A report no unit could be established for", null, "Some authority");
+      await document(
+        "A notice whose publisher has not permitted republication",
+        districtId,
+        "Some agency",
+        "test-attribution",
+      );
     });
 
     afterAll(async () => {
       await pool?.query(`DELETE FROM document WHERE dataset_version_id = $1`, [versionId]);
       await pool?.query(`DELETE FROM admin_unit WHERE dataset_version_id = $1`, [versionId]);
       await pool?.query(`DELETE FROM dataset_version WHERE id = $1`, [versionId]);
+      // By hash, never by `source_id = 'cag'`: that would take real reports with it.
+      await pool?.query(`DELETE FROM source_artifact WHERE sha256 = ANY($1::text[])`, [created]);
       await pool?.query(`DELETE FROM source_artifact WHERE source_id = 'test-attribution'`);
       await pool?.end();
     });
@@ -129,6 +143,14 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     it("returns a state's own records when the state is selected", async () => {
       const titles = await titlesFor(stateId);
       expect(titles).toContain("Attribution District Report No. 9 of 2026");
+    });
+
+    it("withholds a document whose publisher has not permitted republication", async () => {
+      // As its own page and search do: a title in a list still asserts that we
+      // hold and have read the document.
+      const titles = await titlesFor(districtId);
+      expect(titles).toContain("A district-attributed report");
+      expect(titles).not.toContain("A notice whose publisher has not permitted republication");
     });
 
     it("does not hand a state's records down to its district", async () => {
