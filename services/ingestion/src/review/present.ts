@@ -30,6 +30,8 @@ const KIND_LABEL: Readonly<Record<FactKind, string>> = {
   contractor_reference: "firm named",
   officer_role_reference: "role named",
   work_reference: "work named",
+  tender_identifier: "tender identifier",
+  tender_date: "tender date",
 };
 
 // Weight only, never hue. `.docs/17-legal/legal-ethical-rules.md` reserves red

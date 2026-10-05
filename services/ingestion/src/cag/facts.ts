@@ -17,7 +17,12 @@ import { boxAround, type TextItem } from "./extract";
 export const PARSER_VERSION = "cag-facts/23";
 
 export type FactKind =
-  "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
+  | "monetary_amount"
+  | "contractor_reference"
+  | "officer_role_reference"
+  | "work_reference"
+  | "tender_identifier"
+  | "tender_date";
 
 export interface FactCandidate {
   readonly kind: FactKind;
@@ -53,6 +58,12 @@ export interface FactCandidate {
    * caller that has only the stored text.
    */
   readonly box?: { x0: number; y0: number; x1: number; y1: number };
+  /**
+   * Which field of a form-like document this fills — `emd`, `tender_value`,
+   * `bid_submission_end`. Absent for prose, which fills no form: a notice states
+   * four amounts, and `monetary_amount` alone cannot say which is which.
+   */
+  readonly field?: string;
 }
 
 /**

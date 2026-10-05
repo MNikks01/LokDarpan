@@ -12,7 +12,12 @@
  */
 
 export type PublishedFactKind =
-  "monetary_amount" | "contractor_reference" | "officer_role_reference" | "work_reference";
+  | "monetary_amount"
+  | "contractor_reference"
+  | "officer_role_reference"
+  | "work_reference"
+  | "tender_identifier"
+  | "tender_date";
 
 /** How the published value came to differ, or not, from what the parser read. */
 export type FactOrigin = "as_extracted" | "corrected_by_reviewer";

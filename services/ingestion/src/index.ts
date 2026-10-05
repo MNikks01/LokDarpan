@@ -33,7 +33,7 @@ export {
   trimToName,
 } from "./cag/facts";
 export type { FactCandidate, FactKind, PageInput } from "./cag/facts";
-export { loadFactCandidates } from "./cag/facts-load";
+export { CAG_PARSER, loadFactCandidates, type FactParser } from "./cag/facts-load";
 export type { FactLoadResult } from "./cag/facts-load";
 export { pendingReview, reviewProgress } from "./review/queue";
 export type { QueueFilter, ReviewProgress } from "./review/queue";
