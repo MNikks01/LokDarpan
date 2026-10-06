@@ -105,6 +105,54 @@ class TestReadingsAreNotMerged:
         assert {r.content for r in response.readings} == {"Rs", "Bs"}
 
 
+class SingleLanguageEngine(StubEngine):
+    """An engine whose model reads one language, whatever it is asked for."""
+
+    def __init__(self, reads: tuple[str, ...]) -> None:
+        super().__init__("single", [Word("Rs", (0, 0, 10, 10), 0.9)])
+        self._reads = reads
+        self.asked: list[str] | None = None
+
+    def info(self) -> EngineInfo:
+        return EngineInfo(name="single", version="0.0.1-test", reads_languages=self._reads)
+
+    def read(self, image_png: bytes, languages: list[str]) -> list[Word]:
+        self.asked = languages
+        return super().read(image_png, languages)
+
+
+class TestLanguagesRead:
+    def test_a_reading_names_only_the_languages_its_model_reads(self) -> None:
+        # An English-only model asked for English and Marathi has read English.
+        # Filing its reading under both would claim a Marathi reading that
+        # never happened (ADR-038: provenance or nothing).
+        engine = SingleLanguageEngine(("eng",))
+        registry = Registry({"single": lambda: engine})
+        response = _read_with_fake_render(
+            PDF, a_request(engines=["single"], languages=["eng", "mar"]), registry
+        )
+
+        assert response.refusals == []
+        assert response.readings[0].engine.languages == ["eng"]
+        assert engine.asked == ["eng"]
+
+    def test_a_model_that_reads_none_of_the_languages_refuses_and_says_why(self) -> None:
+        registry = Registry({"single": lambda: SingleLanguageEngine(("eng",))})
+        response = _read_with_fake_render(
+            PDF, a_request(engines=["single"], languages=["mar"]), registry
+        )
+
+        assert response.readings == []
+        assert response.refusals[0].page_number == 1
+        assert "reads eng" in response.refusals[0].reason
+        assert "mar" in response.refusals[0].reason
+
+    def test_an_engine_that_loads_any_language_records_every_one_asked_for(self) -> None:
+        registry = Registry({"stub": StubEngine})
+        response = _read_with_fake_render(PDF, a_request(languages=["eng", "mar"]), registry)
+        assert response.readings[0].engine.languages == ["eng", "mar"]
+
+
 def _read_with_fake_render(pdf: bytes, request: ReadRequest, registry: Registry):
     """Runs the read path with rendering stubbed out.
 
