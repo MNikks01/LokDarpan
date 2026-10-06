@@ -148,18 +148,60 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       });
     });
 
-    it("withholds a verified fact read from a scan, and publishes the text layer's", async () => {
+    it("records how legible the figures were to the engine, apart from the parser", async () => {
+      const row = await sql().query<{ reading_confidence: string }>(
+        `SELECT reading_confidence FROM document_fact WHERE page_reading_id = $1`,
+        [readingId],
+      );
+      // The date's word has confidence 0.8; the label's 0.9 does not count.
+      expect(row.rows[0]?.reading_confidence).toBe("0.800");
+    });
+
+    it("publishes a verified scan fact with the engine and legibility a reader is told", async () => {
       await sql().query(
         `UPDATE document_fact
             SET verification_status = 'verified', verified_by = 'a reviewer', verified_at = now()
           WHERE document_id = $1`,
         [documentId],
       );
+      const published = await sql().query<{
+        page_number: number;
+        reading_engine: string | null;
+        reading_engine_version: string | null;
+        reading_confidence: string | null;
+      }>(
+        `SELECT page_number, reading_engine, reading_engine_version, reading_confidence
+           FROM published_fact WHERE document_id = $1 ORDER BY page_number`,
+        [documentId],
+      );
+      expect(published.rows).toEqual([
+        {
+          page_number: 1,
+          reading_engine: null,
+          reading_engine_version: null,
+          reading_confidence: null,
+        },
+        {
+          page_number: 2,
+          reading_engine: "tesseract",
+          reading_engine_version: "5.5.3",
+          reading_confidence: "0.800",
+        },
+      ]);
+    });
+
+    it("withholds a verified scan fact whose legibility was never measured", async () => {
+      await sql().query("SAVEPOINT unmeasured");
+      await sql().query(
+        `UPDATE document_fact SET reading_confidence = NULL WHERE page_reading_id = $1`,
+        [readingId],
+      );
       const published = await sql().query<{ page_number: number }>(
         `SELECT page_number FROM published_fact WHERE document_id = $1`,
         [documentId],
       );
       expect(published.rows.map((r) => r.page_number)).toEqual([1]);
+      await sql().query("ROLLBACK TO SAVEPOINT unmeasured");
     });
 
     it("refuses a fact that cites a reading of another page", async () => {

@@ -73,6 +73,13 @@ export interface FactCandidate {
   readonly pageReadingId?: number;
   /** How this one fact was read, where it differs from its parser's usual method. */
   readonly extractionMethod?: string;
+  /**
+   * For a fact read from a scan: the engine's least confidence among the words
+   * of the value. Kept apart from `extractionConfidence`, which multiplies it
+   * by the parser's, because a reader is told how legible the figure was and
+   * that is the engine's part alone (ADR-072).
+   */
+  readonly readingConfidence?: number;
 }
 
 /**
