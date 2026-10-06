@@ -83,6 +83,59 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       );
     };
 
+    /** A verified fact read from a scan of page 7, at the engine confidence given. */
+    const addScanFact = async (readingConfidence: string): Promise<void> => {
+      await db().query(
+        `INSERT INTO document_page (document_id, page_number, content, script)
+         VALUES ($1, 7, NULL, 'none') ON CONFLICT DO NOTHING`,
+        [documentId],
+      );
+      const version = await db().query<{ id: string }>(
+        `INSERT INTO dataset_version (description) VALUES ('scan fixture') RETURNING id`,
+      );
+      const reading = await db().query<{ id: string }>(
+        `INSERT INTO page_reading (document_id, page_number, contract_version, engine,
+                                   engine_version, model_versions, languages, dpi,
+                                   raster_width, raster_height, page_width, page_height,
+                                   rotation, content, dataset_version_id)
+         VALUES ($1, 7, 'ocr/1', 'tesseract', '5.5.3', '{}', '{eng}', 300,
+                 2480, 3508, 595.276, 841.89, 0, '₹ 15.14 crore', $2)
+         RETURNING id`,
+        [documentId, Number(version.rows[0]?.id)],
+      );
+      await db().query(
+        `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
+                                    extraction_method, parser_version, extraction_confidence,
+                                    verification_status, verified_by, verified_at,
+                                    page_reading_id, reading_confidence)
+         VALUES ($1, 7, 'monetary_amount', '₹ 15.14 crore', '15140000000', 'ocr', 'test', 0.7,
+                 'verified', 'j.doe@example.org', now(), $2, $3)`,
+        [documentId, Number(reading.rows[0]?.id), readingConfidence],
+      );
+    };
+
+    it("serves a fact read from a scan with how it was read, legible at the threshold", async () => {
+      await addScanFact("0.800");
+      const [fact] = (await repository.documentFacts(documentId))?.facts ?? [];
+      expect(fact?.scanReading).toEqual({
+        engine: "tesseract",
+        engineVersion: "5.5.3",
+        legible: true,
+      });
+    });
+
+    it("says a scan's figure was not clearly legible below the threshold", async () => {
+      await addScanFact("0.470");
+      const [fact] = (await repository.documentFacts(documentId))?.facts ?? [];
+      expect(fact?.scanReading?.legible).toBe(false);
+    });
+
+    it("marks no scan on a figure read from the text layer", async () => {
+      await addFact("verified");
+      const [fact] = (await repository.documentFacts(documentId))?.facts ?? [];
+      expect(fact?.scanReading).toBeNull();
+    });
+
     // The guarantee the whole pipeline rests on, asserted at the read boundary.
     it("serves a verified fact and withholds every undecided one", async () => {
       await addFact("verified");

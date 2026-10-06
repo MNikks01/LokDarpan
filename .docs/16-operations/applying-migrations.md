@@ -77,3 +77,19 @@ psql "$DATABASE_URL" -At \
 
 Then release `development` to `main` as usual. After the deploy, the homepage and `/api/v1/units`
 should answer as before.
+
+## 0044 (scan facts shown, October 2026)
+
+After 0040–0043, step 1 should list only
+`0044_a_fact_read_from_a_scan_says_how_legible_it_was.sql`. It adds a nullable
+`document_fact.reading_confidence` and replaces `published_fact` again. The existing columns are
+unchanged, and three new ones come last: `reading_engine`, `reading_engine_version` and
+`reading_confidence`. The grant `lokdarpan_api` reads through is kept. Production holds no scan
+facts, so nothing the site shows changes. Its checks:
+
+```bash
+psql "$DATABASE_URL" -At \
+  -c "SELECT count(*) = 44 FROM schema_migration" \
+  -c "SELECT pg_get_viewdef('published_fact') ~ 'reading_confidence IS NOT NULL'" \
+  -c "SELECT has_table_privilege('lokdarpan_api', 'published_fact', 'SELECT')"
+```

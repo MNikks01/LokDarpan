@@ -52,7 +52,37 @@ export interface PublishedFact {
    */
   readonly verifiedBy: string;
   readonly verifiedAt: string;
+  /**
+   * How the figure was read, when its page is an image with no text of its
+   * own; `null` for a figure read from the publisher's own text. Never
+   * dropped on the way to a reader: a figure read by text recognition and shown
+   * without saying so is presented as something the publisher typed (ADR-072).
+   */
+  readonly scanReading: ScanReading | null;
 }
+
+/** A figure read by text recognition from a scanned page (ADR-072). */
+export interface ScanReading {
+  readonly engine: string;
+  readonly engineVersion: string;
+  /**
+   * Whether the engine could see the figure's characters clearly — the
+   * legibility a reader is told, worded, never as a percentage.
+   */
+  readonly legible: boolean;
+}
+
+/**
+ * The engine confidence, among the words of a figure, at which its characters
+ * count as clearly legible.
+ *
+ * **Provisional.** Set at 0.80 on 6 October 2026 from the first 31 readings,
+ * which leave a gap between 0.73 and 0.86; to be confirmed against what the
+ * first review verified, corrected and rejected. It measures how clearly the
+ * characters could be seen, not whether the figure is right: one date read
+ * correctly scored 0.47, because the engine is less sure of Devanagari digits.
+ */
+export const LEGIBLE_FROM = 0.8;
 
 export interface DocumentProvenance {
   /**

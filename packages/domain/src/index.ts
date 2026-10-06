@@ -9,7 +9,7 @@ export type {
   DepartmentYearFinance,
   FigureStatus,
 } from "./department-finance";
-export { byPage, displayTitle, isReviewComplete } from "./published-fact";
+export { LEGIBLE_FROM, byPage, displayTitle, isReviewComplete } from "./published-fact";
 export type {
   DocumentFactsView,
   DocumentProvenance,
@@ -18,6 +18,7 @@ export type {
   PublishedFact,
   PublishedFactKind,
   PublishedFactRepository,
+  ScanReading,
 } from "./published-fact";
 export {
   attributionFor,

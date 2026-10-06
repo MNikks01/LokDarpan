@@ -114,6 +114,7 @@ async function reconcile(
     needsBox: boolean;
     validationState: string | null;
     perUnit: string | null;
+    readingConfidence: number | null;
   },
   c: FactCandidate,
   parser: FactParser,
@@ -134,6 +135,18 @@ async function reconcile(
         c.perUnit,
       ],
     );
+  }
+
+  // How legible a scan's figures were is a measurement of the reading, like
+  // the box below, not part of what a person decided — so it lands whatever
+  // the row's status. A fact read before the measurement was stored gains it
+  // the next time the parser runs, and only then may it be published (0044).
+  const readingConfidence = c.readingConfidence ?? null;
+  if (row.readingConfidence !== readingConfidence) {
+    await client.query(`UPDATE document_fact SET reading_confidence = $2 WHERE id = $1`, [
+      row.id,
+      readingConfidence,
+    ]);
   }
 
   // Geometry first, and whatever the row's status. A box is not part of
@@ -187,12 +200,14 @@ async function heldByIdentity(
       needsBox: boolean;
       validationState: string | null;
       perUnit: string | null;
+      readingConfidence: number | null;
     }
   >
 > {
   const held = await client.query(
     `SELECT id, page_number, kind, raw_text, normalised_value, verification_status,
-            parser_version, bbox_x0, validation_state, per_unit, field, page_reading_id
+            parser_version, bbox_x0, validation_state, per_unit, field, page_reading_id,
+            reading_confidence
        FROM document_fact WHERE document_id = $1`,
     [documentId],
   );
@@ -206,6 +221,7 @@ async function heldByIdentity(
       needsBox: boolean;
       validationState: string | null;
       perUnit: string | null;
+      readingConfidence: number | null;
     }
   >();
   for (const row of held.rows as {
@@ -221,6 +237,7 @@ async function heldByIdentity(
     per_unit: string | null;
     field: string | null;
     page_reading_id: string | null;
+    reading_confidence: string | null;
   }[]) {
     const key = identity({
       pageNumber: row.page_number,
@@ -237,6 +254,7 @@ async function heldByIdentity(
       needsBox: row.bbox_x0 === null,
       validationState: row.validation_state,
       perUnit: row.per_unit,
+      readingConfidence: row.reading_confidence === null ? null : Number(row.reading_confidence),
     });
   }
   return existing;
@@ -259,8 +277,8 @@ async function insertCandidate(
                                 extraction_method, parser_version, extraction_confidence,
                                 bbox_x0, bbox_y0, bbox_x1, bbox_y1,
                                 validation_state, validation_reason, per_unit, field,
-                                page_reading_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+                                page_reading_id, reading_confidence)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
     [
       documentId,
       c.pageNumber,
@@ -276,6 +294,7 @@ async function insertCandidate(
       c.perUnit,
       c.field ?? null,
       c.pageReadingId ?? null,
+      c.readingConfidence ?? null,
     ],
   );
 }
