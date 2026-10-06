@@ -107,3 +107,19 @@ artefact that looks like the source and is not.
 [ADR-071](./071-a-reading-sits-beside-the-page-never-in-its-place.md). Readings are stored in
 `page_reading`, beside the page, with the provenance this ADR requires. `document_page` is never
 written to. The other two open questions stand.
+
+## Addendum · 2026-10-06, the CAG scans read
+
+This ADR's case for OCR rested on the corpus's pages with no text layer: "where scanned annexures
+and photographed tables live, which is where per-work figures tend to be." All 614 such pages in
+the 30 local CAG reports have now been read (Tesseract 5.5.3, English and Marathi). That
+expectation does not hold for this corpus:
+
+- **530 pages are blank.** The engine found no text, and each sampled page renders pure white
+  with no image on it: separator and filler pages.
+- **84 pages carry text, and they are covers.** They hold the CAG emblem and motto, the report
+  title and `www.cag.gov.in`. None states a rupee amount, and the parser reads no fact from any.
+
+So no figure in these reports is reachable only by OCR. The OCR path stays: it serves the
+Maharashtra agency notices, which are scans throughout, and any later corpus that is. But scans
+are not where this corpus's missing figures are.

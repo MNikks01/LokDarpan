@@ -3,6 +3,7 @@ import pg from "pg";
 import type { TextItem } from "./extract";
 import { extractFacts } from "./facts";
 import { loadFactCandidates } from "./facts-load";
+import { asScanFact, readingsOfScannedPages } from "../ocr/scan-facts";
 
 async function main(): Promise<void> {
   const connectionString = process.env["DATABASE_URL"];
@@ -13,6 +14,11 @@ async function main(): Promise<void> {
 
   const db = new pg.Client({ connectionString });
   await db.connect();
+  // `--dry-run` reads every report and reconciles its facts inside one
+  // transaction, reports what would change, and rolls it all back: the way to
+  // see what a parser change does to reviewed facts before it does it.
+  const dryRun = process.argv.includes("--dry-run");
+  if (dryRun) await db.query("BEGIN");
 
   try {
     const docs = await db.query<{ id: string; title: string }>(
@@ -58,7 +64,7 @@ async function main(): Promise<void> {
         itemsByPage.set(i.page_number, list);
       }
 
-      const candidates = extractFacts(
+      const fromText = extractFacts(
         pages.rows.map((p) => {
           const items = itemsByPage.get(p.page_number);
           return {
@@ -68,6 +74,16 @@ async function main(): Promise<void> {
           };
         }),
       );
+      // A scanned page has no text and yields nothing above; its OCR readings
+      // are read by the same parser and made into scan facts (ADR-072). Both
+      // are loaded together: the loader retires what a run does not produce,
+      // so loading them apart would have each retire the other.
+      const fromScans = (await readingsOfScannedPages(db, documentId)).flatMap((reading) =>
+        extractFacts([
+          { pageNumber: reading.pageNumber, content: reading.content, items: reading.words },
+        ]).map((c) => asScanFact(c, reading)),
+      );
+      const candidates = [...fromText, ...fromScans];
       const result = await loadFactCandidates(db, documentId, candidates);
 
       process.stdout.write(
@@ -95,7 +111,9 @@ async function main(): Promise<void> {
       `\n${pending.rows[0]?.count ?? "0"} candidates await human review. ` +
         `None is published until then.\n`,
     );
+    if (dryRun) process.stdout.write("Dry run: nothing above was kept.\n");
   } finally {
+    if (dryRun) await db.query("ROLLBACK");
     await db.end();
   }
 }
