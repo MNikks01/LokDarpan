@@ -55,6 +55,8 @@ export default defineConfig({
         "services/ingestion/src/beams/actuals-cli.ts",
         "services/ingestion/src/cag/cli.ts",
         "services/ingestion/src/maharashtra/cli.ts",
+        "services/ingestion/src/ocr/cli.ts",
+        "services/ingestion/src/raw-adopt-cli.ts",
         "services/ingestion/src/cag/facts-cli.ts",
         "services/ingestion/src/cag/figure-link-cli.ts",
         "services/ingestion/src/cag/reprocess-cli.ts",

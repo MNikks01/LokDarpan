@@ -119,5 +119,6 @@ right: one date read correctly scored 0.47.
 
 **What a reader sees today does not change.** Every scan fact so far comes from MHADA and MSIDC
 tender notices, which are withheld whole until their publishers permit republication
-(`mayRepublish`). The first scan facts a reader can see will come from a licensed source, such
-as the 522 scanned pages of CAG reports ADR-038 counted, once they are read.
+(`mayRepublish`). The first scan facts a reader can see will come from a licensed source with figures on
+its scans. The CAG reports turned out not to be one: their 614 pages without text are blank pages
+and covers (ADR-038, addendum of 6 October 2026).
