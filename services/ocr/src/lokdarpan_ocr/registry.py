@@ -9,7 +9,9 @@ silently halving the evidence.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import threading
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 
 from .contract import EngineStatus
 from .engines.base import Engine, EngineUnavailableError
@@ -27,12 +29,32 @@ def _default_builders() -> dict[str, Builder]:
 
 
 class Registry:
-    """Builds each engine at most once, and remembers why one could not be."""
+    """Builds each engine at most once, and remembers why one could not be.
+
+    Shared by every request, and requests run on worker threads, so both
+    building and reading are locked. Building: PaddleOCR takes minutes to load,
+    and two requests arriving during that load each built their own copy (its
+    log says "type already registered" when they do). Reading: an engine's
+    model is one object, not documented as safe to drive from two threads at
+    once, so each engine reads one page at a time.
+    """
 
     def __init__(self, builders: dict[str, Builder] | None = None) -> None:
         self._builders = _default_builders() if builders is None else dict(builders)
         self._built: dict[str, Engine] = {}
         self._unavailable: dict[str, str] = {}
+        self._building = threading.Lock()
+        self._reading = {name: threading.Lock() for name in self._builders}
+
+    @contextmanager
+    def reading(self, name: str) -> Iterator[None]:
+        """Hold the engine for one read; another request waits its turn."""
+        lock = self._reading.get(name)
+        if lock is None:
+            yield
+            return
+        with lock:
+            yield
 
     @property
     def names(self) -> list[str]:
@@ -40,6 +62,14 @@ class Registry:
 
     def get(self, name: str) -> Engine:
         """The engine, or `EngineUnavailableError` naming what is missing."""
+        if name in self._built:
+            return self._built[name]
+        with self._building:
+            return self._build(name)
+
+    def _build(self, name: str) -> Engine:
+        # Asked again under the lock: another request may have built it while
+        # this one waited.
         if name in self._built:
             return self._built[name]
         if name in self._unavailable:

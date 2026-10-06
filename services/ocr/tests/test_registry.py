@@ -58,6 +58,7 @@ class TestConstruction:
         registry.get("ok")
         registry.get("ok")
         assert len(built) == 1
+        assert registry.capabilities()[0].available
 
     def test_a_failure_is_remembered_rather_than_retried_each_page(self) -> None:
         attempts: list[int] = []
@@ -75,3 +76,52 @@ class TestConstruction:
     def test_an_unknown_name_names_what_is_available(self) -> None:
         with pytest.raises(EngineUnavailableError, match="ok"):
             Registry({"ok": Ok}).get("surya")
+
+
+class TestConcurrentRequests:
+    def test_an_engine_is_built_once_however_many_ask_at_once(self) -> None:
+        # PaddleOCR takes minutes to load. Requests that arrived during the load
+        # each built their own copy until building was locked.
+        import threading
+        import time
+
+        built: list[int] = []
+
+        def slow_builder():
+            time.sleep(0.05)
+            built.append(1)
+            return Ok()
+
+        registry = Registry({"slow": slow_builder})
+        threads = [threading.Thread(target=registry.get, args=("slow",)) for _ in range(8)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        assert len(built) == 1
+
+    def test_one_engine_reads_one_page_at_a_time(self) -> None:
+        import threading
+        import time
+
+        registry = Registry({"stub": Ok})
+        inside = 0
+        most = 0
+        guard = threading.Lock()
+
+        def read() -> None:
+            nonlocal inside, most
+            with registry.reading("stub"):
+                with guard:
+                    inside += 1
+                    most = max(most, inside)
+                time.sleep(0.02)
+                with guard:
+                    inside -= 1
+
+        threads = [threading.Thread(target=read) for _ in range(6)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        assert most == 1

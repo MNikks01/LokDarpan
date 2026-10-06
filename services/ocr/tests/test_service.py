@@ -15,7 +15,7 @@ from lokdarpan_ocr.contract import ReadRequest
 from lokdarpan_ocr.engines.base import EngineInfo, EngineUnavailableError, Word
 from lokdarpan_ocr.reading import assemble
 from lokdarpan_ocr.registry import Registry
-from lokdarpan_ocr.service import DocumentMismatchError, read_document
+from lokdarpan_ocr.service import DocumentMismatchError, ReadAbandonedError, read_document
 
 PDF = b"%PDF-1.4 not a real document"
 DIGEST = hashlib.sha256(PDF).hexdigest()
@@ -153,7 +153,48 @@ class TestLanguagesRead:
         assert response.readings[0].engine.languages == ["eng", "mar"]
 
 
-def _read_with_fake_render(pdf: bytes, request: ReadRequest, registry: Registry):
+class CountingEngine(StubEngine):
+    """Counts the pages it was asked to read."""
+
+    def __init__(self) -> None:
+        super().__init__("counting", [Word("Rs", (0, 0, 10, 10), 0.9)])
+        self.reads = 0
+
+    def read(self, image_png: bytes, languages: list[str]) -> list[Word]:
+        self.reads += 1
+        return super().read(image_png, languages)
+
+
+class TestAbandonedReads:
+    def test_a_caller_who_left_is_not_read_for(self) -> None:
+        # The caller leaves once page 1 is read. Page 2 must not be: at four
+        # minutes a page, reading on for nobody is a backlog that outlives the
+        # run that asked for it.
+        engine = CountingEngine()
+        registry = Registry({"counting": lambda: engine})
+        with pytest.raises(ReadAbandonedError, match="page 2"):
+            _read_with_fake_render(
+                PDF,
+                a_request(engines=["counting"], page_numbers=[1, 2, 3]),
+                registry,
+                abandoned=lambda: engine.reads >= 1,
+            )
+        assert engine.reads == 1
+
+    def test_a_caller_who_stays_gets_every_page(self) -> None:
+        engine = CountingEngine()
+        registry = Registry({"counting": lambda: engine})
+        response = _read_with_fake_render(
+            PDF,
+            a_request(engines=["counting"], page_numbers=[1, 2, 3]),
+            registry,
+            abandoned=lambda: False,
+        )
+        assert engine.reads == 3
+        assert len(response.readings) == 3
+
+
+def _read_with_fake_render(pdf: bytes, request: ReadRequest, registry: Registry, abandoned=None):
     """Runs the read path with rendering stubbed out.
 
     The renderer needs a real PDF and a real pdfium; neither is what these tests
@@ -187,7 +228,9 @@ def _read_with_fake_render(pdf: bytes, request: ReadRequest, registry: Registry)
     saved = render_module.PdfRenderer
     render_module.PdfRenderer = FakeRenderer  # type: ignore[assignment]
     try:
-        return read_document(pdf, request, registry)
+        if abandoned is None:
+            return read_document(pdf, request, registry)
+        return read_document(pdf, request, registry, abandoned)
     finally:
         render_module.PdfRenderer = saved  # type: ignore[assignment]
 
