@@ -74,3 +74,27 @@ same reason.
   reader means.
 - The CAG load test empties the document tables with a cascading TRUNCATE. It now also locks
   `page_reading` and `page_reading_item`, which the cascade reaches through the new keys.
+
+## Addendum · 2026-10-06, the wording
+
+The sentences a reader would see are written and approved (`apps/web/src/copy/figures.ts`,
+`scanFactCopy`). A scan fact carries a label, an explanation naming the engine and version, and
+the engine's doubt worded as **legibility** ("clearly / not clearly legible to the software"),
+never as a percentage. A number beside a government figure reads as the chance the figure is
+right; the engine's confidence measures only how clearly the characters could be seen.
+
+The hold on publishing stays until three things exist:
+
+1. **The engine's confidence, stored on its own.** `extraction_confidence` is the parser's
+   confidence times the engine's, so the engine's part can't be recovered from it reliably. The
+   legibility sentence needs the engine's figure itself, and the threshold between "clearly" and
+   "not clearly" is a separate decision, to be made on reviewed facts.
+2. **A view that carries it.** `published_fact` gains the reading's engine, version and that
+   confidence, and stops withholding facts read from a scan.
+3. **A page that shows it.** The document page shows `scanFactCopy` with every such figure, and
+   uses `pagesWithoutTextSomeRead` in place of `pagesWithoutText` once any figure on the document
+   was read from a scan.
+
+Until all three ship together, nothing read from a scan reaches a reader. Every scan fact so far
+is a tender-notice fact, and those are withheld anyway while publishing tender details awaits
+permission.
