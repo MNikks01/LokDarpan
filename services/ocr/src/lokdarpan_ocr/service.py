@@ -14,7 +14,7 @@ something this module never defines, and `/read` failed every request.
 import hashlib
 
 from .contract import Capabilities, PageReading, ReadRequest, ReadResponse, Refusal
-from .engines.base import EngineUnavailableError
+from .engines.base import EngineInfo, EngineUnavailableError
 from .reading import assemble
 from .registry import Registry
 
@@ -26,6 +26,13 @@ class DocumentMismatchError(ValueError):
     a reading filed against the wrong document is worse than no reading: it
     attaches a figure to a source that does not contain it.
     """
+
+
+def _languages_read(info: EngineInfo, requested: list[str]) -> list[str]:
+    """The requested languages this engine's model actually reads, in request order."""
+    if info.reads_languages is None:
+        return list(requested)
+    return [language for language in requested if language in info.reads_languages]
 
 
 def read_document(
@@ -86,8 +93,23 @@ def read_document(
                 continue
 
             for name, engine in engines.items():
+                info = engine.info()
+                languages = _languages_read(info, request.languages)
+                if not languages:
+                    refusals.append(
+                        Refusal(
+                            page_number=page_number,
+                            engine=name,
+                            reason=(
+                                f"the loaded model reads {', '.join(info.reads_languages or ())}"
+                                f" and none of the languages asked for"
+                                f" ({', '.join(request.languages)})"
+                            ),
+                        )
+                    )
+                    continue
                 try:
-                    words = engine.read(rendered.png, request.languages)
+                    words = engine.read(rendered.png, languages)
                 except Exception as error:
                     refusals.append(
                         Refusal(
@@ -102,8 +124,8 @@ def read_document(
                     assemble(
                         page_number=page_number,
                         words=words,
-                        engine=engine.info(),
-                        languages=request.languages,
+                        engine=info,
+                        languages=languages,
                         dpi=request.dpi,
                         raster_width=rendered.raster_width,
                         raster_height=rendered.raster_height,

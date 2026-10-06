@@ -43,6 +43,11 @@ class EngineInfo:
     name: str
     version: str
     model_versions: dict[str, str] = field(default_factory=dict)
+    # The languages the loaded model reads, as Tesseract codes ("eng", "mar"),
+    # or None for an engine that loads whatever it is asked for per call. A
+    # reading records only the languages actually read: an English-only model
+    # asked for Marathi has not read Marathi, and must not be filed as if it had.
+    reads_languages: tuple[str, ...] | None = None
 
 
 @runtime_checkable
