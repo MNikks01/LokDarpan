@@ -327,3 +327,51 @@ describe("noticeFacts: a scan, read from an OCR reading", () => {
     expect(typed?.pageReadingId).toBeUndefined();
   });
 });
+
+describe("noticeFacts: the part of the day a Marathi notice names", () => {
+  const at = (when: string): string | null =>
+    noticeFacts([{ pageNumber: 1, content: `निविदा स्विकृती अंतिम दिनांक ०६.१०.२०२६, ${when}` }])[0]
+      ?.normalisedValue ?? null;
+
+  it.each([
+    ["सकाळी १०.३०", "2026-10-06T10:30+05:30"],
+    ["सकाळी १२.१५", "2026-10-06T00:15+05:30"],
+    ["दुपारी १२.००", "2026-10-06T12:00+05:30"],
+    ["दुपारी ३.००", "2026-10-06T15:00+05:30"],
+    ["सायंकाळी ६.१५", "2026-10-06T18:15+05:30"],
+    ["संध्याकाळी ५.३०", "2026-10-06T17:30+05:30"],
+    ["रात्री ८.००", "2026-10-06T20:00+05:30"],
+  ])("reads %s as the hour it names", (when, expected) => {
+    expect(at(when)).toBe(expected);
+  });
+
+  it.each([
+    "दुपारी ९.००",
+    "सायंकाळी १२.००",
+    "रात्री २.००",
+    "सकाळी १३.००",
+    "सकाळी ०.३०",
+    "सकाळी १०.७५",
+  ])("reads the date alone where %s is no time on a clock", (when) => {
+    expect(at(when)).toBe("2026-10-06");
+  });
+
+  it("reads no value from a date no calendar has, and still offers the line", () => {
+    const [fact] = noticeFacts([{ pageNumber: 1, content: "जाहिरात दिनांक ३१.०२.२०२६" }]);
+    expect(fact).toMatchObject({ field: "publish", normalisedValue: null });
+  });
+});
+
+describe("noticeFacts: a reading whose words do not cover the match", () => {
+  it("offers the fact with no box rather than an invented one", () => {
+    const [fact] = noticeFacts([
+      {
+        pageNumber: 1,
+        content: "जाहिरात दिनांक २९.०९.२०२६",
+        reading: { id: 7, engine: "tesseract", engineVersion: "5.5.3", words: [] },
+      },
+    ]);
+    expect(fact?.box).toBeUndefined();
+    expect(fact?.pageReadingId).toBe(7);
+  });
+});
