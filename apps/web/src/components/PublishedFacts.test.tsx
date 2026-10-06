@@ -15,6 +15,7 @@ const fact = (over: Partial<PublishedFact> = {}): PublishedFact => ({
   origin: "as_extracted",
   verifiedBy: "j.doe@example.org",
   verifiedAt: "2026-08-27T09:00:00.000Z",
+  scanReading: null,
   ...over,
 });
 
@@ -157,5 +158,42 @@ describe("a rate is rendered with what it is per", () => {
     // A screen reader must not be told a rate is a sum either.
     const html = renderToStaticMarkup(<Value fact={fact({ value: "15.00", perUnit: "record" })} />);
     expect(html).toMatch(/title="[^"]*per record"/u);
+  });
+});
+
+describe("a figure read from a scanned page", () => {
+  const scanned = (legible: boolean): PublishedFact =>
+    fact({
+      kind: "tender_date",
+      value: "2026-09-29",
+      scanReading: { engine: "tesseract", engineVersion: "5.5.3", legible },
+    });
+
+  it("says it was read by text recognition, by which engine, and checked against the image", () => {
+    const shown = text(renderToStaticMarkup(<FactCard fact={scanned(true)} />));
+    expect(shown).toContain("Read from a scanned page by text recognition");
+    expect(shown).toContain("checked by a reviewer against the page image");
+    expect(shown).toContain("tesseract 5.5.3");
+  });
+
+  it("words the engine's doubt as legibility, never as a percentage", () => {
+    const clear = text(renderToStaticMarkup(<FactCard fact={scanned(true)} />));
+    const unclear = text(renderToStaticMarkup(<FactCard fact={scanned(false)} />));
+    expect(clear).toContain("were clearly legible to the software");
+    expect(unclear).toContain("were not clearly legible to the software");
+    expect(`${clear} ${unclear}`).not.toMatch(/\d+\s*%/u);
+  });
+
+  it("says nothing of scans for a figure the publisher typed", () => {
+    const shown = text(renderToStaticMarkup(<FactCard fact={fact()} />));
+    expect(shown).not.toContain("text recognition");
+  });
+
+  it("changes what the scope says of pages with no text, once a figure was read from one", () => {
+    const none = text(renderToStaticMarkup(<Scope view={view({ facts: [fact()] })} />));
+    const some = text(renderToStaticMarkup(<Scope view={view({ facts: [scanned(true)] })} />));
+    expect(none).toContain("were not searched");
+    expect(some).toContain("are images with no text of their own");
+    expect(some).not.toContain("were not searched");
   });
 });

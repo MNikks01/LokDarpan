@@ -94,6 +94,15 @@ release must both land between two nightly runs** (the sweep starts at 20:00 UTC
 - ~~Tender detail pages~~: stored and cited since migration 0038 (`tender.detail_sha256`; ADR-069
   addendum).
 - **`cag:reprocess`** reads bytes from the local directory only.
-- **Backfilling old rows.** A row whose bytes still exist (today, the one LGD page on the machine
-  that loaded it) may be given a `stored_in` only after those bytes are put in the bucket and hash to
-  its sha256. There is no tool for this yet; do not update `stored_in` by hand.
+- **Backfilling old rows.** A row whose bytes still exist may be given a `stored_in` only after
+  those bytes are in a store and hash to its sha256. Do not update `stored_in` by hand; use
+  `raw:adopt`, which checks each row in the configured store before recording anything:
+
+  ```bash
+  pnpm --filter @lokdarpan/ingestion raw:adopt -- --source=cag
+  ```
+
+  It updates only rows with no `stored_in`, and only once their bytes verify. A row whose bytes are
+  missing or don't verify is reported and left alone. On 6 October 2026 it adopted all 30 CAG
+  reports in the local store (`file`), where they had been kept since they were loaded. Production
+  rows promoted by `promote:cag` already say where their bytes are.

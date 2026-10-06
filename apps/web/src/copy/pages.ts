@@ -5,14 +5,6 @@
  * never be confused, so their wording lives in one place.
  */
 
-export const homeCopy = {
-  intro:
-    "Official records, linked and checked for mathematical consistency — every number traceable to its source.",
-  /** Only the example project is fixture-backed; every other page reads the ledger. */
-  fixtureNotice:
-    "⚠ The example project is fixture data, not a government source. The map, the unit pages and the documents read official records.",
-} as const;
-
 export const documentsCopy = {
   intro:
     "Documents published by government bodies and held here in full. A figure appears on this site only after a person has checked it against the page it was read from.",

@@ -98,3 +98,27 @@ The hold on publishing stays until three things exist:
 Until all three ship together, nothing read from a scan reaches a reader. Every scan fact so far
 is a tender-notice fact, and those are withheld anyway while publishing tender details awaits
 permission.
+
+## Addendum · 2026-10-06, shown
+
+The three things the hold waited for now ship together (migration 0044), and the hold is lifted:
+
+1. **`document_fact.reading_confidence`** stores the engine's least confidence among the words of
+   the value, apart from `extraction_confidence`. The parser fills it on every run, so facts read
+   before 0044 gain it when the parser next runs.
+2. **`published_fact`** carries `reading_engine`, `reading_engine_version` and
+   `reading_confidence`. It publishes a verified scan fact only once that confidence is measured.
+3. **The document page** shows `scanFactCopy` with every such figure (`ScanReadingNote`), and
+   switches to `pagesWithoutTextSomeRead`. `/api/v1/documents/:id` carries the same `scanReading`,
+   because both read one domain type: a figure cannot reach a reader through either without it.
+
+**Legibility is a threshold on the engine's confidence, provisionally 0.80** (`LEGIBLE_FROM`). The
+first 31 readings leave a gap between 0.73 and 0.86. The threshold is to be confirmed against the
+first review. It measures how clearly the characters could be seen, not whether the figure is
+right: one date read correctly scored 0.47.
+
+**What a reader sees today does not change.** Every scan fact so far comes from MHADA and MSIDC
+tender notices, which are withheld whole until their publishers permit republication
+(`mayRepublish`). The first scan facts a reader can see will come from a licensed source with figures on
+its scans. The CAG reports turned out not to be one: their 614 pages without text are blank pages
+and covers (ADR-038, addendum of 6 October 2026).

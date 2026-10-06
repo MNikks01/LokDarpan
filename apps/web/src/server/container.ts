@@ -7,6 +7,7 @@ import { PostgresAdminUnitRepository } from "@lokdarpan/database/repository";
 import { PostgresGeographyRepository } from "@lokdarpan/database/geography";
 import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-fact";
 import { PostgresTenderRepository } from "@lokdarpan/database/tender";
+import { PostgresOverviewRepository } from "@lokdarpan/database/overview";
 import { readLedger, versionOpenedAt } from "@lokdarpan/database/ledger";
 import pg from "pg";
 
@@ -82,6 +83,7 @@ export interface LedgerRepositories {
   readonly geography: PostgresGeographyRepository;
   readonly tenders: PostgresTenderRepository;
   readonly facts: PostgresPublishedFactRepository;
+  readonly overview: PostgresOverviewRepository;
 }
 
 export interface VersionedResult<T> {
@@ -106,6 +108,7 @@ export async function inLedger<T>(
       geography: new PostgresGeographyRepository(db),
       tenders: new PostgresTenderRepository(db),
       facts: new PostgresPublishedFactRepository(db),
+      overview: new PostgresOverviewRepository(db),
     }),
   );
   return { data: value, datasetVersion: ledger.datasetVersion, asOf: ledger.asOf };

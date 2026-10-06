@@ -593,6 +593,9 @@ function fromReading(pageNumber: number, r: Reading, reading: PageReadingInput):
     validation: { state: "needs_review", reason },
     pageReadingId: reading.id,
     extractionMethod: ocrMethod(reading.engine, reading.engineVersion),
+    // No words under the match means nothing was measured, and a fact with no
+    // measured legibility is never published (0044).
+    ...(words.length === 0 ? {} : { readingConfidence: weakest }),
     ...(box === undefined ? {} : { box }),
   };
 }

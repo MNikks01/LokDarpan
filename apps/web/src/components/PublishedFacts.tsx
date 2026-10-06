@@ -4,7 +4,7 @@ import { formatAmount, formatAmountSpoken } from "@lokdarpan/money";
 import { isReviewComplete, type DocumentFactsView, type PublishedFact } from "@lokdarpan/domain";
 
 import { color, figureFontFeatures, radius, space } from "@/ui/tokens";
-import { publishedFactsCopy } from "@/copy/figures";
+import { publishedFactsCopy, scanFactCopy } from "@/copy/figures";
 
 /**
  * Presentation for verified facts, kept out of the route so it can be rendered
@@ -96,7 +96,38 @@ export function FactCard({ fact }: { readonly fact: PublishedFact }): React.JSX.
           <>{publishedFactsCopy.correctedByReviewer}</>
         )}
       </div>
+      {fact.scanReading !== null && <ScanReadingNote reading={fact.scanReading} />}
     </li>
+  );
+}
+
+/**
+ * What a reader must know about a figure read from a scanned page (ADR-072):
+ * that text recognition read it, which engine, and how legible the characters
+ * were to it. Never optional for such a figure, and worded as legibility — a
+ * percentage beside a government figure would read as the chance it is right.
+ */
+export function ScanReadingNote({
+  reading,
+}: {
+  readonly reading: NonNullable<PublishedFact["scanReading"]>;
+}): React.JSX.Element {
+  return (
+    <div
+      role="note"
+      style={{
+        marginTop: space[2],
+        paddingTop: space[2],
+        borderTop: `1px solid ${color.border.hair}`,
+        fontSize: 12,
+        lineHeight: 1.5,
+        color: color.text.secondary,
+      }}
+    >
+      <div style={{ fontWeight: 600 }}>{scanFactCopy.label}</div>
+      <div>{scanFactCopy.explanation(reading.engine, reading.engineVersion)}</div>
+      <div>{scanFactCopy.legibility(reading.legible)}</div>
+    </div>
   );
 }
 
@@ -134,7 +165,9 @@ export function Scope({ view }: { readonly view: DocumentFactsView }): React.JSX
       <p style={{ margin: "8px 0 0" }}>{publishedFactsCopy.notASummary}</p>
       {view.pagesWithoutText > 0 && (
         <p style={{ margin: "8px 0 0" }}>
-          {publishedFactsCopy.pagesWithoutText(view.pagesWithoutText, view.pageCount)}
+          {view.facts.some((f) => f.scanReading !== null)
+            ? scanFactCopy.pagesWithoutTextSomeRead(view.pagesWithoutText, view.pageCount)
+            : publishedFactsCopy.pagesWithoutText(view.pagesWithoutText, view.pageCount)}
         </p>
       )}
     </aside>

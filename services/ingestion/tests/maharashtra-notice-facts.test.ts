@@ -317,6 +317,10 @@ describe("noticeFacts: a scan, read from an OCR reading", () => {
     expect(fact?.extractionConfidence).toBeCloseTo(0.85 * 0.8, 3);
   });
 
+  it("keeps the engine's own confidence apart, for the legibility a reader is told", () => {
+    expect(fact?.readingConfidence).toBe(0.8);
+  });
+
   it("carries the box of the figures it was read from", () => {
     expect(fact?.box).toEqual({ x0: 90, y0: 700, x1: 150, y1: 712 });
   });

@@ -22,6 +22,7 @@ const fact = (
   origin: "as_extracted",
   verifiedBy: "j.doe@example.org",
   verifiedAt: "2026-08-27T00:00:00.000Z",
+  scanReading: null,
   ...over,
 });
 

@@ -20,7 +20,11 @@ const config: NextConfig = {
   // a path built from `process.cwd()`, which file tracing cannot follow. Named
   // here so it is packaged with that function on Vercel, rather than missing and
   // showing the "geometry not installed" page in production.
-  outputFileTracingIncludes: { "/explore": ["./public/geo/manifest.json"] },
+  // The homepage draws its map from the same files when it revalidates.
+  outputFileTracingIncludes: {
+    "/explore": ["./public/geo/manifest.json"],
+    "/": ["./public/geo/manifest.json", "./public/geo/india-states.geojson"],
+  },
 };
 
 export default config;

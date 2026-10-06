@@ -1,4 +1,4 @@
-import { displayTitle, mayRepublish } from "@lokdarpan/domain";
+import { LEGIBLE_FROM, displayTitle, mayRepublish } from "@lokdarpan/domain";
 import { Money } from "@lokdarpan/money";
 import type {
   DocumentFactsView,
@@ -7,6 +7,7 @@ import type {
   PublishedFact,
   PublishedFactKind,
   PublishedFactRepository,
+  ScanReading,
 } from "@lokdarpan/domain";
 /**
  * Anything that can run a query - a pool in production, a transaction-scoped
@@ -36,6 +37,9 @@ interface FactRow {
   readonly verification_status: string;
   readonly verified_by: string;
   readonly verified_at: string;
+  readonly reading_engine: string | null;
+  readonly reading_engine_version: string | null;
+  readonly reading_confidence: string | null;
 }
 
 interface DocumentRow {
@@ -88,7 +92,8 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
 
     const facts = await this.db.query<FactRow>(
       `SELECT id, kind, page_number, raw_text, value, per_unit, verification_status,
-              verified_by, verified_at
+              verified_by, verified_at, reading_engine, reading_engine_version,
+              reading_confidence
          FROM published_fact
         WHERE document_id = $1
         ORDER BY page_number, id`,
@@ -215,6 +220,12 @@ function toFact(row: FactRow): PublishedFact | null {
   // raw would put an unlabelled integer on the page where a reader expects
   // rupees, which is worse than showing nothing.
   if (value === null) return null;
+  // A figure read from a scan is shown with its legibility or not at all. The
+  // view never publishes one without it; a row that somehow lacks it is
+  // suppressed like any figure missing its provenance, rather than shown as if
+  // the publisher had typed it.
+  const scanReading = scanReadingOf(row);
+  if (scanReading === undefined) return null;
   const origin: FactOrigin =
     row.verification_status === "corrected" ? "corrected_by_reviewer" : "as_extracted";
   return {
@@ -227,6 +238,21 @@ function toFact(row: FactRow): PublishedFact | null {
     origin,
     verifiedBy: row.verified_by,
     verifiedAt: new Date(row.verified_at).toISOString(),
+    scanReading,
+  };
+}
+
+/**
+ * How a figure was read from a scan: `null` for one read from a text layer,
+ * `undefined` for a scan fact that arrived without its legibility.
+ */
+function scanReadingOf(row: FactRow): ScanReading | null | undefined {
+  if (row.reading_engine === null) return null;
+  if (row.reading_confidence === null || row.reading_engine_version === null) return undefined;
+  return {
+    engine: row.reading_engine,
+    engineVersion: row.reading_engine_version,
+    legible: Number(row.reading_confidence) >= LEGIBLE_FROM,
   };
 }
 
@@ -243,7 +269,7 @@ function toFact(row: FactRow): PublishedFact | null {
  * A reviewer's correction is trusted to be paise like the parser's reading; a
  * value that is not an integer is refused rather than guessed at.
  */
-function toRupees(paise: string): string | null {
+export function toRupees(paise: string): string | null {
   if (!/^-?\d+$/u.test(paise.trim())) return null;
   return Money.fromPaise(BigInt(paise.trim())).toDecimalString();
 }
