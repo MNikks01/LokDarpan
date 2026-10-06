@@ -25,6 +25,8 @@ export interface OcrClientOptions {
   readonly baseUrl: string;
   readonly fetch?: typeof globalThis.fetch;
   readonly timeoutMs?: number;
+  /** Added to a read's timeout for each page and each engine it asks for. */
+  readonly readTimeoutPerPageMs?: number;
 }
 
 /** Either the service answered, or it did not and says why. */
@@ -32,21 +34,41 @@ export type OcrOutcome<T> =
   { readonly ok: true; readonly value: T } | { readonly ok: false; readonly unavailable: string };
 
 const DEFAULT_TIMEOUT_MS = 120_000;
+// A read's time is pages × engines, and the slowest engine sets it: PaddleOCR
+// took 260 s for one scanned MHADA page at 300 dpi on a laptop CPU (measured
+// 6 October 2026), Tesseract 5 s. A fixed timeout abandoned every multi-page
+// document as "unavailable" while the service went on reading it.
+export const DEFAULT_READ_TIMEOUT_PER_PAGE_MS = 360_000;
 
 export class OcrClient {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof globalThis.fetch;
   private readonly timeoutMs: number;
+  private readonly readTimeoutPerPageMs: number;
 
   public constructor(options: OcrClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/u, "");
     this.fetchImpl = options.fetch ?? globalThis.fetch;
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.readTimeoutPerPageMs = options.readTimeoutPerPageMs ?? DEFAULT_READ_TIMEOUT_PER_PAGE_MS;
+  }
+
+  /** How long a read of these pages by these engines is given before it is abandoned. */
+  public readTimeoutMs(request: OcrReadRequest): number {
+    return (
+      this.timeoutMs +
+      this.readTimeoutPerPageMs * request.page_numbers.length * request.engines.length
+    );
   }
 
   /** Which engines the deployment can actually use, and at which versions. */
   public async capabilities(): Promise<OcrOutcome<OcrCapabilities>> {
-    return this.request(`${this.baseUrl}/capabilities`, undefined, OcrCapabilitiesSchema);
+    return this.request(
+      `${this.baseUrl}/capabilities`,
+      undefined,
+      OcrCapabilitiesSchema,
+      this.timeoutMs,
+    );
   }
 
   public async read(
@@ -66,7 +88,12 @@ export class OcrClient {
       `${request.document_sha256}.pdf`,
     );
 
-    const outcome = await this.request(`${this.baseUrl}/read`, body, OcrReadResponseSchema);
+    const outcome = await this.request(
+      `${this.baseUrl}/read`,
+      body,
+      OcrReadResponseSchema,
+      this.readTimeoutMs(request),
+    );
     if (!outcome.ok) return outcome;
 
     // The service hashes the bytes it read and echoes the result. Checking it
@@ -88,11 +115,12 @@ export class OcrClient {
     url: string,
     body: FormData | undefined,
     schema: { parse: (value: unknown) => T },
+    timeoutMs: number,
   ): Promise<OcrOutcome<T>> {
     const controller = new AbortController();
     const timer = setTimeout(() => {
       controller.abort();
-    }, this.timeoutMs);
+    }, timeoutMs);
 
     try {
       const response = await this.fetchImpl(url, {

@@ -70,3 +70,19 @@ default: the service is optional infrastructure, and a run without it is a compl
   readings reproducible rather than overwriting them.
 - The words of a reading cascade with their reading, and the reading cascades with its page. A
   document removed from the ledger takes its readings with it.
+
+## Addendum · 2026-10-06, first run
+
+- **A reading records the languages actually read, not the languages requested.** PaddleOCR loads
+  one model per language, and the service loaded its English model while recording every
+  language the request named. Each of its readings of a Marathi notice would have claimed a
+  Marathi reading that never happened. Engines now declare what their model reads
+  (`EngineInfo.reads_languages`). A reading names only those languages, and a model that reads
+  none of the requested languages refuses the page with that reason.
+- **A read's timeout scales with pages × engines.** On a laptop CPU, PaddleOCR took 260 s for one
+  scanned MHADA page at 300 dpi; Tesseract took 5 s. A fixed 120 s timeout abandoned every document
+  while the service went on reading it. `ingest:agency` takes `--engines=` and
+  `--ocr-page-seconds=`.
+- **First readings, local database only:** 38 pages (MHADA 26, MSIDC 12), Tesseract 5.5.3, `eng+mar`,
+  300 dpi, mean word confidence 0.89–0.91, no refusals. PaddleOCR is not yet run: at its measured
+  speed the same pages take about 2.7 hours, and its Marathi model is not loaded.
