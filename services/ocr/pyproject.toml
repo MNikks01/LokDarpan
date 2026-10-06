@@ -20,7 +20,9 @@ dependencies = [
 [project.optional-dependencies]
 tesseract = ["pytesseract>=0.3.13"]
 paddle = ["paddleocr>=3.0", "paddlepaddle>=3.0", "numpy>=1.26"]
-serve = ["uvicorn>=0.30"]
+# `/read` takes the PDF as a form upload, and FastAPI refuses to start a form
+# route without python-multipart; the service never started from `[serve]` alone.
+serve = ["uvicorn>=0.30", "python-multipart>=0.0.9"]
 dev = ["pytest>=8.3", "ruff>=0.7"]
 
 [build-system]

@@ -3,9 +3,13 @@
 `read_document` is the whole service; the FastAPI app is a thin wrapper so the
 logic can be tested without a server, and so the boundary stays a contract
 rather than a framework.
-"""
 
-from __future__ import annotations
+No `from __future__ import annotations` here, unlike the other modules: FastAPI
+reads the route's parameter types at request time from this module's globals,
+and `UploadFile` is imported inside `create_app` so the module loads without the
+web stack. Under postponed annotations the route's types are strings naming
+something this module never defines, and `/read` failed every request.
+"""
 
 import hashlib
 
@@ -52,7 +56,19 @@ def read_document(
 
     from .render import PdfRenderer
 
-    with PdfRenderer(pdf_bytes) as renderer:
+    try:
+        opened = PdfRenderer(pdf_bytes)
+    except Exception as error:
+        # A document that will not open is an absence like any other: stated,
+        # once per engine, for the whole document — not a server error that
+        # leaves the caller unable to tell a broken file from a broken service.
+        for name in engines:
+            refusals.append(
+                Refusal(engine=name, reason=f"the document could not be opened: {error}")
+            )
+        return ReadResponse(document_sha256=digest, readings=readings, refusals=refusals)
+
+    with opened as renderer:
         for page_number in request.page_numbers:
             try:
                 rendered = renderer.render(page_number, request.dpi)
