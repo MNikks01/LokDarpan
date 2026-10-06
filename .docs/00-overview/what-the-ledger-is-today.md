@@ -2,6 +2,11 @@
 
 **Date:** 5 September 2026 · **Answers blocker 3** of [`README.md`](../README.md) · **Reconciles** [`01-product/sprint-plan.md`](../01-product/sprint-plan.md) and [`07-analytics/analytics-engine.md`](../07-analytics/analytics-engine.md) **with what may actually be published**
 
+> **Update · 6 October 2026. The audit corpus is in production.** `promote:cag` copied the 30
+> reports, 6,339 pages and 10,712 figures, with all 5,088 published facts and their review history,
+> into production as dataset version 285 (ADR-070). The live `/documents` lists them. BEAMS is
+> still local only.
+>
 > **Correction · 29 September 2026. Everything this document counts is the local database, not
 > production.** A read-only count of the production ledger on 29 September found **no documents,
 > no pages, no facts and no BEAMS rows**: the CAG and BEAMS loaders have only ever been run

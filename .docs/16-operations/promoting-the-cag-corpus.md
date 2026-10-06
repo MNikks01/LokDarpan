@@ -1,5 +1,9 @@
 # Promoting the CAG corpus to production
 
+> **Done · 6 October 2026.** Promoted as dataset version **285**: 30 reports · 6,339 pages · 10,712
+> figures, 5,088 published · 260 review-history rows, matching the dry run exactly. Checked live:
+> `/api/v1/documents` serves 30 documents and 5,088 published facts. The undo below names version 285.
+
 **Written:** 30 September 2026 · **Decision:** [ADR-070](../adr/070-the-reviewed-ledger-is-copied-not-re-derived.md) · **Code:** `services/ingestion/src/cag/promote.ts`
 
 The audit reports and every figure a person reviewed live in the local database, where the review
@@ -25,9 +29,9 @@ stays local is what the extractor needs to find figures, and extraction and revi
 ## Before you run it
 
 - [ ] Neon is serving connections again. The transfer quota reset at 00:00 UTC on 1 October 2026.
-- [ ] The release carrying #152, #158 and #159 is on `main`, and migrations 0037, 0038 and 0039
-      are applied to production (`raw-store.md` §3). The tool refuses to run if the two databases
-      are on different migrations, and your local database already has all three.
+- [ ] Both databases are on the same migrations: `migrate -- --status` shows nothing pending on
+      either (`applying-migrations.md`). The tool refuses to run if they differ. On 6 October 2026
+      both were at 0044.
 - [ ] Your local database holds the reviewed corpus: `SELECT count(*) FROM published_fact` should
       match the figure you expect (5,088 on 30 September 2026).
 
@@ -41,6 +45,8 @@ to a file.
 export SOURCE_DATABASE_URL='postgresql://lokdarpan:lokdarpan_local_only@localhost:5433/lokdarpan'
 read -rs 'TARGET_DATABASE_URL?Production owner connection string: '; echo; export TARGET_DATABASE_URL
 
+# Your Cloudflare account's R2 endpoint (R2 → bucket → Settings → S3 API). Replace the whole
+# placeholder: left as written it fails with "Invalid URL" before anything is written.
 export RAW_STORE_S3_ENDPOINT='https://<account id>.r2.cloudflarestorage.com'
 export RAW_STORE_S3_BUCKET='lokdarpan-raw'
 read -rs 'RAW_STORE_S3_ACCESS_KEY_ID?R2 access key ID: '; echo; export RAW_STORE_S3_ACCESS_KEY_ID
