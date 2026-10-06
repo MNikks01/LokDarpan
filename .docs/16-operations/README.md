@@ -11,6 +11,7 @@ collection on GitHub Actions.
 | [`rate-limiting.md`](rate-limiting.md)                                       | The API rate limit: the Firewall rule, the internal token, watching it             |
 | [`tender-placement.md`](tender-placement.md)                                 | Placing tenders: the pincode directory, backfill, aliases, manual decisions        |
 | [`promoting-the-cag-corpus.md`](promoting-the-cag-corpus.md)                 | Copying the reviewed audit reports and figures into production (`promote:cag`)     |
+| [`reading-scans.md`](reading-scans.md)                                       | Scanned pages: the OCR service, `raw:adopt`, `ocr:read`, scan facts, review        |
 | [`applying-migrations.md`](applying-migrations.md)                           | Migrations into production by hand: `--status`, apply, checks; 0040–0043           |
 | [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037   |
 

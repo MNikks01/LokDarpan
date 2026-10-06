@@ -31,7 +31,7 @@
 | [`15-scalability/`](./15-scalability)               | The eight-phase village→nation plan                                                                                                                |
 | [`16-operations/`](./16-operations)                 | Runbooks: deployment, database, nightly collection, tender placement                                                                               |
 | [`17-legal/`](./17-legal)                           | **Binding** legal and ethical rules                                                                                                                |
-| [`adr/`](./adr)                                     | Decisions 001–070 — **011 onward active; 001–010 deferred (mobile)**                                                                               |
+| [`adr/`](./adr)                                     | Decisions 001–072 — **011 onward active; 001–010 deferred (mobile)**                                                                               |
 | [`wireframes/`](./wireframes)                       | Low-fidelity wireframes (mobile; desktop pass due in W3–W5)                                                                                        |
 | [`diagrams/`](./diagrams)                           | Architecture diagrams _(to be populated)_                                                                                                          |
 | [`decisions/`](./decisions)                         | Cross-cutting product decisions                                                                                                                    |
@@ -47,6 +47,10 @@
 **Working on the map or ingestion safety** → `decisions/gods-eye-view-adoption.md` → `adr/022` → `adr/052`
 
 **Working on tenders** → `adr/056` → `adr/067` → `adr/068` → `16-operations/tender-placement.md`
+
+**Working on scanned pages (OCR)** → `adr/038` → `adr/071` → `adr/072` → `16-operations/reading-scans.md`
+
+**What changed most recently** → `decisions/2026-10-06-scans-read-and-audit-figures-live.md`
 
 **Working on data** → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md`
 
@@ -82,6 +86,8 @@ Web-specific:
 | 2   | ~~**The execution-data gap**~~ — **settled 5 Sep, not closed.** PMGSY is licence-blocked and not collected; since 25 Sep a request to NRIDA is drafted but not sent. `Released − Utilized` has no input ([`00-overview/what-the-ledger-is-today.md`](./00-overview/what-the-ledger-is-today.md))                                                                                                                                                                                                          | Project-level Money Trail, indefinitely     |
 | 3   | ~~**Ask for permission, or don't.**~~ **Answered 5 Sep: don't; reversed 25 Sep: ask, without blocking on the answer.** Drafts are ready and none is sent ([`decisions/2026-09-25-seven-decisions.md`](./decisions/2026-09-25-seven-decisions.md), [`06-government-sources/permission-requests.json`](./06-government-sources/permission-requests.json)). Until an answer, BEAMS and tender details stay withheld ([`00-overview/what-the-ledger-is-today.md`](./00-overview/what-the-ledger-is-today.md)) | — reversible by one variable and one letter |
 | 4   | Confirm self-hosted deployability is tested, not assumed (`adr/011`)                                                                                                                                                                                                                                                                                                                                                                                                                                      | W1                                          |
+| 5   | **The CAG corpus is in production** (6 Oct, dataset version 285): `/documents` lists 30 reports with 5,088 reviewed figures. Reviews made locally after that need re-promoting ([`16-operations/promoting-the-cag-corpus.md`](./16-operations/promoting-the-cag-corpus.md))                                                                                                                                                                                                                               | —                                           |
+| 6   | **A `data.gov.in` API key exists** (6 Oct); untested while the API gateway was failing. It is the one large source licensed for reuse without a request ([`06-government-sources/datagovin-api-findings.md`](./06-government-sources/datagovin-api-findings.md))                                                                                                                                                                                                                                          | the Assam procurement inspection            |
 
 ---
 
