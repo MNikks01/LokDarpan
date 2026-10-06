@@ -43,6 +43,10 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
 # FastAPI declares request parts as argument defaults — `File(...)`, `Form(...)`.
 # That is the framework's own idiom, not the mutable-default hazard B008 is for.
 "src/lokdarpan_ocr/service.py" = ["B008"]
+# The HTTP tests import FastAPI only after `pytest.importorskip`, so the suite
+# skips rather than errors where the [serve] extra is not installed. Newer ruff
+# understands that; the version CI pins (0.7.4) reports E402 on each import.
+"tests/test_http.py" = ["E402"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

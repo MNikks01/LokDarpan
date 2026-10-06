@@ -227,3 +227,122 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
     });
   },
 );
+
+/**
+ * Documents the run cannot read: bytes held in a store this run was not given,
+ * and a document the service fails on. Each is reported and skipped, and
+ * nothing is written for either — a page nobody could read stays a page with
+ * no reading.
+ */
+describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
+  "OCR documents that cannot be read (integration)",
+  { timeout: 60_000 },
+  () => {
+    let pool: pg.Pool | undefined;
+    let db: pg.PoolClient | undefined;
+    let rawDir = "";
+    let counts: ReadPagesCounts | undefined;
+    const lines: string[] = [];
+    const documentIds: number[] = [];
+
+    beforeAll(async () => {
+      pool = new pg.Pool({ connectionString: DATABASE_URL, max: 1 });
+      const client = await pool.connect();
+      db = client;
+      await client.query("BEGIN");
+      rawDir = mkdtempSync(join(tmpdir(), "ocr-unreadable-"));
+      const store = new FileRawStore(rawDir);
+      const version = await client.query<{ id: string }>(
+        `INSERT INTO dataset_version (description) VALUES ('ocr unreadable test') RETURNING id`,
+      );
+
+      // One held here, which the service will fail on; one held in another store.
+      for (const [bytes, storedIn] of [
+        ["%PDF-1.4 a scan the service fails on", store.location],
+        ["%PDF-1.4 a scan held elsewhere", "s3://another-bucket"],
+      ] as const) {
+        const artifact = await putArtifact(store, Buffer.from(bytes), {
+          sourceId: "test-ocr-unreadable",
+          sourceUrl: `https://example.invalid/${String(documentIds.length)}.pdf`,
+          retrievedAt: new Date("2026-10-05T02:00:00Z"),
+          httpStatus: 200,
+          contentType: "application/pdf",
+        });
+        await client.query(
+          `INSERT INTO source_artifact (sha256, source_id, source_url, retrieved_at, http_status,
+                                        content_type, byte_size, storage_path, stored_in)
+           VALUES ($1, 'test-ocr-unreadable', $2, now(), 200, 'application/pdf', $3, $4, $5)`,
+          [
+            artifact.sha256,
+            `https://example.invalid/${String(documentIds.length)}.pdf`,
+            artifact.byteSize,
+            artifact.storagePath,
+            storedIn,
+          ],
+        );
+        const document = await client.query<{ id: string }>(
+          `INSERT INTO document (doc_type, title, issuing_authority, source_sha256, dataset_version_id,
+                                 mime_type, page_count, pages_without_text, extraction_method)
+           VALUES ('tender_notice', 'An unreadable scan', 'An agency', $1, $2,
+                   'application/pdf', 1, 1, 'test fixture')
+           RETURNING id`,
+          [artifact.sha256, Number(version.rows[0]?.id)],
+        );
+        const id = Number(document.rows[0]?.id);
+        documentIds.push(id);
+        await client.query(
+          `INSERT INTO document_page (document_id, page_number, content, script)
+           VALUES ($1, 1, NULL, 'none')`,
+          [id],
+        );
+      }
+
+      const failing: typeof globalThis.fetch = (input) => {
+        const url =
+          input instanceof Request ? input.url : input instanceof URL ? input.href : input;
+        if (url.endsWith("/capabilities")) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                contract_version: "ocr/1",
+                engines: [{ name: "tesseract", available: true, version: "5.5.3", detail: null }],
+              }),
+              { headers: { "content-type": "application/json" } },
+            ),
+          );
+        }
+        return Promise.resolve(new Response("the engine crashed", { status: 500 }));
+      };
+      counts = await readUnreadPages(
+        "test-ocr-unreadable",
+        {
+          db: client,
+          store,
+          client: new OcrClient({ baseUrl: "http://ocr.invalid", fetch: failing }),
+        },
+        { engines: ["tesseract"], log: (l) => lines.push(l) },
+      );
+    });
+
+    afterAll(async () => {
+      await db?.query("ROLLBACK");
+      db?.release();
+      await pool?.end();
+      rmSync(rawDir, { recursive: true, force: true });
+    });
+
+    it("skips both, says why, and reads nothing", () => {
+      expect(counts).toMatchObject({ documents: 0, pages: 0, readings: 0, unavailable: 2 });
+      expect(lines.some((l) => l.includes("held in s3://another-bucket"))).toBe(true);
+      expect(lines.some((l) => l.includes("HTTP 500"))).toBe(true);
+    });
+
+    it("writes no reading and no refusal for a document nobody could read", async () => {
+      const rows = await db?.query<{ n: string }>(
+        `SELECT count(*) AS n FROM page_reading WHERE document_id = ANY($1::bigint[])`,
+        [documentIds],
+      );
+      expect(Number(rows?.rows[0]?.n)).toBe(0);
+    });
+  },
+);
