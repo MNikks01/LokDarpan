@@ -8,17 +8,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **It is deployed and holds real data** (as of 29 September 2026). The site runs on Vercel, reading a PostgreSQL + PostGIS ledger on Neon; a GitHub Actions job collects tenders nightly. Only the example project page (`/project/[id]`) renders fixture data, and it says so.
 
-**Production and the local database do not hold the same things — check which one you mean.** Measured 29 September 2026:
+**Production and the local database do not hold the same things — check which one you mean.** Measured 29 September 2026; the CAG row updated 6 October 2026:
 
 | Ledger contents                                        | Production (Neon)                 | Local Docker       |
 | ------------------------------------------------------ | --------------------------------- | ------------------ |
 | LGD states · districts, with OSM geometry              | 36 · 787                          | 36 · 787           |
 | Sub-districts · villages · urban local bodies          | **none**                          | 355 · 40 · 18      |
-| CAG audit reports · pages · published facts            | **none**                          | 30 · 6,339 · 5,088 |
+| CAG audit reports · pages · published facts            | 30 · 6,339 · 5,088 (promoted)     | 30 · 6,339 · 5,088 |
 | BEAMS departments · schemes (collected, not displayed) | **none**                          | 33 · 524           |
 | Open tenders, 21 portals, placed where evidence allows | 1,318 (nightly; ADR-067, ADR-068) | a stale subset     |
 
-So on the live site `/documents` is empty and the department page has nothing to show. The CAG and BEAMS loaders are operator CLIs that have only ever been run locally. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
+The CAG corpus reached production on 6 October 2026 by `promote:cag` (ADR-070; dataset version 285), so `/documents` lists the 30 reports with their reviewed figures. Extraction and review still happen locally; a report reviewed further after promotion does not follow on its own. The department page still has nothing to show: BEAMS has only ever been loaded locally, and its figures are withheld until permitted. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
 
 What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
 
