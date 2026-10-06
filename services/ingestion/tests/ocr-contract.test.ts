@@ -93,6 +93,25 @@ describe("the client treats the service as optional", () => {
     dpi: 300,
   };
 
+  it("gives a read time for every page and every engine it asks for", () => {
+    // A fixed timeout abandoned every multi-page document while the service was
+    // still reading it, and reported the service as unavailable.
+    const client = new OcrClient({
+      baseUrl: "http://ocr.test",
+      timeoutMs: 1_000,
+      readTimeoutPerPageMs: 10_000,
+    });
+
+    expect(client.readTimeoutMs(request)).toBe(11_000);
+    expect(
+      client.readTimeoutMs({
+        ...request,
+        page_numbers: [1, 2, 3],
+        engines: ["tesseract", "paddleocr"],
+      }),
+    ).toBe(61_000);
+  });
+
   it("reports an unreachable service rather than throwing", async () => {
     const client = new OcrClient({
       baseUrl: "http://ocr.invalid",

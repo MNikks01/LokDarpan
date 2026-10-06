@@ -19,6 +19,8 @@ import { MSIDC } from "./msidc";
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=msidc --dry-run      read listings, fetch no notice, write nothing
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --extract-only make documents of notices already held, and read their facts
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --extract-only --ocr  also send scanned pages to the OCR service
+ *   … --ocr --engines=tesseract                       only the engines named (default: tesseract,paddleocr)
+ *   … --ocr --ocr-page-seconds=600                    allow each page and engine this long (default 360)
  *
  * After collecting, every held notice without a document is read back from the
  * raw store and loaded as a `tender_notice` document with its pages
@@ -48,6 +50,25 @@ const EXIT_MISCONFIGURED = 2;
 
 function argument(name: string): string | undefined {
   return process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
+}
+
+function enginesArgument(): readonly string[] | undefined {
+  const names = argument("engines")
+    ?.split(",")
+    .map((n) => n.trim())
+    .filter((n) => n !== "");
+  return names === undefined || names.length === 0 ? undefined : names;
+}
+
+function ocrPageSecondsOrExit(): number | undefined {
+  const raw = argument("ocr-page-seconds");
+  if (raw === undefined) return undefined;
+  const seconds = Number(raw);
+  if (!Number.isInteger(seconds) || seconds <= 0) {
+    process.stderr.write("--ocr-page-seconds must be a positive whole number of seconds\n");
+    process.exit(EXIT_MISCONFIGURED);
+  }
+  return seconds;
 }
 
 function agencyOrExit(): AgencyListing<never> {
@@ -130,6 +151,9 @@ interface RunOptions {
   readonly dryRun: boolean;
   readonly extractOnly: boolean;
   readonly ocr: boolean;
+  /** Engines to read with; absent means `DEFAULT_ENGINES`. */
+  readonly engines: readonly string[] | undefined;
+  readonly ocrPageSeconds: number | undefined;
   readonly log: (line: string) => void;
 }
 
@@ -172,8 +196,18 @@ async function runAgency(
     if (options.ocr) {
       const client = new OcrClient({
         baseUrl: process.env["OCR_SERVICE_URL"] ?? DEFAULT_OCR_SERVICE,
+        ...(options.ocrPageSeconds === undefined
+          ? {}
+          : { readTimeoutPerPageMs: options.ocrPageSeconds * 1000 }),
       });
-      const read = await readUnreadPages(agency.sourceId, { db, store, client }, options);
+      const read = await readUnreadPages(
+        agency.sourceId,
+        { db, store, client },
+        {
+          log: options.log,
+          ...(options.engines === undefined ? {} : { engines: options.engines }),
+        },
+      );
       options.log(ocrSummary(read));
     }
     options.log(factSummary(await readNoticeFacts(db, agency.sourceId)));
@@ -211,6 +245,8 @@ async function main(): Promise<void> {
         dryRun,
         extractOnly: process.argv.includes("--extract-only"),
         ocr: process.argv.includes("--ocr"),
+        engines: enginesArgument(),
+        ocrPageSeconds: ocrPageSecondsOrExit(),
         log,
       },
     );
