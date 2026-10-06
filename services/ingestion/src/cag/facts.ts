@@ -64,6 +64,15 @@ export interface FactCandidate {
    * four amounts, and `monetary_amount` alone cannot say which is which.
    */
   readonly field?: string;
+  /**
+   * The OCR reading this was read from (`page_reading.id`), for a page with no
+   * text layer. Absent for every fact read from the publisher's own text.
+   * A fact read from a scan is a different claim and is stored as one
+   * (ADR-072): withheld from `published_fact` whatever its review.
+   */
+  readonly pageReadingId?: number;
+  /** How this one fact was read, where it differs from its parser's usual method. */
+  readonly extractionMethod?: string;
 }
 
 /**

@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { FactCandidate } from "../src/cag/facts";
-import { gepnicDateTime, noticeFacts, printedRupeesToPaise } from "../src/maharashtra/notice-facts";
+import {
+  asciiDigits,
+  gepnicDateTime,
+  noticeFacts,
+  printedRupeesToPaise,
+  type PageReadingInput,
+} from "../src/maharashtra/notice-facts";
 
 /**
  * Page text below is copied from MSIDC notices collected on 2026-10-01, line
@@ -166,7 +172,7 @@ describe("noticeFacts: MSIDC's own letter", () => {
 
   it("reads the notice number and the issuer's reference", () => {
     expect(fields["notice_number"]).toBe("09 (2026-2027)");
-    expect(fields["issuer_reference"]).toBe("MSIDC/Mumbai/Limited/Tender/09/2026");
+    expect(fields.issuer_reference).toBe("MSIDC/Mumbai/Limited/Tender/09/2026");
   });
 
   it("reads the EMD and the fee payable, and no figure that is not one", () => {
@@ -218,5 +224,106 @@ describe("noticeFacts: pages with nothing to read", () => {
         { pageNumber: 2, content: "Digitally signed by an officer\nDate: 2024.09.28 17:48:59 IST" },
       ]),
     ).toEqual([]);
+  });
+});
+
+/**
+ * Lines below are copied from Tesseract 5.5.3's readings of MHADA notices
+ * (scans, collected 2026-09-30, read 2026-10-06), OCR damage included.
+ */
+const MHADA_SCHEDULE = `ई-निविदा सुचना क्र.:- का. अ. (पूर्व) / मु.झो.सु.मंडळ/ ई-निविदा/ ३९ /२०२६-२७
+जाहिरात दिनांक २९.०९.२०२६, सकाळी १०.०० वा.
+निविदा स्विकृती अंतिम दिनांक ०६.१०.२०२६, सायंकाळी ६.१५ वाजता
+तांत्रिक बोली उघडण्याचा दिनांक ०८.१०.२०२६, सकाळी १०.३० नंतर`;
+
+describe("noticeFacts: MHADA's Marathi schedule", () => {
+  const fields = Object.fromEntries(
+    noticeFacts([{ pageNumber: 1, content: MHADA_SCHEDULE }]).map((f) => [
+      f.field,
+      f.normalisedValue,
+    ]),
+  );
+
+  it("reads each dated line in Devanagari digits, with the time the part of day gives", () => {
+    expect(fields).toMatchObject({
+      publish: "2026-09-29T10:00+05:30",
+      bid_submission_end: "2026-10-06T18:15+05:30",
+      bid_opening: "2026-10-08T10:30+05:30",
+    });
+  });
+
+  it("keeps the reference as printed, Devanagari and all", () => {
+    expect(fields.issuer_reference).toBe("का. अ. (पूर्व) / मु.झो.सु.मंडळ/ ई-निविदा/ ३९ /२०२६-२७");
+  });
+
+  it("leaves a date OCR damaged unread, rather than repairing it", () => {
+    // Both are from real readings: a doubled digit, and a dot read as a comma.
+    const damaged = noticeFacts([
+      {
+        pageNumber: 1,
+        content: "तांत्रिक बोली उघडण्याचा दिनांक ०८.१९०.२०२६\nनिविदापूर्व बैठक दिनांक २५,०५,२०२६",
+      },
+    ]);
+    expect(damaged).toEqual([]);
+  });
+
+  it("reads no time a part of day cannot name", () => {
+    const [fact] = noticeFacts([
+      { pageNumber: 1, content: "निविदा स्विकृती अंतिम दिनांक ०६.१०.२०२६, दुपारी ९.१५" },
+    ]);
+    expect(fact?.normalisedValue).toBe("2026-10-06");
+  });
+
+  it("turns Devanagari digits into ASCII for a value only", () => {
+    expect(asciiDigits("२९.०९.२०२६")).toBe("29.09.2026");
+  });
+});
+
+describe("noticeFacts: a scan, read from an OCR reading", () => {
+  const content = "जाहिरात दिनांक २९.०९.२०२६";
+  const labelEnd = content.indexOf("२९");
+  const reading: PageReadingInput = {
+    id: 41,
+    engine: "tesseract",
+    engineVersion: "5.5.3",
+    words: [
+      // The label, read badly: an engine's doubt about it says nothing about the date.
+      { charStart: 0, charEnd: labelEnd - 1, x0: 10, y0: 700, x1: 80, y1: 712, confidence: 0.05 },
+      {
+        charStart: labelEnd,
+        charEnd: content.length,
+        x0: 90,
+        y0: 700,
+        x1: 150,
+        y1: 712,
+        confidence: 0.8,
+      },
+    ],
+  };
+  const [fact] = noticeFacts([{ pageNumber: 2, content, reading }]);
+
+  it("is offered for review, and names the reading and the engine", () => {
+    expect(fact).toMatchObject({
+      field: "publish",
+      normalisedValue: "2026-09-29",
+      pageReadingId: 41,
+      extractionMethod: "labelled fields over OCR reading (tesseract 5.5.3)",
+      validation: { state: "needs_review" },
+    });
+    expect(fact?.validation.reason).toContain("tesseract 5.5.3");
+  });
+
+  it("is only as confident as the engine was of the figures, not of the label", () => {
+    expect(fact?.extractionConfidence).toBeCloseTo(0.85 * 0.8, 3);
+  });
+
+  it("carries the box of the figures it was read from", () => {
+    expect(fact?.box).toEqual({ x0: 90, y0: 700, x1: 150, y1: 712 });
+  });
+
+  it("is marked for review even where the same line on a text layer would not be", () => {
+    const [typed] = noticeFacts([{ pageNumber: 2, content }]);
+    expect(typed?.validation.state).toBe("accepted");
+    expect(typed?.pageReadingId).toBeUndefined();
   });
 });
