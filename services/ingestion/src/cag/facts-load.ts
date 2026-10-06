@@ -49,11 +49,24 @@ function identity(c: {
   rawText: string;
   normalisedValue: string | null;
   field?: string | null;
+  pageReadingId?: number | null;
 }): string {
   // The field is part of what a fact is: a notice whose EMD and tender fee are
   // both ₹1,000 states two facts. Absent and null are the same — prose fills no
   // form — so the audit corpus's identities are unchanged by its addition.
-  return JSON.stringify([c.pageNumber, c.kind, c.rawText, c.normalisedValue, c.field ?? null]);
+  //
+  // So is the reading a scanned page's fact came from: two engines that read
+  // the same words off one page have each made a claim, and neither is the
+  // other's. Text-layer facts carry no reading, so their identities are as
+  // they were.
+  return JSON.stringify([
+    c.pageNumber,
+    c.kind,
+    c.rawText,
+    c.normalisedValue,
+    c.field ?? null,
+    c.pageReadingId ?? null,
+  ]);
 }
 
 /** Which parser produced a set of candidates, recorded on every row it writes. */
@@ -179,7 +192,7 @@ async function heldByIdentity(
 > {
   const held = await client.query(
     `SELECT id, page_number, kind, raw_text, normalised_value, verification_status,
-            parser_version, bbox_x0, validation_state, per_unit, field
+            parser_version, bbox_x0, validation_state, per_unit, field, page_reading_id
        FROM document_fact WHERE document_id = $1`,
     [documentId],
   );
@@ -207,6 +220,7 @@ async function heldByIdentity(
     validation_state: string | null;
     per_unit: string | null;
     field: string | null;
+    page_reading_id: string | null;
   }[]) {
     const key = identity({
       pageNumber: row.page_number,
@@ -214,6 +228,7 @@ async function heldByIdentity(
       rawText: row.raw_text,
       normalisedValue: row.normalised_value,
       field: row.field,
+      pageReadingId: row.page_reading_id === null ? null : Number(row.page_reading_id),
     });
     existing.set(key, {
       id: row.id,
@@ -227,6 +242,11 @@ async function heldByIdentity(
   return existing;
 }
 
+/** A candidate's box as its four columns, all null when it has none. */
+function boxColumns(c: FactCandidate): (number | null)[] {
+  return c.box === undefined ? [null, null, null, null] : [c.box.x0, c.box.y0, c.box.x1, c.box.y1];
+}
+
 /** A candidate nobody has seen, offered for review with its region if it has one. */
 async function insertCandidate(
   client: SqlClient,
@@ -238,25 +258,24 @@ async function insertCandidate(
     `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
                                 extraction_method, parser_version, extraction_confidence,
                                 bbox_x0, bbox_y0, bbox_x1, bbox_y1,
-                                validation_state, validation_reason, per_unit, field)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+                                validation_state, validation_reason, per_unit, field,
+                                page_reading_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
     [
       documentId,
       c.pageNumber,
       c.kind,
       c.rawText,
       c.normalisedValue,
-      parser.method,
+      c.extractionMethod ?? parser.method,
       parser.version,
       c.extractionConfidence,
-      c.box?.x0 ?? null,
-      c.box?.y0 ?? null,
-      c.box?.x1 ?? null,
-      c.box?.y1 ?? null,
+      ...boxColumns(c),
       c.validation.state,
       c.validation.reason === "" ? null : c.validation.reason,
       c.perUnit,
       c.field ?? null,
+      c.pageReadingId ?? null,
     ],
   );
 }

@@ -7,7 +7,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { extractNotices, type ExtractCounts } from "../src/maharashtra/documents";
 import { recordArtifact, recordSighting } from "../src/maharashtra/load";
 import { MSIDC, MSIDC_SOURCE_ID } from "../src/maharashtra/msidc";
-import { readNoticeFacts, type NoticeFactCounts } from "../src/maharashtra/notice-facts";
+import {
+  NOTICE_PARSER,
+  readNoticeFacts,
+  type NoticeFactCounts,
+} from "../src/maharashtra/notice-facts";
 import { FileRawStore, putArtifact, storagePathFor } from "../src/raw-store";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
@@ -192,7 +196,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         new Set(["unverified"]),
       );
       expect(new Set(rows?.rows.map((r) => r.parser_version))).toEqual(
-        new Set(["mh-notice-facts/1"]),
+        new Set([NOTICE_PARSER.version]),
       );
     });
 
