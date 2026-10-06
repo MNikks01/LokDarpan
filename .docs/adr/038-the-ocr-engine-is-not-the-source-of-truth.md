@@ -100,3 +100,10 @@ read it unchanged — appealing, and wrong here. It modifies the document, and t
 project's raw store keeps retrieved bytes immutable so that a better parser can
 be run against exactly what was published. A derived PDF would become a second
 artefact that looks like the source and is not.
+
+## Addendum · 2026-10-06
+
+"How a reading enters the ledger" is answered by
+[ADR-071](./071-a-reading-sits-beside-the-page-never-in-its-place.md). Readings are stored in
+`page_reading`, beside the page, with the provenance this ADR requires. `document_page` is never
+written to. The other two open questions stand.

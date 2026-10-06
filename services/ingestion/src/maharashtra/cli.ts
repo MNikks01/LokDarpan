@@ -1,6 +1,8 @@
 import pg from "pg";
 
 import { completeRun, failRun, openRun, type RunCounts } from "../ingestion-run";
+import { OcrClient } from "../ocr/client";
+import { readUnreadPages, type ReadPagesCounts } from "../ocr/read-pages";
 import { RawStoreMisconfigured, rawStoreFromEnv, type ReadableRawStore } from "../raw-store";
 import { collectListing, type AgencyListing, type CollectCounts } from "./collect";
 import { extractNotices, type ExtractCounts } from "./documents";
@@ -16,12 +18,18 @@ import { MSIDC } from "./msidc";
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --pages=0-454  backfill a range, every page read
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=msidc --dry-run      read listings, fetch no notice, write nothing
  *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --extract-only make documents of notices already held, and read their facts
+ *   pnpm --filter @lokdarpan/ingestion ingest:agency -- --source=mhada --extract-only --ocr  also send scanned pages to the OCR service
  *
  * After collecting, every held notice without a document is read back from the
  * raw store and loaded as a `tender_notice` document with its pages
  * (`documents.ts`). Scanned notices are reported: their pages await OCR.
  * Then every notice with text is read for its facts — tender ID, notice
  * number, EMD, fees, dates — as unverified candidates (`notice-facts.ts`).
+ *
+ * With `--ocr`, pages with no text layer are first sent to the OCR service at
+ * `OCR_SERVICE_URL` (default http://127.0.0.1:8000) and each engine's reading is
+ * stored beside the page (`ocr/read-pages.ts`, ADR-071). Off by default: the
+ * service is optional, and a run without it is a complete run.
  *
  * Sources: `mhada` (455 pages, July 2016 on) and `msidc` (one page, February
  * 2024 on). Not yet scheduled (backlog MHA-TENDER-015 adds them to the nightly
@@ -83,6 +91,20 @@ function factSummary(counts: NoticeFactCounts): string {
   );
 }
 
+const DEFAULT_OCR_SERVICE = "http://127.0.0.1:8000";
+
+function ocrSummary(counts: ReadPagesCounts): string {
+  const missing =
+    counts.enginesMissing.length === 0
+      ? ""
+      : ` · not installed: ${counts.enginesMissing.join(", ")}`;
+  return (
+    `OCR: documents ${String(counts.documents)} · pages ${String(counts.pages)} · ` +
+    `readings ${String(counts.readings)} (no text found ${String(counts.empty)}) · ` +
+    `refusals ${String(counts.refusals)} · not read ${String(counts.unavailable)}${missing}`
+  );
+}
+
 function summary(counts: CollectCounts): string {
   return (
     `pages ${String(counts.pages)} · notices listed ${String(counts.listed)} · ` +
@@ -107,6 +129,7 @@ interface RunOptions {
   readonly explicit: boolean;
   readonly dryRun: boolean;
   readonly extractOnly: boolean;
+  readonly ocr: boolean;
   readonly log: (line: string) => void;
 }
 
@@ -146,6 +169,13 @@ async function runAgency(
   if (counts !== null) options.log(summary(counts));
   if (!options.dryRun) {
     options.log(extractSummary(await extractNotices(agency, db, store, options.log)));
+    if (options.ocr) {
+      const client = new OcrClient({
+        baseUrl: process.env["OCR_SERVICE_URL"] ?? DEFAULT_OCR_SERVICE,
+      });
+      const read = await readUnreadPages(agency.sourceId, { db, store, client }, options);
+      options.log(ocrSummary(read));
+    }
     options.log(factSummary(await readNoticeFacts(db, agency.sourceId)));
   }
   return runCountsOf(counts);
@@ -180,6 +210,7 @@ async function main(): Promise<void> {
         ...range,
         dryRun,
         extractOnly: process.argv.includes("--extract-only"),
+        ocr: process.argv.includes("--ocr"),
         log,
       },
     );
