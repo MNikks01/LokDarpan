@@ -48,11 +48,38 @@ function identity(c: {
   kind: string;
   rawText: string;
   normalisedValue: string | null;
+  field?: string | null;
+  pageReadingId?: number | null;
 }): string {
-  return JSON.stringify([c.pageNumber, c.kind, c.rawText, c.normalisedValue]);
+  // The field is part of what a fact is: a notice whose EMD and tender fee are
+  // both ₹1,000 states two facts. Absent and null are the same — prose fills no
+  // form — so the audit corpus's identities are unchanged by its addition.
+  //
+  // So is the reading a scanned page's fact came from: two engines that read
+  // the same words off one page have each made a claim, and neither is the
+  // other's. Text-layer facts carry no reading, so their identities are as
+  // they were.
+  return JSON.stringify([
+    c.pageNumber,
+    c.kind,
+    c.rawText,
+    c.normalisedValue,
+    c.field ?? null,
+    c.pageReadingId ?? null,
+  ]);
 }
 
-const EXTRACTION_METHOD = "regex over pdf text layer";
+/** Which parser produced a set of candidates, recorded on every row it writes. */
+export interface FactParser {
+  readonly version: string;
+  readonly method: string;
+}
+
+/** The audit-report parser, which every caller meant before there was a second. */
+export const CAG_PARSER: FactParser = {
+  version: PARSER_VERSION,
+  method: "regex over pdf text layer",
+};
 
 /**
  * Reconciles a document's candidates to what this parser version produces.
@@ -89,6 +116,7 @@ async function reconcile(
     perUnit: string | null;
   },
   c: FactCandidate,
+  parser: FactParser,
 ): Promise<Reconciled> {
   // The verdict is not part of identity: it is what the field's rules say about
   // a reading, not what the reading is. So it lands on rows already held,
@@ -134,10 +162,10 @@ async function reconcile(
   //
   // Decided rows are not touched: their version is part of what a person
   // reviewed, and the parser does not get to restate that.
-  if (row.parserVersion !== PARSER_VERSION) {
+  if (row.parserVersion !== parser.version) {
     await client.query(`UPDATE document_fact SET parser_version = $2 WHERE id = $1`, [
       row.id,
-      PARSER_VERSION,
+      parser.version,
     ]);
     return { located, alreadyReviewed: false, refreshed: true };
   }
@@ -164,7 +192,7 @@ async function heldByIdentity(
 > {
   const held = await client.query(
     `SELECT id, page_number, kind, raw_text, normalised_value, verification_status,
-            parser_version, bbox_x0, validation_state, per_unit
+            parser_version, bbox_x0, validation_state, per_unit, field, page_reading_id
        FROM document_fact WHERE document_id = $1`,
     [documentId],
   );
@@ -191,12 +219,16 @@ async function heldByIdentity(
     bbox_x0: string | null;
     validation_state: string | null;
     per_unit: string | null;
+    field: string | null;
+    page_reading_id: string | null;
   }[]) {
     const key = identity({
       pageNumber: row.page_number,
       kind: row.kind,
       rawText: row.raw_text,
       normalisedValue: row.normalised_value,
+      field: row.field,
+      pageReadingId: row.page_reading_id === null ? null : Number(row.page_reading_id),
     });
     existing.set(key, {
       id: row.id,
@@ -210,34 +242,40 @@ async function heldByIdentity(
   return existing;
 }
 
+/** A candidate's box as its four columns, all null when it has none. */
+function boxColumns(c: FactCandidate): (number | null)[] {
+  return c.box === undefined ? [null, null, null, null] : [c.box.x0, c.box.y0, c.box.x1, c.box.y1];
+}
+
 /** A candidate nobody has seen, offered for review with its region if it has one. */
 async function insertCandidate(
   client: SqlClient,
   documentId: number,
   c: FactCandidate,
+  parser: FactParser,
 ): Promise<void> {
   await client.query(
     `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
                                 extraction_method, parser_version, extraction_confidence,
                                 bbox_x0, bbox_y0, bbox_x1, bbox_y1,
-                                validation_state, validation_reason, per_unit)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+                                validation_state, validation_reason, per_unit, field,
+                                page_reading_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
     [
       documentId,
       c.pageNumber,
       c.kind,
       c.rawText,
       c.normalisedValue,
-      EXTRACTION_METHOD,
-      PARSER_VERSION,
+      c.extractionMethod ?? parser.method,
+      parser.version,
       c.extractionConfidence,
-      c.box?.x0 ?? null,
-      c.box?.y0 ?? null,
-      c.box?.x1 ?? null,
-      c.box?.y1 ?? null,
+      ...boxColumns(c),
       c.validation.state,
       c.validation.reason === "" ? null : c.validation.reason,
       c.perUnit,
+      c.field ?? null,
+      c.pageReadingId ?? null,
     ],
   );
 }
@@ -246,6 +284,7 @@ export async function loadFactCandidates(
   client: SqlClient,
   documentId: number,
   candidates: readonly FactCandidate[],
+  parser: FactParser = CAG_PARSER,
 ): Promise<FactLoadResult> {
   const existing = await heldByIdentity(client, documentId);
 
@@ -278,14 +317,14 @@ export async function loadFactCandidates(
     const row = existing.get(identity(c));
 
     if (row !== undefined) {
-      const outcome = await reconcile(client, row, c);
+      const outcome = await reconcile(client, row, c, parser);
       located += outcome.located ? 1 : 0;
       skippedAlreadyReviewed += outcome.alreadyReviewed ? 1 : 0;
       refreshed += outcome.refreshed ? 1 : 0;
       continue;
     }
 
-    await insertCandidate(client, documentId, c);
+    await insertCandidate(client, documentId, c, parser);
     inserted += 1;
   }
 

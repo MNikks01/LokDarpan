@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /login          # Fixed: removed full URL
+Disallow: /cgi-bin/
+Disallow: /search
+Disallow: /*?q=
+Sitemap: https://cidco.maharashtra.gov.in/sitemap.xml

@@ -18,9 +18,17 @@ from .base import EngineInfo, EngineUnavailableError, Word
 
 NAME = "paddleocr"
 
+# PaddleOCR's model code for each language it is built with, as the Tesseract
+# code the wire contract uses. One model reads one language.
+_CONTRACT_LANGUAGE = {"en": "eng"}
+
 
 class PaddleEngine:
     def __init__(self, language: str = "en") -> None:
+        if language not in _CONTRACT_LANGUAGE:
+            raise EngineUnavailableError(
+                f"no contract language is recorded for PaddleOCR's {language!r} model"
+            )
         try:
             import paddleocr
             from PIL import Image
@@ -50,10 +58,13 @@ class PaddleEngine:
             name=NAME,
             version=self._version,
             model_versions={"lang": self._language},
+            reads_languages=(_CONTRACT_LANGUAGE[self._language],),
         )
 
     def read(self, image_png: bytes, languages: list[str]) -> list[Word]:
-        del languages  # the model is chosen at construction, not per call
+        # The model is chosen at construction, not per call; `info()` says which
+        # languages it reads, and the service records only those.
+        del languages
         import numpy
 
         image = self._image.open(io.BytesIO(image_png)).convert("RGB")

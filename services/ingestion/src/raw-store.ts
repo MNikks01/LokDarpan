@@ -58,6 +58,16 @@ export interface RawStore {
   ): Promise<void>;
 }
 
+/**
+ * A store that can give bytes back, so a document can be re-read with a better
+ * parser without being downloaded again — the reason the store exists
+ * (ADR-069). A read is verified against the hash it is addressed by: bytes that
+ * no longer match their address are a failure to surface, never data to parse.
+ */
+export interface ReadableRawStore extends RawStore {
+  get(relativePath: string, sha256: string): Promise<Buffer>;
+}
+
 async function exists(path: string): Promise<boolean> {
   try {
     await access(path);
@@ -75,7 +85,7 @@ function integrityFailure(relativePath: string, why: string): Error {
 }
 
 /** A directory. Durable only as long as the machine holding it. */
-export class FileRawStore implements RawStore {
+export class FileRawStore implements ReadableRawStore {
   readonly location = "file";
 
   constructor(private readonly root: string) {}
@@ -92,6 +102,14 @@ export class FileRawStore implements RawStore {
     }
     await mkdir(dirname(absolutePath), { recursive: true });
     await writeFile(absolutePath, bytes, { flag: "wx" });
+  }
+
+  async get(relativePath: string, sha256: string): Promise<Buffer> {
+    const bytes = await readFile(join(this.root, relativePath));
+    if (sha256Of(bytes) !== sha256) {
+      throw integrityFailure(relativePath, "does not hash to its own content address");
+    }
+    return bytes;
   }
 }
 
@@ -113,7 +131,7 @@ export interface ObjectStoreConfig {
  * sweep would re-read every one it had already kept. The check still catches a
  * key holding different bytes, which is the failure that matters.
  */
-export class ObjectRawStore implements RawStore {
+export class ObjectRawStore implements ReadableRawStore {
   readonly location: string;
 
   constructor(
@@ -164,6 +182,18 @@ export class ObjectRawStore implements RawStore {
       throw new Error(`Raw store refused ${relativePath}: PUT returned ${String(put.status)}.`);
     }
   }
+
+  async get(relativePath: string, sha256: string): Promise<Buffer> {
+    const response = await this.signedFetch(this.urlFor(relativePath), { method: "GET" });
+    if (!response.ok) {
+      throw new Error(`Raw store: GET ${relativePath} returned ${String(response.status)}.`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (sha256Of(bytes) !== sha256) {
+      throw integrityFailure(relativePath, "holds bytes other than the ones addressed");
+    }
+    return bytes;
+  }
 }
 
 /** Where local runs keep bytes when no object store is configured. */
@@ -192,7 +222,7 @@ export class RawStoreMisconfigured extends Error {}
 export function rawStoreFromEnv(
   env: Readonly<Record<string, string | undefined>> = process.env,
   root: string = env["RAW_STORE_ROOT"] ?? DEFAULT_RAW_ROOT,
-): RawStore {
+): ReadableRawStore {
   const present = OBJECT_STORE_VARIABLES.filter((name) => (env[name] ?? "") !== "");
 
   if (present.length === OBJECT_STORE_VARIABLES.length) {

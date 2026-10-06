@@ -164,8 +164,9 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
       unit_name: string | null;
       unit_level: string | null;
       geography_source: string | null;
+      source_id: string;
     }>(
-      `SELECT d.id, d.title, d.issuing_authority, d.geography_source,
+      `SELECT d.id, d.title, d.issuing_authority, d.geography_source, s.source_id,
               u.name_en AS unit_name, u.level::text AS unit_level,
               (SELECT count(*) FROM published_fact p WHERE p.document_id = d.id
               ) AS published_facts,
@@ -173,22 +174,28 @@ export class PostgresPublishedFactRepository implements PublishedFactRepository 
                 WHERE f.document_id = d.id AND f.verification_status = 'unverified'
               ) AS awaiting_review
          FROM document d
+         JOIN source_artifact s ON s.sha256 = d.source_sha256
          LEFT JOIN admin_unit u ON u.id = d.admin_unit_id
         WHERE ($1::bigint IS NULL OR d.admin_unit_id = $1)
           AND ($2::boolean IS NOT TRUE OR d.admin_unit_id IS NULL)
         ORDER BY d.title`,
       [scope.adminUnitId ?? null, scope.unattributed ?? false],
     );
-    return result.rows.map((r) => ({
-      documentId: Number(r.id),
-      title: displayTitle(r.title),
-      issuingAuthority: r.issuing_authority,
-      publishedFacts: Number(r.published_facts),
-      awaitingReview: Number(r.awaiting_review),
-      adminUnitName: r.unit_name,
-      adminUnitLevel: r.unit_level,
-      geographySource: r.geography_source,
-    }));
+    // Filtered exactly as a document's own page and search are: a title in a
+    // list still asserts that we hold and have read a document whose publisher
+    // has not permitted republication — an agency's tender notice, say.
+    return result.rows
+      .filter((r) => mayRepublish(r.source_id))
+      .map((r) => ({
+        documentId: Number(r.id),
+        title: displayTitle(r.title),
+        issuingAuthority: r.issuing_authority,
+        publishedFacts: Number(r.published_facts),
+        awaitingReview: Number(r.awaiting_review),
+        adminUnitName: r.unit_name,
+        adminUnitLevel: r.unit_level,
+        geographySource: r.geography_source,
+      }));
   }
 }
 

@@ -127,8 +127,11 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         await db().query("BEGIN");
         try {
           await db().query(
+            // page_reading hangs off document_page, and page_reading_item off it;
+            // a table the cascade reaches but this list omits is one TRUNCATE
+            // waits on, which is the deadlock this loop exists to avoid.
             `LOCK TABLE document, document_page, document_text_item, document_fact,
-                        document_fact_review_history
+                        document_fact_review_history, page_reading, page_reading_item
                IN ACCESS EXCLUSIVE MODE NOWAIT`,
           );
           await db().query(

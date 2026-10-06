@@ -47,6 +47,14 @@ export const FIELDS: Readonly<Record<FactKind, FieldRules>> = {
   // say how carefully it must be read is a compile error, not an omission
   // somebody notices later.
   work_reference: { critical: false, note: "not produced by any extractor yet" },
+  // Read from tender notices (`maharashtra/notice-facts.ts`). A wrong tender ID
+  // links a notice to the wrong MahaTenders record, and a wrong date misstates a
+  // deadline, so both are read for precision.
+  tender_identifier: {
+    critical: true,
+    note: "a tender ID or notice number; it links one record of a tender to another",
+  },
+  tender_date: { critical: true, note: "a date a notice sets, such as a submission deadline" },
 };
 
 /**

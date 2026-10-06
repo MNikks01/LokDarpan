@@ -15,7 +15,7 @@ from lokdarpan_ocr.contract import ReadRequest
 from lokdarpan_ocr.engines.base import EngineInfo, EngineUnavailableError, Word
 from lokdarpan_ocr.reading import assemble
 from lokdarpan_ocr.registry import Registry
-from lokdarpan_ocr.service import DocumentMismatchError, read_document
+from lokdarpan_ocr.service import DocumentMismatchError, ReadAbandonedError, read_document
 
 PDF = b"%PDF-1.4 not a real document"
 DIGEST = hashlib.sha256(PDF).hexdigest()
@@ -105,7 +105,96 @@ class TestReadingsAreNotMerged:
         assert {r.content for r in response.readings} == {"Rs", "Bs"}
 
 
-def _read_with_fake_render(pdf: bytes, request: ReadRequest, registry: Registry):
+class SingleLanguageEngine(StubEngine):
+    """An engine whose model reads one language, whatever it is asked for."""
+
+    def __init__(self, reads: tuple[str, ...]) -> None:
+        super().__init__("single", [Word("Rs", (0, 0, 10, 10), 0.9)])
+        self._reads = reads
+        self.asked: list[str] | None = None
+
+    def info(self) -> EngineInfo:
+        return EngineInfo(name="single", version="0.0.1-test", reads_languages=self._reads)
+
+    def read(self, image_png: bytes, languages: list[str]) -> list[Word]:
+        self.asked = languages
+        return super().read(image_png, languages)
+
+
+class TestLanguagesRead:
+    def test_a_reading_names_only_the_languages_its_model_reads(self) -> None:
+        # An English-only model asked for English and Marathi has read English.
+        # Filing its reading under both would claim a Marathi reading that
+        # never happened (ADR-038: provenance or nothing).
+        engine = SingleLanguageEngine(("eng",))
+        registry = Registry({"single": lambda: engine})
+        response = _read_with_fake_render(
+            PDF, a_request(engines=["single"], languages=["eng", "mar"]), registry
+        )
+
+        assert response.refusals == []
+        assert response.readings[0].engine.languages == ["eng"]
+        assert engine.asked == ["eng"]
+
+    def test_a_model_that_reads_none_of_the_languages_refuses_and_says_why(self) -> None:
+        registry = Registry({"single": lambda: SingleLanguageEngine(("eng",))})
+        response = _read_with_fake_render(
+            PDF, a_request(engines=["single"], languages=["mar"]), registry
+        )
+
+        assert response.readings == []
+        assert response.refusals[0].page_number == 1
+        assert "reads eng" in response.refusals[0].reason
+        assert "mar" in response.refusals[0].reason
+
+    def test_an_engine_that_loads_any_language_records_every_one_asked_for(self) -> None:
+        registry = Registry({"stub": StubEngine})
+        response = _read_with_fake_render(PDF, a_request(languages=["eng", "mar"]), registry)
+        assert response.readings[0].engine.languages == ["eng", "mar"]
+
+
+class CountingEngine(StubEngine):
+    """Counts the pages it was asked to read."""
+
+    def __init__(self) -> None:
+        super().__init__("counting", [Word("Rs", (0, 0, 10, 10), 0.9)])
+        self.reads = 0
+
+    def read(self, image_png: bytes, languages: list[str]) -> list[Word]:
+        self.reads += 1
+        return super().read(image_png, languages)
+
+
+class TestAbandonedReads:
+    def test_a_caller_who_left_is_not_read_for(self) -> None:
+        # The caller leaves once page 1 is read. Page 2 must not be: at four
+        # minutes a page, reading on for nobody is a backlog that outlives the
+        # run that asked for it.
+        engine = CountingEngine()
+        registry = Registry({"counting": lambda: engine})
+        with pytest.raises(ReadAbandonedError, match="page 2"):
+            _read_with_fake_render(
+                PDF,
+                a_request(engines=["counting"], page_numbers=[1, 2, 3]),
+                registry,
+                abandoned=lambda: engine.reads >= 1,
+            )
+        assert engine.reads == 1
+
+    def test_a_caller_who_stays_gets_every_page(self) -> None:
+        engine = CountingEngine()
+        registry = Registry({"counting": lambda: engine})
+        response = _read_with_fake_render(
+            PDF,
+            a_request(engines=["counting"], page_numbers=[1, 2, 3]),
+            registry,
+            abandoned=lambda: False,
+        )
+        assert engine.reads == 3
+        assert len(response.readings) == 3
+
+
+def _read_with_fake_render(pdf: bytes, request: ReadRequest, registry: Registry, abandoned=None):
     """Runs the read path with rendering stubbed out.
 
     The renderer needs a real PDF and a real pdfium; neither is what these tests
@@ -139,7 +228,9 @@ def _read_with_fake_render(pdf: bytes, request: ReadRequest, registry: Registry)
     saved = render_module.PdfRenderer
     render_module.PdfRenderer = FakeRenderer  # type: ignore[assignment]
     try:
-        return read_document(pdf, request, registry)
+        if abandoned is None:
+            return read_document(pdf, request, registry)
+        return read_document(pdf, request, registry, abandoned)
     finally:
         render_module.PdfRenderer = saved  # type: ignore[assignment]
 

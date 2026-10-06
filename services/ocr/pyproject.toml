@@ -20,7 +20,9 @@ dependencies = [
 [project.optional-dependencies]
 tesseract = ["pytesseract>=0.3.13"]
 paddle = ["paddleocr>=3.0", "paddlepaddle>=3.0", "numpy>=1.26"]
-serve = ["uvicorn>=0.30"]
+# `/read` takes the PDF as a form upload, and FastAPI refuses to start a form
+# route without python-multipart; the service never started from `[serve]` alone.
+serve = ["uvicorn>=0.30", "python-multipart>=0.0.9"]
 dev = ["pytest>=8.3", "ruff>=0.7"]
 
 [build-system]
@@ -41,6 +43,10 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
 # FastAPI declares request parts as argument defaults — `File(...)`, `Form(...)`.
 # That is the framework's own idiom, not the mutable-default hazard B008 is for.
 "src/lokdarpan_ocr/service.py" = ["B008"]
+# The HTTP tests import FastAPI only after `pytest.importorskip`, so the suite
+# skips rather than errors where the [serve] extra is not installed. Newer ruff
+# understands that; the version CI pins (0.7.4) reports E402 on each import.
+"tests/test_http.py" = ["E402"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
