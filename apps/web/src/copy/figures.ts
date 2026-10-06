@@ -18,6 +18,26 @@ export const observationCopy = {
     "ⓘ This is an arithmetic observation. It does not indicate that anything is wrong.",
 } as const;
 
+/**
+ * A figure read by text recognition from a page that is an image (ADR-072).
+ *
+ * Approved 6 October 2026, and not yet shown: `published_fact` withholds every
+ * fact read from a scan until the page can say so with these sentences. The
+ * engine's doubt is worded as legibility, never as a percentage: a number
+ * beside a government figure reads as the chance the figure is right, and it
+ * measures only how clearly the characters could be seen.
+ */
+export const scanFactCopy = {
+  label:
+    "Read from a scanned page by text recognition · checked by a reviewer against the page image",
+  explanation: (engine: string, version: string): string =>
+    `This page of the document is an image, with no text of its own. The figure was read from the image by text-recognition software (${engine} ${version}), and a reviewer then compared it with the page.`,
+  legibility: (clear: boolean): string =>
+    `The characters in this figure were ${clear ? "clearly" : "not clearly"} legible to the software.`,
+  pagesWithoutTextSomeRead: (without: number, total: number): string =>
+    `${String(without)} of ${String(total)} pages are images with no text of their own. Figures read from them by text recognition are marked as such; others may contain figures this page does not show.`,
+} as const;
+
 export const publishedFactsCopy = {
   correctedByReviewer: " · corrected by the reviewer against the page",
   notASummary:
