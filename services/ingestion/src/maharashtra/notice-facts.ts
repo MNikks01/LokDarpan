@@ -44,7 +44,7 @@ import type { Verdict } from "../cag/validation";
  */
 
 export const NOTICE_PARSER: FactParser = {
-  version: "mh-notice-facts/2",
+  version: "mh-notice-facts/3",
   method: "labelled fields over pdf text layer",
 };
 
@@ -343,9 +343,18 @@ const LETTER_FEE = new RegExp(
 /** `E-Tender Notice No. 09 (2026-2027)`, `E-TENDER NOTICE NO.06 OF 2023-2024`, `notice No.09 Year 2024-25`. */
 const LETTER_NOTICE_NUMBER =
   /(?:E-?\s*Tender\s+Notice|notice)\s+No\.?\s*(\d{1,3})\s*(?:\(\s*(\d{4}\s*-\s*\d{2,4})\s*\)|OF\s+(\d{4}\s*-\s*\d{2,4})|Year\s+(\d{4}\s*-\s*\d{2,4}))/dgiu;
-/** `No. MSIDC/Mumbai/Tender/ 09 /2026` on a line of its own, or `Tender Ref. No: MSIDC/EOI/EMP-ADV/2026`. */
+/**
+ * `No. MSIDC/Mumbai/Tender/ 09 /2026`, or `Tender Ref. No: MSIDC/EOI/EMP-ADV/2026`.
+ *
+ * Read up to the year it ends in, and no further. It used to run to the end of
+ * the line, which held while every reference stood alone; but a scan's OCR
+ * reading joins a line across columns, and the signature beside a reference
+ * became part of it — `…/2024 (R.R.Hande)`, `…/2024 Sd/-`. A re-tender's
+ * `(2nd Call)` is the one thing after the year that is part of the reference:
+ * two calls of one tender share the rest of it.
+ */
 const LETTER_REFERENCE =
-  /(?:^No\.|Tender\s+Ref\.?\s*No\.?\s*:?)\s*(MSIDC\/[^\n]*?)(?=\s+Date\b|\s*$)/dgimu;
+  /(?:^No\.|Tender\s+Ref\.?\s*No\.?\s*:?)\s*(MSIDC(?:\s*\/\s*[A-Za-z0-9-]*)*?\s*\/\s*(?:19|20)\d{2}(?:\s*-\s*\d{2,4})?(?:\s*\(\s*\d+\s*(?:st|nd|rd|th)\s+Call\s*\))?)(?![\d/])/dgimu;
 
 function letterIdentifiers(page: string): Reading[] {
   const out: Reading[] = [];

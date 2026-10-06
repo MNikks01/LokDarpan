@@ -375,3 +375,30 @@ describe("noticeFacts: a reading whose words do not cover the match", () => {
     expect(fact?.pageReadingId).toBe(7);
   });
 });
+
+describe("noticeFacts: where a reference ends", () => {
+  const reference = (line: string): string | null =>
+    noticeFacts([{ pageNumber: 1, content: line }]).find((f) => f.field === "issuer_reference")
+      ?.normalisedValue ?? null;
+
+  it("ends at its year, though OCR joined the signature beside it onto the line", () => {
+    // From Tesseract's reading of an MSIDC scan: the reference and the officer's
+    // name sit in two columns, and the reading put them on one line.
+    expect(reference("No. MSIDC/Mumbai/Tender/g4 /2024 (R.R.Hande)")).toBe(
+      "MSIDC/Mumbai/Tender/g4/2024",
+    );
+    expect(reference("No. MSIDC/Mumbai/Tender/ 344 /2024 Sd/-")).toBe(
+      "MSIDC/Mumbai/Tender/344/2024",
+    );
+  });
+
+  it("keeps a re-tender's call, which two calls of one tender differ by", () => {
+    expect(reference("No. MSIDC/Mumbai/Tender/05/2024 (2nd Call)")).toBe(
+      "MSIDC/Mumbai/Tender/05/2024(2ndCall)",
+    );
+  });
+
+  it("keeps a financial year written as a range", () => {
+    expect(reference("Tender Ref. No: MSIDC/EOI/PMC/06/2024-25")).toBe("MSIDC/EOI/PMC/06/2024-25");
+  });
+});
