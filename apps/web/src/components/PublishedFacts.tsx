@@ -5,6 +5,7 @@ import { isReviewComplete, type DocumentFactsView, type PublishedFact } from "@l
 
 import { color, figureFontFeatures, radius, space } from "@/ui/tokens";
 import { publishedFactsCopy, scanFactCopy } from "@/copy/figures";
+import { reportCopy } from "@/copy/report";
 
 /**
  * Presentation for verified facts, kept out of the route so it can be rendered
@@ -98,6 +99,15 @@ export function FactCard({ fact }: { readonly fact: PublishedFact }): React.JSX.
         )}
       </div>
       {fact.scanReading !== null && <ScanReadingNote reading={fact.scanReading} />}
+      {/* Every figure can be questioned from where it is shown (ADR-075). */}
+      <div style={{ fontSize: 12, marginTop: space[2] }}>
+        <a
+          href={`/report?subject=${encodeURIComponent(`fact:${String(fact.id)}`)}`}
+          style={{ color: color.text.tertiary }}
+        >
+          {reportCopy.reportThisFigure}
+        </a>
+      </div>
     </li>
   );
 }

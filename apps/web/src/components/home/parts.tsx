@@ -17,7 +17,8 @@ export const ABOUT_HREF = "/about";
 export const METHODOLOGY_HREF = "/about/methodology";
 export const GITHUB_HREF = "https://github.com/MNikks01/LokDarpan";
 /** The visible way to report an error that `legal-ethical-rules.md` requires. */
-export const ISSUE_HREF = "https://github.com/MNikks01/LokDarpan/issues/new";
+/** The correction form, which needs no account (ADR-075). */
+export const ISSUE_HREF = "/report";
 
 const GLYPH: Readonly<Record<Availability, string>> = {
   available: "●",
