@@ -219,6 +219,24 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(await mentions()).toBe(1);
     });
 
+    it("places a government named in one state's report in the unit it names", async () => {
+      const elsewhere = await db().query<{ id: string }>(
+        `INSERT INTO admin_unit (lgd_code, level, name_en, source_sha256, dataset_version_id,
+                                 extraction_confidence, valid_from)
+         VALUES ('T-074E', 'state', 'Elsewhere', $1, $2, 1, '2000-01-01') RETURNING id`,
+        [ARTIFACT, versionId],
+      );
+      await fact("Government of Elsewhere", "verified");
+      const r = await loadPublicBodies(db(), { stateLgdCode: STATE_LGD });
+      expect(r.unplaced).toEqual([]);
+      const placed = await db().query<{ jurisdiction_admin_unit_id: string }>(
+        `SELECT jurisdiction_admin_unit_id FROM public_body WHERE name_en = 'Government of Elsewhere'`,
+      );
+      expect(placed.rows.map((p) => Number(p.jurisdiction_admin_unit_id))).toEqual([
+        Number(elsewhere.rows[0]?.id),
+      ]);
+    });
+
     it("leaves out a government whose place is not in the hierarchy, and says so", async () => {
       await fact("Government of Nowhere", "verified");
       const r = await loadPublicBodies(db(), { stateLgdCode: STATE_LGD });

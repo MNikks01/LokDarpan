@@ -21,6 +21,21 @@ describe("departmentName", () => {
     expect(departmentName("The Finance ")).toBe("Finance Department");
   });
 
+  it('keeps "General" that opens a name and restarts after one that ends a title', () => {
+    expect(departmentName("General Administration ")).toBe("General Administration Department");
+    expect(departmentName("Director General ")).toBeNull();
+    // The secretary of the General Administration Department, not of an
+    // "Administration Department".
+    expect(departmentName("Secretary General Administration ")).toBe(
+      "General Administration Department",
+    );
+  });
+
+  it("names nothing when only joiners remain, and trims them from either end", () => {
+    expect(departmentName("and & ")).toBeNull();
+    expect(departmentName("and Housing and ")).toBe("Housing Department");
+  });
+
   it("names nothing when only generic words remain", () => {
     expect(departmentName("The ")).toBeNull();
     expect(departmentName("Government ")).toBeNull();
