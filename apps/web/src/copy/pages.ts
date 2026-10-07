@@ -42,3 +42,31 @@ export const departmentCopy = {
   conflictColumn: "allocated minus spent",
   conflictTail: "column inherits this uncertainty.",
 } as const;
+
+/**
+ * A government or department page (ADR-074). Every sentence here describes what
+ * a mention is and is not: a reviewed report page that names the body, never a
+ * claim that the page's figures are about it.
+ */
+export const bodiesCopy = {
+  kindLabel: { government: "Government", department: "Department" },
+  governs: (place: string): string => `Governs ${place}`,
+  partOf: "Part of",
+  whatThisIs:
+    "Each entry below is a page of a published audit report that names this body. A person has checked that the page prints this name. The figures on those pages are not attributed to this body here; open the report to read them in their context.",
+  notShown:
+    "Only what published audit reports say is shown here. Budgets, spending, tenders and works for this body are not shown: each is either not collected or held under terms that do not yet permit publishing it.",
+  departmentsHeading: "Departments named in the reports held",
+  reportsHeading: "Reports that name it",
+  namedIn: (count: number): string =>
+    count === 1 ? "Named in 1 report" : `Named in ${String(count)} reports`,
+  page: (n: number): string => `Page ${String(n)}`,
+  openReport: "Open the report",
+  originalDocument: "Original document",
+  retrieved: (date: string): string => `Retrieved ${date}`,
+  publishedOn: (date: string): string => `Published ${date}`,
+  datasetVersion: (v: number): string => `Dataset version ${String(v)}`,
+  unitSectionHeading: "Governments and departments",
+  unitSectionNone:
+    "No government or department has yet been confirmed from the audit reports held for this place. That says what has been reviewed, not that this place has none.",
+} as const;

@@ -97,6 +97,8 @@ interface QueueOptions {
   readonly documentId: number | undefined;
   /** `--ids=5733,5734`, for acting on a named set rather than a partition. */
   readonly ids: readonly number[] | undefined;
+  /** `--state=27`: documents filed under one state, by LGD code. */
+  readonly stateLgdCode: string | undefined;
 }
 
 /** Parsed queue filters, or null when `--document` is not a document id. */
@@ -117,6 +119,7 @@ function queueOptions(): QueueOptions | null {
     only: arg("check") as SelfCheck | typeof CRITERION | undefined,
     documentId,
     ids,
+    stateLgdCode: arg("state"),
   };
 }
 
@@ -294,12 +297,13 @@ async function applyRevision(
  */
 async function buildQueue(
   client: pg.Client,
-  { kind, limit, only, documentId, ids }: QueueOptions,
+  { kind, limit, only, documentId, ids, stateLgdCode }: QueueOptions,
   claimed: ClaimedByPage,
 ): Promise<ReviewCandidate[]> {
   const all = await pendingReview(client, {
     ...(kind === undefined ? {} : { kind }),
     ...(documentId === undefined ? {} : { documentId }),
+    ...(stateLgdCode === undefined ? {} : { stateLgdCode }),
     ...(ids === undefined ? {} : { ids }),
     // Naming facts explicitly must never be truncated. `pendingReview` defaults
     // to 500, which is right for walking a queue and wrong for a set someone

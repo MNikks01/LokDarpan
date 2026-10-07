@@ -14,6 +14,7 @@ collection on GitHub Actions.
 | [`reading-scans.md`](reading-scans.md)                                       | Scanned pages: the OCR service, `raw:adopt`, `ocr:read`, scan facts, review        |
 | [`applying-migrations.md`](applying-migrations.md)                           | Migrations into production by hand: `--status`, apply, checks; 0040–0043           |
 | [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037   |
+| [`reviewing-public-bodies.md`](reviewing-public-bodies.md)                   | Governments and departments: extract names, review them, `ingest:bodies` (ADR-074) |
 
 Elsewhere:
 

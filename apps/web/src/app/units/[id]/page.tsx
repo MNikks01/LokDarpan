@@ -2,10 +2,12 @@ import type React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { ApiError, getUnit, type AdminUnit } from "@/lib/api";
+import type { PublicBodyRef } from "@lokdarpan/domain";
+
+import { ApiError, getJson, getUnit, type AdminUnit } from "@/lib/api";
 import { ProvenanceNote } from "@/components/Provenance";
 import { color, radius, space } from "@/ui/tokens";
-import { unitsCopy } from "@/copy/pages";
+import { bodiesCopy, unitsCopy } from "@/copy/pages";
 
 /**
  * Rendered per request, not prerendered at build.
@@ -66,6 +68,22 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * The governments and departments shown for a unit (ADR-074). A failure here
+ * leaves the section out rather than taking the unit page down with it.
+ */
+async function loadBodies(id: string): Promise<readonly PublicBodyRef[] | null> {
+  try {
+    const { data } = await getJson(`/api/v1/units/${encodeURIComponent(id)}/bodies`);
+    return data as readonly PublicBodyRef[];
+  } catch {
+    return null;
+  }
+}
+
+/** Bodies govern states and the country; below that, nothing is named yet. */
+const LEVELS_WITH_BODIES = new Set(["country", "state"]);
+
 function UnitRow({ child }: { readonly child: AdminUnit }): React.JSX.Element {
   return (
     <li
@@ -101,6 +119,7 @@ export default async function UnitPage({
   const { datasetVersion } = result;
   const level = LEVEL_LABEL[unit.level] ?? unit.level;
   const childHeading = CHILD_LABEL[unit.level] ?? "Sub-units";
+  const bodies = LEVELS_WITH_BODIES.has(unit.level) ? await loadBodies(id) : null;
 
   return (
     <>
@@ -152,6 +171,46 @@ export default async function UnitPage({
           </ul>
         )}
       </section>
+
+      {bodies !== null && (
+        <section
+          aria-labelledby="bodies"
+          style={{
+            marginTop: space[5],
+            padding: space[4],
+            borderRadius: radius.md,
+            border: `1px solid ${color.border.hair}`,
+          }}
+        >
+          <h2 id="bodies" style={{ fontSize: 16, margin: 0 }}>
+            {bodiesCopy.unitSectionHeading}
+          </h2>
+          {bodies.length === 0 ? (
+            <p style={{ color: color.text.secondary, fontSize: 14, marginBottom: 0 }}>
+              {bodiesCopy.unitSectionNone}
+            </p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: `${String(space[3])}px 0 0` }}>
+              {bodies.map((b) => (
+                <li
+                  key={b.id}
+                  style={{
+                    padding: `${String(space[2])}px 0`,
+                    borderBottom: `1px solid ${color.border.hair}`,
+                  }}
+                >
+                  <a href={`/bodies/${String(b.id)}`} style={{ color: color.text.primary }}>
+                    {b.name}
+                  </a>
+                  <span style={{ color: color.text.tertiary, fontSize: 12, marginInlineStart: 8 }}>
+                    {bodiesCopy.namedIn(b.reportCount)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <ProvenanceNote
         sourceUrl={unit.provenance.sourceUrl}

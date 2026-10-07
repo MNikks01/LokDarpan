@@ -1,6 +1,7 @@
 import { AmountFormatError, shiftedToPaise } from "../beams/amount";
 import { validate, type Verdict } from "./validation";
 import { boxAround, type TextItem } from "./extract";
+import { bodiesIn, firstMentionOfEach } from "./bodies";
 
 /**
  * Pattern extraction over audit prose.
@@ -14,7 +15,7 @@ import { boxAround, type TextItem } from "./extract";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/23";
+export const PARSER_VERSION = "cag-facts/24";
 
 export type FactKind =
   | "monetary_amount"
@@ -22,7 +23,8 @@ export type FactKind =
   | "officer_role_reference"
   | "work_reference"
   | "tender_identifier"
-  | "tender_date";
+  | "tender_date"
+  | "body_reference";
 
 export interface FactCandidate {
   readonly kind: FactKind;
@@ -746,6 +748,7 @@ function candidatesIn(sentence: string, rules: ReadingRules): FactCandidate[] {
     ...moneyIn(sentence, rules),
     ...contractorsIn(sentence, rules.pageNumber),
     ...officersIn(sentence, rules.pageNumber),
+    ...bodiesIn(sentence, rules.pageNumber),
   ];
 }
 
@@ -792,5 +795,6 @@ export function extractFacts(pages: readonly PageInput[]): FactCandidate[] {
       );
     }
   }
-  return out;
+  // A body is proposed once per document, at the first page that names it.
+  return firstMentionOfEach(out);
 }

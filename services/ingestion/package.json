@@ -33,7 +33,8 @@
     "tenders:review": "tsx src/gepnic/review-cli.ts",
     "check:collection": "tsx src/freshness/cli.ts",
     "raw:adopt": "tsx src/raw-adopt-cli.ts",
-    "ocr:read": "tsx src/ocr/cli.ts"
+    "ocr:read": "tsx src/ocr/cli.ts",
+    "ingest:bodies": "tsx src/cag/bodies-cli.ts"
   },
   "dependencies": {
     "@lokdarpan/contracts": "workspace:*",

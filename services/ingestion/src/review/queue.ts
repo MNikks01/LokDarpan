@@ -9,6 +9,12 @@ export interface QueueFilter {
   readonly kind?: FactKind;
   readonly documentId?: number;
   /**
+   * Only documents filed under this state, by LGD code (`27` for Maharashtra).
+   * A reviewer working one state's departments should not be handed another
+   * state's, whose names are the same words for different bodies.
+   */
+  readonly stateLgdCode?: string;
+  /**
    * Exactly these facts, named by id.
    *
    * For acting on a set some other reading produced — the criterion-governed
@@ -63,6 +69,20 @@ export async function pendingReview(
   if (filter.documentId !== undefined) {
     params.push(filter.documentId);
     where.push(`f.document_id = $${String(params.length)}`);
+  }
+  if (filter.stateLgdCode !== undefined) {
+    params.push(filter.stateLgdCode);
+    // Up the parent chain rather than through admin_unit_closure, which no
+    // loader writes and is empty (see cag/bodies-load.ts).
+    where.push(
+      `EXISTS (WITH RECURSIVE up (id, parent_id, level, lgd_code) AS (
+                 SELECT a.id, a.parent_id, a.level, a.lgd_code FROM admin_unit a
+                  WHERE a.id = d.admin_unit_id
+                 UNION ALL
+                 SELECT a.id, a.parent_id, a.level, a.lgd_code FROM admin_unit a
+                   JOIN up ON a.id = up.parent_id)
+               SELECT 1 FROM up WHERE level = 'state' AND lgd_code = $${String(params.length)})`,
+    );
   }
   if (filter.ids !== undefined) {
     params.push(filter.ids);

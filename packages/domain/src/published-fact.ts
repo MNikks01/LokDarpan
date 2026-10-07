@@ -17,7 +17,8 @@ export type PublishedFactKind =
   | "officer_role_reference"
   | "work_reference"
   | "tender_identifier"
-  | "tender_date";
+  | "tender_date"
+  | "body_reference";
 
 /** How the published value came to differ, or not, from what the parser read. */
 export type FactOrigin = "as_extracted" | "corrected_by_reviewer";
