@@ -16,8 +16,8 @@ export const dynamic = "force-dynamic";
  *
  * DETAILS ARE WITHHELD BY DEFAULT
  * Every collected portal permits reproduction only with the issuing
- * department's permission, which has not been sought (ADR-056). Until
- * `PUBLISH_TENDER_DETAILS` is set, this returns how many tenders are held and a
+ * department's permission, which has not been sought (ADR-056). Until a
+ * grant is recorded and `PUBLISH_TENDER_DETAILS` is set (ADR-073), this returns how many tenders are held and a
  * link to the state's portal, which its terms permit without asking. The
  * details are not read at all, so they cannot reach a response or a cache.
  */

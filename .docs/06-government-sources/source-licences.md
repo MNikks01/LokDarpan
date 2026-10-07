@@ -14,7 +14,8 @@ Every entry below was **fetched**, not recalled. No licence is recorded from mem
 
 **Resolved 5 September 2026, without asking.** Permission has not been sought and is not
 being sought for now, so **BEAMS figures are not rendered**. The department page is
-withheld behind `PUBLISH_BEAMS_FIGURES`, off unless explicitly set, and the withholding
+withheld behind `PUBLISH_BEAMS_FIGURES`, off unless explicitly set — and, since ADR-073, opened
+only together with a grant recorded in `PERMISSION_GRANTS` — and the withholding
 happens before the fetch so no treasury figure enters a response that might be cached.
 
 This withholds **display, not collection**. BEAMS is still ingested, and its figures are
@@ -133,7 +134,7 @@ source is not publishable. `mayRepublish` would refuse it, but only the CAG docu
 `mayRepublish`, and the tender path does not. **Resolved 17 September 2026, the same way as BEAMS: tender details are withheld, and the reader is
 linked to the state's portal instead** ([`../adr/056-a-tender-is-linked-to-not-reproduced.md`](../adr/056-a-tender-is-linked-to-not-reproduced.md)).
 Counts and district shading remain, as LokDarpan's own measurement. `PUBLISH_TENDER_DETAILS` restores
-the lists once permission exists.
+the lists once permission exists and is recorded as a grant (ADR-073).
 
 Two limits, as with BEAMS:
 
