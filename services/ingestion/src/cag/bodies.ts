@@ -163,10 +163,14 @@ export function departmentName(run: string): string | null {
     if (w.toLowerCase() === "general" && i === start) return;
     if (startsAfresh(w)) start = i + 1;
   });
-  const name = words.slice(start);
-  while (name.length > 0 && JOINERS.has((name[0] ?? "").toLowerCase())) name.shift();
-  while (name.length > 0 && JOINERS.has((name[name.length - 1] ?? "").toLowerCase())) name.pop();
-  if (name.length === 0) return null;
+  const rest = words.slice(start);
+  const isWord = (w: string): boolean => !JOINERS.has(w.toLowerCase());
+  const first = rest.findIndex(isWord);
+  if (first === -1) return null;
+  const last = rest.length - 1 - [...rest].reverse().findIndex(isWord);
+  const name = rest.slice(first, last + 1);
+  // "Director General Department" leaves "General", which names nothing.
+  if (name.length === 1 && name[0]?.toLowerCase() === "general") return null;
   return `${name.join(" ")} Department`;
 }
 
@@ -207,16 +211,15 @@ export function bodiesIn(sentence: string, pageNumber: number): FactCandidate[] 
  * the name and links the report to the body.
  */
 export function firstMentionOfEach(candidates: readonly FactCandidate[]): FactCandidate[] {
-  const seen = new Set<string>();
+  const seen = new Set<string | null>();
   const kept: FactCandidate[] = [];
   for (const c of candidates) {
     if (c.kind !== "body_reference") {
       kept.push(c);
       continue;
     }
-    const key = c.normalisedValue ?? "";
-    if (seen.has(key)) continue;
-    seen.add(key);
+    if (seen.has(c.normalisedValue)) continue;
+    seen.add(c.normalisedValue);
     kept.push(c);
   }
   return kept;
