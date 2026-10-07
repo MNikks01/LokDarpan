@@ -54,6 +54,8 @@
 
 **Working on data** → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md`
 
+**Planning beyond tenders (receipts, transfers, the Money Trace)** → `02-architecture/PUBLIC_FINANCE_GRAPH_ARCHITECTURE.md` _(proposed)_ → `04-data-engineering/entity-linking.md` → `06-government-sources/source-licences.md`
+
 **Reviewing for neutrality** → `17-legal/legal-ethical-rules.md` → `01-product/design-system.md` §Neutrality primitives → `01-product/screen-inventory.md` §Screens that must not exist → `14-testing/testing-strategy.md` §6
 
 ---
