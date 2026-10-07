@@ -64,6 +64,7 @@ export default defineConfig({
         "services/ingestion/src/ocr/score-cli.ts",
         "services/ingestion/src/cag/corpus-cli.ts",
         "services/ingestion/src/cag/promote-cli.ts",
+        "services/ingestion/src/cag/bodies-cli.ts",
         "services/ingestion/src/freshness/cli.ts",
         "services/ingestion/src/review/cli.ts",
         "services/ingestion/src/review/triage-cli.ts",

@@ -59,3 +59,11 @@ export type {
   TenderCollectionInput,
   Transport,
 } from "./data-state";
+export type {
+  BodyMention,
+  BodyMentionsInReport,
+  PublicBodyKind,
+  PublicBodyRef,
+  PublicBodyRepository,
+  PublicBodyView,
+} from "./public-body";

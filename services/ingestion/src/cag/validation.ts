@@ -55,6 +55,14 @@ export const FIELDS: Readonly<Record<FactKind, FieldRules>> = {
     note: "a tender ID or notice number; it links one record of a tender to another",
   },
   tender_date: { critical: true, note: "a date a notice sets, such as a submission deadline" },
+  // Not critical in this module's sense: the qualifiers below (a rate, a
+  // multiplicand, a threshold) are about figures and say nothing about a name.
+  // A wrong name still matters — a confirmed one creates or cites a public body
+  // a reader can open — so its precision comes from the reviewer (ADR-074).
+  body_reference: {
+    critical: false,
+    note: "a government or department named on the page; a confirmed name creates or cites a public body",
+  },
 };
 
 /**

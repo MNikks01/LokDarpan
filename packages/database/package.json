@@ -28,6 +28,7 @@
     "./geography": "./src/geography.repository.ts",
     "./tender": "./src/tender.repository.ts",
     "./overview": "./src/overview.repository.ts",
+    "./public-body": "./src/public-body.repository.ts",
     "./ledger": "./src/ledger.ts"
   }
 }

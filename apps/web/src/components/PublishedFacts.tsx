@@ -19,6 +19,7 @@ const KIND_LABEL: Readonly<Record<PublishedFact["kind"], string>> = {
   work_reference: "Work named",
   tender_identifier: "Tender identifier",
   tender_date: "Tender date",
+  body_reference: "Body named",
 };
 
 /** A value, in the form the source stated it. */

@@ -16,3 +16,4 @@ export {
   collectionStatusOf,
 } from "./tender.repository";
 export type { CollectionStatus, CollectionWindow } from "./tender.repository";
+export { PostgresPublicBodyRepository } from "./public-body.repository";
