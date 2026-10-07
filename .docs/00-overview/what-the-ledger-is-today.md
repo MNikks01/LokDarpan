@@ -108,8 +108,9 @@ terms of the source.
 
 **Nothing here is irreversible.** If permission is later sought and granted:
 
-- BEAMS becomes publishable by setting `PUBLISH_BEAMS_FIGURES` — one environment
-  variable, no code change (see `apps/web/src/server/publishable.ts`).
+- BEAMS becomes publishable by recording the grant in `PERMISSION_GRANTS` and setting
+  `PUBLISH_BEAMS_FIGURES` — no change to any code path (ADR-073; see
+  `apps/web/src/server/publishable.ts`).
 - PMGSY becomes collectable, and the project-level Money Trail becomes buildable
   for rural roads. It would still not cover state highways, which
   [`phase-1-maharashtra-roads.md`](../06-government-sources/phase-1-maharashtra-roads.md)

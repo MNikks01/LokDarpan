@@ -27,8 +27,19 @@ export {
   describeSources,
   licenceFor,
   mayRepublish,
+  PERMISSION_GRANTS,
+  publicationDecision,
 } from "./source-licence";
-export type { Republication, SourceDescriptor, SourceLicence } from "./source-licence";
+export type {
+  PermissionGrant,
+  PublicationBasis,
+  PublicationContext,
+  PublicationDecision,
+  Republication,
+  SourceDescriptor,
+  SourceLicence,
+  WithheldReason,
+} from "./source-licence";
 export * from "./geography";
 export { PORTALS, portalByCode, portalForState, portalHomeUrl } from "./gepnic-portals";
 export type { Portal } from "./gepnic-portals";
