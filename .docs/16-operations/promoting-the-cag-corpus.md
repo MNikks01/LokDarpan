@@ -103,8 +103,33 @@ COMMIT;
 The artefact rows and the bytes in R2 stay. They are content-addressed and harmless, and a later
 promotion reuses them.
 
-## Later reviews
+## Later reviews (`--refresh`, #190)
 
-The promotion copies a report once. Decisions made locally after that do not follow it. Re-promoting
-a report means removing it first (above) and running again, which gives its figures new ids. Nothing
-outside the document tables refers to those ids today; check that is still true before doing it.
+The promotion copies a report once. Review continues afterwards — a newer parser adds candidates, a
+reviewer decides them or revises an earlier decision — and `--refresh` carries that work into
+production for reports both databases hold:
+
+```bash
+# Same environment as above. Dry run first:
+pnpm --filter @lokdarpan/ingestion promote:cag -- --refresh
+# Only if the dry run's numbers are what you expect:
+pnpm --filter @lokdarpan/ingestion promote:cag -- --refresh --commit
+```
+
+It prints how many reports differed, and for those: figures added, decisions updated, undecided
+candidates retired, history rows carried and same-figure links set. Every figure keeps its
+production id; nothing a reader may have linked to is renumbered.
+
+- **Matching.** A figure is found in production by its identity (page, kind, the words it was read
+  from, its value and field). Figures identical in all five are matched in id order.
+- **Decisions are never deleted.** A decided production figure the source no longer produces is kept
+  and counted as `stranded`; only undecided candidates are retired.
+- **History is copied, not regenerated.** The review-history trigger is disabled inside the
+  transaction while decisions are copied, and re-enabled before it commits.
+- **Self-check.** After applying, it plans again and refuses to commit unless nothing is left to do.
+- **Not carried:** figures read from scans, since page readings are not promoted. They are counted.
+- **Refused:** a report whose page count differs between the databases (it was re-read and needs
+  removing and promoting again), or two databases on different migrations.
+
+Then, if bodies changed, run `ingest:bodies` against production
+([`reviewing-public-bodies.md`](reviewing-public-bodies.md)).

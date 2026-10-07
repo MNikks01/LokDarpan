@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Open tenders, 21 portals, placed where evidence allows | 1,318 (nightly; ADR-067, ADR-068) | a stale subset     |
 | Maharashtra agency notices (MHADA, MSIDC) · scan facts | **none**                          | 96 · 31 unreviewed |
 
-The CAG corpus reached production on 6 October 2026 by `promote:cag` (ADR-070; dataset version 285), so `/documents` lists the 30 reports with their reviewed figures. Extraction and review still happen locally; a report reviewed further after promotion does not follow on its own. The department page still has nothing to show: BEAMS has only ever been loaded locally, and its figures are withheld until permitted. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
+The CAG corpus reached production on 6 October 2026 by `promote:cag` (ADR-070; dataset version 285), so `/documents` lists the 30 reports with their reviewed figures. Extraction and review still happen locally; review done after a report was promoted is carried with `promote:cag --refresh` (#190). The department page still has nothing to show: BEAMS has only ever been loaded locally, and its figures are withheld until permitted. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
 
 What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python; reads pages with no text layer, `.docs/16-operations/reading-scans.md`), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
 

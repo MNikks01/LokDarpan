@@ -15,6 +15,7 @@ import {
 } from "@lokdarpan/database";
 
 import { PromotionRefused, promoteCag } from "../src/cag/promote";
+import { refreshCag } from "../src/cag/promote-refresh";
 import { FileRawStore, sha256Of, storagePathFor } from "../src/raw-store";
 
 const DATABASE_URL = process.env["DATABASE_URL"];
@@ -273,6 +274,150 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       expect(await targetCount(`SELECT count(*) AS n FROM document WHERE source_sha256 = $1`)).toBe(
         1,
       );
+    });
+
+    /** Review work done in the source after the report was promoted (#190). */
+    const reviewSincePromotion = async (): Promise<void> => {
+      const doc = await src().query<{ id: string }>(
+        `SELECT id FROM document WHERE source_sha256 = $1`,
+        [reportSha],
+      );
+      const documentId = doc.rows[0]?.id;
+      // A newer parser's candidate, decided.
+      await src().query(
+        `INSERT INTO document_fact (document_id, page_number, kind, raw_text, normalised_value,
+                                    extraction_method, parser_version, extraction_confidence,
+                                    verification_status, verified_by, verified_at)
+         VALUES ($1, 2, 'monetary_amount', 'Rs 2 crore was released later',
+                 '2000000000', 'pattern', 'v2', 0.6,
+                 'verified', 'A Reviewer', '2026-10-07T09:00:00Z')`,
+        [documentId],
+      );
+      // Same-figure links changed: the new figure is the English one again; the
+      // Marathi one is no longer.
+      await src().query(
+        `UPDATE document_fact SET same_figure_as = (
+           SELECT id FROM document_fact
+            WHERE document_id = $1 AND page_number = 2 AND verification_status = 'verified'
+              AND raw_text = 'Rs 5 crore')
+          WHERE document_id = $1 AND raw_text = 'Rs 2 crore was released later'`,
+        [documentId],
+      );
+      await src().query(
+        `UPDATE document_fact SET same_figure_as = NULL WHERE document_id = $1 AND page_number = 1`,
+        [documentId],
+      );
+      // An earlier decision revised: the source's trigger keeps the old one.
+      await src().query(
+        `UPDATE document_fact SET verification_status = 'rejected', verified_by = 'B Reviewer',
+                                  verified_at = '2026-10-07T09:30:00Z',
+                                  reviewer_note = 'Re-read: a rate, not an amount.'
+          WHERE document_id = $1 AND page_number = 1`,
+        [documentId],
+      );
+    };
+
+    const refresh = (dryRun: boolean) =>
+      refreshCag({ source: src(), target: tgt(), dryRun, only: [reportSha] });
+
+    it("carries review done after promotion, history and all, and then has nothing to do", async () => {
+      await seedState(tgt(), lgdCode);
+      await promote();
+      await reviewSincePromotion();
+
+      const dry = await refresh(true);
+      expect(dry).toMatchObject({
+        reports: 1,
+        inserted: 1,
+        updated: 1,
+        history: 1,
+        links: 2,
+        committed: false,
+      });
+      expect(
+        await targetCount(
+          `SELECT count(*) AS n FROM document_fact f JOIN document d ON d.id = f.document_id
+            WHERE d.source_sha256 = $1 AND f.raw_text = 'Rs 2 crore was released later'`,
+        ),
+      ).toBe(0);
+
+      const done = await refresh(false);
+      expect(done).toMatchObject({
+        reports: 1,
+        inserted: 1,
+        updated: 1,
+        history: 1,
+        committed: true,
+      });
+
+      const revised = await tgt().query<{ status: string; by: string; note: string }>(
+        `SELECT f.verification_status AS status, f.verified_by AS by, f.reviewer_note AS note
+           FROM document_fact f JOIN document d ON d.id = f.document_id
+          WHERE d.source_sha256 = $1 AND f.page_number = 1 AND f.kind = 'monetary_amount'`,
+        [reportSha],
+      );
+      expect(revised.rows).toEqual([
+        { status: "rejected", by: "B Reviewer", note: "Re-read: a rate, not an amount." },
+      ]);
+      // The superseded decision came across exactly once: from the source, not
+      // invented again by the target's trigger.
+      expect(
+        await targetCount(
+          `SELECT count(*) AS n FROM document_fact_review_history h
+             JOIN document_fact f ON f.id = h.document_fact_id
+             JOIN document d ON d.id = f.document_id
+            WHERE d.source_sha256 = $1 AND f.page_number = 1`,
+        ),
+      ).toBe(1);
+
+      expect(await refresh(false)).toMatchObject({ reports: 0, committed: false });
+    });
+
+    it("leaves a report the target does not hold yet to promote:cag", async () => {
+      await seedState(tgt(), lgdCode);
+      expect(await refresh(true)).toMatchObject({ reports: 0, committed: false });
+    });
+
+    it("refuses to refresh a report re-read with a different number of pages", async () => {
+      await seedState(tgt(), lgdCode);
+      await promote();
+      await src().query(`UPDATE document SET page_count = 3 WHERE source_sha256 = $1`, [reportSha]);
+      await expect(refresh(true)).rejects.toThrow(/needs promoting again/u);
+    });
+
+    it("refuses to refresh between databases on different migrations", async () => {
+      await seedState(tgt(), lgdCode);
+      await promote();
+      await tgt().query(
+        `INSERT INTO schema_migration (id, checksum) VALUES ('9999_not_in_the_source', 'x')`,
+      );
+      try {
+        await expect(refresh(true)).rejects.toThrow(/same migrations/u);
+      } finally {
+        await tgt().query(`DELETE FROM schema_migration WHERE id = '9999_not_in_the_source'`);
+      }
+    });
+
+    it("leaves the target's review trigger on afterwards", async () => {
+      await seedState(tgt(), lgdCode);
+      await promote();
+      await reviewSincePromotion();
+      await refresh(false);
+      await tgt().query(
+        `UPDATE document_fact f SET verified_by = 'C Reviewer', verified_at = now()
+           FROM document d
+          WHERE d.id = f.document_id AND d.source_sha256 = $1 AND f.page_number = 1
+            AND f.kind = 'monetary_amount'`,
+        [reportSha],
+      );
+      expect(
+        await targetCount(
+          `SELECT count(*) AS n FROM document_fact_review_history h
+             JOIN document_fact f ON f.id = h.document_fact_id
+             JOIN document d ON d.id = f.document_id
+            WHERE d.source_sha256 = $1 AND f.page_number = 1`,
+        ),
+      ).toBe(2);
     });
 
     it("refuses a report whose place the target does not hold", async () => {
