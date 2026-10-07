@@ -57,6 +57,7 @@ The data is public, but **integrity, availability, and traceability** are the se
 - **Inbound (public API):** all query/body params validated with Zod; strict allow-lists for filter/sort fields (prevents injection via sort/filter). Parameterized SQL only — no string-built queries. Output encoding to prevent XSS in any rendered content.
 - **Ingestion:** treat all scraped/parsed content as untrusted — schema/type/range validation, size limits, content-type checks, and sandboxed PDF/OCR processing (resource-limited workers) to contain malicious files.
 - **File handling:** raw artifacts stored by hash; parsers run with least privilege and timeouts; no execution of downloaded content.
+- **The one public write path (ADR-075):** `POST /api/v1/corrections`. Same-origin only, a 16 KB body cap, the edge rate limit, a honeypot field, validation that mirrors the table's constraints, and a database role (`lokdarpan_intake`) that may execute `submit_correction` and nothing else. The function enforces a site-wide hourly ceiling that holds even when the edge limit fails open. It writes a message to reviewers, never a figure.
 
 ## Application & supply-chain hardening
 
@@ -76,6 +77,7 @@ The data is public, but **integrity, availability, and traceability** are the se
 
 - Only public official data is ingested. Incidental PII in documents is minimized in display; a redaction step masks obvious personal identifiers not relevant to finance.
 - No behavioral tracking beyond privacy-respecting, aggregate analytics; no ad tech.
+- Correction reports store no name, email address, IP address or other identifier of the person reporting (ADR-075), and the form asks readers not to include personal details. Reports are readable only by the reviewer role, never through the public API.
 
 ## Incident response
 

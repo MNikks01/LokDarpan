@@ -68,6 +68,7 @@ export default defineConfig({
         "services/ingestion/src/freshness/cli.ts",
         "services/ingestion/src/review/cli.ts",
         "services/ingestion/src/review/triage-cli.ts",
+        "services/ingestion/src/review/correction-requests-cli.ts",
         "services/ingestion/src/osm/cli.ts",
         "services/ingestion/src/pincode/cli.ts",
         "services/ingestion/src/gepnic/resolve-cli.ts",

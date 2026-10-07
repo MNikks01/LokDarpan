@@ -68,3 +68,15 @@ export type {
   PublicBodyRepository,
   PublicBodyView,
 } from "./public-body";
+export {
+  CORRECTION_CATEGORIES,
+  HONEYPOT_FIELD,
+  isCorrectionSubject,
+  parseCorrection,
+} from "./correction";
+export type {
+  CorrectionCategory,
+  CorrectionInput,
+  CorrectionParse,
+  CorrectionProblem,
+} from "./correction";
