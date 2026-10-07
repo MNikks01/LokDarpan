@@ -14,6 +14,7 @@ import styles from "./home.module.css";
 export const EXPLORE_HREF = "/explore";
 export const REPORTS_HREF = "/documents";
 export const ABOUT_HREF = "/about";
+export const METHODOLOGY_HREF = "/about/methodology";
 export const GITHUB_HREF = "https://github.com/MNikks01/LokDarpan";
 /** The visible way to report an error that `legal-ethical-rules.md` requires. */
 export const ISSUE_HREF = "https://github.com/MNikks01/LokDarpan/issues/new";
@@ -96,7 +97,7 @@ export function SiteFooter(): React.JSX.Element {
               <Link href={REPORTS_HREF}>{footer.links.reports}</Link>
             </li>
             <li>
-              <Link href={ABOUT_HREF}>{footer.links.methodology}</Link>
+              <Link href={METHODOLOGY_HREF}>{footer.links.methodology}</Link>
             </li>
             <li>
               <a href={GITHUB_HREF} rel="noopener noreferrer">

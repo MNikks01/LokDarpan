@@ -309,3 +309,14 @@ export function describeSource(sourceId: string): SourceDescriptor {
 export function describeSources(sourceIds: readonly string[]): readonly SourceDescriptor[] {
   return [...new Set(sourceIds)].map(describeSource);
 }
+
+/**
+ * Every source whose terms are recorded, in registry order.
+ *
+ * For the methodology page, which lists each source from this registry rather
+ * than from its own copy of it, so the two cannot drift: a source added here
+ * without a methodology entry fails a test.
+ */
+export function sourceLicences(): readonly SourceLicence[] {
+  return LICENCES;
+}

@@ -24,6 +24,8 @@ export const aboutCopy = {
   emptyVersusUnpublished:
     "An empty map and an unpublished register look identical. Which one you are looking at is stated in words beside the map, with the source that was checked and when.",
 
+  methodologyLink: "How each source is collected, checked and shown",
+
   rulesHeading: "Rules the interface follows",
 
   rules: [

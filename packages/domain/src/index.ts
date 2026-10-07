@@ -29,6 +29,7 @@ export {
   mayRepublish,
   PERMISSION_GRANTS,
   publicationDecision,
+  sourceLicences,
 } from "./source-licence";
 export type {
   PermissionGrant,
