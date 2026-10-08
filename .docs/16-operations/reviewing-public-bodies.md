@@ -52,8 +52,17 @@ confirmed mention. Each body's page lists the reviewed pages that name it, and l
 
 ## Production
 
-**Not yet possible in the normal way.** `promote:cag` copies reports production does not hold; it
-does not carry review decisions made after a report was promoted, and all 30 reports are already
-there (#190). Until that is resolved, bodies exist locally only. Once it is, the order is: apply
-0045 to production ([`applying-migrations.md`](applying-migrations.md)), promote the decisions,
-then run `ingest:bodies` with the owner credential.
+Production receives reviewed names the way it receives figures, then builds bodies from them:
+
+1. Apply 0045 to production ([`applying-migrations.md`](applying-migrations.md)); the two databases
+   must be on the same migrations for anything below to run.
+2. Carry the review across: `promote:cag --refresh`, dry run first, then `--commit`
+   ([`promoting-the-cag-corpus.md`](promoting-the-cag-corpus.md) §Later reviews).
+3. Build the bodies there, with the owner credential:
+
+   ```bash
+   DATABASE_URL=<production owner, direct> \
+     pnpm --filter @lokdarpan/ingestion ingest:bodies -- --state=27
+   ```
+
+4. Open the production Maharashtra page and check the "Governments and departments" section.
