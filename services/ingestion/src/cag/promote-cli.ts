@@ -57,7 +57,11 @@ async function runRefresh(source: pg.Client, target: pg.Client, commit: boolean)
 }
 
 async function main(): Promise<void> {
-  const unknown = process.argv.slice(2).filter((a) => a !== "--commit" && a !== "--refresh");
+  // `pnpm … promote:cag -- --refresh` forwards the `--` itself, as the other
+  // ingestion commands are invoked; it separates arguments and means nothing here.
+  const unknown = process.argv
+    .slice(2)
+    .filter((a) => a !== "--" && a !== "--commit" && a !== "--refresh");
   if (unknown.length > 0) {
     process.stderr.write(
       `Unknown argument(s): ${unknown.join(" ")}. Only --commit and --refresh are accepted.\n`,
