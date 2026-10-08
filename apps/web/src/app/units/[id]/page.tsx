@@ -2,9 +2,10 @@ import type React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { PublicBodyRef } from "@lokdarpan/domain";
+import type { Holding, PublicBodyRef } from "@lokdarpan/domain";
 
 import { ApiError, getJson, getUnit, type AdminUnit } from "@/lib/api";
+import { Holdings } from "@/components/Holdings";
 import { ProvenanceNote } from "@/components/Provenance";
 import { color, radius, space } from "@/ui/tokens";
 import { bodiesCopy, unitsCopy } from "@/copy/pages";
@@ -81,6 +82,20 @@ async function loadBodies(id: string): Promise<readonly PublicBodyRef[] | null> 
   }
 }
 
+/**
+ * What is held for the unit (LD-009). A failure shows the checklist's own
+ * "could not be loaded" line: leaving it out would let the page read as if
+ * every record it does not show were absent.
+ */
+async function loadHoldings(id: string): Promise<readonly Holding[] | null> {
+  try {
+    const { data } = await getJson(`/api/v1/units/${encodeURIComponent(id)}/holdings`);
+    return (data as { holdings: readonly Holding[] }).holdings;
+  } catch {
+    return null;
+  }
+}
+
 /** Bodies govern states and the country; below that, nothing is named yet. */
 const LEVELS_WITH_BODIES = new Set(["country", "state"]);
 
@@ -119,7 +134,10 @@ export default async function UnitPage({
   const { datasetVersion } = result;
   const level = LEVEL_LABEL[unit.level] ?? unit.level;
   const childHeading = CHILD_LABEL[unit.level] ?? "Sub-units";
-  const bodies = LEVELS_WITH_BODIES.has(unit.level) ? await loadBodies(id) : null;
+  const [bodies, holdings] = await Promise.all([
+    LEVELS_WITH_BODIES.has(unit.level) ? loadBodies(id) : Promise.resolve(null),
+    loadHoldings(id),
+  ]);
 
   return (
     <>
@@ -211,6 +229,8 @@ export default async function UnitPage({
           )}
         </section>
       )}
+
+      <Holdings holdings={holdings} place={unit.nameEn} />
 
       <ProvenanceNote
         sourceUrl={unit.provenance.sourceUrl}
