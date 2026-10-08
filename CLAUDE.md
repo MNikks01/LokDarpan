@@ -8,19 +8,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **It is deployed and holds real data** (as of 29 September 2026). The site runs on Vercel, reading a PostgreSQL + PostGIS ledger on Neon; a GitHub Actions job collects tenders nightly. Only the example project page (`/project/[id]`) renders fixture data, and it says so.
 
-**Production and the local database do not hold the same things — check which one you mean.** Measured 29 September 2026:
+**Production and the local database do not hold the same things — check which one you mean.** Measured 29 September 2026; the CAG row updated 6 October 2026:
 
 | Ledger contents                                        | Production (Neon)                 | Local Docker       |
 | ------------------------------------------------------ | --------------------------------- | ------------------ |
 | LGD states · districts, with OSM geometry              | 36 · 787                          | 36 · 787           |
 | Sub-districts · villages · urban local bodies          | **none**                          | 355 · 40 · 18      |
-| CAG audit reports · pages · published facts            | **none**                          | 30 · 6,339 · 5,088 |
+| CAG audit reports · pages · published facts            | 30 · 6,339 · 5,088 (promoted)     | 30 · 6,339 · 5,088 |
 | BEAMS departments · schemes (collected, not displayed) | **none**                          | 33 · 524           |
 | Open tenders, 21 portals, placed where evidence allows | 1,318 (nightly; ADR-067, ADR-068) | a stale subset     |
+| Maharashtra agency notices (MHADA, MSIDC) · scan facts | **none**                          | 96 · 31 unreviewed |
 
-So on the live site `/documents` is empty and the department page has nothing to show. The CAG and BEAMS loaders are operator CLIs that have only ever been run locally. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
+The CAG corpus reached production on 6 October 2026 by `promote:cag` (ADR-070; dataset version 285), so `/documents` lists the 30 reports with their reviewed figures. Extraction and review still happen locally; review done after a report was promoted is carried with `promote:cag --refresh` (#190). The department page still has nothing to show: BEAMS has only ever been loaded locally, and its figures are withheld until permitted. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
 
-What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
+What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python; reads pages with no text layer, `.docs/16-operations/reading-scans.md`), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
 
 ```bash
 pnpm install && pnpm test          # ~1,370 tests; integration suites need a database
@@ -114,7 +115,7 @@ These come from cross-referencing several documents; each is load-bearing.
 
 **Mobile, deferred** (`.docs/02-architecture/mobile-architecture.md`): Expo + React Native, four enforced layers, four bottom tabs. Stands for when mobile resumes; revalidate the toolchain at that point.
 
-ADRs in `.docs/adr/` (001–068) record decisions with alternatives and trade-offs. **ADRs append; they are never rewritten** — a change is a new ADR or a dated addendum. 001–010 are the deferred mobile specification; 011 onward are active.
+ADRs in `.docs/adr/` (001–075) record decisions with alternatives and trade-offs. **ADRs append; they are never rewritten** — a change is a new ADR or a dated addendum. 001–010 are the deferred mobile specification; 011 onward are active.
 
 ## Working with the data-source registry
 
@@ -133,7 +134,7 @@ Fields with no evidence are `null` or `"unknown"` — never guessed. If you add 
 Do not treat these as settled; they are tracked in `.docs/README.md` and `.docs/06-government-sources/SOURCE-DISCOVERY-REPORT.md`.
 
 - **The execution-data gap — located, and licence-blocked.** No _usable_ source exists for physical progress, financial progress, work orders, completion or per-project expenditure, so `.docs/07-analytics/analytics-engine.md`'s central `Released − Utilized` variance still has no source it may draw on, and the project-level Money Trail depends on it. But the blocker is no longer discovery: PMGSY's **OMMAS was found reachable on 28 August** at `pmgsy.dord.gov.in` (the discovered host `online.omms.nic.in` is gone from public DNS), publishing exactly that register at work level across 92 public report routes with no login. **NRIDA's terms forbid copying or republishing it without prior written permission** — the most restrictive licence of any source examined. `.docs/06-government-sources/pmgsy-ommas-findings.md` has the evidence.
-- **Permission, not discovery, is the blocker.** LGD and CAG permit republication; BEAMS, PMGSY and the tender portals' issuing departments do not. Drafts exist and are tracked in `.docs/06-government-sources/permission-requests.json` (checked by a test), but **no request has been sent**. Until one is granted, BEAMS figures and tender details stay withheld (`PUBLISH_BEAMS_FIGURES`, `PUBLISH_TENDER_DETAILS` — never set them in production without a recorded permission).
+- **Permission, not discovery, is the blocker.** LGD and CAG permit republication; BEAMS, PMGSY and the tender portals' issuing departments do not. Drafts exist and are tracked in `.docs/06-government-sources/permission-requests.json` (checked by a test), but **no request has been sent**. Until one is granted, BEAMS figures and tender details stay withheld. **On 7 October 2026 the requests were deferred** (`.docs/decisions/2026-10-07-permissions-deferred.md`): build on publishable sources and do not make permission a development dependency. A restricted source opens only with a grant recorded in `PERMISSION_GRANTS` (`packages/domain/src/source-licence.ts`, held to the JSON by a test) **and** its switch set (`PUBLISH_BEAMS_FIGURES`, `PUBLISH_TENDER_DETAILS`, or `PUBLISH_RESTRICTED_SOURCES`); a switch without a grant opens nothing (ADR-073).
 - **Backend P0 items** (`.docs/11-api/client-api-contract.md` §7, re-prioritised for web in `.docs/01-product/roadmap-web.md` §Backend dependencies). Some have landed — `/api/v1/search` exists and money crosses the wire as decimal strings — so check the code before assuming any is missing. The list: a search endpoint, money as decimal strings, both variances, three confidences, provenance page anchors, no inline geometry, and a CGNAT-safe rate tier — per-IP limits misfire on Indian carrier NAT, which affects web users too. The composite BFF dropped from P0 to P2: a server-rendered client can make parallel calls.
 - ~~Mobile-only removes the desktop workflow for researchers and journalists~~ — **resolved.** PR-1 was the reason for the web-first pivot; the researcher surfaces (tables, bulk export, API access) ship before launch in W9.
 - **A second platform pivot would be expensive.** Web-first should be treated as settled through launch.

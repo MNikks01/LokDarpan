@@ -34,6 +34,12 @@ export default function AboutPage(): React.JSX.Element {
         {aboutCopy.emptyVersusUnpublished}
       </p>
 
+      <p style={{ maxWidth: "62ch" }}>
+        <Link href="/about/methodology" style={{ color: color.accent.base }}>
+          {aboutCopy.methodologyLink}
+        </Link>
+      </p>
+
       <h2 style={{ fontSize: 18, marginTop: 28 }}>{aboutCopy.rulesHeading}</h2>
       <ul style={{ maxWidth: "62ch", lineHeight: 1.65 }}>
         {aboutCopy.rules.map((rule) => (

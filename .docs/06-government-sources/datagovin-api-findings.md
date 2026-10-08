@@ -76,3 +76,17 @@ Its value is as a **template** for what the procurement layer should contain, an
 ## Next step
 
 Obtain a `data.gov.in` API key by self-service registration, then inspect the Assam series field-by-field. That determines whether a state-published procurement dataset can carry the tender → contractor → award link at all, which is the open question behind Branch A.
+
+## Addendum · 2026-10-06 — a key, and a gateway that did not answer
+
+- **A key is registered** to the project's account. It is held as `DATA_GOV_IN_API_KEY` in the local
+  `.env.local`, which git ignores, and as a GitHub Actions secret of the same name. It is never
+  written to the repository. The pincode importer's `--api` mode reads it.
+- **The API gateway failed for every request that day**, keyless or keyed. `/lists` answered
+  `HTTP 500 {"error": "There was a problem proxying the request"}` in the afternoon and again at 15:45
+  IST, and `HTTP 429` at 15:40. A one-row keyed read of the pincode resource answered the same 500. **The key
+  is therefore untested, not rejected**: a refused key answers an authorization error, not a proxy
+  failure. Recorded per the registry rule as _the API gateway did not answer from this vantage
+  point on 2026-10-06; the service's state is not established._
+- **Next, unchanged:** once the gateway answers, read one row with the key, switch the pincode
+  directory to `--api`, and inspect the Assam procurement series field by field.

@@ -3,16 +3,19 @@
 Runbooks for what is deployed: the site on Vercel, the ledger on Neon, and the nightly tender
 collection on GitHub Actions.
 
-| Runbook                                                                      | What it covers                                                                     |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| [`deployment-vercel.md`](deployment-vercel.md)                               | The site: project settings, environment, base map, protection bypass, verification |
-| [`provisioning-scheduled-ingestion.md`](provisioning-scheduled-ingestion.md) | The database: migrations, the ingestion credential, the first load                 |
-| [`collection-schedule.md`](collection-schedule.md)                           | The nightly collection: schedule, credentials, monitoring, recovery                |
-| [`rate-limiting.md`](rate-limiting.md)                                       | The API rate limit: the Firewall rule, the internal token, watching it             |
-| [`tender-placement.md`](tender-placement.md)                                 | Placing tenders: the pincode directory, backfill, aliases, manual decisions        |
-| [`promoting-the-cag-corpus.md`](promoting-the-cag-corpus.md)                 | Copying the reviewed audit reports and figures into production (`promote:cag`)     |
-| [`applying-migrations.md`](applying-migrations.md)                           | Migrations into production by hand: `--status`, apply, checks; 0040–0043           |
-| [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037   |
+| Runbook                                                                      | What it covers                                                                        |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [`deployment-vercel.md`](deployment-vercel.md)                               | The site: project settings, environment, base map, protection bypass, verification    |
+| [`provisioning-scheduled-ingestion.md`](provisioning-scheduled-ingestion.md) | The database: migrations, the ingestion credential, the first load                    |
+| [`collection-schedule.md`](collection-schedule.md)                           | The nightly collection: schedule, credentials, monitoring, recovery                   |
+| [`rate-limiting.md`](rate-limiting.md)                                       | The API rate limit: the Firewall rule, the internal token, watching it                |
+| [`tender-placement.md`](tender-placement.md)                                 | Placing tenders: the pincode directory, backfill, aliases, manual decisions           |
+| [`promoting-the-cag-corpus.md`](promoting-the-cag-corpus.md)                 | Copying the reviewed audit reports and figures into production (`promote:cag`)        |
+| [`reading-scans.md`](reading-scans.md)                                       | Scanned pages: the OCR service, `raw:adopt`, `ocr:read`, scan facts, review           |
+| [`applying-migrations.md`](applying-migrations.md)                           | Migrations into production by hand: `--status`, apply, checks; 0040–0043              |
+| [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037      |
+| [`correction-requests.md`](correction-requests.md)                           | Reports of data errors from `/report`: enabling the form, reviewing reports (ADR-075) |
+| [`reviewing-public-bodies.md`](reviewing-public-bodies.md)                   | Governments and departments: extract names, review them, `ingest:bodies` (ADR-074)    |
 
 Elsewhere:
 

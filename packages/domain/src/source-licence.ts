@@ -136,6 +136,116 @@ export function licenceFor(sourceId: string): SourceLicence | null {
 }
 
 /**
+ * A permission a publisher actually granted, as received.
+ *
+ * A `permission_required` source stays withheld until one of these exists. It
+ * is the only way such a source becomes publishable: the licence entry above
+ * keeps stating the publisher's terms, which a grant does not change.
+ *
+ * Every grant must match an entry in
+ * `.docs/06-government-sources/permission-requests.json` whose status is
+ * `granted`, with the same reference and date; a test holds the two together.
+ */
+export interface PermissionGrant {
+  /** The registry id the grant covers: `beams`, `gepnic`, `pmgsy`. */
+  readonly sourceId: string;
+  /**
+   * The issuing body the grant is limited to, or `null` for the whole source.
+   * GePNIC portals require permission per issuing department, so one
+   * department's grant opens only that department's tenders.
+   */
+  readonly issuer: string | null;
+  /** The id of the request in `permission-requests.json`. */
+  readonly requestId: string;
+  /** When the grant was received, `YYYY-MM-DD`. */
+  readonly grantedOn: string;
+  /** The grant's own reference: a letter number, an email's date and sender. */
+  readonly reference: string;
+  /** Conditions the grant states, such as a required attribution. */
+  readonly conditions: string | null;
+}
+
+/**
+ * Grants received. Empty: no request has been sent
+ * (`.docs/decisions/2026-10-07-permissions-deferred.md`).
+ */
+export const PERMISSION_GRANTS: readonly PermissionGrant[] = [];
+
+/** Why a source may be shown. */
+export type PublicationBasis =
+  /** The publisher's terms permit reproduction without asking. */
+  | "terms_permit"
+  /** The terms require permission, a grant is recorded, and the source is switched on. */
+  | "grant_recorded";
+
+/** Why a source is withheld. */
+export type WithheldReason =
+  /** No terms are recorded, or the terms found are `unknown`. */
+  | "terms_unrecorded"
+  /** The terms require permission and no grant covering this material is recorded. */
+  | "permission_not_granted"
+  /** A grant is recorded, but no operator has switched the source on yet. */
+  | "not_switched_on";
+
+export type PublicationDecision =
+  | { readonly publishable: true; readonly basis: PublicationBasis }
+  | { readonly publishable: false; readonly reason: WithheldReason };
+
+export interface PublicationContext {
+  /**
+   * Registry ids an operator has switched on. Read from the environment by the
+   * server, never decided here: this package does no I/O.
+   */
+  readonly switchedOn?: ReadonlySet<string>;
+  /** The issuing body the material came from, where a grant may be per issuer. */
+  readonly issuer?: string | null;
+  /** The grants to consult. Defaults to the recorded ones; tests pass their own. */
+  readonly grants?: readonly PermissionGrant[];
+}
+
+const NOTHING_SWITCHED_ON: ReadonlySet<string> = new Set();
+
+/**
+ * Whether a source's material may be shown to a reader, and on what basis.
+ *
+ * Three recorded facts decide it, and nothing else:
+ *
+ * 1. the publisher's terms (`LICENCES`);
+ * 2. a grant, for a source whose terms require permission (`PERMISSION_GRANTS`);
+ * 3. an operator's switch, so a recorded grant goes live when someone decides
+ *    it should, and can be withdrawn without a deployment.
+ *
+ * A switch without a grant opens nothing: the rule that a restricted source is
+ * never published without a recorded permission is enforced here rather than
+ * left to whoever sets the environment. Enabling a granted source is therefore
+ * a matter of data — a grant and a switch — and never of code.
+ */
+export function publicationDecision(
+  sourceId: string,
+  context: PublicationContext = {},
+): PublicationDecision {
+  const licence = licenceFor(sourceId);
+  if (licence === null || licence.republication === "unknown") {
+    return { publishable: false, reason: "terms_unrecorded" };
+  }
+  if (licence.republication === "permitted") {
+    return { publishable: true, basis: "terms_permit" };
+  }
+
+  const grants = context.grants ?? PERMISSION_GRANTS;
+  const issuer = context.issuer ?? null;
+  const granted = grants.some(
+    (g) => g.sourceId === licence.sourceId && (g.issuer === null || g.issuer === issuer),
+  );
+  if (!granted) return { publishable: false, reason: "permission_not_granted" };
+
+  const switchedOn = context.switchedOn ?? NOTHING_SWITCHED_ON;
+  if (!switchedOn.has(licence.sourceId)) return { publishable: false, reason: "not_switched_on" };
+
+  return { publishable: true, basis: "grant_recorded" };
+}
+
+/**
  * Whether a source's material may be shown to a reader.
  *
  * An unrecorded source is refused, not allowed. The two errors are not
@@ -143,8 +253,8 @@ export function licenceFor(sourceId: string): SourceLicence | null {
  * no right to publish damages the standing this project's entire value rests
  * on. So the default is withheld and silence is never read as consent.
  */
-export function mayRepublish(sourceId: string): boolean {
-  return licenceFor(sourceId)?.republication === "permitted";
+export function mayRepublish(sourceId: string, context: PublicationContext = {}): boolean {
+  return publicationDecision(sourceId, context).publishable;
 }
 
 /**
@@ -198,4 +308,15 @@ export function describeSource(sourceId: string): SourceDescriptor {
 /** One descriptor per distinct source id, in first-seen order. */
 export function describeSources(sourceIds: readonly string[]): readonly SourceDescriptor[] {
   return [...new Set(sourceIds)].map(describeSource);
+}
+
+/**
+ * Every source whose terms are recorded, in registry order.
+ *
+ * For the methodology page, which lists each source from this registry rather
+ * than from its own copy of it, so the two cannot drift: a source added here
+ * without a methodology entry fails a test.
+ */
+export function sourceLicences(): readonly SourceLicence[] {
+  return LICENCES;
 }

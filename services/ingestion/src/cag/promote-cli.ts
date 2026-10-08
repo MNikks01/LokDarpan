@@ -1,6 +1,7 @@
 import pg from "pg";
 
 import { PromotionRefused, promoteCag } from "./promote";
+import { refreshCag } from "./promote-refresh";
 import {
   DEFAULT_RAW_ROOT,
   RawStoreMisconfigured,
@@ -14,6 +15,7 @@ import {
  *   SOURCE_DATABASE_URL=… TARGET_DATABASE_URL=… RAW_STORE_S3_*=… \
  *     pnpm --filter @lokdarpan/ingestion promote:cag            # dry run
  *   … promote:cag --commit                                      # writes
+ *   … promote:cag --refresh [--commit]                          # review done since (#190)
  *
  * A dry run by default: it does everything, checks every count, and rolls back.
  * Nothing is written to the target without `--commit`, which is the one flag a
@@ -33,13 +35,41 @@ function required(name: string): string {
   return value;
 }
 
+/** `--refresh`: carry review done since promotion into the target (#190). */
+async function runRefresh(source: pg.Client, target: pg.Client, commit: boolean): Promise<void> {
+  try {
+    process.stdout.write(`refresh, ${commit ? "COMMIT" : "dry run"} …\n`);
+    const r = await refreshCag({ source, target, dryRun: !commit });
+    process.stdout.write(
+      `${String(r.reports)} report(s) differed · ${String(r.inserted)} figure(s) added · ` +
+        `${String(r.updated)} updated · ${String(r.retired)} retired · ` +
+        `${String(r.history)} history row(s) · ${String(r.links)} link(s)\n` +
+        `${String(r.stranded)} decided figure(s) the source no longer produces were kept; ` +
+        `${String(r.scanSkipped)} figure(s) read from scans were not carried.\n` +
+        (r.committed
+          ? `Committed as dataset version ${String(r.datasetVersionId)}.\n`
+          : "Nothing was written. Run with --commit to write.\n"),
+    );
+  } finally {
+    await source.end();
+    await target.end();
+  }
+}
+
 async function main(): Promise<void> {
-  const unknown = process.argv.slice(2).filter((a) => a !== "--commit");
+  // `pnpm … promote:cag -- --refresh` forwards the `--` itself, as the other
+  // ingestion commands are invoked; it separates arguments and means nothing here.
+  const unknown = process.argv
+    .slice(2)
+    .filter((a) => a !== "--" && a !== "--commit" && a !== "--refresh");
   if (unknown.length > 0) {
-    process.stderr.write(`Unknown argument(s): ${unknown.join(" ")}. Only --commit is accepted.\n`);
+    process.stderr.write(
+      `Unknown argument(s): ${unknown.join(" ")}. Only --commit and --refresh are accepted.\n`,
+    );
     process.exit(EXIT_USAGE);
   }
   const commit = process.argv.includes("--commit");
+  const refresh = process.argv.includes("--refresh");
   const sourceUrl = required("SOURCE_DATABASE_URL");
   const targetUrl = required("TARGET_DATABASE_URL");
   if (sourceUrl === targetUrl) {
@@ -61,6 +91,10 @@ async function main(): Promise<void> {
   const target = new pg.Client({ connectionString: targetUrl });
   await source.connect();
   await target.connect();
+  if (refresh) {
+    await runRefresh(source, target, commit);
+    return;
+  }
   try {
     process.stdout.write(`raw store: ${store.location}\n${commit ? "COMMIT" : "dry run"} …\n`);
     const result = await promoteCag({

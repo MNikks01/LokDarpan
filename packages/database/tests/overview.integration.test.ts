@@ -23,8 +23,10 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
 
     const ARTIFACT = "7".repeat(64);
     const PORTAL = "zz-overview";
-    const LGD_STATE = "9930001";
-    const LGD_DISTRICT = "9930002";
+    // Not 9930xxx: tender-integrity commits rows under those codes while it runs,
+    // and a state it has just collected would already be in `before`.
+    const LGD_STATE = "9941001";
+    const LGD_DISTRICT = "9941002";
 
     beforeAll(async () => {
       pool = new pg.Pool({ connectionString: DATABASE_URL, max: 1 });

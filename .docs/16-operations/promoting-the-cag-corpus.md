@@ -1,5 +1,9 @@
 # Promoting the CAG corpus to production
 
+> **Done · 6 October 2026.** Promoted as dataset version **285**: 30 reports · 6,339 pages · 10,712
+> figures, 5,088 published · 260 review-history rows, matching the dry run exactly. Checked live:
+> `/api/v1/documents` serves 30 documents and 5,088 published facts. The undo below names version 285.
+
 **Written:** 30 September 2026 · **Decision:** [ADR-070](../adr/070-the-reviewed-ledger-is-copied-not-re-derived.md) · **Code:** `services/ingestion/src/cag/promote.ts`
 
 The audit reports and every figure a person reviewed live in the local database, where the review
@@ -25,9 +29,9 @@ stays local is what the extractor needs to find figures, and extraction and revi
 ## Before you run it
 
 - [ ] Neon is serving connections again. The transfer quota reset at 00:00 UTC on 1 October 2026.
-- [ ] The release carrying #152, #158 and #159 is on `main`, and migrations 0037, 0038 and 0039
-      are applied to production (`raw-store.md` §3). The tool refuses to run if the two databases
-      are on different migrations, and your local database already has all three.
+- [ ] Both databases are on the same migrations: `migrate -- --status` shows nothing pending on
+      either (`applying-migrations.md`). The tool refuses to run if they differ. On 6 October 2026
+      both were at 0044.
 - [ ] Your local database holds the reviewed corpus: `SELECT count(*) FROM published_fact` should
       match the figure you expect (5,088 on 30 September 2026).
 
@@ -41,6 +45,8 @@ to a file.
 export SOURCE_DATABASE_URL='postgresql://lokdarpan:lokdarpan_local_only@localhost:5433/lokdarpan'
 read -rs 'TARGET_DATABASE_URL?Production owner connection string: '; echo; export TARGET_DATABASE_URL
 
+# Your Cloudflare account's R2 endpoint (R2 → bucket → Settings → S3 API). Replace the whole
+# placeholder: left as written it fails with "Invalid URL" before anything is written.
 export RAW_STORE_S3_ENDPOINT='https://<account id>.r2.cloudflarestorage.com'
 export RAW_STORE_S3_BUCKET='lokdarpan-raw'
 read -rs 'RAW_STORE_S3_ACCESS_KEY_ID?R2 access key ID: '; echo; export RAW_STORE_S3_ACCESS_KEY_ID
@@ -97,8 +103,33 @@ COMMIT;
 The artefact rows and the bytes in R2 stay. They are content-addressed and harmless, and a later
 promotion reuses them.
 
-## Later reviews
+## Later reviews (`--refresh`, #190)
 
-The promotion copies a report once. Decisions made locally after that do not follow it. Re-promoting
-a report means removing it first (above) and running again, which gives its figures new ids. Nothing
-outside the document tables refers to those ids today; check that is still true before doing it.
+The promotion copies a report once. Review continues afterwards — a newer parser adds candidates, a
+reviewer decides them or revises an earlier decision — and `--refresh` carries that work into
+production for reports both databases hold:
+
+```bash
+# Same environment as above. Dry run first:
+pnpm --filter @lokdarpan/ingestion promote:cag -- --refresh
+# Only if the dry run's numbers are what you expect:
+pnpm --filter @lokdarpan/ingestion promote:cag -- --refresh --commit
+```
+
+It prints how many reports differed, and for those: figures added, decisions updated, undecided
+candidates retired, history rows carried and same-figure links set. Every figure keeps its
+production id; nothing a reader may have linked to is renumbered.
+
+- **Matching.** A figure is found in production by its identity (page, kind, the words it was read
+  from, its value and field). Figures identical in all five are matched in id order.
+- **Decisions are never deleted.** A decided production figure the source no longer produces is kept
+  and counted as `stranded`; only undecided candidates are retired.
+- **History is copied, not regenerated.** The review-history trigger is disabled inside the
+  transaction while decisions are copied, and re-enabled before it commits.
+- **Self-check.** After applying, it plans again and refuses to commit unless nothing is left to do.
+- **Not carried:** figures read from scans, since page readings are not promoted. They are counted.
+- **Refused:** a report whose page count differs between the databases (it was re-read and needs
+  removing and promoting again), or two databases on different migrations.
+
+Then, if bodies changed, run `ingest:bodies` against production
+([`reviewing-public-bodies.md`](reviewing-public-bodies.md)).

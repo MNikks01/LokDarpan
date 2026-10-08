@@ -27,8 +27,20 @@ export {
   describeSources,
   licenceFor,
   mayRepublish,
+  PERMISSION_GRANTS,
+  publicationDecision,
+  sourceLicences,
 } from "./source-licence";
-export type { Republication, SourceDescriptor, SourceLicence } from "./source-licence";
+export type {
+  PermissionGrant,
+  PublicationBasis,
+  PublicationContext,
+  PublicationDecision,
+  Republication,
+  SourceDescriptor,
+  SourceLicence,
+  WithheldReason,
+} from "./source-licence";
 export * from "./geography";
 export { PORTALS, portalByCode, portalForState, portalHomeUrl } from "./gepnic-portals";
 export type { Portal } from "./gepnic-portals";
@@ -48,3 +60,23 @@ export type {
   TenderCollectionInput,
   Transport,
 } from "./data-state";
+export type {
+  BodyMention,
+  BodyMentionsInReport,
+  PublicBodyKind,
+  PublicBodyRef,
+  PublicBodyRepository,
+  PublicBodyView,
+} from "./public-body";
+export {
+  CORRECTION_CATEGORIES,
+  HONEYPOT_FIELD,
+  isCorrectionSubject,
+  parseCorrection,
+} from "./correction";
+export type {
+  CorrectionCategory,
+  CorrectionInput,
+  CorrectionParse,
+  CorrectionProblem,
+} from "./correction";
