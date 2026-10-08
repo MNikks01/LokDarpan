@@ -14,14 +14,32 @@ In this order. Until all three are done, `/report` tells readers reports cannot 
    group role.
 2. **Create the login user** with a generated password, held only in the password manager:
 
-   ```sql
-   CREATE ROLE lokdarpan_intake_user LOGIN PASSWORD '<generated>';
-   ALTER ROLE lokdarpan_intake_user NOSUPERUSER NOCREATEDB NOCREATEROLE;
+   ```bash
+   INTAKE_PW=$(openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | cut -c1-32)
+   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v pw="$INTAKE_PW" <<'SQL'
+   CREATE ROLE lokdarpan_intake_user LOGIN PASSWORD :'pw';
    GRANT lokdarpan_intake TO lokdarpan_intake_user;
+   SQL
    ```
 
+   No `ALTER ROLE … NOSUPERUSER NOCREATEDB NOCREATEROLE`: Neon's owner is not a superuser and may
+   not name the `SUPERUSER` attribute at all, even to clear it (found on 8 October 2026). A new role
+   has all three off by default; confirm it, expecting `f|f|f|t|t`:
+
+   ```bash
+   psql "$DATABASE_URL" -At -c "SELECT r.rolsuper, r.rolcreatedb, r.rolcreaterole, r.rolcanlogin,
+          pg_has_role('lokdarpan_intake_user', 'lokdarpan_intake', 'MEMBER')
+     FROM pg_roles r WHERE r.rolname = 'lokdarpan_intake_user'"
+   ```
+
+   The local script (`database/scripts/create-local-intake-user.sql`) keeps the `ALTER`: the Docker
+   owner is a superuser there.
+
 3. **Set `DATABASE_URL_INTAKE`** on the Vercel project (Production) to that user's **pooled**
-   connection string, then redeploy. Never the owner's, and never the read-only API user's.
+   connection string (the owner's host with `-pooler` after the endpoint id), piped rather than typed:
+   `printf %s "$INTAKE_URL" | vercel env add DATABASE_URL_INTAKE production`. Never the owner's, and
+   never the read-only API user's. Check it is fenced in first: `psql "$INTAKE_URL" -c "SELECT
+count(*) FROM correction_request"` must fail with "permission denied".
 
 Check: submit a test report from `/report`, note its reference, then mark it `not_actionable`
 with the note "Deployment check" (below).
