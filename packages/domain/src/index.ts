@@ -60,6 +60,24 @@ export type {
   TenderCollectionInput,
   Transport,
 } from "./data-state";
+export {
+  auditHolding,
+  boundaryHolding,
+  budgetHolding,
+  holdingHeadline,
+  LEVELS_BELOW,
+  tenderHolding,
+  worksHolding,
+} from "./holdings";
+export type {
+  BoundaryInput,
+  Decide,
+  FiledInput,
+  Holding,
+  HoldingHeadline,
+  HoldingLayer,
+  Showing,
+} from "./holdings";
 export type {
   BodyMention,
   BodyMentionsInReport,

@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Holdings > renders a current row 1`] = `
+"What LokDarpan holds here
+Each kind of record LokDarpan deals in, and whether it is held and shown, held and not shown, or not collected for this place. None of these is a statement about what a government has published.
+Open tenders Held, collected daily
+Collected from the e-procurement portal of Maharashtra. Collected since 20 August 2026; tenders advertised before then are not held. Counts are shown; the tenders' details are not, because the portals permit reproducing them only with the issuing department's permission."
+`;
+
+exports[`Holdings > renders a failing row 1`] = `
+"What LokDarpan holds here
+Each kind of record LokDarpan deals in, and whether it is held and shown, held and not shown, or not collected for this place. None of these is a statement about what a government has published.
+Open tenders Held, last collection did not complete
+The most recent collection did not complete. Last successful collection 8 October 2026."
+`;
+
+exports[`Holdings > renders a held row 1`] = `
+"What LokDarpan holds here
+Each kind of record LokDarpan deals in, and whether it is held and shown, held and not shown, or not collected for this place. None of these is a statement about what a government has published.
+Taluka boundaries Held
+14 held."
+`;
+
+exports[`Holdings > renders a not_collected row 1`] = `
+"What LokDarpan holds here
+Each kind of record LokDarpan deals in, and whether it is held and shown, held and not shown, or not collected for this place. None of these is a statement about what a government has published.
+Progress of individual works Not collected
+No register of individual public works that may be republished has been identified in the sources reviewed. The one found, the rural roads register (PMGSY's OMMAS), may not be copied without written permission. This describes what LokDarpan holds, not whether work is under way."
+`;
+
+exports[`Holdings > renders a partial row 1`] = `
+"What LokDarpan holds here
+Each kind of record LokDarpan deals in, and whether it is held and shown, held and not shown, or not collected for this place. None of these is a statement about what a government has published.
+Municipal body boundaries Partly held
+1 held. OpenStreetMap tags 18 of about 270."
+`;
+
+exports[`Holdings > renders a stale row 1`] = `
+"What LokDarpan holds here
+Each kind of record LokDarpan deals in, and whether it is held and shown, held and not shown, or not collected for this place. None of these is a statement about what a government has published.
+Open tenders Held, not recently collected
+Last collected 8 October 2026, longer ago than the daily schedule expects."
+`;
+
+exports[`Holdings > renders a withheld row 1`] = `
+"What LokDarpan holds here
+Each kind of record LokDarpan deals in, and whether it is held and shown, held and not shown, or not collected for this place. None of these is a statement about what a government has published.
+Budget, release and expenditure Held, not shown
+Figures from the Finance Department's budget system are held for Maharashtra, and are not shown: its terms permit reproducing them only with the department's permission, which is not yet recorded. Budgets are held by state, not by district or taluka. Last loaded 26 August 2026."
+`;

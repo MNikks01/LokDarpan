@@ -9,6 +9,7 @@ import { PostgresPublishedFactRepository } from "@lokdarpan/database/published-f
 import { PostgresTenderRepository } from "@lokdarpan/database/tender";
 import { PostgresOverviewRepository } from "@lokdarpan/database/overview";
 import { PostgresPublicBodyRepository } from "@lokdarpan/database/public-body";
+import { PostgresHoldingsRepository } from "@lokdarpan/database/holdings";
 import { readLedger, versionOpenedAt } from "@lokdarpan/database/ledger";
 import pg from "pg";
 
@@ -87,6 +88,8 @@ export interface LedgerRepositories {
   readonly overview: PostgresOverviewRepository;
   /** Governments and departments, shown only through reviewed mentions (ADR-074). */
   readonly bodies: PostgresPublicBodyRepository;
+  /** What is held for a unit, before the publication gate is applied (ADR-076). */
+  readonly holdings: PostgresHoldingsRepository;
 }
 
 export interface VersionedResult<T> {
@@ -113,6 +116,7 @@ export async function inLedger<T>(
       facts: new PostgresPublishedFactRepository(db),
       overview: new PostgresOverviewRepository(db),
       bodies: new PostgresPublicBodyRepository(db),
+      holdings: new PostgresHoldingsRepository(db),
     }),
   );
   return { data: value, datasetVersion: ledger.datasetVersion, asOf: ledger.asOf };
