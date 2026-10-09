@@ -21,6 +21,7 @@ const detail = (over: Partial<TenderDetail> = {}): TenderDetail => ({
   tenderType: "Open Tender",
   tenderValuePaise: 59_200_000n,
   emdPaise: 450_000n,
+  fields: { "Work Description": "Repair of the block road", "Tender Fee in ₹": "1,180" },
   ...over,
 });
 
@@ -320,6 +321,18 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         "c1".repeat(32),
       );
       expect(await cited()).toBe(D1);
+      const fields = async (): Promise<unknown> =>
+        (
+          await db.query<{ detail_fields: unknown }>(
+            `SELECT detail_fields FROM tender WHERE portal_code = $1 AND portal_tender_id = 'P'`,
+            [PORTAL],
+          )
+        ).rows[0]?.detail_fields;
+      // Every field the page stated is kept, as stated (0048).
+      expect(await fields()).toEqual({
+        "Work Description": "Repair of the block road",
+        "Tender Fee in ₹": "1,180",
+      });
       const stored = await client.query<{ source_id: string; stored_in: string }>(
         `SELECT source_id, stored_in FROM source_artifact WHERE sha256 = $1`,
         [D1],
@@ -333,6 +346,10 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
         "c1".repeat(32),
       );
       expect(await cited()).toBe(D1);
+      expect(await fields()).toEqual({
+        "Work Description": "Repair of the block road",
+        "Tender Fee in ₹": "1,180",
+      });
 
       // A page kept but not parsed into details is not a citation for them.
       await load(

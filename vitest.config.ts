@@ -67,6 +67,7 @@ export default defineConfig({
         "services/ingestion/src/cag/bodies-cli.ts",
         "services/ingestion/src/cag/places-cli.ts",
         "services/ingestion/src/review/places-cli.ts",
+        "services/ingestion/src/gepnic/refill-details-cli.ts",
         "services/ingestion/src/freshness/cli.ts",
         "services/ingestion/src/review/cli.ts",
         "services/ingestion/src/review/triage-cli.ts",
