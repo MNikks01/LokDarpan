@@ -1,4 +1,5 @@
 import { childBoundaries } from "./child-boundaries";
+import { namedPlaces } from "./named-places";
 import { selectedUnit } from "./selected-unit";
 import { stateOutlines } from "./state-outlines";
 import { tenderOffices } from "./tender-offices";
@@ -11,13 +12,16 @@ import type { LayerDefinition, StyleContext, StyleLayer } from "./types";
  * reviewable in one place, and cannot differ between two renders. What is not
  * here is deliberate — contractors and audit observations are not layers
  * (`.docs/decisions/gods-eye-view-adoption.md`), and there is no works layer
- * because no register of works with coordinates is held.
+ * because no register of works with coordinates is held. `named-places` is not
+ * an observation layer: it marks where a reviewed audit page names a place, each
+ * pin alike, and says nothing about what the page found (ADR-077).
  */
 export const LAYERS: readonly LayerDefinition[] = [
   stateOutlines,
   selectedUnit,
   tenderOffices,
   childBoundaries,
+  namedPlaces,
 ];
 
 /** Every style layer, lowest band first; within a band, in registry order. */
