@@ -15,6 +15,7 @@ const input = (over: Partial<MapInput> = {}): MapInput => ({
   stateOutlines: null,
   childBoundaries: null,
   activeGeometry: null,
+  namedPlaces: null,
   tenders: null,
   visibility: DEFAULT_LAYERS,
   ...over,
@@ -54,6 +55,7 @@ describe("the layer registry", () => {
       "ld-child-fill",
       "ld-child-line",
       "ld-active-line",
+      "ld-named-places-circle",
     ]);
     expect(ids(false)).toEqual(ids(true));
   });

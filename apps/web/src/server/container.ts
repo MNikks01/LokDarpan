@@ -10,6 +10,7 @@ import { PostgresTenderRepository } from "@lokdarpan/database/tender";
 import { PostgresOverviewRepository } from "@lokdarpan/database/overview";
 import { PostgresPublicBodyRepository } from "@lokdarpan/database/public-body";
 import { PostgresHoldingsRepository } from "@lokdarpan/database/holdings";
+import { PostgresPlaceMentionRepository } from "@lokdarpan/database/place-mention";
 import { readLedger, versionOpenedAt } from "@lokdarpan/database/ledger";
 import pg from "pg";
 
@@ -90,6 +91,8 @@ export interface LedgerRepositories {
   readonly bodies: PostgresPublicBodyRepository;
   /** What is held for a unit, before the publication gate is applied (ADR-076). */
   readonly holdings: PostgresHoldingsRepository;
+  /** Districts and talukas named on reviewed audit pages (ADR-077). */
+  readonly places: PostgresPlaceMentionRepository;
 }
 
 export interface VersionedResult<T> {
@@ -117,6 +120,7 @@ export async function inLedger<T>(
       overview: new PostgresOverviewRepository(db),
       bodies: new PostgresPublicBodyRepository(db),
       holdings: new PostgresHoldingsRepository(db),
+      places: new PostgresPlaceMentionRepository(db),
     }),
   );
   return { data: value, datasetVersion: ledger.datasetVersion, asOf: ledger.asOf };
