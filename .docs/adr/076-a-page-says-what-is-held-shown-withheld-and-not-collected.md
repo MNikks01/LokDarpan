@@ -78,3 +78,14 @@ boundaries. It also cannot express the case above. Budget figures are collected,
   caveats, and repeating a bare count here would drop them.
 - The Body and Document pages do not show the checklist yet. A body's row would need its own
   rules (a department's budget is not its state's), and that is left for its own change.
+
+## Addendum · 9 October 2026 · counted anywhere inside, and municipal bodies on taluka pages
+
+Loading Maharashtra's geography into production (LD-006) showed that OpenStreetMap files 17 of the
+state's 18 municipal bodies under a taluka, and only one directly under a district. Counting a
+level's units "one level down" therefore had Nagpur district report one municipal body. Its
+talukas hold more, and a taluka page had no municipal-body row at all.
+
+The boundary rows now count units of each level **anywhere inside** the page's unit, and a taluka
+page lists municipal bodies beside villages (`LEVELS_BELOW.sub_district`). Decision 2's "one level
+down" is read as "each level below".

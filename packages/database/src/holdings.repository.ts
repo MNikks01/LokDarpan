@@ -102,17 +102,24 @@ export class PostgresHoldingsRepository {
     return result.rows[0] ?? null;
   }
 
-  /** Units held one level down, with the nearest recorded coverage finding for each level. */
+  /** Units held inside the unit at each level below it, with the nearest recorded coverage finding. */
   private async boundaries(
     unitId: number,
     level: AdminUnitLevel,
   ): Promise<readonly BoundaryInput[]> {
     const below = LEVELS_BELOW[level];
     if (below.length === 0) return [];
+    // Anywhere inside, not only direct children: OpenStreetMap files most
+    // municipal bodies under a taluka, so a district holding 18 would
+    // otherwise report one.
     const counts = await this.db.query<{ level: AdminUnitLevel; held: string }>(
-      `SELECT level, count(*)::text AS held FROM admin_unit
-        WHERE parent_id = $1 AND valid_to IS NULL
-        GROUP BY level`,
+      `WITH RECURSIVE inside AS (
+         SELECT id, level FROM admin_unit WHERE parent_id = $1 AND valid_to IS NULL
+         UNION ALL
+         SELECT a.id, a.level FROM admin_unit a JOIN inside i ON a.parent_id = i.id
+          WHERE a.valid_to IS NULL
+       )
+       SELECT level, count(*)::text AS held FROM inside GROUP BY level`,
       [unitId],
     );
     const held = new Map(counts.rows.map((r) => [r.level, Number(r.held)]));
