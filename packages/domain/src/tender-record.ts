@@ -205,6 +205,14 @@ const rupees = (inr: string | null): FieldValue | null =>
 const asPrinted = (t: string): FieldValue => ({ kind: "as_printed", text: t });
 const asText = (t: string): FieldValue => ({ kind: "text", text: t });
 
+/**
+ * The tender fee as printed, with the rupee sign the portal prints in the
+ * label ("Tender Fee in ₹") rather than the value. Anything other than a plain
+ * figure ("Exempted", "NIL") is shown exactly as printed.
+ */
+const feeAsPrinted = (t: string): FieldValue =>
+  asPrinted(/^[\d,]+(\.\d+)?$/u.test(t) ? `₹${t}` : t);
+
 function officeDistrict(input: TenderRecordInput): FieldState {
   if (input.districtName === null || input.districtSource === null) {
     return missing("district_not_established");
@@ -285,7 +293,7 @@ function sectionsOf(input: TenderRecordInput): TenderSection[] {
       fields: [
         { key: "estimatedValue", value: column(input, rupees(input.tenderValueInr)) },
         { key: "bidSecurity", value: column(input, rupees(input.emdInr)) },
-        { key: "tenderFee", value: pageField(input, LABELS.tenderFee, asPrinted) },
+        { key: "tenderFee", value: pageField(input, LABELS.tenderFee, feeAsPrinted) },
         { key: "winningBid", value: missing("award_not_collected") },
         { key: "contractValue", value: missing("award_not_collected") },
         { key: "amountPaid", value: missing("progress_not_available") },

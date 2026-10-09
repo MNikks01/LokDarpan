@@ -68,11 +68,18 @@ describe("tenderRecord", () => {
     });
     expect(field({}, "tenderFee")).toEqual({
       state: "known",
-      value: { kind: "as_printed", text: "2,950" },
+      value: { kind: "as_printed", text: "₹2,950" },
     });
     expect(field({}, "documentsAvailable")).toEqual({
       state: "known",
       value: { kind: "as_printed", text: "30-Sep-2026 05:00 PM to 14-Oct-2026 10:00 AM" },
+    });
+  });
+
+  it("adds the rupee sign to a plain fee, and leaves words like Exempted as printed", () => {
+    expect(field({ detailFields: { "Tender Fee in ₹": "Exempted" } }, "tenderFee")).toEqual({
+      state: "known",
+      value: { kind: "as_printed", text: "Exempted" },
     });
   });
 
