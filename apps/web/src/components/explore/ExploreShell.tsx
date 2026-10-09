@@ -15,7 +15,9 @@ import { MARK, mark } from "@/lib/perf-marks";
 import dynamic from "next/dynamic";
 import type { NamedPlace } from "@lokdarpan/domain";
 import { useResource } from "@/lib/use-resource";
+import { DepartmentChips } from "./DepartmentChips";
 import type { MapCanvasProps, MapHandle } from "./MapCanvas";
+import { UnitTenders } from "./UnitTenders";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
 import { RecordsPanel } from "./RecordsPanel";
@@ -268,6 +270,11 @@ export function ExploreShell({
           {exploreCopy.notice}
         </p>
         <PinNotice pinnedVersion={pinnedVersion} pinnedAt={pinnedAt} />
+        <DepartmentChips
+          departments={tenderState.overview.departments}
+          selected={department}
+          onSelect={actions.selectDepartment}
+        />
       </div>
 
       <div className={styles.stage}>
@@ -467,7 +474,7 @@ function ExplorerRail({
         />
       )}
       {activeUnit !== null && (
-        <TenderList
+        <UnitTenders
           heading={`Tenders from offices in ${activeUnit.name}`}
           tenders={tenderState.unitTenders.tenders}
           loading={tenderState.unitTenders.loading}

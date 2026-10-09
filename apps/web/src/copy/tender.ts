@@ -163,3 +163,20 @@ export const tenderCopy = {
 export const tenderPageCopy = {
   withheldTitle: "A tender held by LokDarpan — details not shown",
 } as const;
+
+/** The department chips above the map, and the tender card in the side panel. */
+export const tenderExploreCopy = {
+  chipsLabel: "Show tenders from one department",
+  allDepartments: "All departments",
+  chip: (name: string, count: number): string => `${name} · ${count.toLocaleString("en-IN")}`,
+  openTender: (title: string): string => `Open the record for ${title}`,
+  back: "Back to the list",
+  fullPage: "Open as a full page",
+  loading: "Loading the tender…",
+} as const;
+
+/** The tenders panel in the explorer's side rail. */
+export const tenderPanelCopy = {
+  showingDepartment: (name: string): string => `Showing tenders from ${name}.`,
+  showAll: "Show all departments",
+} as const;
