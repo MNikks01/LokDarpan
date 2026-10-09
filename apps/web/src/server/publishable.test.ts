@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   decideFor,
+  internalPreview,
   switchedOnSources,
   tenderDetailsArePublishable,
   treasuryFiguresArePublishable,
@@ -22,6 +23,8 @@ afterEach(() => {
   delete process.env["PUBLISH_BEAMS_FIGURES"];
   delete process.env["PUBLISH_TENDER_DETAILS"];
   delete process.env["PUBLISH_RESTRICTED_SOURCES"];
+  delete process.env["LOKDARPAN_INTERNAL_PREVIEW"];
+  delete process.env["VERCEL_ENV"];
 });
 
 /** A grant as it would be recorded once received. Test-only; none exists. */
@@ -134,5 +137,48 @@ describe("switches", () => {
       publishable: false,
       reason: "terms_unrecorded",
     });
+  });
+});
+
+/**
+ * The private preview shows withheld material to the operator alone (ADR-078).
+ * The case that costs something is a public deployment that opens: so every
+ * production shape is refused whatever the switch says.
+ */
+describe("the private preview", () => {
+  const on = { LOKDARPAN_INTERNAL_PREVIEW: "true" };
+
+  it("opens on a local development server and a Vercel preview, when switched on", () => {
+    expect(internalPreview({ ...on, NODE_ENV: "development" })).toBe(true);
+    expect(internalPreview({ ...on, NODE_ENV: "production", VERCEL_ENV: "preview" })).toBe(true);
+  });
+
+  it("never opens in production, on Vercel or anywhere else", () => {
+    expect(internalPreview({ ...on, NODE_ENV: "production", VERCEL_ENV: "production" })).toBe(
+      false,
+    );
+    expect(internalPreview({ ...on, NODE_ENV: "production" })).toBe(false);
+    expect(internalPreview({ ...on, VERCEL_ENV: "production" })).toBe(false);
+  });
+
+  it("stays shut unless the switch is exactly true", () => {
+    expect(internalPreview({ NODE_ENV: "development" })).toBe(false);
+    expect(internalPreview({ LOKDARPAN_INTERNAL_PREVIEW: "1", NODE_ENV: "development" })).toBe(
+      false,
+    );
+  });
+
+  it("opens a withheld source in the preview, and says that is why", () => {
+    expect(tenderDetailsArePublishable()).toBe(false);
+    process.env["LOKDARPAN_INTERNAL_PREVIEW"] = "true";
+    expect(decideFor("gepnic")).toEqual({ publishable: true, basis: "internal_preview" });
+    expect(tenderDetailsArePublishable()).toBe(true);
+    process.env["VERCEL_ENV"] = "production";
+    expect(tenderDetailsArePublishable()).toBe(false);
+  });
+
+  it("leaves a source the terms permit on its own basis", () => {
+    process.env["LOKDARPAN_INTERNAL_PREVIEW"] = "true";
+    expect(decideFor("cag")).toEqual({ publishable: true, basis: "terms_permit" });
   });
 });
