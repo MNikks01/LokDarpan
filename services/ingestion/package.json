@@ -37,6 +37,7 @@
     "ocr:read": "tsx src/ocr/cli.ts",
     "ingest:bodies": "tsx src/cag/bodies-cli.ts",
     "ingest:places": "tsx src/cag/places-cli.ts",
+    "tenders:refill-details": "tsx src/gepnic/refill-details-cli.ts",
     "corrections:review": "tsx src/review/correction-requests-cli.ts"
   },
   "dependencies": {

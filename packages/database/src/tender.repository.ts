@@ -1,3 +1,5 @@
+import type { TenderRecordInput } from "@lokdarpan/domain";
+
 import type { Queryable } from "./published-fact.repository";
 
 /**
@@ -318,6 +320,50 @@ export class PostgresTenderRepository {
   }
 
   /**
+   * Whether a tender is held, without reading anything it says. What the
+   * record route answers with while details are withheld (ADR-056).
+   */
+  async tenderPortal(id: number): Promise<{ readonly portalCode: string } | null> {
+    const r = await this.db.query<{ portal_code: string }>(
+      `SELECT portal_code FROM tender WHERE id = $1`,
+      [id],
+    );
+    const row = r.rows[0];
+    return row === undefined ? null : { portalCode: row.portal_code };
+  }
+
+  /**
+   * Everything held about one tender, for its record (ADR-079). Closed tenders
+   * too: a record outlives its deadline. Call only where the publication gate
+   * permits tender details; the route checks before it reads.
+   */
+  async recordInput(id: number): Promise<TenderRecordInput | null> {
+    const r = await this.db.query<RecordRow>(
+      `SELECT t.id::text AS id, t.portal_code, t.title, t.tender_reference, t.department,
+              t.organisation_chain, t.location, t.pincode, t.tender_category,
+              t.product_category, t.tender_type,
+              (t.tender_value_paise / 100)::numeric(20, 2)::text AS tender_value_inr,
+              (t.emd_paise / 100)::numeric(20, 2)::text AS emd_inr,
+              to_json(t.closing_at) #>> '{}' AS closing_at,
+              to_json(t.bid_opening_at) #>> '{}' AS bid_opening_at,
+              d.name_en AS district_name, t.district_source, t.district_evidence_key,
+              t.linkage_confidence::text AS linkage_confidence, t.detail_fields,
+              COALESCE(p.source_url, a.source_url) AS source_url,
+              to_json(t.first_seen_at) #>> '{}' AS first_seen_at,
+              to_json(t.last_seen_at) #>> '{}' AS last_seen_at,
+              (SELECT count(*) FROM tender_version v WHERE v.tender_id = t.id)::text AS changes
+         FROM tender t
+         LEFT JOIN admin_unit d      ON d.id = t.admin_unit_id
+         JOIN source_artifact a      ON a.sha256 = t.source_sha256
+         LEFT JOIN source_artifact p ON p.sha256 = t.detail_sha256
+        WHERE t.id = $1`,
+      [id],
+    );
+    const row = r.rows[0];
+    return row === undefined ? null : toRecordInput(row);
+  }
+
+  /**
    * How many open tenders match, without reading any of their details.
    *
    * What the explorer shows while tender details are withheld: a count is
@@ -438,4 +484,60 @@ export class PostgresTenderRepository {
     );
     return Number(result.rows[0]?.count ?? "0");
   }
+}
+
+interface RecordRow {
+  readonly id: string;
+  readonly portal_code: string;
+  readonly title: string;
+  readonly tender_reference: string;
+  readonly department: string | null;
+  readonly organisation_chain: string | null;
+  readonly location: string | null;
+  readonly pincode: string | null;
+  readonly tender_category: string | null;
+  readonly product_category: string | null;
+  readonly tender_type: string | null;
+  readonly tender_value_inr: string | null;
+  readonly emd_inr: string | null;
+  readonly closing_at: string | null;
+  readonly bid_opening_at: string | null;
+  readonly district_name: string | null;
+  readonly district_source: string | null;
+  readonly district_evidence_key: string | null;
+  readonly linkage_confidence: string | null;
+  readonly detail_fields: Record<string, string> | null;
+  readonly source_url: string;
+  readonly first_seen_at: string;
+  readonly last_seen_at: string;
+  readonly changes: string;
+}
+
+function toRecordInput(row: RecordRow): TenderRecordInput {
+  return {
+    id: Number(row.id),
+    portalCode: row.portal_code,
+    title: row.title,
+    reference: row.tender_reference,
+    department: row.department,
+    organisationChain: row.organisation_chain,
+    location: row.location,
+    pincode: row.pincode,
+    tenderCategory: row.tender_category,
+    productCategory: row.product_category,
+    tenderType: row.tender_type,
+    tenderValueInr: row.tender_value_inr,
+    emdInr: row.emd_inr,
+    closingAt: row.closing_at,
+    bidOpeningAt: row.bid_opening_at,
+    districtName: row.district_name,
+    districtSource: row.district_source,
+    districtEvidenceKey: row.district_evidence_key,
+    linkageConfidence: row.linkage_confidence === null ? null : Number(row.linkage_confidence),
+    detailFields: row.detail_fields,
+    sourceUrl: row.source_url,
+    firstSeenAt: row.first_seen_at,
+    lastSeenAt: row.last_seen_at,
+    changes: Number(row.changes),
+  };
 }

@@ -46,6 +46,13 @@ export interface TenderDetail {
   /** Paise. Null where the portal prints "NA", which it usually does. */
   readonly tenderValuePaise: bigint | null;
   readonly emdPaise: bigint | null;
+  /**
+   * Every label and value the page states, as it states them, with the
+   * portal's "NA" dropped. Kept whole so a field read later — the work
+   * description, the tender fee, the pre-bid meeting — needs no second visit
+   * to the portal, and a portal that words a label differently loses nothing.
+   */
+  readonly fields: Readonly<Record<string, string>>;
 }
 
 function decodeEntities(text: string): string {
@@ -215,6 +222,20 @@ export function districtFromChain(
   return null;
 }
 
+/** "NA" is the portal saying it publishes no figure; it is not a value. */
+function isStated(value: string | undefined): value is string {
+  return value !== undefined && value !== "" && value.toUpperCase() !== "NA";
+}
+
+/**
+ * Every label and value a detail page states, with "NA" dropped: what
+ * `tender.detail_fields` holds (0048). Shared by the collector and by
+ * `refill-details.ts`, so both keep exactly the same fields.
+ */
+export function statedFields(html: string): Readonly<Record<string, string>> {
+  return Object.fromEntries([...labelledValues(html)].filter(([, v]) => isStated(v)));
+}
+
 export function parseDetail(
   html: string,
   knownDistricts: ReadonlySet<string>,
@@ -248,5 +269,6 @@ export function parseDetail(
     tenderType: stated(fields.get("Tender Type")),
     tenderValuePaise: rupeesToPaise(fields.get("Tender Value in ₹")),
     emdPaise: rupeesToPaise(fields.get("EMD Amount in ₹")),
+    fields: Object.fromEntries([...fields].filter(([, v]) => isStated(v))),
   };
 }

@@ -50,6 +50,7 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       tenderType: null,
       tenderValuePaise: null,
       emdPaise: null,
+      fields: {},
     };
 
     const artifact: FetchedArtifact & Retained = {

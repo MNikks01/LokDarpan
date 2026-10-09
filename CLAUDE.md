@@ -115,7 +115,7 @@ These come from cross-referencing several documents; each is load-bearing.
 
 **Mobile, deferred** (`.docs/02-architecture/mobile-architecture.md`): Expo + React Native, four enforced layers, four bottom tabs. Stands for when mobile resumes; revalidate the toolchain at that point.
 
-ADRs in `.docs/adr/` (001–078) record decisions with alternatives and trade-offs. **ADRs append; they are never rewritten** — a change is a new ADR or a dated addendum. 001–010 are the deferred mobile specification; 011 onward are active.
+ADRs in `.docs/adr/` (001–079) record decisions with alternatives and trade-offs. **ADRs append; they are never rewritten** — a change is a new ADR or a dated addendum. 001–010 are the deferred mobile specification; 011 onward are active.
 
 ## Working with the data-source registry
 
