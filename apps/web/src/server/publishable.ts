@@ -67,16 +67,43 @@ export function switchedOnSources(
   return on;
 }
 
+/**
+ * Whether this deployment is the operator's private preview (ADR-078).
+ *
+ * A preview shows withheld material so the operator can see the product with
+ * real data before any permission arrives. Showing it to themselves is review,
+ * not republication; showing it to anyone else would be. So it opens only where
+ * nobody else can look, and never where the public can:
+ *
+ * - never on Vercel's production environment, whatever else is set;
+ * - never in a production build outside Vercel, which is a self-hosted
+ *   production site by another name;
+ * - otherwise only when `LOKDARPAN_INTERNAL_PREVIEW` is exactly "true": a local
+ *   `next dev`, or a Vercel preview deployment, which Vercel Authentication
+ *   restricts to the project's members.
+ */
+export function internalPreview(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  if (env["VERCEL_ENV"] === "production") return false;
+  if (env["NODE_ENV"] === "production" && env["VERCEL_ENV"] !== "preview") return false;
+  return env["LOKDARPAN_INTERNAL_PREVIEW"] === "true";
+}
+
 /** The decision for a source in this environment, with its basis or reason. */
 export function decideFor(
   sourceId: string,
   options: { readonly issuer?: string | null; readonly grants?: readonly PermissionGrant[] } = {},
 ): PublicationDecision {
-  return publicationDecision(sourceId, {
+  const decision = publicationDecision(sourceId, {
     switchedOn: switchedOnSources(),
     issuer: options.issuer ?? null,
     grants: options.grants ?? PERMISSION_GRANTS,
   });
+  if (!decision.publishable && internalPreview()) {
+    return { publishable: true, basis: "internal_preview" };
+  }
+  return decision;
 }
 
 /**

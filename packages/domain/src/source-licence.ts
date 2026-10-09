@@ -176,7 +176,13 @@ export type PublicationBasis =
   /** The publisher's terms permit reproduction without asking. */
   | "terms_permit"
   /** The terms require permission, a grant is recorded, and the source is switched on. */
-  | "grant_recorded";
+  | "grant_recorded"
+  /**
+   * Not shown to the public at all: a private preview the operator alone can
+   * open, on their own machine or a protected preview deployment, never in
+   * production (ADR-078). Decided by the server, never by this package.
+   */
+  | "internal_preview";
 
 /** Why a source is withheld. */
 export type WithheldReason =
