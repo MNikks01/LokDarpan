@@ -33,6 +33,7 @@ const KIND_LABEL: Readonly<Record<FactKind, string>> = {
   tender_identifier: "tender identifier",
   tender_date: "tender date",
   body_reference: "body named",
+  place_reference: "place named",
 };
 
 // Weight only, never hue. `.docs/17-legal/legal-ethical-rules.md` reserves red
