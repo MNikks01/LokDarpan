@@ -75,7 +75,9 @@ const TOGGLES = Object.keys(TOGGLE_TOKEN) as (keyof LayerVisibility)[];
  */
 function parseLayers(raw: string | null): LayerVisibility {
   if (raw === null) return DEFAULT_LAYERS;
-  if (raw === NO_LAYERS) return { states: false, areas: false, placeNames: false };
+  if (raw === NO_LAYERS) {
+    return { states: false, areas: false, placeNames: false, auditPlaces: false };
+  }
   const tokens = new Set(raw.split(","));
   const known = TOGGLES.filter((key) => tokens.has(TOGGLE_TOKEN[key]));
   if (known.length === 0) return DEFAULT_LAYERS;
@@ -83,6 +85,7 @@ function parseLayers(raw: string | null): LayerVisibility {
     states: known.includes("states"),
     areas: known.includes("areas"),
     placeNames: known.includes("placeNames"),
+    auditPlaces: known.includes("auditPlaces"),
   };
 }
 

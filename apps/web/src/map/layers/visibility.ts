@@ -1,3 +1,5 @@
+import { placesCopy } from "@/copy/places";
+
 /**
  * Which map layers are drawn.
  *
@@ -10,6 +12,8 @@ export interface LayerVisibility {
   /** Boundaries of whatever level is being drilled into. */
   readonly areas: boolean;
   readonly placeNames: boolean;
+  /** Pins where a reviewed audit page names a district or taluka (ADR-077). */
+  readonly auditPlaces: boolean;
 }
 
 /**
@@ -21,12 +25,14 @@ export const TOGGLE_TOKEN: Readonly<Record<keyof LayerVisibility, string>> = {
   states: "so",
   areas: "cb",
   placeNames: "pn",
+  auditPlaces: "ap",
 };
 
 export const DEFAULT_LAYERS: LayerVisibility = {
   states: true,
   areas: true,
   placeNames: true,
+  auditPlaces: true,
 };
 
 export const LAYER_LABELS: readonly {
@@ -48,5 +54,10 @@ export const LAYER_LABELS: readonly {
     key: "placeNames",
     label: "Place names",
     note: "State and district names, placed to avoid overlapping",
+  },
+  {
+    key: "auditPlaces",
+    label: placesCopy.layerLabel,
+    note: placesCopy.layerNote,
   },
 ];

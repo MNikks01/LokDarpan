@@ -43,6 +43,8 @@ export interface MapCanvasProps {
   readonly childBoundaries: FeatureCollection | null;
   /** What the tender shading is drawn from, and on what terms. Null before it loads. */
   readonly tenders: MapInput["tenders"];
+  /** Places a reviewed audit page names inside the selected state (ADR-077). */
+  readonly namedPlaces: MapInput["namedPlaces"];
   readonly states: readonly StateOption[];
   readonly layers: LayerVisibility;
   readonly insets: { readonly left: number; readonly right: number };
@@ -126,6 +128,7 @@ export function MapCanvas({
   activeGeometry,
   childBoundaries,
   tenders,
+  namedPlaces,
   states,
   layers,
   insets,
@@ -315,9 +318,10 @@ export function MapCanvas({
       childBoundaries,
       activeGeometry,
       tenders,
+      namedPlaces,
       visibility: layers,
     }),
-    [activeGeometry, childBoundaries, layers, stateCode, stateOutlines, tenders],
+    [activeGeometry, childBoundaries, layers, namedPlaces, stateCode, stateOutlines, tenders],
   );
 
   useEffect(() => {

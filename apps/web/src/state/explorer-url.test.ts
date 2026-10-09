@@ -141,7 +141,7 @@ describe("what a reader chose travels with the link (ADR-061)", () => {
   it("round-trips layers, department and a pinned version", () => {
     const original: ExplorerState = {
       ...base,
-      layers: { states: false, areas: true, placeNames: false },
+      layers: { states: false, areas: true, placeNames: false, auditPlaces: true },
       department: "Rural Engineering Service",
       pinnedVersion: 18731,
     };
@@ -153,13 +153,21 @@ describe("what a reader chose travels with the link (ADR-061)", () => {
   });
 
   it("names every hidden layer with its own token", () => {
-    const hidden = { ...base, layers: { states: false, areas: false, placeNames: false } };
+    const hidden = {
+      ...base,
+      layers: { states: false, areas: false, placeNames: false, auditPlaces: false },
+    };
     expect(toQueryString(hidden)).toContain("layers=none");
     expect(parse(toQueryString(hidden)).layers).toEqual(hidden.layers);
   });
 
   it("drops tokens it does not know, and falls back to the defaults when none are known", () => {
-    expect(parse("layers=cb,zz").layers).toEqual({ states: false, areas: true, placeNames: false });
+    expect(parse("layers=cb,zz").layers).toEqual({
+      states: false,
+      areas: true,
+      placeNames: false,
+      auditPlaces: false,
+    });
     expect(parse("layers=zz,qq").layers).toEqual(DEFAULT_LAYERS);
   });
 

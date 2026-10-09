@@ -13,6 +13,8 @@ import { FilterPanel } from "./FilterPanel";
 import { CopyViewLink, PinNotice } from "./ViewLink";
 import { MARK, mark } from "@/lib/perf-marks";
 import dynamic from "next/dynamic";
+import type { NamedPlace } from "@lokdarpan/domain";
+import { useResource } from "@/lib/use-resource";
 import type { MapCanvasProps, MapHandle } from "./MapCanvas";
 import { MapControls } from "./MapControls";
 import { RecordDrawer } from "./RecordDrawer";
@@ -84,6 +86,20 @@ interface TenderLayer {
   readonly showingUnplaced: boolean;
   readonly toggleUnplaced: () => void;
   readonly unplacedTenders: ReturnType<typeof useTendersFor>["tenders"];
+}
+
+/**
+ * Pins for the whole state, so they stay put while the reader drills in
+ * (ADR-077). Fetched only once a state with a ledger id is chosen.
+ */
+function useNamedPlaces(
+  state: { readonly unitId: number | null } | null,
+): readonly NamedPlace[] | null {
+  const stateUnitId = state?.unitId ?? null;
+  const { data } = useResource<readonly NamedPlace[]>(
+    stateUnitId === null ? null : `/api/v1/units/${String(stateUnitId)}/named-places`,
+  );
+  return data;
 }
 
 /**
@@ -169,6 +185,8 @@ export function ExploreShell({
     records,
     scopeLabel,
   } = useExplorerGeography(states, geo.stateCode, geo.unitId);
+
+  const namedPlaces = useNamedPlaces(selectedState);
 
   const tenderState = useTenderLayer(geo.unitId, geo.stateCode, {
     department,
@@ -260,6 +278,7 @@ export function ExploreShell({
           activeGeometry={activeGeometry}
           childBoundaries={childBoundaries}
           tenders={tenderState.mapTenders}
+          namedPlaces={namedPlaces}
           states={states}
           layers={layers}
           insets={insets}

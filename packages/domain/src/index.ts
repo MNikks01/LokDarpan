@@ -70,6 +70,12 @@ export {
   worksHolding,
 } from "./holdings";
 export type {
+  NamedPlace,
+  PlaceMentionPage,
+  PlaceMentionRepository,
+  PlaceMentionsInReport,
+} from "./place-mention";
+export type {
   BoundaryInput,
   Decide,
   FiledInput,

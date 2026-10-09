@@ -12,7 +12,7 @@
  * here imports MapLibre at runtime, so every definition is tested without a
  * browser.
  */
-import type { DataState, SourceDescriptor } from "@lokdarpan/domain";
+import type { DataState, NamedPlace, SourceDescriptor } from "@lokdarpan/domain";
 import type { FilterSpecification, LayerSpecification, SourceSpecification } from "maplibre-gl";
 import type { Feature, FeatureCollection } from "geojson";
 import type { LayerVisibility } from "./visibility";
@@ -33,6 +33,8 @@ export interface MapInput {
     /** Open tenders by the district of the issuing office. Absent districts have none held. */
     readonly counts: readonly { readonly adminUnitId: number; readonly tenderCount: number }[];
   } | null;
+  /** Places a reviewed audit page names, inside the selected state (ADR-077). Null before they load. */
+  readonly namedPlaces: readonly NamedPlace[] | null;
   readonly visibility: LayerVisibility;
 }
 
@@ -52,6 +54,7 @@ export const Z = {
   aggregate: 30,
   level: 40,
   selectionLine: 50,
+  records: 60,
 } as const;
 
 export interface StyleLayer {
@@ -81,7 +84,8 @@ export interface HitSpec {
   };
 }
 
-export type LayerId = "state-outlines" | "child-boundaries" | "selected-unit" | "tender-offices";
+export type LayerId =
+  "state-outlines" | "child-boundaries" | "selected-unit" | "tender-offices" | "named-places";
 
 export interface LayerDefinition {
   readonly id: LayerId;
