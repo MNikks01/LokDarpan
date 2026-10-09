@@ -63,6 +63,13 @@ export const FIELDS: Readonly<Record<FactKind, FieldRules>> = {
     critical: false,
     note: "a government or department named on the page; a confirmed name creates or cites a public body",
   },
+  // Matched against the state's own districts and talukas, so it cannot invent
+  // a place; what a reviewer confirms is that the word names the place here
+  // (not a person, a scheme or another state's town) (ADR-077).
+  place_reference: {
+    critical: false,
+    note: "a district or taluka named on the page; a confirmed one is pinned on the map",
+  },
 };
 
 /**
