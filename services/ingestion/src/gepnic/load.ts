@@ -193,6 +193,7 @@ function parameters(
     place.evidenceKey,
     // Cited only when the details were read from it.
     record.detail === null ? null : (record.detailPage?.sha256 ?? null),
+    record.detail === null ? null : JSON.stringify(record.detail.fields),
   ];
 }
 
@@ -204,10 +205,10 @@ const UPSERT = `
     department, organisation_chain, district_source,
     location, pincode, tender_category, product_category, tender_type,
     tender_value_paise, emd_paise, district_evidence_sha256, district_evidence_key,
-    detail_sha256, district_resolved_at, first_seen_at, last_seen_at
+    detail_sha256, detail_fields, district_resolved_at, first_seen_at, last_seen_at
   ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-    $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24,
+    $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25::jsonb,
     CASE WHEN $7::bigint IS NULL THEN NULL ELSE now() END, now(), now()
   )
   ON CONFLICT (portal_code, portal_tender_id) DO UPDATE SET
@@ -273,7 +274,8 @@ const UPSERT = `
     emd_paise = COALESCE(EXCLUDED.emd_paise, tender.emd_paise),
     -- The page the details were last read from. A page that could not be read
     -- or kept leaves the previous citation, alongside the values it gave.
-    detail_sha256 = COALESCE(EXCLUDED.detail_sha256, tender.detail_sha256)
+    detail_sha256 = COALESCE(EXCLUDED.detail_sha256, tender.detail_sha256),
+    detail_fields = COALESCE(EXCLUDED.detail_fields, tender.detail_fields)
     -- first_seen_at is deliberately absent: it records when we began holding
     -- this tender, and rewriting it would erase the collection history.
   RETURNING (xmax = 0) AS inserted`;

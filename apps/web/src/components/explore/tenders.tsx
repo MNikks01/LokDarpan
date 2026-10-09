@@ -1,10 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useCallback } from "react";
 import { displayStateOf, type DataState, type SourceDescriptor } from "@lokdarpan/domain";
 import { notChecked, tenderCopy } from "@/copy/data-state";
 import { useResource } from "@/lib/use-resource";
+import { tenderExploreCopy, tenderPanelCopy } from "@/copy/tender";
 import styles from "./explorer.module.css";
 
 /**
@@ -289,13 +289,6 @@ export function TendersPanel({
   /** The selected state, for a sentence that names it. Null before one is chosen. */
   readonly stateName: string | null;
 }): React.JSX.Element {
-  const onChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      onSelectDepartment(event.target.value === "" ? null : event.target.value);
-    },
-    [onSelectDepartment],
-  );
-
   // The collection window comes from the state on screen's own collection
   // state — never whichever window row came back first, which once dated every
   // state's figures by one arbitrary portal.
@@ -314,25 +307,28 @@ export function TendersPanel({
               {tenderCopy.shadingTail}
             </p>
 
-            <label
-              htmlFor="tender-department"
-              style={{ display: "block", fontSize: 11.5, marginBottom: 4 }}
-            >
-              Department
-            </label>
-            <select
-              id="tender-department"
-              value={department ?? ""}
-              onChange={onChange}
-              style={{ width: "100%", fontSize: 12.5, padding: "6px 8px" }}
-            >
-              <option value="">All departments</option>
-              {overview.departments.map((d) => (
-                <option key={d.name} value={d.name}>
-                  {d.name} ({d.tenderCount})
-                </option>
-              ))}
-            </select>
+            {department !== null && (
+              <p style={{ fontSize: 12.5, margin: 0 }}>
+                {tenderPanelCopy.showingDepartment(department)}{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectDepartment(null);
+                  }}
+                  style={{
+                    background: "none",
+                    border: 0,
+                    padding: 0,
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    color: "var(--ld-text)",
+                    font: "inherit",
+                  }}
+                >
+                  {tenderPanelCopy.showAll}
+                </button>
+              </p>
+            )}
 
             {overview.placed.districts === 0 ? (
               <p style={{ fontSize: 12, margin: "10px 0 0" }}>
@@ -485,6 +481,7 @@ export function TenderList({
   detailsWithheld = false,
   heldCount = tenders.length,
   portalUrl = null,
+  onOpen,
 }: {
   /** Stated by the caller, because a placed list and an unplaced one are
    *  different claims and neither should be phrased as the other. */
@@ -496,6 +493,8 @@ export function TenderList({
   readonly detailsWithheld?: boolean;
   readonly heldCount?: number;
   readonly portalUrl?: string | null;
+  /** Opens a tender's full record in place of the list (ADR-079). Absent: titles are plain text. */
+  readonly onOpen?: (tenderId: number) => void;
 }): React.JSX.Element {
   return (
     <div className={styles.panel}>
@@ -519,7 +518,30 @@ export function TenderList({
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 12 }}>
           {tenders.map((tender) => (
             <li key={tender.id} style={{ fontSize: 12.5, lineHeight: 1.5 }}>
-              <span style={{ fontWeight: 600 }}>{tender.title}</span>
+              {onOpen === undefined ? (
+                <span style={{ fontWeight: 600 }}>{tender.title}</span>
+              ) : (
+                <button
+                  type="button"
+                  aria-label={tenderExploreCopy.openTender(tender.title)}
+                  onClick={() => {
+                    onOpen(tender.id);
+                  }}
+                  style={{
+                    fontWeight: 600,
+                    background: "none",
+                    border: 0,
+                    padding: 0,
+                    textAlign: "left",
+                    cursor: "pointer",
+                    color: "var(--ld-text)",
+                    textDecoration: "underline",
+                    font: "inherit",
+                  }}
+                >
+                  {tender.title}
+                </button>
+              )}
               <span style={{ display: "block", color: "var(--ld-text-secondary)" }}>
                 {tender.department ?? "Department not stated"}
                 {tender.tenderCategory !== null && ` · ${tender.tenderCategory}`}

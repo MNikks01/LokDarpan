@@ -30,6 +30,7 @@
     "./overview": "./src/overview.repository.ts",
     "./public-body": "./src/public-body.repository.ts",
     "./holdings": "./src/holdings.repository.ts",
+    "./place-mention": "./src/place-mention.repository.ts",
     "./ledger": "./src/ledger.ts"
   }
 }

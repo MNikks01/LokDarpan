@@ -3,6 +3,8 @@ import pg from "pg";
 import type { TextItem } from "./extract";
 import { extractFacts } from "./facts";
 import { loadFactCandidates } from "./facts-load";
+import { gazetteerOf, placesIn } from "./places";
+import { gazetteerForDocument } from "./places-load";
 import { asScanFact, readingsOfScannedPages } from "../ocr/scan-facts";
 
 async function main(): Promise<void> {
@@ -64,15 +66,21 @@ async function main(): Promise<void> {
         itemsByPage.set(i.page_number, list);
       }
 
-      const fromText = extractFacts(
-        pages.rows.map((p) => {
-          const items = itemsByPage.get(p.page_number);
-          return {
-            pageNumber: p.page_number,
-            content: p.content,
-            ...(items === undefined ? {} : { items }),
-          };
-        }),
+      const textPages = pages.rows.map((p) => {
+        const items = itemsByPage.get(p.page_number);
+        return {
+          pageNumber: p.page_number,
+          content: p.content,
+          ...(items === undefined ? {} : { items }),
+        };
+      });
+      const fromText = extractFacts(textPages);
+      // Places are matched against the report's own state (ADR-077), so they
+      // need the ledger, which `extractFacts` does not. They are loaded with
+      // the rest because the loader retires whatever a run does not produce.
+      const fromPlaces = placesIn(
+        textPages,
+        gazetteerOf(await gazetteerForDocument(db, documentId)),
       );
       // A scanned page has no text and yields nothing above; its OCR readings
       // are read by the same parser and made into scan facts (ADR-072). Both
@@ -83,7 +91,7 @@ async function main(): Promise<void> {
           { pageNumber: reading.pageNumber, content: reading.content, items: reading.words },
         ]).map((c) => asScanFact(c, reading)),
       );
-      const candidates = [...fromText, ...fromScans];
+      const candidates = [...fromText, ...fromPlaces, ...fromScans];
       const result = await loadFactCandidates(db, documentId, candidates);
 
       process.stdout.write(

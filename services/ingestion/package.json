@@ -16,6 +16,7 @@
     "extract:cag-facts": "tsx src/cag/facts-cli.ts",
     "review": "tsx src/review/cli.ts",
     "review:triage": "tsx src/review/triage-cli.ts",
+    "review:places": "tsx src/review/places-cli.ts",
     "ingest:osm-boundaries": "tsx src/osm/cli.ts",
     "ingest:gepnic": "tsx src/gepnic/cli.ts",
     "ingest:agency": "tsx src/maharashtra/cli.ts",
@@ -35,6 +36,8 @@
     "raw:adopt": "tsx src/raw-adopt-cli.ts",
     "ocr:read": "tsx src/ocr/cli.ts",
     "ingest:bodies": "tsx src/cag/bodies-cli.ts",
+    "ingest:places": "tsx src/cag/places-cli.ts",
+    "tenders:refill-details": "tsx src/gepnic/refill-details-cli.ts",
     "corrections:review": "tsx src/review/correction-requests-cli.ts"
   },
   "dependencies": {

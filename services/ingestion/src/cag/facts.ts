@@ -15,7 +15,7 @@ import { bodiesIn, firstMentionOfEach } from "./bodies";
  * correctly. They say nothing about whether the underlying government
  * statement is true, and none of them means "publishable".
  */
-export const PARSER_VERSION = "cag-facts/24";
+export const PARSER_VERSION = "cag-facts/25";
 
 export type FactKind =
   | "monetary_amount"
@@ -24,7 +24,8 @@ export type FactKind =
   | "work_reference"
   | "tender_identifier"
   | "tender_date"
-  | "body_reference";
+  | "body_reference"
+  | "place_reference";
 
 export interface FactCandidate {
   readonly kind: FactKind;
