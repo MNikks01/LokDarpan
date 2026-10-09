@@ -99,6 +99,33 @@ describe.skipIf(DATABASE_URL === undefined || DATABASE_URL === "")(
       ]);
     });
 
+    // OpenStreetMap files most of Maharashtra's municipal bodies under a taluka
+    // (17 of 18 on 9 October 2026). Counting only a district's direct children
+    // reported one.
+    it("counts a municipal body filed inside a taluka, on the district and on the taluka", async () => {
+      const taluka = Number(
+        (
+          await db().query<{ id: string }>(
+            `SELECT id FROM admin_unit WHERE parent_id = $1 ORDER BY id LIMIT 1`,
+            [district],
+          )
+        ).rows[0]?.id,
+      );
+      await unit("urban_local_body", "Testnagar", `${STATE_CODE}0101U`, taluka);
+
+      const onDistrict = await repo().inputsFor(district);
+      expect(onDistrict?.boundaries[1]).toEqual({
+        level: "urban_local_body",
+        held: 1,
+        coverage: null,
+      });
+      const onTaluka = await repo().inputsFor(taluka);
+      expect(onTaluka?.boundaries.map((b) => [b.level, b.held])).toEqual([
+        ["urban_local_body", 1],
+        ["village", 0],
+      ]);
+    });
+
     it("reads a coverage finding recorded against the state from a district below it", async () => {
       await db().query(
         `INSERT INTO geography_coverage (admin_unit_id, level, status, source_id, note)

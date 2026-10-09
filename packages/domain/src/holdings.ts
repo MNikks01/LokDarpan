@@ -112,8 +112,8 @@ function countIf(showing: Showing, count: number): number | null {
 }
 
 /**
- * The levels a unit's page reports boundaries for: those directly below it in
- * the hierarchy as the ledger records it. A district has two, because talukas
+ * The levels a unit's page reports boundaries for: those below it in the
+ * hierarchy as the ledger records it. A district has two, because talukas
  * and urban local bodies are both its children, and a reader looking for a
  * municipality must be told whether those are held as plainly as talukas.
  */
@@ -121,7 +121,9 @@ export const LEVELS_BELOW: Readonly<Record<AdminUnitLevel, readonly AdminUnitLev
   country: ["state"],
   state: ["district"],
   district: ["sub_district", "urban_local_body"],
-  sub_district: ["village"],
+  // OpenStreetMap files most municipal bodies inside a taluka, so a taluka's
+  // page reports them as plainly as its villages.
+  sub_district: ["urban_local_body", "village"],
   block: ["gram_panchayat"],
   urban_local_body: ["ward"],
   village: [],
@@ -131,7 +133,11 @@ export const LEVELS_BELOW: Readonly<Record<AdminUnitLevel, readonly AdminUnitLev
 
 export interface BoundaryInput {
   readonly level: AdminUnitLevel;
-  /** Units held at this level directly under the page's unit. */
+  /**
+   * Units held at this level anywhere inside the page's unit, not only its
+   * direct children: a district's municipal bodies are mostly filed under its
+   * talukas, and counting only those directly under it would understate them.
+   */
   readonly held: number;
   /** The nearest recorded finding for this level, or null where none is recorded. */
   readonly coverage: LevelCoverageInput | null;
