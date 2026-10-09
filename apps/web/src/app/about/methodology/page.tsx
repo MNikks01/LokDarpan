@@ -84,6 +84,9 @@ export default function MethodologyPage(): React.JSX.Element {
       <h2 style={h2}>{copy.bodiesHeading}</h2>
       <p style={prose}>{copy.bodies}</p>
 
+      <h2 style={h2}>{copy.placesHeading}</h2>
+      <p style={prose}>{copy.places}</p>
+
       <h2 style={h2}>{copy.confidenceHeading}</h2>
       <p style={prose}>{copy.confidence}</p>
 
