@@ -13,7 +13,7 @@
 
 ## How to read a document's status
 
-Most of this suite was written between 21 and 25 August 2026, before any code existed and partly while the product was planned as mobile-only. Documents fall into five kinds, and each says which it is in its opening lines:
+Most of this suite was written between 21 and 25 August 2026, before any code existed and partly while the product was planned as mobile-only. Documents fall into five kinds. Most say which in their opening lines; wireframes and `10-mobile/` files inherit the label from their directory README, ADRs and runbooks carry their own status or date line, and the source-registry findings and inventories are dated evidence, kept as written:
 
 | Kind                  | Means                                                                                                                                                                                                                      |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
