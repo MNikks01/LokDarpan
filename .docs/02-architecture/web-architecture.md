@@ -208,9 +208,11 @@ are the places the implementation took a different or narrower path, checked aga
 16 October 2026.
 
 - **Styling.** No Tailwind. Plain CSS (`app/globals.css`) with the design tokens in `src/ui/tokens.ts`.
-- **Client libraries.** `apps/web` depends on Next.js, React, MapLibre GL JS and `@vercel/firewall`
-  only: there is no `next-intl`, TanStack Query or Table, React Hook Form or Zod in it. Reader-facing
-  sentences are English, in `src/copy/`.
+- **Client libraries.** The third-party dependencies of `apps/web` are Next.js, React, MapLibre GL JS,
+  `@vercel/firewall` and `pg` (the server-side database client), beside six workspace packages
+  (`@lokdarpan/contracts`, `database`, `domain`, `errors`, `money`, `neutrality`). There is no
+  `next-intl`, TanStack Query or Table, or React Hook Form, and no direct Zod dependency: schemas
+  arrive through `@lokdarpan/contracts`. Reader-facing sentences are English, in `src/copy/`.
 - **Routes.** Units are `/units/[id]`, not `/unit/[id]`; source documents are `/documents/[id]`; the
   map is `/explore`; data issues are reported at `/report`; public bodies are `/bodies/[id]`;
   methodology is `/about/methodology`. The `/district/…` aliases, and the tender, contractor, scheme,
