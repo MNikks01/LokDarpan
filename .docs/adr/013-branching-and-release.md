@@ -1,6 +1,6 @@
 # ADR-013 — Branching: `feature/*` → `development` → `main`
 
-**Status:** Accepted · 2026-08-24 · **Amended 2026-08-25** — the approving-review requirement in §Decision is relaxed to zero while the project has one maintainer; see [`016-review-requirement.md`](./016-review-requirement.md). Every other protection stands. · **Amended 2026-08-28** — `development` is retired and `feature/*` now targets `main`; see [`023-features-target-main.md`](./023-features-target-main.md). The protections on `main` are unchanged.
+**Status:** Accepted · 2026-08-24 · **Amended 2026-08-25** — the approving-review requirement in §Decision is relaxed to zero while the project has one maintainer; see [`016-review-requirement.md`](./016-review-requirement.md). Every other protection stands. · **Amended 2026-08-28** — `development` is retired and `feature/*` now targets `main`; see [`023-features-target-main.md`](./023-features-target-main.md). The protections on `main` are unchanged. · **Note added 2026-10-16** — `023` was itself superseded on 2026-09-04 by [`032-development-is-reinstated.md`](./032-development-is-reinstated.md): `development` is reinstated, so the flow in §Decision is the one in force again, with the merge method set by [`041`](./041-the-merge-method-is-a-setting-not-a-checklist-line.md) and [`042`](./042-a-repo-wide-setting-cannot-express-a-per-branch-rule.md). The body below is unchanged.
 
 ## Context
 

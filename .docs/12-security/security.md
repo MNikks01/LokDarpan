@@ -1,5 +1,15 @@
 # 13 — Security
 
+> **Status:** Target spec for the platform's security posture, 21 August 2026, with later additions.
+> **In the repository as of 16 October 2026:** least-privilege database roles (`lokdarpan_api`
+> read-only, `lokdarpan_etl`, `lokdarpan_reviewer`, `lokdarpan_intake`); `X-Content-Type-Options` and
+> `Referrer-Policy` headers (`apps/web/vercel.json`); the API rate limit
+> ([`../16-operations/rate-limiting.md`](../16-operations/rate-limiting.md)); a high-severity
+> dependency audit and a secret scan in CI; and the corrections write path below. **Not in the
+> repository:** an `audit_log` table, CSP or HSTS configuration, Nginx or a WAF, Redis rate limiting,
+> SSO or MFA, keyed API tiers, read replicas, and SAST. Read the rest as the target, not as a
+> description of controls in force.
+
 The data is public, but **integrity, availability, and traceability** are the security priorities: the platform's credibility depends on nobody being able to tamper with figures or provenance, and on the service staying reachable for citizens and journalists. Confidentiality matters mainly for API keys, admin accounts, and operational secrets.
 
 ## Threat model (summary)

@@ -1,5 +1,12 @@
 # 08 — Search Experience
 
+> **Status:** Target spec, written 21–23 August 2026 for the mobile client. Its rules apply to every client; its native
+> mechanics (phone screens, bottom sheets, taps, on-device storage, `lokdarpan://` links) are
+> deferred with the app. Where web differs, [`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md)
+> and [`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md) §What reverses govern.
+> Search as built: `/api/v1/search` over places, report pages and verified figures (migration 0039);
+> tenders are not indexed while their details are withheld (ADR-056).
+
 Search is the journalist's and the RTI activist's front door, and `.docs/11-api/api-documentation.md` does not define a search endpoint at all (`00-document-audit` M1). This document specifies the experience and the requirement.
 
 ---

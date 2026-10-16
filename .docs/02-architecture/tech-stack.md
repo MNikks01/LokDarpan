@@ -1,5 +1,17 @@
 # 12 — Tech Stack
 
+> **Status:** Target spec — the stack chosen on 21 August 2026, superseded for the frontend by
+> [`web-architecture.md`](./web-architecture.md). What was actually built, as of 16 October 2026:
+>
+> | Layer          | Chosen below                                           | As built                                                                                                    |
+> | -------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+> | Site           | Next.js, Tailwind, Mapbox GL JS, React Query, Recharts | Next.js App Router with server components; CSS and tokens in `apps/web/src/ui`; MapLibre GL JS; bespoke SVG |
+> | API            | Express gateway, GraphQL                               | Next.js route handlers under `/api/v1`, REST only ([ADR-012](../adr/012-web-api-strategy.md))               |
+> | Ingestion      | Python, pandas, DuckDB, Camelot, Playwright, BullMQ    | TypeScript in `services/ingestion` (`unpdf`, `node-html-parser`), bounded fetches (ADR-052)                 |
+> | OCR            | Tesseract                                              | A Python FastAPI service with Tesseract ([ADR-039](../adr/039-tesseract-and-not-yet-into-the-ledger.md))    |
+> | Storage        | PostgreSQL 16 + PostGIS, Redis, S3/MinIO, pgvector     | PostgreSQL + PostGIS on Neon; raw bytes in Cloudflare R2 (ADR-069); Redis only in local compose, unused     |
+> | Infrastructure | Docker, Kubernetes, Nginx, Prometheus/Grafana, Sentry  | Vercel, Neon, GitHub Actions; metrics and scrubbed logs in `packages/observability` (ADR-018, ADR-019)      |
+
 Choices favor a boring, well-supported, open-source stack — appropriate for a public-interest project that must be auditable, cheap to run, and easy for contributors to join.
 
 ## Frontend

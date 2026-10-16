@@ -32,6 +32,9 @@
 > [`.docs/02-architecture/web-architecture.md`](./web-architecture.md) §Repository placement; the deferred
 > mobile layout is in [`.docs/02-architecture/repository-structure.md`](./repository-structure.md).
 
+> **Note · 16 October 2026:** the trees below are the August plan, not the repository. The repository
+> as built is described in [`repository-structure.md`](./repository-structure.md).
+
 Monorepo (pnpm + uv/poetry). Declarative source connectors so contributors can add sources without touching core. National-scale layout (`apps` / `services` / `packages` / `workers` / `infrastructure`):
 
 ```text

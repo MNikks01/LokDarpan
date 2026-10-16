@@ -1,5 +1,11 @@
 # 20 — GIS Intelligence
 
+> **Status:** Target spec, 21 August 2026. Its spatial model and honesty rules hold. Its serving stack
+> was not built as written: there are no vector tiles, Mapbox GL or Redis. The explorer draws
+> boundaries from GeoJSON served by `/api/v1/geo/units/[id]/level`, simplified per level when loaded
+> (ADR-064, ADR-065), with MapLibre GL JS over a hosted base map that claims no boundary (ADR-066).
+> No point geometry is held for any work, so the asset layers below have no source yet.
+
 Geography is a first-class dimension of the platform: every administrative unit has a boundary, every asset has a location, and every rupee can be rendered on a map. GIS turns the ledger into something a citizen can _see_ — "what was built near me, and does its cost look normal?" This document covers the spatial data model, map layers, tiling/serving, heat/expenditure maps, and the asset-GIS architecture for each infrastructure type.
 
 **Stack:** PostgreSQL + **PostGIS** (spatial store & queries), vector tiles (Mapbox Vector Tiles / MVT), Mapbox GL on the frontend, with GeoJSON for small/detail queries ([12](../02-architecture/tech-stack.md)).

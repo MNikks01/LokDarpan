@@ -3,6 +3,13 @@
 **Date:** 2026-09-30 · **Status:** Proposed — a specification for implementation; no code yet.
 **Evidence:** [`../06-government-sources/maharashtra-tenders/maharashtra-tender-data.md`](../06-government-sources/maharashtra-tenders/maharashtra-tender-data.md) (research) · [`../06-government-sources/maharashtra-tenders/maharashtra-sources.md`](../06-government-sources/maharashtra-tenders/maharashtra-sources.md) (inventory).
 
+> **Update · 16 October 2026.** Status unchanged — _Proposed_ — but "no code yet" is no longer true.
+> The first agency adapters were built: MHADA and MSIDC notices are collected as documents with
+> `artifact_sighting` (migration 0040), and notice facts name the field they fill (0041), in
+> `services/ingestion/src/maharashtra/` ([decision of 6 October](../decisions/2026-10-06-scans-read-and-audit-figures-live.md)).
+> They run locally; production holds none ([`../00-overview/current-state.md`](../00-overview/current-state.md)).
+> The rest of the backlog is not built.
+
 > MahaTenders and PWD's NIT system both serve `robots.txt: Disallow: /`. This design collects Maharashtra tender notices from the **agencies that issue them**, on hosts that permit it, and treats MahaTenders as an identifier namespace and a link target — so that no single site's CAPTCHA or crawl policy can remove LokDarpan's view of Maharashtra procurement.
 
 ---

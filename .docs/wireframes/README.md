@@ -1,5 +1,11 @@
 # Wireframes
 
+> **Status:** Deferred (mobile) — every wireframe here is drawn for a 390 × 844 pt phone with bottom
+> tabs, written 21–23 August 2026. Their information hierarchy, states and neutrality rules carry to
+> web; their layouts, tabs and sheets do not, and must not dictate the web interface
+> ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md) §What reverses). No desktop
+> wireframes exist; the pages in `apps/web` are the current reference.
+
 Low-fidelity wireframes for every screen in `.docs/01-product/screen-inventory.md`. These are a **product specification**, not decoration: they define information hierarchy, content density, primary actions, and state behaviour. Visual design (colour, type, spacing) is specified separately in `.docs/01-product/design-system.md` and is deliberately absent here.
 
 ## Reading these

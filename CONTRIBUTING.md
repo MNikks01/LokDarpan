@@ -74,7 +74,7 @@ A fix that cannot wait for a release branches from `main` as `hotfix/*` and **mu
 
 There is deliberately **no workflow** that opens pull requests on your behalf. GitHub gates "Actions may create pull requests" behind the same setting as "Actions may approve pull requests"; enabling it would let a workflow approve its own PR and bypass the review requirement. Least privilege wins over the convenience.
 
-Commits follow [Conventional Commits](https://www.conventionalcommits.org/); `commitlint` enforces this on `commit-msg`. Scopes: `web`, `api`, `money`, `neutrality`, `contracts`, `ingestion`, `docs`, `ci`, `deps`, `repo`.
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/); `commitlint` enforces this on `commit-msg`. Scopes (from `commitlint.config.js`): `web`, `api`, `money`, `neutrality`, `contracts`, `database`, `observability`, `ingestion`, `ocr`, `docs`, `ci`, `deps`, `repo`.
 
 Rationale: [`.docs/adr/013-branching-and-release.md`](./.docs/adr/013-branching-and-release.md) → amended by [`.docs/adr/023`](./.docs/adr/023-features-target-main.md) → reversed by [`.docs/adr/032`](./.docs/adr/032-development-is-reinstated.md). Read them in that order; `023` is the strongest argument against the flow now in force.
 
@@ -89,17 +89,17 @@ git clone https://github.com/MNikks01/LokDarpan.git
 cd LokDarpan
 pnpm install
 
-pnpm test          # 56 unit + integration tests
-pnpm test:e2e      # 7 Playwright journeys (builds the app first)
+pnpm test          # ~1,730 tests; integration suites skip without a database
+pnpm test:e2e      # 14 Playwright tests in two specs (builds the app first)
 pnpm dev           # web client  → http://localhost:3000
 pnpm dev:api       # API         → http://localhost:4000
 pnpm lint          # eslint, strict type-aware rules
 pnpm format        # prettier
 pnpm typecheck
-pnpm neutrality    # docs/15 language gate
+pnpm neutrality    # the language gate of .docs/17-legal, over apps, packages and services
 ```
 
-The backend does not exist yet. The app runs on fixtures from `packages/contracts/src/fixtures/`, all labelled as such. **No real government data is ingested.**
+The site reads a real ledger: `apps/web` serves `/api/v1` over `packages/database`, and `services/ingestion` loads official records into it. Without a database the integration suites skip, and only the example project page (`/project/[id]`) renders fixture data from `packages/contracts/src/fixtures/`, labelled as such. The README's [With a database](./README.md#with-a-database) section sets up the local ledger; what production holds is in [`.docs/00-overview/current-state.md`](./.docs/00-overview/current-state.md).
 
 ---
 
@@ -109,7 +109,7 @@ The platform is designed to grow by **source coverage**, not feature count. [`.d
 
 Before writing a connector:
 
-1. **Check the registry.** [`.docs/06-government-sources/`](./.docs/06-government-sources/) has 99 catalogued sources, 96 verified, plus a 6,466-row directory catalogue. Your source may already be listed with its status.
+1. **Check the registry.** [`.docs/06-government-sources/`](./.docs/06-government-sources/) has 107 curated sources in `source-registry.json` (104 verified as of 30 September 2026), plus a 6,466-row directory catalogue. Your source may already be listed with its status.
 2. **Confirm it is an official government source.** Central, State, UT, department, agency, PSU, statutory or autonomous body, or local government. News sites, private tender aggregators (TenderTiger, TenderDetail, IndiaMART), blogs, social media and commercial databases are **never** sources of fact. They may be named as discovery aids, never as authorities.
 3. **Read [`.docs/04-data-engineering/ingestion-methods.md`](./.docs/04-data-engineering/ingestion-methods.md)** — most State/UT portals are GePNIC deployments sharing one page structure, so one parameterised connector serves many states.
 
@@ -167,7 +167,7 @@ Each of these is enforced by a test or the type system, so you will usually find
 The neutrality gate scans every locale file and source string:
 
 ```bash
-pnpm neutrality apps packages
+pnpm neutrality
 ```
 
 Forbidden: corrupt, scam, stolen, fraud, embezzle, guilty, illegal, bribe, siphon, divert, loot, suspicious — and their Marathi and Hindi equivalents — plus causal constructions like _"because the contractor…"_ or _"due to misuse"_.
@@ -228,7 +228,7 @@ See [`.changeset/README.md`](./.changeset/README.md).
 Use the checklist in [`.github/pull_request_template.md`](./.github/pull_request_template.md). Before opening:
 
 ```bash
-pnpm -r typecheck && pnpm test && pnpm neutrality apps packages
+pnpm -r typecheck && pnpm test && pnpm neutrality
 pnpm changeset:status   # a behaviour change needs a changeset
 ```
 

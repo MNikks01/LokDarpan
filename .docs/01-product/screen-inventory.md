@@ -1,5 +1,12 @@
 # 01 — Screen Inventory
 
+> **Status:** Target spec, written 21–23 August 2026 for the mobile client. Its rules apply to every client; its native
+> mechanics (phone screens, bottom sheets, taps, on-device storage, `lokdarpan://` links) are
+> deferred with the app. Where web differs, [`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md)
+> and [`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md) §What reverses govern.
+> In §Screens that must not exist, wide tables, bulk export, breadcrumbs, sidebars and an analytics
+> surface return on web; the rows rejected under the legal rules never return.
+
 Every screen the mobile product requires, with its purpose, data, states, and instrumentation. Screens carry stable IDs (`S-nn`) used by `.docs/11-api/screen-api-matrix.md`, `.docs/05-data-model/screen-data-matrix.md`, and the wireframes.
 
 ## How to read a screen block

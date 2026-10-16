@@ -1,5 +1,9 @@
 # 07 — Risk Scoring Engine
 
+> **Status:** Target spec, 21 August 2026. Not built: `services/risk-engine` is empty and no
+> Verification Priority is computed or shown anywhere. The naming and display rules bind whatever is
+> built later.
+
 The risk score is a **0–100 "needs-verification" indicator** — a triage number that helps a journalist or researcher decide where to look first. It is emphatically **not** a corruption score, a guilt score, or a legal finding. A high score means _"the published figures for this project are unusual or incomplete and are worth a closer look,"_ nothing more. Every score is fully decomposable into its contributing factors, each tied to source figures.
 
 > **Naming discipline:** in the UI this is labeled **"Verification Priority"** or **"Data Consistency Score,"** never "corruption risk." See [15 — Legal & Ethical Rules](../17-legal/legal-ethical-rules.md).

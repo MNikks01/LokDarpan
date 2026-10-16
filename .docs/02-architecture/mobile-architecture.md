@@ -1,5 +1,9 @@
 # 05 — Mobile Architecture
 
+> **Status:** Deferred (mobile) — written 21–23 August 2026 for the native app, which follows web
+> launch ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). Revalidate the
+> toolchain when mobile resumes. Web counterpart: [`web-architecture.md`](./web-architecture.md).
+
 ## Principles applied (and where they are _not_ applied)
 
 The brief asks for SOLID, separation of concerns, dependency inversion, and testability — and explicitly warns against Clean Architecture as ceremony. The resolution used throughout:

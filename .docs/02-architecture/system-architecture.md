@@ -1,5 +1,15 @@
 # 02 — System Architecture
 
+> **Status:** Target spec — the original system design of 21 August 2026 (document 02). Its
+> principles hold: provenance first, one write path through ETL, a read-only public surface,
+> versioned datasets. Its mechanics were not built: there is no Express gateway, GraphQL, BullMQ,
+> Redis cache, Python ETL tier or Kubernetes. As built, the site and `/api/v1` are Next.js route
+> handlers on Vercel, collectors are TypeScript run by GitHub Actions or from an operator's machine,
+> the ledger is on Neon, raw bytes are in R2, and OCR is a Python service — see
+> [`repository-structure.md`](./repository-structure.md) and
+> [`../00-overview/current-state.md`](../00-overview/current-state.md). Its frontend sections are
+> superseded by [`web-architecture.md`](./web-architecture.md).
+
 ## Guiding principles
 
 1. **Provenance first.** Every stored figure keeps a pointer to its source document, extraction method, and confidence. Nothing is displayed that cannot be traced.

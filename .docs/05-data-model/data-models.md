@@ -1,5 +1,10 @@
 # 05 — Data Models (TypeScript)
 
+> **Status:** Historical — the original TypeScript type sketch of 21 August 2026. Superseded by
+> [`packages/contracts`](../../packages/contracts), the contract of record: money crosses the wire as a
+> **decimal string**, never a `number` with a pre-formatted `display` (document-audit C2, C3); three
+> distinct confidences replace one (C4); and no field is called `variance` (C1).
+
 Shared types used by the API gateway and frontend. They mirror [04 — Database Design](./database-design.md). **Money is represented as an integer/`number` of rupees plus a formatted display string**; never as a float subject to rounding surprises in the UI. Every fact type carries a `provenance` object so the traceability rule is a compile-time expectation, not a convention.
 
 ```typescript

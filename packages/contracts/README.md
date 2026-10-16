@@ -2,7 +2,7 @@
 
 **The API contract, in code.** Zod schemas plus the TypeScript types inferred from them, shared by `apps/web`, `services/api`, and later `apps/mobile`.
 
-Because the backend does not exist yet, these schemas **are** the API specification — and the day it ships they become drift detection ([`../../.docs/11-api/client-api-contract.md`](../../.docs/11-api/client-api-contract.md)).
+These schemas **are** the API specification. They were written before the backend existed; now that `/api/v1` serves the ledger from `apps/web`, they are its drift detection ([`../../.docs/11-api/client-api-contract.md`](../../.docs/11-api/client-api-contract.md)).
 
 ## Why there is no separate `validation` package
 
@@ -18,7 +18,7 @@ The distinction was never real: contracts here _are_ Zod schemas, so a separate 
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/primitives.ts` | `Amount` (decimal string, JSON numbers rejected by name), the three confidences, `Provenance` with page anchors, `Figure` (present-with-provenance \| explicitly-missing), localisable observation text |
 | `src/finance.ts`    | `FinanceChain` with **both** variances and a bare `variance` field refused; `VerificationPriority`, unusable without its factor breakdown                                                               |
-| `src/fixtures/`     | ⚠ Synthetic data only, for development before the backend exists                                                                                                                                        |
+| `src/fixtures/`     | ⚠ Synthetic data only; the example project page and tests are its only users                                                                                                                            |
 
 ## The invariants this package enforces
 

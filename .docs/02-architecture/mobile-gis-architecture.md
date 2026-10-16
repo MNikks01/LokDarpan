@@ -1,5 +1,9 @@
 # 07 — GIS / Map Experience (Mobile)
 
+> **Status:** Deferred (mobile) — written 21–23 August 2026 for the native app, which follows web
+> launch ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). Revalidate the
+> toolchain when mobile resumes. Web counterpart: [ADR-022](../adr/022-web-map-explorer.md) and the explorer decisions, ADR-052 to ADR-066.
+
 The map is how a citizen answers _"what was built near me, and does its cost look normal?"_ It is also the fastest way to make a phone unusable. This document defines the mobile GIS architecture so that it does neither.
 
 **Inherited unchanged from `.docs/03-domain/gis-intelligence.md`:** PostGIS as the spatial store, EPSG:4326 geometries, the MVT tile pyramid keyed by `datasetVersion`, precomputed per-unit choropleth metrics, and the honesty rules (approximate coordinates marked, missing geometry listed, legend states that colour encodes a measurement).

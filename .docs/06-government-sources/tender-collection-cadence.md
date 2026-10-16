@@ -2,6 +2,12 @@
 
 **Status:** Measured finding · 1 September 2026 · amends [`tender-ingestion-plan.md`](./tender-ingestion-plan.md) §2a
 
+> **Update · 16 October 2026.** The schedule was resumed **once daily** on 5 September
+> ([`../16-operations/collection-schedule.md`](../16-operations/collection-schedule.md)); the
+> four-hourly cadence argued for below was not adopted. What a daily sweep cannot see is stated to
+> readers as a collection floor (`collecting_since`; ADR-048, ADR-054) rather than hidden. The
+> measurements below stand.
+
 The tender plan established that collection is forward-only: the GePNIC landing page shows a rolling window of about twenty current tenders and cannot be paged backwards, so anything not collected is not recoverable. It assumed a daily sweep was adequate.
 
 It is not. **The window turns over almost completely within hours.**

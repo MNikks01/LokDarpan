@@ -1,5 +1,10 @@
 # 10 — Source Traceability
 
+> **Status:** Target spec, written 21–23 August 2026 for the mobile client. Its rules apply to every client; its native
+> mechanics (phone screens, bottom sheets, taps, on-device storage, `lokdarpan://` links) are
+> deferred with the app. Where web differs, [`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md)
+> and [`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md) §What reverses govern.
+
 > _"Every number must be traceable. No figure is displayed without a link to its source document, extraction method, and retrieval date."_ — `.docs/17-legal/legal-ethical-rules.md`, rule 5.
 
 On mobile this rule is harder (screen space, network, 400-page scanned PDFs) and more important (a phone screenshot travels further than a desktop tab). This document specifies how the chain from a rendered figure to a page of a government document is built, and how it degrades honestly when it cannot be completed.

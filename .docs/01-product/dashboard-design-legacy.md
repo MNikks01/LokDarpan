@@ -1,5 +1,11 @@
 # 09 — Dashboard Design
 
+> **Status:** Historical — the original dashboard design (document 09, 21 August 2026). Its six
+> layouts are replaced by the level-agnostic Unit page ([`screen-inventory.md`](./screen-inventory.md)
+> S-23); its three UI contracts remain binding; its stack line (Tailwind, Mapbox, React Query) is not
+> what was built ([`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md)).
+> Chart-to-PNG export (§4) is forbidden by the legal rules.
+
 The public dashboard is the surface where neutrality is most visible. Three UI contracts hold on **every** page:
 
 1. **Every figure is a source.** Each number renders with a source link, an "as of" date, and a confidence indicator when extracted.
