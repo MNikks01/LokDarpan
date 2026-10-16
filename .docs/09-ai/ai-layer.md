@@ -1,5 +1,8 @@
 # 11 — AI Layer
 
+> **Status:** Target spec, 21 August 2026. Deliberately not started: `services/ai` is empty and no AI
+> surface ships before launch. Its prohibitions bind any future AI feature.
+
 The AI layer makes the ledger **readable** — plain-language summaries, anomaly explanations, and question-answering — without ever becoming an accuser. It is a **retrieval-grounded, guardrailed** assistant: it may only speak from figures already in the canonical ledger, and it may only make neutral, factual, comparative statements. It is the highest-risk component for the platform's neutrality promise, so it is the most tightly constrained.
 
 ## Responsibilities

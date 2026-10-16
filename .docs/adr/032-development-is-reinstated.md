@@ -1,6 +1,6 @@
 # ADR-032 · `development` is reinstated as the integration branch
 
-**Status:** Accepted · **Date:** 2026-09-04 · **Reverses:** [`023-features-target-main.md`](./023-features-target-main.md) · **Restores:** [`013-branching-and-release.md`](./013-branching-and-release.md) §Decision
+**Status:** Accepted · **Date:** 2026-09-04 · **Reverses:** [`023-features-target-main.md`](./023-features-target-main.md) · **Restores:** [`013-branching-and-release.md`](./013-branching-and-release.md) §Decision · **Amended by** [`041`](./041-the-merge-method-is-a-setting-not-a-checklist-line.md) (2026-09-04; pointer added 2026-10-16)
 
 ## Context
 

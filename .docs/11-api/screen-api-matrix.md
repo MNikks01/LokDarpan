@@ -1,5 +1,9 @@
 # 19 — Screen → API Matrix
 
+> **Status:** Deferred (mobile) — keyed to the native screens and their on-device caches (TanStack
+> Query→MMKV, SQLite), written 21–23 August 2026. The web's endpoints are listed in
+> [`api-documentation.md`](./api-documentation.md)'s status note.
+
 Every production screen, its endpoints, caching, pagination, auth, and offline behaviour.
 
 **Legend** — ★ new backend requirement (`.docs/11-api/client-api-contract.md`) · Cache: `Q`=TanStack Query→MMKV, `D`=SQLite durable, `H`=HTTP/CDN, `L`=local-only, `—`=none · Auth: all `public` (anonymous) unless stated · Offline: `Full`=works from cache/durable · `Partial`=degraded, stated · `Cached`=cache only · `No`=explicitly unavailable, with copy.

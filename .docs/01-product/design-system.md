@@ -1,5 +1,11 @@
 # 06 — Design System
 
+> **Status:** Active for the palette, typography and neutrality primitives, which bind the web client
+> (`apps/web/src/ui/tokens.ts`, CI guardrail G3). Written 21–23 August 2026 for the mobile client: its
+> native mechanics (bundled fonts, `maxFontSizeMultiplier`, `FlashList`, `react-native-svg`, 44 pt
+> targets) are deferred with the app, and `RecordList` replacing tables does not hold on desktop,
+> where tables return ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)).
+
 ## Design brief
 
 The product must feel **institutional but not bureaucratic; serious but not severe; data-dense but readable at arm's length on a ₹8,000 phone in daylight.**

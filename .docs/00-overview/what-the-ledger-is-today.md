@@ -1,5 +1,12 @@
 # What the ledger is today
 
+> **Status:** Historical — the position on 5 September 2026, with updates to 6 October. **For the
+> current position read [`current-state.md`](./current-state.md).** Since the last update below, the
+> permission requests were **deferred on 7 October**
+> ([`decisions/2026-10-07-permissions-deferred.md`](../decisions/2026-10-07-permissions-deferred.md)):
+> none is sent until the core Maharashtra platform is substantially complete, and a restricted source
+> opens only on a recorded grant plus a switch (ADR-073).
+
 **Date:** 5 September 2026 · **Answers blocker 3** of [`README.md`](../README.md) · **Reconciles** [`01-product/sprint-plan.md`](../01-product/sprint-plan.md) and [`07-analytics/analytics-engine.md`](../07-analytics/analytics-engine.md) **with what may actually be published**
 
 > **Update · 6 October 2026. The audit corpus is in production.** `promote:cag` copied the 30

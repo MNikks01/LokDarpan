@@ -1,5 +1,11 @@
 # 14 — Scalability Plan
 
+> **Status:** Target spec, 21 August 2026. The eight-phase path and the guardrail rule stand. Some
+> levers below were not adopted: the API is REST only ([ADR-012](../adr/012-web-api-strategy.md),
+> no GraphQL), there is no DuckDB, Redis cache, vector tiles or worker pool, and the source registry
+> is [`../06-government-sources/source-registry.json`](../06-government-sources/source-registry.json),
+> not YAML connectors.
+
 Scaling has two axes: **breadth** (more domains, more levels of the hierarchy, more states) and **throughput** (more data, more users). The architecture ([02](../02-architecture/system-architecture.md)) is source-driven, hierarchy-generic ([19](../03-domain/administrative-hierarchy.md)), and horizontally scalable, so breadth expansion is mostly _configuration + connectors + domain modules_, not rewrites.
 
 ## Eight-phase expansion (village → nation)

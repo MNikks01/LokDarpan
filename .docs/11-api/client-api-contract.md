@@ -2,6 +2,16 @@
 
 **Status: a requirements document, not an implementation.** No backend exists yet. This states what the mobile client needs from the API, marking clearly what `.docs/11-api/api-documentation.md` already specifies, what must change, and what must be added. It deliberately does not invent implementation details for the server.
 
+> **Update · 16 October 2026.** "No backend exists yet" is no longer true: the `/api/v1` route
+> handlers in `apps/web` read the ledger through `packages/database`. Of the §7 P0 items, these are in
+> the code: search (`/api/v1/search`), money as decimal strings, provenance page anchors (page and
+> rectangle, ADR-036), and a web rate tier that counts cache misses per IP
+> ([`../16-operations/rate-limiting.md`](../16-operations/rate-limiting.md)). Not in the code: the
+> mobile per-install rate tier, cursor pagination (P1) and an OpenAPI document. Both variances and the
+> three confidences are modelled in `packages/contracts`; the one payload that would carry a variance
+> from a real source, the department page's, is withheld (ADR-073). The composite BFF (M3) is P2 for
+> web ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)).
+
 Legend: ✅ exists in `.docs/11-api/api-documentation.md` · 🔧 exists but must change · ★ **new requirement**
 
 ---

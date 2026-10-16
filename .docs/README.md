@@ -7,42 +7,58 @@
 
 > **[`17-legal/legal-ethical-rules.md`](./17-legal/legal-ethical-rules.md) is binding on every document here.** Where anything conflicts with it, it wins and the feature is withheld.
 
+> **What is built, deployed and open today:** [`00-overview/current-state.md`](./00-overview/current-state.md) — the one maintained snapshot. Every other status note is dated and describes its own day.
+
+---
+
+## How to read a document's status
+
+Most of this suite was written between 21 and 25 August 2026, before any code existed and partly while the product was planned as mobile-only. Documents fall into five kinds, and each says which it is in its opening lines:
+
+| Kind                  | Means                                                                                                                                                                                                                      |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Active**            | Describes what exists or binds what is built: the legal rules, ADRs 011 onward, the runbooks, the source registry, `current-state.md`, `web-architecture.md`, `repository-structure.md`                                    |
+| **Target spec**       | Describes what is to be built, written before the code. Its rules hold; its mechanics may not match the code. The schema of record is `database/migrations/`; the API contract of record is `packages/contracts`           |
+| **Proposed**          | Awaiting a decision; not a commitment until accepted (`feature-priorities-2026-10-07.md`, `PUBLIC_FINANCE_GRAPH_ARCHITECTURE.md`, `maharashtra-tender-ingestion.md`)                                                       |
+| **Deferred (mobile)** | Written for the native app, which follows web launch. Platform-independent rules inside still apply; native mechanics wait (`10-mobile/`, `wireframes/`, `mobile-*.md`, ADRs 001–010)                                      |
+| **Historical**        | A dated record of what was known or decided then. Kept for its reasoning, never updated to look current (`document-audit.md`, `product-audit-2026-09-29.md`, `what-the-ledger-is-today.md`, superseded roadmaps, findings) |
+
 ---
 
 ## Map
 
-| Area                                                | Contents                                                                                                                                           |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`00-overview/`](./00-overview)                     | Platform overview · the audit of the original documentation set · **[feature & blocker audit, 29 Sep](./00-overview/product-audit-2026-09-29.md)** |
-| [`01-product/`](./01-product)                       | PRD · screen inventory · user journeys · design system · search · source traceability · accessibility · state design · roadmaps (platform & web)   |
-| [`02-architecture/`](./02-architecture)             | System architecture · web architecture · tech stack · data flow · repository structure · performance                                               |
-| [`03-domain/`](./03-domain)                         | Administrative hierarchy · road-infrastructure intelligence · GIS intelligence                                                                     |
-| [`04-data-engineering/`](./04-data-engineering)     | Collection architecture · ingestion methods · source→data-model mapping · **entity linking**                                                       |
-| [`05-data-model/`](./05-data-model)                 | Database design · data models · screen/entity matrix                                                                                               |
-| [`06-government-sources/`](./06-government-sources) | **The verified source registry** — 100 sources, 97 verified, plus a 6,466-row catalogue                                                            |
-| [`07-analytics/`](./07-analytics)                   | Variance, comparisons, cost-per-unit, concentration, roll-up                                                                                       |
-| [`08-risk/`](./08-risk)                             | Verification Priority — never "corruption risk"                                                                                                    |
-| [`09-ai/`](./09-ai)                                 | Guardrailed AI layer · scope-bound client experience                                                                                               |
-| [`10-mobile/`](./10-mobile)                         | **Deferred** mobile specification — architecture, navigation, offline, deep links, notifications, GIS, roadmap                                     |
-| [`11-api/`](./11-api)                               | API documentation · client contract · screen/API matrix                                                                                            |
-| [`12-security/`](./12-security)                     | Platform security · client security                                                                                                                |
-| [`13-observability/`](./13-observability)           | Privacy-first analytics and monitoring                                                                                                             |
-| [`14-testing/`](./14-testing)                       | Test strategy and the guardrail gates                                                                                                              |
-| [`15-scalability/`](./15-scalability)               | The eight-phase village→nation plan                                                                                                                |
-| [`16-operations/`](./16-operations)                 | Runbooks: deployment, database, nightly collection, tender placement                                                                               |
-| [`17-legal/`](./17-legal)                           | **Binding** legal and ethical rules                                                                                                                |
-| [`adr/`](./adr)                                     | Decisions 001–076 — **011 onward active; 001–010 deferred (mobile)**                                                                               |
-| [`wireframes/`](./wireframes)                       | Low-fidelity wireframes (mobile; desktop pass due in W3–W5)                                                                                        |
-| [`diagrams/`](./diagrams)                           | Architecture diagrams _(to be populated)_                                                                                                          |
-| [`decisions/`](./decisions)                         | Cross-cutting product decisions                                                                                                                    |
+| Area                                                | Contents                                                                                                                                                                                                                                                                      |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`00-overview/`](./00-overview)                     | **[Current state](./00-overview/current-state.md)** · original platform overview · audits of 21 August (documentation) and **[29 September (features and blockers)](./00-overview/product-audit-2026-09-29.md)** · the 5 September ledger record                              |
+| [`01-product/`](./01-product)                       | PRD · screens · journeys · design system · search · traceability · accessibility · states · **[sprint plan](./01-product/sprint-plan.md)** (accepted) · **[feature priorities](./01-product/feature-priorities-2026-10-07.md)** (proposed) · superseded and deferred roadmaps |
+| [`02-architecture/`](./02-architecture)             | **[Repository structure](./02-architecture/repository-structure.md)** (as built) · **[web architecture](./02-architecture/web-architecture.md)** · system architecture and tech stack (original target) · finance-graph plan (proposed) · mobile architecture (deferred)      |
+| [`03-domain/`](./03-domain)                         | Administrative hierarchy · road-infrastructure intelligence · GIS intelligence (target spec)                                                                                                                                                                                  |
+| [`04-data-engineering/`](./04-data-engineering)     | Collection architecture (original design) · ingestion methods · source→data-model mapping · entity linking · OCR evaluation · Maharashtra tender ingestion (proposed)                                                                                                         |
+| [`05-data-model/`](./05-data-model)                 | Database design (pre-migration; **read its correction notice**) · data models · screen/entity matrix. The schema of record is [`database/migrations/`](../database/migrations)                                                                                                |
+| [`06-government-sources/`](./06-government-sources) | **The verified source registry** — 107 curated sources (104 verified) in `source-registry.json`, a 6,466-row catalogue, findings, licences and permission drafts                                                                                                              |
+| [`07-analytics/`](./07-analytics)                   | Variance, comparisons, cost-per-unit, concentration, roll-up (target spec; `services/analytics` is empty)                                                                                                                                                                     |
+| [`08-risk/`](./08-risk)                             | Verification Priority — never "corruption risk" (target spec)                                                                                                                                                                                                                 |
+| [`09-ai/`](./09-ai)                                 | Guardrailed AI layer · scope-bound client experience (target spec; deliberately not started)                                                                                                                                                                                  |
+| [`10-mobile/`](./10-mobile)                         | **Deferred** mobile-only capabilities — offline, deep links, notifications                                                                                                                                                                                                    |
+| [`11-api/`](./11-api)                               | API documentation (original design) · client contract and its P0 list · screen/API matrix (mobile)                                                                                                                                                                            |
+| [`12-security/`](./12-security)                     | Platform security · mobile client security (deferred)                                                                                                                                                                                                                         |
+| [`13-observability/`](./13-observability)           | Privacy-first analytics and monitoring                                                                                                                                                                                                                                        |
+| [`14-testing/`](./14-testing)                       | Test strategy and the guardrail gates (written for mobile; its banner maps the guardrails to CI)                                                                                                                                                                              |
+| [`15-scalability/`](./15-scalability)               | The eight-phase village→nation plan                                                                                                                                                                                                                                           |
+| [`16-operations/`](./16-operations)                 | **Runbooks:** deployment, migrations, collection, rate limiting, tender placement, CAG promotion, scans, raw store, corrections, public bodies                                                                                                                                |
+| [`17-legal/`](./17-legal)                           | **Binding** legal and ethical rules                                                                                                                                                                                                                                           |
+| [`adr/`](./adr)                                     | Decisions 001–076 — **011 onward active; 001–010 deferred (mobile)**. 060 and 063 are reserved for the blocked records-layer phase of `decisions/gods-eye-view-adoption.md` and not yet written                                                                               |
+| [`wireframes/`](./wireframes)                       | Low-fidelity wireframes for the **mobile** client (deferred). No desktop wireframes exist; the pages in `apps/web` are the current reference                                                                                                                                  |
+| [`diagrams/`](./diagrams)                           | Where the inline diagrams live                                                                                                                                                                                                                                                |
+| [`decisions/`](./decisions)                         | Cross-cutting product decisions, dated                                                                                                                                                                                                                                        |
 
 ---
 
 ## Reading paths
 
-**New to the project** → `00-overview/platform-overview.md` → `01-product/prd.md` → `17-legal/legal-ethical-rules.md` → `decisions/web-first-pivot.md`
+**New to the project** → `00-overview/current-state.md` → `01-product/prd.md` → `17-legal/legal-ethical-rules.md` → `decisions/web-first-pivot.md` → `02-architecture/repository-structure.md`
 
-**Building the website** → `01-product/sprint-plan.md` → `decisions/web-first-pivot.md` → `02-architecture/web-architecture.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
+**Building the website** → `00-overview/current-state.md` → `01-product/feature-priorities-2026-10-07.md` _(proposed; M1 in progress)_ → `02-architecture/web-architecture.md` → `adr/011`, `adr/012` → `01-product/design-system.md` → `01-product/state-design.md`
 
 **Working on the map or ingestion safety** → `decisions/gods-eye-view-adoption.md` → `adr/022` → `adr/052`
 
@@ -50,15 +66,17 @@
 
 **Working on scanned pages (OCR)** → `adr/038` → `adr/071` → `adr/072` → `16-operations/reading-scans.md`
 
-**What changed most recently** → `decisions/2026-10-06-scans-read-and-audit-figures-live.md`
+**What changed most recently** → `00-overview/current-state.md` → the newest file in `decisions/`
 
-**Working on data** → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md`
+**Working on data** → `../database/migrations/` (the schema of record) → `06-government-sources/SOURCE-DISCOVERY-REPORT.md` → `04-data-engineering/entity-linking.md` → `05-data-model/database-design.md` _(pre-migration design; read its correction notice first)_
 
-**Deciding what to build next** → `01-product/feature-priorities-2026-10-07.md` _(proposed)_ → `00-overview/product-audit-2026-09-29.md`
+**Deciding what to build next** → `01-product/feature-priorities-2026-10-07.md` _(proposed)_ → `00-overview/current-state.md` → `00-overview/product-audit-2026-09-29.md`
 
 **Planning beyond tenders (receipts, transfers, the Money Trace)** → `02-architecture/PUBLIC_FINANCE_GRAPH_ARCHITECTURE.md` _(proposed)_ → `04-data-engineering/entity-linking.md` → `06-government-sources/source-licences.md`
 
 **Reviewing for neutrality** → `17-legal/legal-ethical-rules.md` → `01-product/design-system.md` §Neutrality primitives → `01-product/screen-inventory.md` §Screens that must not exist → `14-testing/testing-strategy.md` §6
+
+**Resuming the mobile app** → `decisions/web-first-pivot.md` → `10-mobile/README.md` → `02-architecture/mobile-architecture.md` → `01-product/roadmap-mobile.md` → `adr/001`–`010`
 
 ---
 
@@ -84,15 +102,8 @@ Web-specific:
 
 ## Open items
 
-| #   | Item                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Blocks                                      |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| 1   | Backend acceptance of the P0 contract items (`11-api/client-api-contract.md` §7)                                                                                                                                                                                                                                                                                                                                                                                                                          | W4, W5                                      |
-| 2   | ~~**The execution-data gap**~~ — **settled 5 Sep, not closed.** PMGSY is licence-blocked and not collected; since 25 Sep a request to NRIDA is drafted but not sent. `Released − Utilized` has no input ([`00-overview/what-the-ledger-is-today.md`](./00-overview/what-the-ledger-is-today.md))                                                                                                                                                                                                          | Project-level Money Trail, indefinitely     |
-| 3   | ~~**Ask for permission, or don't.**~~ **Answered 5 Sep: don't; reversed 25 Sep: ask, without blocking on the answer.** Drafts are ready and none is sent ([`decisions/2026-09-25-seven-decisions.md`](./decisions/2026-09-25-seven-decisions.md), [`06-government-sources/permission-requests.json`](./06-government-sources/permission-requests.json)). Until an answer, BEAMS and tender details stay withheld ([`00-overview/what-the-ledger-is-today.md`](./00-overview/what-the-ledger-is-today.md)) | — reversible by one variable and one letter |
-| 4   | Confirm self-hosted deployability is tested, not assumed (`adr/011`)                                                                                                                                                                                                                                                                                                                                                                                                                                      | W1                                          |
-| 5   | **The CAG corpus is in production** (6 Oct, dataset version 285): `/documents` lists 30 reports with 5,088 reviewed figures. Reviews made locally after that need re-promoting ([`16-operations/promoting-the-cag-corpus.md`](./16-operations/promoting-the-cag-corpus.md))                                                                                                                                                                                                                               | —                                           |
-| 6   | **A `data.gov.in` API key exists** (6 Oct); untested while the API gateway was failing. It is the one large source licensed for reuse without a request ([`06-government-sources/datagovin-api-findings.md`](./06-government-sources/datagovin-api-findings.md))                                                                                                                                                                                                                                          | the Assam procurement inspection            |
+Kept with the rest of the current position, in [`00-overview/current-state.md`](./00-overview/current-state.md) §Open items, so there is one list to update.
 
 ---
 
-_Documentation written 21–24 August 2026. Restructured into this layout 24 August 2026._
+_Documentation written 21–24 August 2026. Restructured into this layout 24 August 2026. Document statuses and the current-state snapshot added 16 October 2026._

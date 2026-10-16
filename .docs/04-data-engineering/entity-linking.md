@@ -4,6 +4,13 @@
 
 Verified 21 August 2026.
 
+> **Note · 16 October 2026.** A dated finding, kept as written. Answered since: OMMAS is reachable
+> and licence-blocked ([`pmgsy-ommas-findings.md`](../06-government-sources/pmgsy-ommas-findings.md));
+> award data is CAPTCHA-gated on every GePNIC portal tested and Maharashtra's portal disallows
+> crawling ([`gepnic-access-findings.md`](../06-government-sources/gepnic-access-findings.md),
+> [`access-and-permissions.md`](../06-government-sources/access-and-permissions.md)); no PWD works
+> register was identified ([`sprint0-findings-q1-q3.md`](../06-government-sources/sprint0-findings-q1-q3.md)).
+
 ## The one genuinely good answer: LGD
 
 The **Local Government Directory** (`lgdirectory.gov.in`, ✅ verified via alternate channel) is the Government of India's own answer to the linkage problem for _place_.

@@ -1,5 +1,10 @@
 # 14 — Performance
 
+> **Status:** Deferred (mobile) — budgets for the native app on a 4 GB Android reference device,
+> written 21–23 August 2026. Web budgets are in [`web-architecture.md`](./web-architecture.md)
+> §Performance budgets; the one enforced in CI is the explorer's initial JavaScript
+> ([ADR-062](../adr/062-performance-is-measured-and-budgeted.md), guardrail G7).
+
 ## The device that defines the budgets
 
 Every number in this document is stated against the **reference device**, not a flagship:

@@ -1,6 +1,6 @@
 # ADR-041 · The merge method is a setting, not a checklist line
 
-**Status:** Accepted · **Date:** 2026-09-04 · **Amends** [`032-development-is-reinstated.md`](./032-development-is-reinstated.md)
+**Status:** Accepted · **Date:** 2026-09-04 · **Amends** [`032-development-is-reinstated.md`](./032-development-is-reinstated.md) · **Amended by** [`042`](./042-a-repo-wide-setting-cannot-express-a-per-branch-rule.md) (2026-09-04; pointer added 2026-10-16)
 
 ## Context
 

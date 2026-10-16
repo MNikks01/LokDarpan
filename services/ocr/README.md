@@ -48,6 +48,8 @@ exercises the refusal path instead of asserting it.
 
 ## What is not here
 
-No accuracy claim, and no benchmark. Which engine reads these documents better is
-measured on the real 522 pages, and until it is measured nothing in this
-repository says one is better than the other.
+No accuracy claim in the service itself. The engines were measured on this corpus
+with `bench/` on 4 September 2026
+([`ocr-evaluation-report.md`](../../.docs/04-data-engineering/ocr-evaluation-report.md)),
+and [`ADR-039`](../../.docs/adr/039-tesseract-and-not-yet-into-the-ledger.md)
+chose Tesseract on that evidence. Any later claim needs a new measurement.

@@ -1,54 +1,116 @@
 # 23 — Repository Structure
 
-`.docs/02-architecture/deliverables-and-risk.md` defines the platform monorepo (`apps/`, `services/`, `packages/`, `workers/`, `infrastructure/`). The mobile app **joins that monorepo** as `apps/mobile`; it is not a separate repository.
+**Status:** Active — describes the repository as built. **Rewritten 16 October 2026.** The first
+version (24 August 2026) described a mobile-only monorepo that was never created (`bharat-platform/`
+with `apps/mobile` as the product, `apps/web` removed, `workers/`, `sources/`, `db/`, and a `docs/`
+beside `.docs/`). Its `apps/mobile` layout is kept below as the deferred mobile specification; the
+rest is in git history.
 
-**Why in the monorepo:** the neutrality word list, the API contract, the domain types (`.docs/05-data-model/data-models.md`), and the money formatting rules must be **shared, not duplicated**. A copy of the forbidden-language list that drifts from the server's copy is a `.docs/17-legal/legal-ethical-rules.md` failure waiting to happen. Shared packages make drift a build error.
+**Why one monorepo:** the neutrality word list, the API contract, the domain types and the money
+rules must be **shared, not duplicated**. A copy of the forbidden-language list that drifts from the
+server's copy is a [`17-legal/legal-ethical-rules.md`](../17-legal/legal-ethical-rules.md) failure
+waiting to happen; shared packages make drift a build error.
 
 ---
 
 ## Top level
 
 ```text
-bharat-platform/
+lokdarpan/
 ├── apps/
-│   ├── mobile/              ★ THE PRODUCT — React Native / Expo (iOS + Android)
-│   ├── api/                 Node REST gateway + mobile BFF (.docs/02-architecture/system-architecture.md, .docs/11-api/client-api-contract.md)
-│   └── admin/               internal console — SSO+MFA, web, out of mobile scope
-├── services/                ingestion · analytics · ai · audit · gis   (.docs/02-architecture/system-architecture.md, 03, 06, 07, 11, 20)
-├── workers/                 crawler · ocr · parser · anomaly
-├── packages/
-│   ├── shared-types/        domain types (.docs/05-data-model/data-models.md) — TS, consumed by api + mobile
-│   ├── api-contract/        ★ OpenAPI + generated Zod schemas — the single source of truth
-│   ├── neutrality/          ★ forbidden-language lists (en/mr/hi) + the linter
-│   ├── money/               ₹ formatting rules, Indian grouping, crore/lakh
-│   ├── ui-web/              web components (admin console only)
-│   └── sdk/                 typed public API client for third parties
-├── sources/                 declarative source registry (YAML) — .docs/06-government-sources/legacy-source-directory.md
-├── config/                  road-model · risk-weights · thresholds (versioned)
-├── db/                      migrations · seeds
-├── infrastructure/          docker · kubernetes · terraform · observability
-├── docs/                    ORIGINAL platform documentation (00–20)  ← unchanged
-├── .docs/                   ★ MOBILE product & architecture docs      ← this suite
-└── .github/workflows/
+│   ├── web/                 Next.js App Router — the site and /api/v1 (deployed on Vercel)
+│   └── mobile/              deferred; a placeholder until after web launch
+├── services/
+│   ├── ingestion/           TypeScript collectors, loaders, review CLIs, promote:cag
+│   ├── ocr/                 Python (FastAPI, Tesseract) — reads pages with no text layer
+│   ├── api/                 the self-hosted API shape; not deployed (audit B13)
+│   └── ai · analytics · entity-resolution · normalization · risk-engine   empty skeletons
+├── packages/                see the table below
+├── database/
+│   ├── migrations/          0001–0046, plain SQL, the schema of record (ADR-017)
+│   └── scripts/             the local database users (api, etl, intake, reviewer)
+├── data/reference/          reviewed reference data (district aliases, CAG fact corrections)
+├── .docs/                   this documentation — the one documentation root
+├── .changeset/              pending changesets; CHANGELOG.md files are generated from them (ADR-028)
+├── .github/                 CI, the nightly collection, the collection check, the PR template
+└── docker-compose.yml       Postgres+PostGIS on 5433 and Redis on 6380 for local work
 ```
 
-★ = added or materially changed by the mobile-only decision.
+Present but holding only `.gitkeep`: `infrastructure/*` (docker, kubernetes, terraform, nginx,
+monitoring, environments), `scripts/*`, the top-level `tests/*`, `data/{raw,staging,normalized,fixtures,samples}`
+and `database/{seeds,functions,views}`. Tests live beside the code they test, in each package's
+`tests/` or as `*.test.ts`. Hosting is Vercel, Neon and GitHub Actions; nothing runs on Kubernetes.
+Redis is in `docker-compose.yml` and no code path uses it.
 
-### `apps/web/` is removed
+## Packages
 
-`.docs/02-architecture/deliverables-and-risk.md` lists a Next.js public dashboard. The mobile-only decision deletes it. `packages/ui/` (shared React web components) is renamed `packages/ui-web/` and scoped to the admin console. Neither is deleted silently — `.docs/02-architecture/deliverables-and-risk.md` should be annotated with a pointer to `.docs/00-overview/document-audit.md` §3.
+| Package         | Holds                                                                                                      | State                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `money`         | `Money` over `bigint` paise; decimal-string conversion; Indian grouping                                    | Real                     |
+| `neutrality`    | The forbidden vocabulary (en/mr/hi), `ServerText`, the `pnpm neutrality` CLI                               | Real                     |
+| `contracts`     | Zod schemas for everything crossing the network; amounts as decimal strings; three confidences; provenance | Real                     |
+| `domain`        | Domain rules shared by web and services, including the publication decision (ADR-073)                      | Real                     |
+| `database`      | Repositories over the ledger and the migration runner (`pnpm --filter @lokdarpan/database migrate`)        | Real                     |
+| `observability` | Metrics with route patterns and buckets, and log scrubbing (ADR-018, ADR-019)                              | Real                     |
+| `errors`        | Shared error types                                                                                         | Real                     |
+| `architecture`  | `pnpm architecture`: import-direction rules and rule B, no sentences in components (ADR-059)               | Real                     |
+| `config`        | —                                                                                                          | Placeholder (`.gitkeep`) |
+| `utils`         | —                                                                                                          | Placeholder (`.gitkeep`) |
+| `validation`    | — (merged into `contracts`; see `packages/contracts/README.md`)                                            | Placeholder (`.gitkeep`) |
 
-### The three new shared packages
+The web-architecture plan named `api-contract`, `ui` and `sdk` packages. As built, the contract is
+`contracts`, the design tokens and shared components live in `apps/web/src/ui` and
+`apps/web/src/components`, and there is no SDK.
 
-| Package            | Contents                                                                                    | Consumed by                                            | Why shared                                                                                                                                                                                                   |
-| ------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`api-contract`** | OpenAPI spec + generated Zod schemas + generated TS types                                   | `apps/api`, `apps/mobile`, `packages/sdk`              | The contract is generated once. A server change that breaks the client fails the client's contract tests in the same PR — which is the entire mechanism preventing `00-document-audit` C1–C13 from recurring |
-| **`neutrality`**   | Forbidden vocabulary in en/mr/hi, causal-construction patterns, and the lint implementation | server text generation, `apps/mobile` i18n, CI on both | `.docs/17-legal/legal-ethical-rules.md` §Enforcement requires one gate. Two copies of the word list is one copy too many                                                                                     |
-| **`money`**        | Indian grouping, crore/lakh thresholds, paise arithmetic rules                              | `apps/api`, `apps/mobile`                              | A figure formatted differently by server and client is a traceability discrepancy                                                                                                                            |
+## Inside `apps/web/src`
+
+| Directory     | Holds                                                                                                                                                                                                                      |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`        | Routes: `/`, `/explore`, `/units`, `/units/[id]`, `/units/[id]/departments/[code]`, `/bodies/[id]`, `/documents`, `/documents/[id]`, `/report`, `/about`, `/about/methodology`, `/project/[id]` (fixture), and `/api/v1/*` |
+| `copy/`       | Every reader-facing sentence (rule B of ADR-059; reviewed by the neutrality gate)                                                                                                                                          |
+| `server/`     | Server-only code: `respond()`, rate limiting, the publication switches, the home summary                                                                                                                                   |
+| `components/` | Rendering, including `<Figure>`, which will not compile without `provenance`                                                                                                                                               |
+| `ui/`         | Design tokens; `tokens.test.ts` is CI guardrail G3 (no red in any data token)                                                                                                                                              |
+| `map/`        | The MapLibre explorer: layers, labels, the level cache (ADR-057, 058, 064)                                                                                                                                                 |
 
 ---
 
-## `apps/mobile/`
+## Where each document is enforced
+
+Every document in `.docs/` is meant to have at least one automated check once code exists. This is
+the map of the checks that do exist, and of the documents still waiting for one.
+
+| Concern                                       | Document                                                  | Enforced by                                                                                                  |
+| --------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Forbidden language, every locale              | `17-legal/legal-ethical-rules.md`                         | `pnpm neutrality` (`packages/neutrality`) — CI guardrail G1                                                  |
+| Import directions; no sentences in components | ADR-059                                                   | `pnpm architecture` (`packages/architecture`) — CI guardrail G2                                              |
+| No red in data colours                        | `01-product/design-system.md`                             | `apps/web/src/ui/tokens.test.ts` — CI guardrail G3                                                           |
+| Fixture data kept out of production           | `14-testing/testing-strategy.md` §6 G6                    | CI guardrail G6, a search of the production build                                                            |
+| Explorer JavaScript budget                    | ADR-062                                                   | `pnpm --filter @lokdarpan/web perf:bytes` — CI guardrail G7                                                  |
+| A figure needs its provenance                 | `web-architecture.md` §Neutrality primitives              | The type of `<Figure>`; `pnpm typecheck` in CI                                                               |
+| Money as `bigint` paise, decimal strings      | `00-overview/document-audit.md` C3                        | `packages/money` tests; `AmountSchema` in `packages/contracts`                                               |
+| Restricted sources stay withheld              | ADR-073; `06-government-sources/permission-requests.json` | `packages/domain/tests/publication-decision.test.ts`, `services/ingestion/tests/permission-registry.test.ts` |
+| Secrets stay on the server                    | `16-operations/deployment-vercel.md`                      | `apps/web/src/lib/secrets-stay-on-server.test.ts`                                                            |
+| No identifiers in telemetry                   | `13-observability/observability.md`, ADR-018              | `packages/observability/tests/scrub.test.ts`                                                                 |
+| Migrations apply cleanly                      | ADR-017                                                   | CI applies every migration to PostGIS before the tests run                                                   |
+| The OCR boundary                              | ADR-038                                                   | `services/ocr` tests and `services/ingestion/tests/ocr-contract.test.ts`, over the same examples             |
+| Dependencies and committed secrets            | `12-security/security.md`                                 | CI job "Dependencies · Secrets"                                                                              |
+| Commit messages and their scopes              | `CONTRIBUTING.md`                                         | `commitlint.config.js` on `commit-msg`                                                                       |
+| Formatting, documentation included            | —                                                         | `pnpm format:check` in CI                                                                                    |
+
+**No automated check yet:** the analytics, risk and AI specifications (nothing implements them),
+accessibility beyond what the type system and tests cover, and the performance budgets other than
+G7. A specification with no enforcement mechanism becomes fiction; these are the places to watch.
+
+---
+
+## Deferred — the `apps/mobile` layout
+
+Written 24 August 2026 for the native app, which follows web launch
+([`decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). Kept as specified; revalidate
+the toolchain when mobile resumes.
+
+### `apps/mobile/`
 
 ```text
 apps/mobile/
@@ -83,7 +145,7 @@ apps/mobile/
 
 Layer responsibilities and the enforced dependency rules: `.docs/02-architecture/mobile-architecture.md`.
 
-### Directories that carry a warning
+#### Directories that carry a warning
 
 | Path                 | Rule                                                                                                                                                                                                                                               |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -93,7 +155,7 @@ Layer responsibilities and the enforced dependency rules: `.docs/02-architecture
 
 ---
 
-## Environments and configuration
+### Environments and configuration
 
 ```text
 development   local API or fixtures · dev client · verbose logging · analytics OFF
@@ -105,30 +167,19 @@ Config is a **Zod-validated schema** in `src/config/env.ts`; a missing or malfor
 
 ---
 
-## Where each `.docs` document lives in the build
-
-| Concern                 | Doc                                                        | Enforced by                                                                             |
-| ----------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Screens & states        | `01`, `15`                                                 | Component tests, state union type                                                       |
-| Navigation & links      | `03`, `21`                                                 | Route tree = link table; link fuzz tests                                                |
-| Data flow & contracts   | `04`, `18`                                                 | `packages/api-contract` + contract tests                                                |
-| Architecture boundaries | `05`                                                       | `dependency-cruiser` + ESLint `no-restricted-paths`                                     |
-| Design system           | `06`                                                       | Token lint (no raw hex/px), contrast check                                              |
-| Neutrality              | `.docs/17-legal/legal-ethical-rules.md` + `06`, `09`, `10` | `packages/neutrality` lint + `ServerText` branded type + `<Figure>` required provenance |
-| Accessibility           | `12`                                                       | ESLint a11y, role/label tests, 200% snapshots, chart-text-equivalent test               |
-| Security                | `13`                                                       | Secret scan, allow-list test, `npm audit`, SBOM                                         |
-| Performance             | `14`                                                       | Bundle delta, startup benchmark, payload assertions                                     |
-| Privacy                 | `16`                                                       | Event-union test, forbidden-pattern scan, no-3p-SDK test                                |
-
-Every document in this suite has at least one automated check. A specification with no enforcement mechanism becomes fiction within two quarters; this table is the antidote.
-
 ---
 
 ## Documentation convention
 
-- `docs/` — the **platform** documentation (00–20). Data model, pipeline, analytics, legal rules. Not modified by the mobile work, except for two annotations pointing at supersessions (`00-document-audit` C12: `.docs/01-product/roadmap-platform.md` Month 3; `.docs/02-architecture/deliverables-and-risk.md`: `apps/web` removed).
-- `.docs/` — the **mobile product and architecture** documentation. The single source of truth for the client.
-- `.docs/adr/` — architecture decision records. **New decisions append; existing records are never rewritten.** A superseded ADR gets a `Status: Superseded by ADR-0NN` header and stays.
-- Code comments explain _why_; `.docs/` explains _what and how_. A decision that lives only in a comment is a decision that will be silently reversed.
+- `.docs/` is the one documentation root. The old split between `docs/` (the platform suite) and
+  `.docs/` (the mobile suite) is gone; numbered prefixes in old titles ("04 —", "15 —") are the
+  original document numbers, kept so older cross-references still make sense.
+- `.docs/adr/` holds architecture decision records. **New decisions append; existing records are never
+  rewritten.** A superseded ADR gets a status header naming its replacement and stays.
+- Code comments explain _why_; `.docs/` explains _what and how_. A decision that lives only in a
+  comment is a decision that will be silently reversed.
+- What is built, deployed and open is kept in one place:
+  [`00-overview/current-state.md`](../00-overview/current-state.md).
 
-**Rule:** a PR that changes an architectural decision must update the relevant `.docs/` file or add an ADR, in the same PR. Enforced by a PR template checklist and reviewer discipline.
+**Rule:** a PR that changes an architectural decision updates the relevant `.docs/` file or adds an
+ADR, in the same PR. The PR template asks for it.

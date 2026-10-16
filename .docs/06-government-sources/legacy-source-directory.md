@@ -1,5 +1,12 @@
 # 18 — Government Data Source Registry (Central · All States · UTs)
 
+> **Status:** Historical — superseded. The original discovery directory of 21 August 2026 (document
+> 18), written before verification: its URLs were not individually fetched, and several are marked
+> "verify". **Do not take a URL from here.** The verified registry is
+> [`source-registry.json`](./source-registry.json), introduced by the
+> [discovery report](./SOURCE-DISCOVERY-REPORT.md); the `sources/*.yaml` files named below were never
+> created. Kept as the record of what was originally expected to exist.
+
 > **Goal:** the official portals from which LokDarpan collects budgets, expenditure, tenders, infrastructure projects, finance records, roads/transport data, and statistical datasets.
 >
 > **Sourcing rule ([15](../17-legal/legal-ethical-rules.md)):** only official government portals. No news, blogs, social media, or third-party sites are ever used as sources of fact.

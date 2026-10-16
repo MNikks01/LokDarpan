@@ -1,5 +1,10 @@
 # Bharat Public Governance Intelligence Platform
 
+> **Status:** Historical — the original platform overview of 21 August 2026 (document "00"). Its
+> mission, scope and financial-flow model stand; its document index uses the original numbering and
+> describes plans, not the build. What exists now: [`current-state.md`](./current-state.md). The
+> documentation map: [`../README.md`](../README.md).
+
 **A national public-finance, governance, and infrastructure intelligence platform that tracks the flow of public money from the Government of India down to the Gram Panchayat and ward — built entirely on official government records.**
 
 > Working name **LokDarpan** (लोकदर्पण) — "the people's mirror." Phase 1 is Maharashtra roads; the platform is designed to scale to every ministry, every state, every district, and every village in India.

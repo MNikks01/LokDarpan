@@ -1,6 +1,6 @@
 # ADR-030 · A bare ₹ figure is rupees, decided per page
 
-**Status:** Accepted · **Date:** 2026-09-04 · **Extends:** [`026-candidates-are-reconciled-not-accumulated.md`](./026-candidates-are-reconciled-not-accumulated.md)
+**Status:** Accepted · **Date:** 2026-09-04 · **Extends:** [`026-candidates-are-reconciled-not-accumulated.md`](./026-candidates-are-reconciled-not-accumulated.md) · **Amended by** [`037`](./037-precision-is-judged-at-the-scale-the-source-states.md) (2026-09-04; pointer added 2026-10-16)
 
 ## Context
 

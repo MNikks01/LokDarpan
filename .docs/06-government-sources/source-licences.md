@@ -164,6 +164,12 @@ recorded here rather than resolved.
 
 ## What this blocks, concretely
 
+> **Note · 16 October 2026.** This section describes 28 August. Since 5 September the site renders no
+> BEAMS figure (withheld; ADR-073 since 7 October): every figure it shows comes from CAG. Option 3 below
+> is, in effect, the position taken; option 1 is deferred
+> ([`../decisions/2026-10-07-permissions-deferred.md`](../decisions/2026-10-07-permissions-deferred.md)).
+> The "5,164 published facts" above is the 5 September count (ADR-044).
+
 Every monetary figure the site renders today comes from BEAMS: the unit pages and the departmental finance page. Under the Finance Department's stated terms, publishing those to the public requires asking first.
 
 This collides with a decision already taken on the project — **not to approach government while building**. The two cannot both hold for BEAMS-derived display. The options, without preference:

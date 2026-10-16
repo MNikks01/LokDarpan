@@ -1,5 +1,24 @@
 # 04 — Database Design
 
+> **Correction · 16 October 2026 ([#183](https://github.com/MNikks01/LokDarpan/issues/183)).** This
+> is the **pre-migration target design** of 21 August 2026. The schema of record is
+> [`database/migrations/`](../../database/migrations); where this document disagrees with it, the
+> migrations win. Do not implement from it. Known contradictions, each checked against the migration
+> named:
+>
+> | This document                                                           | The ledger                                                                                                         | Where                                                  |
+> | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+> | `confidence NUMERIC(4,3) NOT NULL DEFAULT 1.000` on every fact table    | A confidence is never defaulted: a parser that omits one fails to insert rather than claim certainty               | `0007_document_facts.sql` and later fact tables        |
+> | `amount_inr NUMERIC(20,2) NOT NULL` on allocation, release, expenditure | Every amount is nullable; NULL means not published, never zero                                                     | `0003_finance.sql`, `0005_department_finance.sql`      |
+> | `source_document` and `data_source` provenance tables                   | `source_artifact` (content-addressed) and `artifact_sighting`                                                      | `0001`, `0037`, `0040`                                 |
+> | `tender.contractor_id`, `awarded_amount`, `num_bidders`                 | Deliberately absent: award data is CAPTCHA-gated, and a nullable column would invite a screen to imply it is known | `0012_tender.sql` header                               |
+> | `ministry` and a separate `district` table                              | One `admin_unit` hierarchy; the legacy `district` table is "deliberately not recreated"                            | `0001_admin_unit.sql`                                  |
+> | One table per tax (`tax_revenue`, `gst_revenue`, `excise_revenue`)      | No revenue layer yet                                                                                               | — (proposed as budget lines in the finance-graph plan) |
+>
+> National-scale plans that replace parts of this design are in
+> [`../02-architecture/PUBLIC_FINANCE_GRAPH_ARCHITECTURE.md`](../02-architecture/PUBLIC_FINANCE_GRAPH_ARCHITECTURE.md)
+> (proposed). The body below is unchanged, as the record of what was originally specified.
+
 **Engine:** PostgreSQL 16 + PostGIS. **Conventions:** `snake_case`; surrogate `BIGINT`/`UUID` PKs; every fact table carries provenance (`source_document_id`, `confidence`, `record_version`); monetary amounts stored as `NUMERIC(20,2)` in **rupees** (paise precision), never floats; timestamps `TIMESTAMPTZ`. Amounts are stored canonically in ₹; crore/lakh formatting is a presentation concern.
 
 ## Design notes

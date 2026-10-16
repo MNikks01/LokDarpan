@@ -1,6 +1,6 @@
 # ADR-049 · A tender that changed can say what it said before
 
-**Status:** Accepted · **Date:** 2026-09-05 · **Applies** the pattern of migration 0009 to tenders
+**Status:** Accepted · **Date:** 2026-09-05 · **Applies** the pattern of migration 0009 to tenders · **Amended by** [`050`](./050-a-timestamp-that-lost-precision-in-transit-has-not-changed.md) (2026-09-05; pointer added 2026-10-16)
 
 ## Context
 

@@ -3,6 +3,14 @@
 **Date:** 7 October 2026 · **Status:** Proposed · **Refreshes** [`00-overview/product-audit-2026-09-29.md`](../00-overview/product-audit-2026-09-29.md) for a 65-feature version of the same brief
 **Binding:** [`17-legal/legal-ethical-rules.md`](../17-legal/legal-ethical-rules.md). Where a feature conflicts with it, the feature is planned in its permitted form or not at all (§2).
 
+> **Progress note · 16 October 2026.** Status unchanged — still _Proposed_. M1 tasks have since
+> landed in the repository: LD-017 as [ADR-073](../adr/073-a-restricted-source-opens-on-a-recorded-grant-and-a-switch.md),
+> LD-007 and LD-008 as [ADR-074](../adr/074-a-body-is-named-by-the-page-that-names-it.md), LD-004 as
+> [ADR-075](../adr/075-a-correction-is-received-never-applied.md), LD-009 as
+> [ADR-076](../adr/076-a-page-says-what-is-held-shown-withheld-and-not-collected.md), LD-005 as the
+> `/about/methodology` page, and LD-003 as the correction notice on `database-design.md`. LD-001 is
+> deferred. Which of these are in production: [`../00-overview/current-state.md`](../00-overview/current-state.md).
+
 This document answers the "Master Product & Engineering Specification" brief of 7 October 2026. Most of
 what that brief asks for already exists in `.docs/`, written against the code. Repeating it here would
 create a second specification that drifts from the first, so this document does three things only:

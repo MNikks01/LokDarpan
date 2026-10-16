@@ -2,6 +2,15 @@
 
 **Status:** Proposal · **Date:** 2026-09-04 · Decisions it asks for are listed in §7
 
+> **Update · 16 October 2026.** Historical proposal: §1 ("There is no OCR") describes 4 September.
+> Its §7 decisions were taken — the engine boundary in
+> [ADR-038](../adr/038-the-ocr-engine-is-not-the-source-of-truth.md), Tesseract on measurement in
+> [ADR-039](../adr/039-tesseract-and-not-yet-into-the-ledger.md) (see
+> [`ocr-evaluation-report.md`](./ocr-evaluation-report.md)), readings beside the page in
+> [ADR-071](../adr/071-a-reading-sits-beside-the-page-never-in-its-place.md), and scan facts as
+> review-only candidates in [ADR-072](../adr/072-a-fact-read-from-a-scan-is-a-candidate-never-a-fact.md).
+> The service is `services/ocr`.
+
 This inspects the pipeline as built, then proposes what to change. It proposes
 rather than decides, because choosing an OCR stack commits money, a licence and
 an operational surface, and those are the maintainer's to commit.

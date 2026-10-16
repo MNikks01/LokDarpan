@@ -1,5 +1,14 @@
 # 10 — API Documentation
 
+> **Status:** Target spec — the original API design of 21 August 2026 (document 10). Its envelope
+> and provenance rules hold. **Its GraphQL section was declined by
+> [ADR-012](../adr/012-web-api-strategy.md)** (REST, called server-side). The endpoints built are in
+> `apps/web/src/app/api/v1`: `units`, `units/[id]` (with `bodies`, `departments/[code]` and
+> `holdings`), `geo/units/[id]` and its `level`, `bodies/[id]`, `documents`, `documents/[id]`,
+> `tenders`, `tenders/overview`, `search` and `corrections`. The
+> contract of record is `packages/contracts`; the gaps between this document and a client are in
+> [`client-api-contract.md`](./client-api-contract.md).
+
 **Base URL:** `https://api.lokdarpan.org/api` (illustrative). **Version:** `v1` (prefix `/api/v1`). **Format:** JSON. **Auth:** public read endpoints are open but rate-limited; higher quotas require an API key ([13](../12-security/security.md)). **All responses are read-only** — the public API never mutates the ledger.
 
 ## Conventions

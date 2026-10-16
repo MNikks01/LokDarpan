@@ -1,5 +1,9 @@
 # 19 — Administrative Hierarchy & Local Bodies
 
+> **Status:** Target spec, 21 August 2026. The one-hierarchy principle is built: `admin_unit` with a
+> closure table and LGD codes (migrations `0001`, `0011`). What production holds of it — states and
+> districts only — is in [`../00-overview/current-state.md`](../00-overview/current-state.md).
+
 The platform models the **complete Indian administrative and fiscal hierarchy**, so any rupee can be followed from the Union Budget down to a ward-level project and back up. This document defines that hierarchy, the urban and rural local-body structures, the geographic hierarchy, the official code systems that make cross-source linkage possible, and how money flows through the levels. The database realization is in [04 — Database Design](../05-data-model/database-design.md).
 
 ## Design principle: one hierarchy, many parents

@@ -1,5 +1,10 @@
 # 02 — User Journeys
 
+> **Status:** Target spec, written 21–23 August 2026 for the mobile client. Its rules apply to every client; its native
+> mechanics (phone screens, bottom sheets, taps, on-device storage, `lokdarpan://` links) are
+> deferred with the app. Where web differs, [`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md)
+> and [`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md) §What reverses govern.
+
 Twelve end-to-end journeys covering the six audiences in `.docs/01-product/prd.md`. Each states the intent, the path (screen IDs from `.docs/01-product/screen-inventory.md`), what must be true at each step, where it fails, and the neutrality constraint that binds it.
 
 **Convention:** ▸ = a tap. Every journey that displays a figure implicitly permits ▸ → **S-52 Source sheet** at that point; that affordance is not repeated in each diagram.

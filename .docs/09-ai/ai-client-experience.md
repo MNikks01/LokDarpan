@@ -1,5 +1,9 @@
 # 09 — AI Experience (Mobile)
 
+> **Status:** Target spec for the mobile AI surface, written 21–23 August 2026; deferred. No AI
+> surface is built (`services/ai` is empty) and none ships before launch. [`ai-layer.md`](./ai-layer.md)
+> governs where the two differ.
+
 `.docs/09-ai/ai-layer.md` defines the AI layer: retrieval-grounded, guardrailed, citation-enforced, with hard prohibitions. This document defines only the **mobile surface** and the constraints it adds. Where the two differ, `.docs/09-ai/ai-layer.md` and `.docs/17-legal/legal-ethical-rules.md` win and the feature is withheld.
 
 ---

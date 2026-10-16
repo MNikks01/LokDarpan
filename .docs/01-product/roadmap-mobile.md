@@ -1,5 +1,10 @@
 # 25 — Implementation Roadmap
 
+> **Status:** Deferred (mobile) — the native app's roadmap, written 21–23 August 2026 under the
+> mobile-only premise. Web ships first ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md));
+> this plan resumes after web launch, with its toolchain revalidated then. Its claim below to
+> supersede Month 3 of `roadmap-platform.md` was itself reversed by the pivot.
+
 Supersedes Month 3 of `.docs/01-product/roadmap-platform.md` (which builds a Next.js dashboard — `.docs/00-overview/document-audit.md` C12). Backend months 1, 2, 4, 5, 6 of `.docs/01-product/roadmap-platform.md` stand, with the additions in `.docs/11-api/client-api-contract.md`.
 
 **Team assumption:** 2 mobile engineers + 1 designer (part-time) + the existing backend/data team. **Duration:** ~20 weeks to a Phase-1 public launch. Adjust proportionally for a different team.

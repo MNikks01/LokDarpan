@@ -1,5 +1,11 @@
 # 24 — Pre-Implementation Questions, Answered
 
+> **Status:** Deferred (mobile), written 21–23 August 2026. The answers on journeys, screens, what
+> is shown, traceability, incomplete data, neutrality and scaling (§1–§5, §8–§10, §15) hold for every
+> client; the answers on caching, offline, navigation, device performance, testing tools and
+> telemetry mechanics (§6–§7, §11–§14) describe the native app. The web answers are in
+> [`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md).
+
 The fifteen questions that must be answered before any code is written. Answers are decisions, with their reasoning and their pointer into the specification.
 
 ---

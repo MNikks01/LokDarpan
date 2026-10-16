@@ -41,4 +41,4 @@ keep a registry; don't block").
 
 The publication decision is one function over three recorded facts — the publisher's terms, a
 recorded grant, and an operator switch — so a granted source is enabled by data, not by code. See
-the ADR that lands with the permission model.
+the ADR that lands with the permission model: [ADR-073](../adr/073-a-restricted-source-opens-on-a-recorded-grant-and-a-switch.md).

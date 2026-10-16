@@ -8,7 +8,7 @@
 ## Checklist
 
 - [ ] `pnpm test` passes
-- [ ] `pnpm neutrality` passes (the docs/15 language gate, over `apps packages services`)
+- [ ] `pnpm neutrality` passes (the language gate of `.docs/17-legal/legal-ethical-rules.md`, over `apps packages services`)
 - [ ] A changeset, if this changes what the pipeline extracts, stores or publishes — `pnpm changeset` ([`adr/028`](../.docs/adr/028-changesets-for-the-record-not-the-release.md))
 - [ ] Every new figure renders through `<Figure>` with its `provenance`
 - [ ] No variance computed across a missing stage; nothing renders `₹0` for missing data

@@ -1,5 +1,11 @@
 # 16 — Analytics & Observability
 
+> **Status:** Active rules, written 21–23 August 2026 for the mobile client. The three rules and the
+> event-privacy constraints bind every client and are enforced in `packages/observability`
+> ([ADR-018](../adr/018-telemetry-without-identifiers.md), [ADR-019](../adr/019-log-shipping.md)). The
+> mobile mechanics — a rotating install id, an MMKV event queue, Sentry — are not built, and no
+> third-party error tracker is in use.
+
 ## Position
 
 The product's audience includes people whose _investigative intent_ is sensitive — an activist searching a contractor's name before filing an RTI, a journalist tracking one project. `.docs/12-security/security.md` commits to "no behavioural tracking beyond privacy-respecting, aggregate analytics; no ad tech." This document takes that seriously enough to make it structural.
