@@ -27,7 +27,7 @@ lokdarpan/
 │   └── ai · analytics · entity-resolution · normalization · risk-engine   empty skeletons
 ├── packages/                see the table below
 ├── database/
-│   ├── migrations/          0001–0046, plain SQL, the schema of record (ADR-017)
+│   ├── migrations/          0001–0048, plain SQL, the schema of record (ADR-017)
 │   └── scripts/             the local database users (api, etl, intake, reviewer)
 ├── data/reference/          reviewed reference data (district aliases, CAG fact corrections)
 ├── .docs/                   this documentation — the one documentation root
@@ -64,14 +64,14 @@ The web-architecture plan named `api-contract`, `ui` and `sdk` packages. As buil
 
 ## Inside `apps/web/src`
 
-| Directory     | Holds                                                                                                                                                                                                                      |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/`        | Routes: `/`, `/explore`, `/units`, `/units/[id]`, `/units/[id]/departments/[code]`, `/bodies/[id]`, `/documents`, `/documents/[id]`, `/report`, `/about`, `/about/methodology`, `/project/[id]` (fixture), and `/api/v1/*` |
-| `copy/`       | Every reader-facing sentence (rule B of ADR-059; reviewed by the neutrality gate)                                                                                                                                          |
-| `server/`     | Server-only code: `respond()`, rate limiting, the publication switches, the home summary                                                                                                                                   |
-| `components/` | Rendering, including `<Figure>`, which will not compile without `provenance`                                                                                                                                               |
-| `ui/`         | Design tokens; `tokens.test.ts` is CI guardrail G3 (no red in any data token)                                                                                                                                              |
-| `map/`        | The MapLibre explorer: layers, labels, the level cache (ADR-057, 058, 064)                                                                                                                                                 |
+| Directory     | Holds                                                                                                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/`        | Routes: `/`, `/explore`, `/units`, `/units/[id]`, `/units/[id]/departments/[code]`, `/bodies/[id]`, `/documents`, `/documents/[id]`, `/tenders/[id]`, `/report`, `/about`, `/about/methodology`, `/project/[id]` (fixture), and `/api/v1/*` |
+| `copy/`       | Every reader-facing sentence (rule B of ADR-059; reviewed by the neutrality gate)                                                                                                                                                           |
+| `server/`     | Server-only code: `respond()`, rate limiting, the publication switches, the home summary                                                                                                                                                    |
+| `components/` | Rendering, including `<Figure>`, which will not compile without `provenance`                                                                                                                                                                |
+| `ui/`         | Design tokens; `tokens.test.ts` is CI guardrail G3 (no red in any data token)                                                                                                                                                               |
+| `map/`        | The MapLibre explorer: layers, labels, the level cache (ADR-057, 058, 064)                                                                                                                                                                  |
 
 ---
 

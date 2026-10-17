@@ -46,7 +46,7 @@ The full map, with what each part enforces, is [`.docs/02-architecture/repositor
 
 ```bash
 pnpm install
-pnpm test                 # ~1,730 tests; integration suites skip without a database
+pnpm test                 # ~1,790 tests; integration suites skip without a database
 pnpm dev                  # web client at http://localhost:3000
 pnpm neutrality           # the language gate of .docs/17-legal — a hit blocks release
 ```

@@ -16,6 +16,8 @@ collection on GitHub Actions.
 | [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037      |
 | [`correction-requests.md`](correction-requests.md)                           | Reports of data errors from `/report`: enabling the form, reviewing reports (ADR-075) |
 | [`reviewing-public-bodies.md`](reviewing-public-bodies.md)                   | Governments and departments: extract names, review them, `ingest:bodies` (ADR-074)    |
+| [`reviewing-places.md`](reviewing-places.md)                                 | Places named in audit reports: extract, review, promote (ADR-077)                     |
+| [`private-preview.md`](private-preview.md)                                   | Showing withheld material to the operator alone, never in production (ADR-078)        |
 
 Elsewhere:
 

@@ -3,9 +3,9 @@
 > **Status:** Target spec — the original API design of 21 August 2026 (document 10). Its envelope
 > and provenance rules hold. **Its GraphQL section was declined by
 > [ADR-012](../adr/012-web-api-strategy.md)** (REST, called server-side). The endpoints built are in
-> `apps/web/src/app/api/v1`: `units`, `units/[id]` (with `bodies`, `departments/[code]` and
-> `holdings`), `geo/units/[id]` and its `level`, `bodies/[id]`, `documents`, `documents/[id]`,
-> `tenders`, `tenders/overview`, `search` and `corrections`. The
+> `apps/web/src/app/api/v1`: `units`, `units/[id]` (with `bodies`, `departments/[code]`, `holdings`,
+> `mentions` and `named-places`), `geo/units/[id]` and its `level`, `bodies/[id]`, `documents`,
+> `documents/[id]`, `tenders`, `tenders/[id]`, `tenders/overview`, `search` and `corrections`. The
 > contract of record is `packages/contracts`; the gaps between this document and a client are in
 > [`client-api-contract.md`](./client-api-contract.md).
 
