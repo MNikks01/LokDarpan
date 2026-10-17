@@ -93,3 +93,30 @@ psql "$DATABASE_URL" -At \
   -c "SELECT pg_get_viewdef('published_fact') ~ 'reading_confidence IS NOT NULL'" \
   -c "SELECT has_table_privilege('lokdarpan_api', 'published_fact', 'SELECT')"
 ```
+
+## 0047 – 0048 (places in audit reports and the tender record, 17 October 2026)
+
+Step 1 reported `applied 46 of 48`, so 0045–0046 were already in production; when they were applied
+is not recorded. Pending were exactly:
+
+```text
+0047_a_place_is_named_by_the_page_that_names_it.sql
+0048_a_tender_keeps_every_field_its_page_states.sql
+```
+
+| Migration | What it does to production                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------- |
+| 0047      | New table `place_mention` (ADR-077); read by `lokdarpan_api` through 0002's default grants.       |
+| 0048      | Nullable `tender.detail_fields` (JSONB, checked to be an object) for the tender record (ADR-079). |
+
+Both are additive. **0048 had to precede the release**: the GePNIC loader writes `detail_fields` on
+every run, and the nightly sweep runs from `main`. Both applied, `--status` reported 48 of 48, and
+these checks each printed `t` before `development` was released to `main` (PR #210):
+
+```bash
+psql "$DATABASE_URL" -At \
+  -c "SELECT count(*) = 48 FROM schema_migration" \
+  -c "SELECT to_regclass('place_mention') IS NOT NULL" \
+  -c "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tender' AND column_name='detail_fields')" \
+  -c "SELECT has_table_privilege('lokdarpan_api', 'place_mention', 'SELECT')"
+```
