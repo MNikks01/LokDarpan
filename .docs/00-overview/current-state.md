@@ -4,7 +4,7 @@
 the same PR that changes any of it. Every row says how it is known and when; a row that cannot say
 so is marked _not recorded_ rather than assumed.
 
-**Last reviewed:** 16 October 2026. Dated audits keep their own dates and are not rewritten:
+**Last reviewed:** 17 October 2026. Dated audits keep their own dates and are not rewritten:
 [`product-audit-2026-09-29.md`](./product-audit-2026-09-29.md) is the evidence behind most of what
 follows, and [`what-the-ledger-is-today.md`](./what-the-ledger-is-today.md) is the 5 September
 record this page replaces.
@@ -20,7 +20,7 @@ record this page replaces.
 | Nightly collection | GitHub Actions, `0 20 * * *` (01:30 IST), `ingest:gepnic --all` over 21 GePNIC portals; a separate check opens an issue when a run fails or does not run                                                                                           | `.github/workflows/ingest-tenders.yml`, `check-collection.yml`                                           |
 | Raw bytes          | Cloudflare R2, content-addressed by SHA-256                                                                                                                                                                                                        | [ADR-069](../adr/069-the-bytes-a-row-cites-are-kept-where-they-outlive-the-run.md), migration 0037       |
 | API rate limit     | One-hour CDN caching of every `/api/v1` answer is in the code on `main`. The per-IP limit on cache misses also needs a Vercel token and Firewall rule; **that setup is not recorded as done**, and until it is the code lets every request through | [`16-operations/rate-limiting.md`](../16-operations/rate-limiting.md) §1–§2                              |
-| Migrations in prod | 0001–0044, applied by hand with `--status` checked before and after (6 October). **0045–0048: not recorded** — check with `migrate -- --status`                                                                                                    | [`16-operations/applying-migrations.md`](../16-operations/applying-migrations.md), decision of 6 October |
+| Migrations in prod | 0001–0048. `--status` on 17 October reported 46 of 48 applied (0045–0046 already in; when is not recorded), then 0047–0048 were applied by hand and `--status` reported 48 of 48                                                                   | [`16-operations/applying-migrations.md`](../16-operations/applying-migrations.md), decision of 6 October |
 
 ## What the ledger holds — production and local differ
 
@@ -42,18 +42,19 @@ Extraction and review still happen locally; review done after promotion is carri
 
 ## Built, but not recorded as live
 
-Checked on 17 October 2026: `origin/main` is 0d8c2c9 (9 October 2026), which is what Vercel deploys
-(ADR-020); `origin/development` is ahead of it with the rows marked "No" below, awaiting a release.
-Work on unmerged feature branches is not listed here; it is added when it merges into `development`. Nothing in the repository records the migrations below as applied to production, or
-the live deployment's commit; check with `migrate -- --status` and the Vercel dashboard.
+Checked on 17 October 2026: `development` was released to `main` (merge commit dc821d4, PR #210)
+after migrations 0047–0048 were applied to production, and `development` was fast-forwarded to it.
+Every row below is on `main` and its migration is applied. That the production deployment serves
+dc821d4 is not recorded here; check the Vercel dashboard. Work on unmerged feature branches is not
+listed; it is added when it merges into `development`.
 
-| Capability                                                     | Decision                                                                           | Migration | Runbook                                                                     | On `main`?            |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------- | --------------------- |
-| Public bodies named from CAG pages, and the Body page          | [ADR-074](../adr/074-a-body-is-named-by-the-page-that-names-it.md)                 | 0045      | [`reviewing-public-bodies.md`](../16-operations/reviewing-public-bodies.md) | Yes                   |
-| Correction requests from `/report`, received and never applied | [ADR-075](../adr/075-a-correction-is-received-never-applied.md)                    | 0046      | [`correction-requests.md`](../16-operations/correction-requests.md)         | Yes                   |
-| Places named by audit pages                                    | [ADR-077](../adr/077-a-place-is-named-by-the-page-that-names-it.md)                | 0047      | [`reviewing-places.md`](../16-operations/reviewing-places.md)               | No — on `development` |
-| A private preview of withheld material, for the operator only  | [ADR-078](../adr/078-a-private-preview-shows-withheld-material-to-the-operator.md) | —         | [`private-preview.md`](../16-operations/private-preview.md)                 | No — on `development` |
-| A tender record answering what, where, who, how much and when  | [ADR-079](../adr/079-a-tender-is-a-record-that-answers-five-questions.md)          | 0048      | —                                                                           | No — on `development` |
+| Capability                                                     | Decision                                                                           | Migration | Runbook                                                                     | On `main`? |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------- | ---------- |
+| Public bodies named from CAG pages, and the Body page          | [ADR-074](../adr/074-a-body-is-named-by-the-page-that-names-it.md)                 | 0045      | [`reviewing-public-bodies.md`](../16-operations/reviewing-public-bodies.md) | Yes        |
+| Correction requests from `/report`, received and never applied | [ADR-075](../adr/075-a-correction-is-received-never-applied.md)                    | 0046      | [`correction-requests.md`](../16-operations/correction-requests.md)         | Yes        |
+| Places named by audit pages                                    | [ADR-077](../adr/077-a-place-is-named-by-the-page-that-names-it.md)                | 0047      | [`reviewing-places.md`](../16-operations/reviewing-places.md)               | Yes        |
+| A private preview of withheld material, for the operator only  | [ADR-078](../adr/078-a-private-preview-shows-withheld-material-to-the-operator.md) | —         | [`private-preview.md`](../16-operations/private-preview.md)                 | Yes        |
+| A tender record answering what, where, who, how much and when  | [ADR-079](../adr/079-a-tender-is-a-record-that-answers-five-questions.md)          | 0048      | —                                                                           | Yes        |
 
 "Built" includes the corrections form, which stays closed until the steps in its runbook are done.
 
@@ -68,22 +69,21 @@ the live deployment's commit; check with `migrate -- --status` and the Vercel da
 | `services/{ai,analytics,entity-resolution,normalization,risk-engine}` | Empty skeletons                                                                                               |
 | `packages/{config,utils,validation}`                                  | Empty placeholders (`.gitkeep` only)                                                                          |
 | Tests                                                                 | 1,786 on 17 October: 1,429 pass and 357 skip without a database                                               |
-| Migrations                                                            | 48 files, `0001`–`0048`; `main` has `0001`–`0046`                                                             |
+| Migrations                                                            | 48 files, `0001`–`0048`, all on `main` and applied to production                                              |
 
 Only the example project page (`/project/[id]`) renders fixture data, and it says so.
 
 ## Open items
 
-| #   | Item                                                                                                                                                                                                                                                                                                                                                          | Blocks                                  |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| 1   | **API contract P0 items** ([`11-api/client-api-contract.md`](../11-api/client-api-contract.md) §7). In the code: search, money as decimal strings, page anchors, a web rate tier. Not in the code: cursor pagination, an OpenAPI document, the mobile per-install rate tier                                                                                   | Researcher surfaces (export, API)       |
-| 2   | **The execution-data gap — settled, not closed.** PMGSY/OMMAS is licence-blocked and not collected, so `Released − Utilized` has no input                                                                                                                                                                                                                     | Project-level Money Trail, indefinitely |
-| 3   | **Permission requests are deferred** (7 October). Drafts exist and none is sent; restricted sources are built behind the publication gate and open only on a recorded grant plus a switch ([decision](../decisions/2026-10-07-permissions-deferred.md), [ADR-073](../adr/073-a-restricted-source-opens-on-a-recorded-grant-and-a-switch.md))                  | BEAMS figures, tender details, OMMAS    |
-| 4   | Confirm self-hosted deployability is tested, not assumed ([ADR-011](../adr/011-web-framework.md))                                                                                                                                                                                                                                                             | —                                       |
-| 5   | **A `data.gov.in` API key exists** (6 October); untested while the gateway was failing. `permission-requests.json` still records `dop-pincode-directory` as `credential_needed`                                                                                                                                                                               | Pincode placement; the Assam inspection |
-| 6   | Pages are rendered per request (`force-dynamic`); revalidation by `datasetVersion` tag is not built, and the homepage revalidates hourly                                                                                                                                                                                                                      | Read cost at scale                      |
-| 7   | Rotate the Neon owner password and other keys: recorded open on 6 October, not recorded as done                                                                                                                                                                                                                                                               | —                                       |
-| 8   | **Release order.** Apply migrations 0047 and 0048 to production before `development` is released to `main`. The GePNIC loader now writes `tender.detail_fields` (0048) on every run, and the nightly sweep runs from `main`, so releasing first would make the sweep fail ([`16-operations/applying-migrations.md`](../16-operations/applying-migrations.md)) | The release of ADR-077 to ADR-079       |
+| #   | Item                                                                                                                                                                                                                                                                                                                                         | Blocks                                  |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| 1   | **API contract P0 items** ([`11-api/client-api-contract.md`](../11-api/client-api-contract.md) §7). In the code: search, money as decimal strings, page anchors, a web rate tier. Not in the code: cursor pagination, an OpenAPI document, the mobile per-install rate tier                                                                  | Researcher surfaces (export, API)       |
+| 2   | **The execution-data gap — settled, not closed.** PMGSY/OMMAS is licence-blocked and not collected, so `Released − Utilized` has no input                                                                                                                                                                                                    | Project-level Money Trail, indefinitely |
+| 3   | **Permission requests are deferred** (7 October). Drafts exist and none is sent; restricted sources are built behind the publication gate and open only on a recorded grant plus a switch ([decision](../decisions/2026-10-07-permissions-deferred.md), [ADR-073](../adr/073-a-restricted-source-opens-on-a-recorded-grant-and-a-switch.md)) | BEAMS figures, tender details, OMMAS    |
+| 4   | Confirm self-hosted deployability is tested, not assumed ([ADR-011](../adr/011-web-framework.md))                                                                                                                                                                                                                                            | —                                       |
+| 5   | **A `data.gov.in` API key exists** (6 October); untested while the gateway was failing. `permission-requests.json` still records `dop-pincode-directory` as `credential_needed`                                                                                                                                                              | Pincode placement; the Assam inspection |
+| 6   | Pages are rendered per request (`force-dynamic`); revalidation by `datasetVersion` tag is not built, and the homepage revalidates hourly                                                                                                                                                                                                     | Read cost at scale                      |
+| 7   | Rotate the Neon owner password and other keys: recorded open on 6 October, not recorded as done                                                                                                                                                                                                                                              | —                                       |
 
 Feature priorities and the milestone being worked on:
 [`01-product/feature-priorities-2026-10-07.md`](../01-product/feature-priorities-2026-10-07.md)
