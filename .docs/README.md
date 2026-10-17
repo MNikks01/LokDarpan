@@ -62,7 +62,7 @@ Most of this suite was written between 21 and 25 August 2026, before any code ex
 
 **Working on the map or ingestion safety** → `decisions/gods-eye-view-adoption.md` → `adr/022` → `adr/052`
 
-**Working on tenders** → `adr/056` → `adr/067` → `adr/068` → `16-operations/tender-placement.md`
+**Working on tenders** → `adr/056` → `adr/067` → `adr/068` → `adr/079` → `16-operations/tender-placement.md`
 
 **Working on scanned pages (OCR)** → `adr/038` → `adr/071` → `adr/072` → `16-operations/reading-scans.md`
 

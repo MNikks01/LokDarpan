@@ -89,7 +89,7 @@ git clone https://github.com/MNikks01/LokDarpan.git
 cd LokDarpan
 pnpm install
 
-pnpm test          # ~1,730 tests; integration suites skip without a database
+pnpm test          # ~1,790 tests; integration suites skip without a database
 pnpm test:e2e      # 14 Playwright tests in two specs (builds the app first)
 pnpm dev           # web client  → http://localhost:3000
 pnpm dev:api       # API         → http://localhost:4000

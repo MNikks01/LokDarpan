@@ -214,9 +214,9 @@ are the places the implementation took a different or narrower path, checked aga
   `next-intl`, TanStack Query or Table, or React Hook Form, and no direct Zod dependency: schemas
   arrive through `@lokdarpan/contracts`. Reader-facing sentences are English, in `src/copy/`.
 - **Routes.** Units are `/units/[id]`, not `/unit/[id]`; source documents are `/documents/[id]`; the
-  map is `/explore`; data issues are reported at `/report`; public bodies are `/bodies/[id]`;
-  methodology is `/about/methodology`. The `/district/…` aliases, and the tender, contractor, scheme,
-  search, ask, data and API-access pages, do not exist yet.
+  map is `/explore`; data issues are reported at `/report`; public bodies are `/bodies/[id]`; tenders
+  are `/tenders/[id]`; methodology is `/about/methodology`. The `/district/…` aliases, and the
+  contractor, scheme, search, ask, data and API-access pages, do not exist yet.
 - **Packages.** The contract package is `packages/contracts`, not `api-contract`. There is no
   `packages/ui` and no SDK; tokens and components live in `apps/web/src`.
 - **Rendering.** As the 30 September addendum says, entity pages are rendered per request until the
