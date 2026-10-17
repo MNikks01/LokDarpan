@@ -1,5 +1,21 @@
 # 17 — Testing Strategy
 
+> **Status:** Target spec, written 21–23 August 2026 for the mobile client (Jest, React Native
+> Testing Library, Maestro, `tsd`). The web uses Vitest and Playwright. §3's premise that no backend
+> exists dates from August; the contract tests now guard a real API. The §6 guardrails map to CI
+> (`.github/workflows/ci.yml`) like this, as of 16 October 2026:
+>
+> | §6 guardrail      | In CI                                                                                                                                              |
+> | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | G1 Neutrality     | **G1** — `pnpm neutrality`                                                                                                                         |
+> | G2 Provenance     | Not a separate step: `<Figure>` will not type-check without `provenance`. CI's step named **G2** is a different check, the import rules of ADR-059 |
+> | G3 Palette        | **G3** — `apps/web/src/ui/tokens.test.ts`                                                                                                          |
+> | G4 Accessibility  | Not a CI gate                                                                                                                                      |
+> | G5 Privacy        | Not a CI gate; `packages/observability` tests cover log scrubbing                                                                                  |
+> | G6 Mock isolation | **G6** — a search of the production build for fixture text                                                                                         |
+> | G7 Performance    | **G7** — the explorer's initial JavaScript bytes (ADR-062); runtime is measured but only warns                                                     |
+> | G8 Security       | The job "Dependencies · Secrets": a high-severity dependency audit and a secret scan                                                               |
+
 ## What must not break
 
 Ordinary app bugs are recoverable. Three classes of failure here are not:

@@ -1,5 +1,10 @@
 # 06 — Analytics Engine
 
+> **Status:** Target spec, 21 August 2026. Its formulas and labelling rules bind any implementation.
+> Not built as written: `services/analytics` is empty, and the Python/pandas/DuckDB stack was never
+> adopted. The one variance the ledger computes is the `scheme_finance_variance` view (migration
+> `0003`), over BEAMS figures that are withheld from display (ADR-073).
+
 The analytics engine turns the canonical ledger into **derived facts and neutral observations**. It is deterministic, reproducible (pinned to a `dataset_version`), and every output records the inputs and sources it used. It computes numbers; it never assigns intent. Language rules from [15](../17-legal/legal-ethical-rules.md) apply to every label it emits.
 
 **Stack:** Python + pandas + DuckDB (DuckDB reads directly from Postgres/parquet for fast columnar aggregation). Results are written back to analytics tables / materialized views ([04](../05-data-model/database-design.md)).

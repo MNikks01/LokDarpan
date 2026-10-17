@@ -122,6 +122,10 @@ export const methodologyCopy = {
   bodies:
     "A government or department appears only where a person has confirmed that a page of a published audit report names it. Its page lists those pages. A page naming a department is not a statement that the figures on that page are about it.",
 
+  placesHeading: "Districts and talukas named in reports",
+  places:
+    "A district or taluka is linked to an audit report only where a person has confirmed that the report's pages name it. The names are matched against the state's own list of districts and talukas, so no place is invented. Because the same name repeated across a report is one statement, a person confirms each place once, after reading a sentence from every report that names it, and the decision is recorded for each page. A page naming a place is not a statement that the figures on that page were spent there.",
+
   confidenceHeading: "Confidence",
   confidence:
     "Two confidences are kept apart. Extraction confidence is the estimate that a figure was read correctly from its page. Linkage confidence is how firmly a record is connected to a place or body. Neither is a judgement about whether the government's statement is true.",

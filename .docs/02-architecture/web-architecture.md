@@ -200,3 +200,26 @@ packages/
 - **Saved items / watchlists.** These were designed around on-device storage for privacy (`.docs/10-mobile/notifications.md`). A server-side watchlist would create the one genuinely sensitive dataset the platform otherwise avoids — _which identified person is monitoring which government contract_. Defer until the privacy design is redone for web, or until the mobile app carries it on-device.
 - **Notifications.** Same reasoning.
 - **Offline support.** A service worker for static shell caching is optional polish, not launch scope.
+
+## Addendum, 16 October 2026 — where the build differs
+
+Recorded so this document is not read as a description of the code. The decisions above stand; these
+are the places the implementation took a different or narrower path, checked against `apps/web` on
+16 October 2026.
+
+- **Styling.** No Tailwind. Plain CSS (`app/globals.css`) with the design tokens in `src/ui/tokens.ts`.
+- **Client libraries.** The third-party dependencies of `apps/web` are Next.js, React, MapLibre GL JS,
+  `@vercel/firewall` and `pg` (the server-side database client), beside six workspace packages
+  (`@lokdarpan/contracts`, `database`, `domain`, `errors`, `money`, `neutrality`). There is no
+  `next-intl`, TanStack Query or Table, or React Hook Form, and no direct Zod dependency: schemas
+  arrive through `@lokdarpan/contracts`. Reader-facing sentences are English, in `src/copy/`.
+- **Routes.** Units are `/units/[id]`, not `/unit/[id]`; source documents are `/documents/[id]`; the
+  map is `/explore`; data issues are reported at `/report`; public bodies are `/bodies/[id]`; tenders
+  are `/tenders/[id]`; methodology is `/about/methodology`. The `/district/…` aliases, and the
+  contractor, scheme, search, ask, data and API-access pages, do not exist yet.
+- **Packages.** The contract package is `packages/contracts`, not `api-contract`. There is no
+  `packages/ui` and no SDK; tokens and components live in `apps/web/src`.
+- **Rendering.** As the 30 September addendum says, entity pages are rendered per request until the
+  `datasetVersion` revalidation webhook exists.
+
+The layout as built is in [`repository-structure.md`](./repository-structure.md).

@@ -1,5 +1,10 @@
 # 15 — Loading, Empty, Error, Offline & Partial States
 
+> **Status:** Target spec, written 21–23 August 2026 for the mobile client. Its rules apply to every client; its native
+> mechanics (phone screens, bottom sheets, taps, on-device storage, `lokdarpan://` links) are
+> deferred with the app. Where web differs, [`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md)
+> and [`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md) §What reverses govern.
+
 In most products, states are polish. Here, three of them are **data-honesty controls**:
 
 - An empty state that says "no data" where the truth is "not published yet" makes a false statement about a government body.

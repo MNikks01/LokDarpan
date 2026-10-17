@@ -1,5 +1,9 @@
 # 20 — Screen → Data Entity Matrix
 
+> **Status:** Target spec, written 21–23 August 2026 against the mobile screen inventory (S-IDs).
+> Its §Structural invariants bind every client — item 3, no Verification Priority beside a
+> contractor, is the auditable record of that omission.
+
 Which domain entities (`.docs/05-data-model/database-design.md`, `.docs/05-data-model/data-models.md`, `.docs/03-domain/administrative-hierarchy.md`) each screen touches.
 
 **Legend** — ● primary subject · ○ referenced/summarised · · not used

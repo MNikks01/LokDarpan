@@ -1,5 +1,12 @@
 # 00 — Document Audit
 
+> **Status:** Historical — the audit of 21 August 2026, written when the product was planned as
+> mobile-only. That premise was reversed on 24 August by
+> [`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md). Its contract defects C1–C13
+> and requirements M1–M12 remain the reasons behind invariants in `packages/contracts`, which cites
+> them; where it says "the app", read "every client". Its `docs/00`–`20`
+> references use the original document numbers.
+
 **Purpose.** A complete audit of the existing `docs/` suite (00–20) against the new product decision: **LokDarpan is a mobile-only application (iOS + Android). No website, no responsive web app, no desktop dashboard.**
 
 This document records what exists, what is reusable as-is, what is web-specific and must be discarded or redesigned, what contradicts itself, what is missing, and every assumption this architecture phase makes. Nothing here is silently assumed.

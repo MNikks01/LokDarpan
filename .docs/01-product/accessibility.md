@@ -1,5 +1,11 @@
 # 12 — Accessibility
 
+> **Status:** Target spec, written 21–23 August 2026 for the mobile client. Its rules apply to every client; its native
+> mechanics (phone screens, bottom sheets, taps, on-device storage, `lokdarpan://` links) are
+> deferred with the app. Where web differs, [`../02-architecture/web-architecture.md`](../02-architecture/web-architecture.md)
+> and [`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md) §What reverses govern.
+> Web adds keyboard-first workflows, semantic HTML and real tables (web-architecture §Accessibility).
+
 Target: **WCAG 2.2 AA**, applied to a native app (`.docs/01-product/dashboard-design-legacy.md` commits to WCAG 2.1 AA; this raises it to 2.2, whose additions — target size, focus appearance, dragging alternatives — are all mobile-relevant).
 
 Accessibility is not a compliance exercise here. The audience includes older citizens reading small figures in daylight, people using a screen reader to check their village's accounts, and users of low-end devices where "reduce motion" is a performance setting as much as a comfort one.

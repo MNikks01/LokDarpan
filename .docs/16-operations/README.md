@@ -12,14 +12,17 @@ collection on GitHub Actions.
 | [`tender-placement.md`](tender-placement.md)                                 | Placing tenders: the pincode directory, backfill, aliases, manual decisions           |
 | [`promoting-the-cag-corpus.md`](promoting-the-cag-corpus.md)                 | Copying the reviewed audit reports and figures into production (`promote:cag`)        |
 | [`reading-scans.md`](reading-scans.md)                                       | Scanned pages: the OCR service, `raw:adopt`, `ocr:read`, scan facts, review           |
-| [`applying-migrations.md`](applying-migrations.md)                           | Migrations into production by hand: `--status`, apply, checks; 0040–0043              |
+| [`applying-migrations.md`](applying-migrations.md)                           | Migrations into production by hand: `--status`, apply, checks; 0040–0044              |
 | [`raw-store.md`](raw-store.md)                                               | Where the bytes a row cites are kept: R2 setup, release order for migration 0037      |
 | [`correction-requests.md`](correction-requests.md)                           | Reports of data errors from `/report`: enabling the form, reviewing reports (ADR-075) |
 | [`reviewing-public-bodies.md`](reviewing-public-bodies.md)                   | Governments and departments: extract names, review them, `ingest:bodies` (ADR-074)    |
+| [`reviewing-places.md`](reviewing-places.md)                                 | Places named in audit reports: extract, review, promote (ADR-077)                     |
+| [`private-preview.md`](private-preview.md)                                   | Showing withheld material to the operator alone, never in production (ADR-078)        |
 
 Elsewhere:
 
-- Deployment topology → [`../02-architecture/system-architecture.md`](../02-architecture/system-architecture.md)
+- What is deployed, and which migrations production has → [`../00-overview/current-state.md`](../00-overview/current-state.md)
+- The repository as built → [`../02-architecture/repository-structure.md`](../02-architecture/repository-structure.md)
 - Monitoring and alerting → [`../13-observability/observability.md`](../13-observability/observability.md)
 - Source re-verification cadence → [`../06-government-sources/source-quality.md`](../06-government-sources/source-quality.md)
 - Permission requests to government bodies → [`../06-government-sources/permission-requests.json`](../06-government-sources/permission-requests.json)

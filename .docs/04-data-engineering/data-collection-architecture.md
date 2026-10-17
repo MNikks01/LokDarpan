@@ -1,5 +1,14 @@
 # 03 — Data Collection Architecture
 
+> **Status:** Target spec — the collection design of 21 August 2026. Its contract holds: never
+> fabricate, never infer a missing value, record where every value came from and how confident the
+> reading is. Its mechanics differ from what was built: there is no YAML registry under `sources/`
+> (the registry is [`../06-government-sources/source-registry.json`](../06-government-sources/source-registry.json)),
+> and no BullMQ, pandas, Camelot or Playwright. Collectors are TypeScript in `services/ingestion` with
+> bounded fetches (ADR-052); raw bytes go to R2 by SHA-256 (ADR-069); a person reviews candidates
+> before they are published (ADR-021, ADR-043); the schedule is in
+> [`../16-operations/collection-schedule.md`](../16-operations/collection-schedule.md).
+
 The collection layer turns heterogeneous official artifacts (APIs, CSV/XLS, digital PDFs, scanned PDFs) into a clean, versioned, provenance-stamped ledger. Its contract: **never fabricate, never infer a missing value, always record where a value came from and how confident we are in it.**
 
 ## Source registry

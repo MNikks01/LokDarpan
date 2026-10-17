@@ -1,5 +1,10 @@
 # 13 — Mobile Security
 
+> **Status:** Deferred (mobile) — written 21–23 August 2026 for the native app, which follows web
+> launch ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). The platform posture
+> in [`security.md`](./security.md) applies now; `SECURITY.md` cites two deliberate trade-offs from
+> here for the future app.
+
 `.docs/12-security/security.md` sets the platform posture: the data is public, so **integrity, availability and traceability** are the priorities, not confidentiality. The mobile client inherits that and adds its own surfaces. This document covers only what is client-side or client-triggered.
 
 **The client's security goal, stated precisely:** a user must be able to trust that a figure shown in the app is the figure the platform published, that the app is not building a profile of what they investigate, and that opening a government document cannot compromise their device.

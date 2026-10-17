@@ -1,5 +1,9 @@
 # 03 — Navigation Architecture
 
+> **Status:** Deferred (mobile) — written 21–23 August 2026 for the native app, which follows web
+> launch ([`../decisions/web-first-pivot.md`](../decisions/web-first-pivot.md)). Revalidate the
+> toolchain when mobile resumes. Web counterpart: [`web-architecture.md`](./web-architecture.md) §Page structure.
+
 ## The problem mobile navigation must solve here
 
 This product's data is **seven to nine levels deep** and cross-linked in every direction:

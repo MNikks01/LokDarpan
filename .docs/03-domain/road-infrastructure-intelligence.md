@@ -1,5 +1,9 @@
 # 08 — Road Infrastructure Intelligence
 
+> **Status:** Target spec, 21 August 2026. Not implemented: no road, work or cost-per-km data is held,
+> because no permitted source for it has been identified
+> ([`../00-overview/current-state.md`](../00-overview/current-state.md)).
+
 This module estimates **expected** engineering quantities and costs for a road from its published physical attributes, and compares actuals against peers. The expected values are **transparent reference models with stated assumptions** — they are engineering estimates for context, not official standards, and never a claim that a deviation is improper. Every coefficient is configurable, sourced (e.g. from published Schedule of Rates / Morth/IRC norms where available), and shown to the user.
 
 > **Framing rule:** outputs are phrased as _"expected under model X"_ vs _"reported."_ A gap is _"reported cost is 35% above the modeled estimate,"_ never _"overcharged."_ See [15](../17-legal/legal-ethical-rules.md).

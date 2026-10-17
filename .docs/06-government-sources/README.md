@@ -26,14 +26,14 @@ Only official Government of India, State, UT, and government-body sources. News 
 
 ## Machine-readable registry
 
-| File                                                                                                   | Contents                                                                                    |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| **[`.docs/06-government-sources/source-registry.json`](./source-registry.json)**                       | 107 curated sources, full schema per §28                                                    |
-| **[`.docs/06-government-sources/source-registry.csv`](./source-registry.csv)**                         | The same, flattened                                                                         |
-| **[`.docs/06-government-sources/igod-organization-catalogue.csv`](./igod-organization-catalogue.csv)** | **6,466 government organisations** crawled from IGOD — all 36 States/UTs + Union Government |
-| [`.docs/06-government-sources/data/union-ministries.json`](./data/union-ministries.json)               | 106 Union ministries/departments with URLs, addresses, sub-organisation counts              |
-| [`.docs/06-government-sources/data/igod_all.json`](./data/igod_all.json)                               | Raw IGOD State/UT crawl                                                                     |
-| [`.docs/06-government-sources/data/verif_lookup.json`](./data/verif_lookup.json)                       | Raw verification results (168 URLs)                                                         |
+| File                                                                                                   | Contents                                                                                       |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **[`.docs/06-government-sources/source-registry.json`](./source-registry.json)**                       | 107 curated sources (104 `VERIFIED`, 3 `DISCOVERED` on 30 September 2026), full schema per §28 |
+| **[`.docs/06-government-sources/source-registry.csv`](./source-registry.csv)**                         | The same, flattened                                                                            |
+| **[`.docs/06-government-sources/igod-organization-catalogue.csv`](./igod-organization-catalogue.csv)** | **6,466 government organisations** crawled from IGOD — all 36 States/UTs + Union Government    |
+| [`.docs/06-government-sources/data/union-ministries.json`](./data/union-ministries.json)               | 106 Union ministries/departments with URLs, addresses, sub-organisation counts                 |
+| [`.docs/06-government-sources/data/igod_all.json`](./data/igod_all.json)                               | Raw IGOD State/UT crawl                                                                        |
+| [`.docs/06-government-sources/data/verif_lookup.json`](./data/verif_lookup.json)                       | Raw verification results (168 URLs)                                                            |
 
 Fields with no evidence are `null` or `"unknown"` — never guessed.
 
@@ -51,7 +51,7 @@ Read these two Sprint 0 findings first.
 - [`gepnic-access-findings.md`](./gepnic-access-findings.md) — **award data is CAPTCHA-gated on every GePNIC portal tested**, and on CPPP. Changing state does not obtain it; Phase 1 stays Maharashtra.
 - [`sprint0-findings-q1-q3.md`](./sprint0-findings-q1-q3.md) — **Q1 no** (no Maharashtra PWD works register), **Q3 yes** (BEAMS public MIS: departmental/scheme/DDO expenditure, ten years, no login).
 - [`mahatenders-access-request-draft.md`](./mahatenders-access-request-draft.md) — Route 4, drafted: a letter to the Government of Maharashtra asking whether an official channel exists, with an RTI as the parallel statutory route. **Needs its addressee verified before sending.**
-- [`tender-collection-cadence.md`](./tender-collection-cadence.md) — **daily is not often enough.** The landing-page window turns over almost completely within six hours, so a daily sweep captures a minority of what is advertised while looking complete. The scheduled job is paused until the cadence is chosen.
+- [`tender-collection-cadence.md`](./tender-collection-cadence.md) — **daily is not often enough.** The landing-page window turns over almost completely within six hours, so a daily sweep captures a minority of what is advertised while looking complete. The job was resumed once daily on 5 September, with the shortfall stated to readers as a collection floor ([`../16-operations/collection-schedule.md`](../16-operations/collection-schedule.md)).
 - [`maharashtra-tenders/maharashtra-tender-data.md`](./maharashtra-tenders/maharashtra-tender-data.md) — **Maharashtra tenders without MahaTenders (30 Sep).** PWD's own NIT system (`mahapwd.gov.in/nit/`) is also `Disallow: /`; the issuing agencies publish the notices instead — MHADA back to July 2016, MSIDC's "E-Tenders for Maharashtra PWD Projects", MMRDA, MSRDC, MEDA — on hosts that permit collection. PWD's site also publishes region-wise **Roads & Bridges project lists**, which partly revises Q1 below. Inventory: [`maharashtra-sources.md`](./maharashtra-tenders/maharashtra-sources.md); architecture and backlog: [`../04-data-engineering/maharashtra-tender-ingestion.md`](../04-data-engineering/maharashtra-tender-ingestion.md).
 - [`tender-ingestion-plan.md`](./tender-ingestion-plan.md) — Mahatenders re-verified closed (29 Aug). What a tender connector **can** collect — landing pages in 34 permitting states, forward-only, advertisements never awards — plus the schema, pipeline and copy that keep that limit visible.
 
@@ -82,7 +82,7 @@ Read these two Sprint 0 findings first.
 | [`.docs/06-government-sources/central/central-government.md`](./central/central-government.md)                                                                                                                                                                                                                                                                 | Union ministries, agencies, national systems   |
 | [`.docs/06-government-sources/states/state-governments.md`](./states/state-governments.md)                                                                                                                                                                                                                                                                     | All 28 States                                  |
 | [`.docs/06-government-sources/uts/union-territories.md`](./uts/union-territories.md)                                                                                                                                                                                                                                                                           | All 8 UTs                                      |
-| [`.docs/06-government-sources/procurement/procurement-portals.md`](./procurement/procurement-portals.md) · [`.docs/06-government-sources/procurement/tender-portals.md`](./procurement/tender-portals.md)                                                                                                                                                      | **All 36 State/UT portals + CPPP endpoints**   |
+| [`.docs/06-government-sources/procurement/procurement-portals.md`](./procurement/procurement-portals.md)                                                                                                                                                                                                                                                       | **All 36 State/UT portals + CPPP endpoints**   |
 | [`.docs/06-government-sources/finance/finance-portals.md`](./finance/finance-portals.md) · [`.docs/06-government-sources/finance/budget-portals.md`](./finance/budget-portals.md)                                                                                                                                                                              | Treasury, expenditure, budget                  |
 | [`.docs/06-government-sources/finance/scheme-portals.md`](./finance/scheme-portals.md)                                                                                                                                                                                                                                                                         | PMGSY, MGNREGA, urban missions                 |
 | [`.docs/06-government-sources/infrastructure/infrastructure-portals.md`](./infrastructure/infrastructure-portals.md) · [`.docs/06-government-sources/infrastructure/roads-portals.md`](./infrastructure/roads-portals.md)                                                                                                                                      | Works departments; road authorities by class   |
@@ -100,10 +100,12 @@ Read these two Sprint 0 findings first.
 | Status             | Meaning                                                                                                    | Count                                     |
 | ------------------ | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | `DISCOVERED`       | Found in an official directory or search                                                                   | 6,466 catalogue rows + 3 registry entries |
-| `VERIFIED`         | Fetched — status, final URL, page title recorded. **Confirms it responds, not what it holds.**             | **96**                                    |
+| `VERIFIED`         | Fetched — status, final URL, page title recorded. **Confirms it responds, not what it holds.**             | **104** (96 on 21 August)                 |
 | `PRODUCTION_READY` | Data exposure, retrieval, identifiers, cadence, history, extraction, legality and entity mapping all known | **0**                                     |
 
 **Zero sources are production-ready, and that is the correct state after a discovery pass.** Promotion requires field-level inspection — the next phase.
+
+**Not yet reconciled (16 October 2026):** [`beams-discovery.md`](./beams-discovery.md) and [`lgd-access-findings.md`](./lgd-access-findings.md) each declare their source `PRODUCTION_READY` for a stated scope, but `source-registry.json` records no source at that status. The JSON is what code and tests read; promoting the two entries is a registry change for the maintainer, not a documentation edit.
 
 ---
 
@@ -121,6 +123,8 @@ Every such host is recorded as _"not reachable from the verification vantage poi
 ---
 
 ## Next phase
+
+> **Answered since (16 October 2026).** 1: no works register identified, and 4: BEAMS is public without login ([`sprint0-findings-q1-q3.md`](./sprint0-findings-q1-q3.md), which numbers them Q1 and Q3). 2: OMMAS is reachable and licence-blocked ([`pmgsy-ommas-findings.md`](./pmgsy-ommas-findings.md)). 3: the GePNIC field set is in [`gepnic-access-findings.md`](./gepnic-access-findings.md) and [`tender-ingestion-plan.md`](./tender-ingestion-plan.md). 5: boundaries are joined to LGD units through OpenStreetMap relations (`admin_unit.osm_relation_id`). The section is kept as written on 21 August.
 
 Five questions, not more URLs:
 

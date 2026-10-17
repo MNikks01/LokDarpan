@@ -18,4 +18,5 @@ export {
 export type { CollectionStatus, CollectionWindow } from "./tender.repository";
 export { PostgresPublicBodyRepository } from "./public-body.repository";
 export { PostgresHoldingsRepository } from "./holdings.repository";
+export { PostgresPlaceMentionRepository } from "./place-mention.repository";
 export type { UnitHoldingsInputs } from "./holdings.repository";

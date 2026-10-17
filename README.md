@@ -13,17 +13,17 @@ LokDarpan links official records into one traceable ledger — revenue → budge
 
 ## Status
 
-**Deployed, with a narrow ledger.** The web client is first; the mobile app follows after launch ([`.docs/decisions/web-first-pivot.md`](.docs/decisions/web-first-pivot.md)). The full picture, measured on 29 September 2026, is in [`.docs/00-overview/product-audit-2026-09-29.md`](.docs/00-overview/product-audit-2026-09-29.md).
+**Deployed, with a narrow ledger.** The web client is first; the mobile app follows after launch ([`.docs/decisions/web-first-pivot.md`](.docs/decisions/web-first-pivot.md)). What is deployed, what the production ledger holds, and what is open are kept in one place: [`.docs/00-overview/current-state.md`](.docs/00-overview/current-state.md).
 
-|                            |                                                                                                                              |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Government source registry | 100 sources, 97 verified ([`.docs/06-government-sources/`](.docs/06-government-sources))                                     |
-| `apps/web`                 | Deployed on Vercel. Map explorer, unit, department and document pages; `/api/v1`                                             |
-| `services/ingestion`       | Real: LGD, OpenStreetMap, CAG, BEAMS and GePNIC collectors; tenders collected nightly                                        |
-| `services/ocr`             | Real (Python, Tesseract); benchmarked, not yet feeding the ledger                                                            |
-| Database                   | PostgreSQL + PostGIS on Neon, 36 migrations                                                                                  |
-| Production ledger          | States and districts with boundaries; 1,318 open tenders from 21 states. **No audit reports or budget figures loaded yet**   |
-| Not yet started            | `services/{ai,analytics,entity-resolution,normalization,risk-engine}`; project and contractor data (no permitted source yet) |
+|                            |                                                                                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Government source registry | 107 curated sources, 104 verified ([`.docs/06-government-sources/`](.docs/06-government-sources))                                      |
+| `apps/web`                 | Deployed on Vercel from `main`: map explorer; unit, body, department and document pages; a corrections form; `/api/v1`                 |
+| `services/ingestion`       | Real: LGD, OpenStreetMap, CAG, BEAMS, GePNIC, MHADA and MSIDC collectors; tenders collected nightly                                    |
+| `services/ocr`             | Real (Python, Tesseract). Readings sit beside the page; a figure read from a scan is a candidate a person reviews                      |
+| Database                   | PostgreSQL + PostGIS on Neon; migrations applied to production are listed in `current-state.md`                                        |
+| Production ledger          | States and districts with boundaries; 30 CAG audit reports with 5,088 reviewed figures; open tenders from 21 states. No budget figures |
+| Not yet started            | `services/{ai,analytics,entity-resolution,normalization,risk-engine}`; project and contractor data (no permitted source yet)           |
 
 **Only the example project page renders fixture data**, and it says so.
 
@@ -33,20 +33,22 @@ LokDarpan links official records into one traceable ledger — revenue → budge
 .docs/          Product + engineering source of truth (start at .docs/README.md)
 apps/web/       Next.js public site — the first product
 apps/mobile/    React Native / Expo — deferred until after web launch
-services/       ingestion · normalization · entity-resolution · analytics · risk-engine · ai · api
-packages/       money · neutrality · contracts · domain · config · database · observability · errors
+services/       ingestion · ocr · api (real) — normalization · entity-resolution · analytics · risk-engine · ai (empty)
+packages/       money · neutrality · contracts · domain · database · observability · errors · architecture
 data/           raw (immutable) · staging · normalized · reference · fixtures · samples
 database/       migrations · seeds · functions · views
-infrastructure/ docker · kubernetes · terraform · monitoring
+infrastructure/ placeholders only — the site runs on Vercel, the ledger on Neon, collection on GitHub Actions
 ```
+
+The full map, with what each part enforces, is [`.docs/02-architecture/repository-structure.md`](.docs/02-architecture/repository-structure.md).
 
 ## Getting started
 
 ```bash
 pnpm install
-pnpm test                 # ~1,370 tests; integration suites skip without a database
+pnpm test                 # ~1,790 tests; integration suites skip without a database
 pnpm dev                  # web client at http://localhost:3000
-pnpm neutrality apps packages   # docs/15 language gate — a hit blocks release
+pnpm neutrality           # the language gate of .docs/17-legal — a hit blocks release
 ```
 
 Requires Node ≥20 and pnpm 9.

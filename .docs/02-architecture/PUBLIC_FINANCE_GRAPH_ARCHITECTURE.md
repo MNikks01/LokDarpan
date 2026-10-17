@@ -4,6 +4,13 @@
 Each phase in §18 becomes numbered migrations and an ADR once it is accepted.
 **Binding on this document:** [`17-legal/legal-ethical-rules.md`](../17-legal/legal-ethical-rules.md). Where this plan and those rules disagree, the rules win and the feature is withheld. §3 lists every place they disagree.
 
+> **Update · 16 October 2026.** Status unchanged — _Proposed_ — but the sentence above is no longer
+> true. One part has since been built under its own decisions: `public_body` and
+> `public_body_mention` (migration 0045, [ADR-074](../adr/074-a-body-is-named-by-the-page-that-names-it.md))
+> and `place_mention` (0047, [ADR-077](../adr/077-a-place-is-named-by-the-page-that-names-it.md)).
+> `budget_line`, `money_fact`, `graph_edge`, programmes and transfers are not built. Phase 0's
+> correction notice on `database-design.md` was added on 16 October.
+
 > LokDarpan's long-term shape is a source-backed record of how public money moves through Indian
 > government: receipts → budgets → allocations → releases → expenditure → works → procurement →
 > audit, with transfers between governments. Tenders are one observable part of that flow.

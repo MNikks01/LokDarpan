@@ -100,7 +100,7 @@ Full model: [`.docs/12-security/security.md`](./.docs/12-security/security.md) a
 
 ## Supported versions
 
-Pre-release. Only `main` is supported; there are no published releases yet and no backend is deployed.
+Pre-release. Only `main` is supported, and there are no published releases. The site and its read-only API are deployed from `main`; the ingestion credentials and the operator's review tools never run on the public deployment.
 
 ---
 

@@ -1,6 +1,6 @@
 # ADR-073 · A restricted source opens on a recorded grant and a switch
 
-**Status:** Accepted · **Date:** 2026-10-07 · **Implements** [`../decisions/2026-10-07-permissions-deferred.md`](../decisions/2026-10-07-permissions-deferred.md) · **Builds on** ADR-055, ADR-056
+**Status:** Accepted · **Date:** 2026-10-07 · **Implements** [`../decisions/2026-10-07-permissions-deferred.md`](../decisions/2026-10-07-permissions-deferred.md) · **Builds on** ADR-055, ADR-056 · **Amended by** [`078`](./078-a-private-preview-shows-withheld-material-to-the-operator.md) (2026-10-09; pointer added 2026-10-17)
 
 ## Context
 

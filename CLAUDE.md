@@ -8,31 +8,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **It is deployed and holds real data** (as of 29 September 2026). The site runs on Vercel, reading a PostgreSQL + PostGIS ledger on Neon; a GitHub Actions job collects tenders nightly. Only the example project page (`/project/[id]`) renders fixture data, and it says so.
 
-**Production and the local database do not hold the same things — check which one you mean.** Measured 29 September 2026; the CAG row updated 6 October 2026:
-
-| Ledger contents                                        | Production (Neon)                 | Local Docker       |
-| ------------------------------------------------------ | --------------------------------- | ------------------ |
-| LGD states · districts, with OSM geometry              | 36 · 787                          | 36 · 787           |
-| Sub-districts · villages · urban local bodies          | **none**                          | 355 · 40 · 18      |
-| CAG audit reports · pages · published facts            | 30 · 6,339 · 5,088 (promoted)     | 30 · 6,339 · 5,088 |
-| BEAMS departments · schemes (collected, not displayed) | **none**                          | 33 · 524           |
-| Open tenders, 21 portals, placed where evidence allows | 1,318 (nightly; ADR-067, ADR-068) | a stale subset     |
-| Maharashtra agency notices (MHADA, MSIDC) · scan facts | **none**                          | 96 · 31 unreviewed |
-
-The CAG corpus reached production on 6 October 2026 by `promote:cag` (ADR-070; dataset version 285), so `/documents` lists the 30 reports with their reviewed figures. Extraction and review still happen locally; review done after a report was promoted is carried with `promote:cag --refresh` (#190). The department page still has nothing to show: BEAMS has only ever been loaded locally, and its figures are withheld until permitted. `.docs/00-overview/product-audit-2026-09-29.md` has the full audit.
+**Production and the local database do not hold the same things — check which one you mean.** Production holds the LGD states and districts with geometry, the 30 CAG reports and their 5,088 reviewed figures (promoted 6 October 2026, ADR-070), and the nightly tenders; sub-district geography, BEAMS and the Maharashtra agency notices exist only locally. The counts, the migrations applied to production, and what is built but not recorded as released are in **`.docs/00-overview/current-state.md`** — the one maintained snapshot. Update it, not this file, when the state changes; `.docs/00-overview/product-audit-2026-09-29.md` is the dated evidence behind it.
 
 What is real: `apps/web` (Next.js, serving the site and `/api/v1/*`), `services/ingestion` (every collector and loader), `services/api` (the self-hosted API shape), `services/ocr` (Python; reads pages with no text layer, `.docs/16-operations/reading-scans.md`), and the `packages/` listed below. `services/ai`, `analytics`, `entity-resolution`, `normalization` and `risk-engine` are still empty skeletons.
 
 ```bash
-pnpm install && pnpm test          # ~1,370 tests; integration suites need a database
+pnpm install && pnpm test          # ~1,790 tests; integration suites need a database
 pnpm dev                           # web client
-pnpm neutrality apps packages      # the language gate
+pnpm neutrality                    # the language gate, over apps, packages and services
 pnpm architecture                  # import rules and rule B (no sentences in components)
 ```
 
 Integration tests run against the Docker Postgres (`docker compose up`, host port 5433) with `DATABASE_URL`, `DATABASE_URL_READONLY`, `DATABASE_URL_REVIEWER` and `DATABASE_URL_ETL` set; without them they skip, and coverage falls below its floor.
 
-**The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The build order is in `.docs/01-product/sprint-plan.md` (cross-functional; supersedes `roadmap-web.md`). This reversed an earlier mobile-only decision, so **treat everything under `.docs/10-mobile/` and `adr/001`–`010` as the deferred mobile specification, not the active plan**. `.docs/decisions/web-first-pivot.md` records what changed and, more usefully, what did not.
+**The product is web-first (decided 2026-08-24).** The website ships first; the mobile app follows after launch. The accepted delivery plan is `.docs/01-product/sprint-plan.md` (cross-functional; supersedes `roadmap-web.md`), but its sprint sequence was overtaken by what the data permits; the work in progress follows milestone M1 of `.docs/01-product/feature-priorities-2026-10-07.md`, which is still marked _Proposed_. This reversed an earlier mobile-only decision, so **treat everything under `.docs/10-mobile/` and `adr/001`–`010` as the deferred mobile specification, not the active plan**. `.docs/decisions/web-first-pivot.md` records what changed and, more usefully, what did not.
 
 `.agents/`, `.claude/` and `skills-lock.json` are local skill installations, untracked and unrelated to the project.
 
@@ -77,7 +66,7 @@ This is not a policy document to nod at — it determines concrete engineering d
 
 - **No red anywhere** in variance, severity, verification priority or status. A red badge implies wrongdoing before a word is read. Red is reserved for destructive user actions only. No red/green diverging ramps (also fails colour-vision deficiency).
 - **No global anomaly feed, no anomaly push notifications, no rankings or leaderboards.** `.docs/08-risk/risk-scoring-engine.md` forbids ranking people. Observations are always scoped to an entity the user navigated to.
-- **Contractor screens carry no score, rank, badge or flag.** Concentration statistics (HHI) attach to a _scope_ (taluka, FY), never to a firm. This omission is deliberate and tracked in `.docs/05-data-model/screen-data-matrix.md` §3 so it stays auditable.
+- **Contractor screens carry no score, rank, badge or flag.** Concentration statistics (HHI) attach to a _scope_ (taluka, FY), never to a firm. This omission is deliberate and tracked in `.docs/05-data-model/screen-data-matrix.md` §Structural invariants (item 3) so it stays auditable.
 - The risk score is labelled **"Verification Priority"**, never "corruption risk", and is never rendered without its factor breakdown and confidence.
 - Audit findings are **cited documents**, never inputs to the analytics engine — an auditor's conclusion is categorically different from arithmetic.
 
@@ -85,7 +74,7 @@ This is not a policy document to nod at — it determines concrete engineering d
 
 These come from cross-referencing several documents; each is load-bearing.
 
-**Money is a `bigint` of paise, never a float or a JSON number.** `.docs/05-data-model/database-design.md` stores `NUMERIC(20,2)`; a national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and would fail _silently_, producing a wrong government figure with a correct-looking source link. Amounts cross the wire as decimal strings.
+**Money is a `bigint` of paise, never a float or a JSON number.** The ledger stores `NUMERIC(20,2)` rupees (migrations `0003`, `0005`); a national multi-year aggregate exceeds `Number.MAX_SAFE_INTEGER` and would fail _silently_, producing a wrong government figure with a correct-looking source link. Amounts cross the wire as decimal strings.
 
 **A figure cannot be rendered without its provenance.** `<Figure>` requires a `provenance` prop — it is a compile error, not a code review item. A fact arriving without provenance is suppressed and logged as a contract violation.
 
@@ -101,7 +90,7 @@ These come from cross-referencing several documents; each is load-bearing.
 
 **The client computes no financial arithmetic.** Variance, deviation %, cost/km, peer medians, HHI, roll-up gaps and Verification Priority all arrive computed, versioned and source-linked from the backend.
 
-**`admin_unit` is the one hierarchy.** `.docs/05-data-model/database-design.md` retains a legacy `district` table alongside the generic `admin_unit` closure; clients target `/units/:id` exclusively. Two code paths for "a place" is the fastest route to an unmaintainable app, and on web it would also produce two indexable URLs for one entity.
+**`admin_unit` is the one hierarchy.** The pre-migration design in `.docs/05-data-model/database-design.md` shows a legacy `district` table beside the generic `admin_unit` closure; migration `0001` deliberately does not create it, and the migrations are the schema of record. Clients target `/units/:id` exclusively. Two code paths for "a place" is the fastest route to an unmaintainable app, and on web it would also produce two indexable URLs for one entity.
 
 ## Architecture in one pass
 
@@ -115,11 +104,11 @@ These come from cross-referencing several documents; each is load-bearing.
 
 **Mobile, deferred** (`.docs/02-architecture/mobile-architecture.md`): Expo + React Native, four enforced layers, four bottom tabs. Stands for when mobile resumes; revalidate the toolchain at that point.
 
-ADRs in `.docs/adr/` (001–076) record decisions with alternatives and trade-offs. **ADRs append; they are never rewritten** — a change is a new ADR or a dated addendum. 001–010 are the deferred mobile specification; 011 onward are active.
+ADRs in `.docs/adr/` (001–079; 060 and 063 are reserved for the blocked records-layer phase of `decisions/gods-eye-view-adoption.md` and not written) record decisions with alternatives and trade-offs. **ADRs append; they are never rewritten** — a change is a new ADR or a dated addendum. 001–010 are the deferred mobile specification; 011 onward are active.
 
 ## Working with the data-source registry
 
-`.docs/06-government-sources/` catalogues 100 curated sources (97 verified) plus a 6,466-row catalogue crawled from the Integrated Government Online Directory.
+`.docs/06-government-sources/` catalogues 107 curated sources in `source-registry.json` (104 verified, 3 discovered, as of 30 September 2026) plus a 6,466-row catalogue crawled from the Integrated Government Online Directory. Count from the JSON rather than repeating a number here.
 
 **The rule the registry is built on:** never record "the government does not publish X" because you could not find X. Record "X was not identified in the sources reviewed as of \[date\]."
 
@@ -131,12 +120,12 @@ Fields with no evidence are `null` or `"unknown"` — never guessed. If you add 
 
 ## Known blockers and open decisions
 
-Do not treat these as settled; they are tracked in `.docs/README.md` and `.docs/06-government-sources/SOURCE-DISCOVERY-REPORT.md`.
+Do not treat these as settled; they are tracked in `.docs/00-overview/current-state.md` §Open items and `.docs/06-government-sources/SOURCE-DISCOVERY-REPORT.md`.
 
 - **The execution-data gap — located, and licence-blocked.** No _usable_ source exists for physical progress, financial progress, work orders, completion or per-project expenditure, so `.docs/07-analytics/analytics-engine.md`'s central `Released − Utilized` variance still has no source it may draw on, and the project-level Money Trail depends on it. But the blocker is no longer discovery: PMGSY's **OMMAS was found reachable on 28 August** at `pmgsy.dord.gov.in` (the discovered host `online.omms.nic.in` is gone from public DNS), publishing exactly that register at work level across 92 public report routes with no login. **NRIDA's terms forbid copying or republishing it without prior written permission** — the most restrictive licence of any source examined. `.docs/06-government-sources/pmgsy-ommas-findings.md` has the evidence.
 - **Permission, not discovery, is the blocker.** LGD and CAG permit republication; BEAMS, PMGSY and the tender portals' issuing departments do not. Drafts exist and are tracked in `.docs/06-government-sources/permission-requests.json` (checked by a test), but **no request has been sent**. Until one is granted, BEAMS figures and tender details stay withheld. **On 7 October 2026 the requests were deferred** (`.docs/decisions/2026-10-07-permissions-deferred.md`): build on publishable sources and do not make permission a development dependency. A restricted source opens only with a grant recorded in `PERMISSION_GRANTS` (`packages/domain/src/source-licence.ts`, held to the JSON by a test) **and** its switch set (`PUBLISH_BEAMS_FIGURES`, `PUBLISH_TENDER_DETAILS`, or `PUBLISH_RESTRICTED_SOURCES`); a switch without a grant opens nothing (ADR-073).
-- **Backend P0 items** (`.docs/11-api/client-api-contract.md` §7, re-prioritised for web in `.docs/01-product/roadmap-web.md` §Backend dependencies). Some have landed — `/api/v1/search` exists and money crosses the wire as decimal strings — so check the code before assuming any is missing. The list: a search endpoint, money as decimal strings, both variances, three confidences, provenance page anchors, no inline geometry, and a CGNAT-safe rate tier — per-IP limits misfire on Indian carrier NAT, which affects web users too. The composite BFF dropped from P0 to P2: a server-rendered client can make parallel calls.
-- ~~Mobile-only removes the desktop workflow for researchers and journalists~~ — **resolved.** PR-1 was the reason for the web-first pivot; the researcher surfaces (tables, bulk export, API access) ship before launch in W9.
+- **Backend P0 items** (`.docs/11-api/client-api-contract.md` §7, re-prioritised for web in `.docs/01-product/roadmap-web.md` §Backend dependencies). In the code as of 16 October 2026: `/api/v1/search`, money as decimal strings, provenance page anchors, and a web rate tier that counts cache misses per IP (`.docs/16-operations/rate-limiting.md` explains why that is tolerable for web; the mobile per-install tier is still unmet). Not in the code: cursor pagination and an OpenAPI document. Check the code before assuming an item is missing. The composite BFF dropped from P0 to P2: a server-rendered client can make parallel calls.
+- ~~Mobile-only removes the desktop workflow for researchers and journalists~~ — **resolved.** PR-1 was the reason for the web-first pivot; the researcher surfaces (tables, bulk export, API access) ship before launch (Sprint 8 of the sprint plan); bulk export, CSV with provenance columns and API keys are not built yet.
 - **A second platform pivot would be expensive.** Web-first should be treated as settled through launch.
 
 ## Operating what is deployed

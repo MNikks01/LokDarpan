@@ -18,7 +18,8 @@ export type PublishedFactKind =
   | "work_reference"
   | "tender_identifier"
   | "tender_date"
-  | "body_reference";
+  | "body_reference"
+  | "place_reference";
 
 /** How the published value came to differ, or not, from what the parser read. */
 export type FactOrigin = "as_extracted" | "corrected_by_reviewer";

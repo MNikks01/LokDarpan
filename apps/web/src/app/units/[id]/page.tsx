@@ -2,10 +2,11 @@ import type React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { Holding, PublicBodyRef } from "@lokdarpan/domain";
+import type { Holding, PlaceMentionsInReport, PublicBodyRef } from "@lokdarpan/domain";
 
 import { ApiError, getJson, getUnit, type AdminUnit } from "@/lib/api";
 import { Holdings } from "@/components/Holdings";
+import { PlaceMentions } from "@/components/PlaceMentions";
 import { ProvenanceNote } from "@/components/Provenance";
 import { color, radius, space } from "@/ui/tokens";
 import { bodiesCopy, unitsCopy } from "@/copy/pages";
@@ -96,6 +97,23 @@ async function loadHoldings(id: string): Promise<readonly Holding[] | null> {
   }
 }
 
+/**
+ * The audit pages that name the unit (ADR-077). A failure shows the section's
+ * own "could not be loaded" line rather than an empty list, which would read as
+ * "no report names this place".
+ */
+async function loadMentions(id: string): Promise<readonly PlaceMentionsInReport[] | null> {
+  try {
+    const { data } = await getJson(`/api/v1/units/${encodeURIComponent(id)}/mentions`);
+    return data as readonly PlaceMentionsInReport[];
+  } catch {
+    return null;
+  }
+}
+
+/** The levels a report's pages are matched against (ADR-077). */
+const LEVELS_NAMED_IN_REPORTS = new Set(["district", "sub_district"]);
+
 /** Bodies govern states and the country; below that, nothing is named yet. */
 const LEVELS_WITH_BODIES = new Set(["country", "state"]);
 
@@ -134,9 +152,11 @@ export default async function UnitPage({
   const { datasetVersion } = result;
   const level = LEVEL_LABEL[unit.level] ?? unit.level;
   const childHeading = CHILD_LABEL[unit.level] ?? "Sub-units";
-  const [bodies, holdings] = await Promise.all([
+  const named = LEVELS_NAMED_IN_REPORTS.has(unit.level);
+  const [bodies, holdings, mentions] = await Promise.all([
     LEVELS_WITH_BODIES.has(unit.level) ? loadBodies(id) : Promise.resolve(null),
     loadHoldings(id),
+    named ? loadMentions(id) : Promise.resolve(null),
   ]);
 
   return (
@@ -229,6 +249,8 @@ export default async function UnitPage({
           )}
         </section>
       )}
+
+      {named && <PlaceMentions reports={mentions} place={unit.nameEn} />}
 
       <Holdings holdings={holdings} place={unit.nameEn} />
 

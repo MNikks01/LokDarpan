@@ -69,6 +69,25 @@ export {
   tenderHolding,
   worksHolding,
 } from "./holdings";
+export { tenderRecord, tenderStatus } from "./tender-record";
+export type {
+  FieldState,
+  FieldValue,
+  MissingReason,
+  TenderField,
+  TenderFieldKey,
+  TenderRecord,
+  TenderRecordInput,
+  TenderSection,
+  TenderSectionKey,
+  TenderStatus,
+} from "./tender-record";
+export type {
+  NamedPlace,
+  PlaceMentionPage,
+  PlaceMentionRepository,
+  PlaceMentionsInReport,
+} from "./place-mention";
 export type {
   BoundaryInput,
   Decide,

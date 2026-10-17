@@ -85,6 +85,7 @@ const input = (over: Partial<MapInput> = {}): MapInput => ({
   stateOutlines: outlines,
   childBoundaries: level,
   activeGeometry: null,
+  namedPlaces: null,
   tenders: {
     sources: describeSources(["gepnic-od"]),
     state: collected,

@@ -1,5 +1,10 @@
 # 16 — Development Roadmap
 
+> **Status:** Historical — the original six-month plan (August 2026). Its sequencing is replaced by
+> [`sprint-plan.md`](./sprint-plan.md) (accepted 25 August), which plans every track; Month 3 was
+> expanded into [`roadmap-web.md`](./roadmap-web.md), itself superseded by the sprint plan. Kept for
+> its exit criteria and because other documents cite it by number ("16").
+
 A six-month plan to a Phase-1 production launch (Maharashtra roads). Each month ends with a demonstrable, source-linked artifact. Neutrality/traceability guardrails are built in from Month 1, not bolted on.
 
 ## Month 1 — Foundations: architecture, database, ingestion

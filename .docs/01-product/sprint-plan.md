@@ -2,6 +2,14 @@
 
 **Status:** Accepted · 2026-08-25 · **Supersedes** [`roadmap-web.md`](./roadmap-web.md) as the active delivery plan
 
+> **Progress note · 16 October 2026.** Still the accepted plan, but its sprint sequence was overtaken
+> by what the sources permit. Sprint 0 answered Q1 no, Q2 reachable but licence-blocked, and Q3 yes;
+> no ADR records the Branch A/B choice its exit criterion asked for. Work since late September has
+> followed the data and licence findings rather than the sprint order. What exists is in
+> [`../00-overview/current-state.md`](../00-overview/current-state.md); the work in progress follows
+> milestone M1 of [`feature-priorities-2026-10-07.md`](./feature-priorities-2026-10-07.md), which is
+> still marked _Proposed_. Statements below such as "a backend… does not" exist describe 25 August.
+
 `roadmap-web.md` planned the _frontend_ on the assumption a backend existed. It does not. This plan is cross-functional — data, backend, frontend, DevOps, observability, security — and sequences them against the real critical path, which is **data, not UI**.
 
 ---
@@ -249,7 +257,7 @@ Not sprint-specific, not optional, not a later sprint:
 - Input validated at the boundary; least privilege; no secrets committed
 - Migrations version-controlled; no manual schema changes
 - Docs or an ADR updated **in the same PR**
-- `feature/*` → `main`; CI green before merge ([`adr/023`](../adr/023-features-target-main.md))
+- `feature/*` → `development` → `main`; CI green before merge ([`adr/032`](../adr/032-development-is-reinstated.md); when this plan was written it was `feature/*` → `main`, [`adr/023`](../adr/023-features-target-main.md))
 
 ---
 

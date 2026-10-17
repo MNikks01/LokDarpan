@@ -1,5 +1,12 @@
 # 04 — Data Flow
 
+> **Status:** Deferred (mobile) for its client half — written 21–23 August 2026. Everything left of
+> the CDN in §1 is the original backend design (see [`system-architecture.md`](./system-architecture.md)'s
+> status for what was built); everything right of it (Zod mapping into TanStack Query, MMKV, SQLite,
+> the mobile BFF) is the native client. The web client renders on the server and reads `/api/v1`
+> ([`web-architecture.md`](./web-architecture.md)). §1's invariant — the client performs no financial
+> arithmetic — binds every client.
+
 How data reaches a pixel, and how it survives a bad network. Covers the end-to-end pipeline, the client's layered data path, caching, invalidation, pagination, retry, offline, and the three flows that carry the most product weight.
 
 ---

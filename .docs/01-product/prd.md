@@ -77,7 +77,7 @@ A national public-finance intelligence layer where anyone can follow a rupee fro
 | **M6**     | Hardening, provenance/versioning UX, production launch (Phase 1)                                                                          |
 | **Beyond** | Transportation → all MH ministries → India roads → India ministries → national platform (see [14](../15-scalability/scalability-plan.md)) |
 
-Detailed engineering plan in [16 — Development Roadmap](./roadmap-platform.md).
+Detailed engineering plan in [16 — Development Roadmap](./roadmap-platform.md), the original plan. This table is the August intent: the accepted delivery plan is [`sprint-plan.md`](./sprint-plan.md), current priorities are in [`feature-priorities-2026-10-07.md`](./feature-priorities-2026-10-07.md) (proposed), and what exists is in [`../00-overview/current-state.md`](../00-overview/current-state.md).
 
 ## Success metrics
 
